@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jdbc-connection name="MySqlPool">
+    <jndi-name>java:/MySqlDS</jndi-name>
+    <driver-name>mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1</driver-name>
+    <property name="track-statements">NOWARN</property>
+    <property name="connection-url">jdbc:mysql://db4free.net:3306/usstates</property>
+    <property name="share-prepared-statements">false</property>
+    <property name="statistics-enabled">false</property>
+    <property name="validate-on-match">false</property>
+    <property name="allow-multiple-users">false</property>
+    <property name="user-name">komodo</property>
+    <property name="password">XUMz4vBKuA2v</property>
+    <property name="use-fast-fail">false</property>
+    <property name="set-tx-query-timeout">false</property>
+    <property name="spy">false</property>
+</jdbc-connection>

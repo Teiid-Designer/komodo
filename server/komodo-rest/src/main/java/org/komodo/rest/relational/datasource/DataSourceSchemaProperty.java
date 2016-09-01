@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -21,20 +21,20 @@
  */
 package org.komodo.rest.relational.datasource;
 
-import org.komodo.core.KomodoLexicon;
 import org.komodo.rest.KomodoService;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 public class DataSourceSchemaProperty {
 
     /**
      * Label used to describe jndi name
      */
-    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.JNDI_NAME);
+    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(DataVirtLexicon.Connection.JNDI_NAME);
 
     /**
      * Label used to describe driver name
      */
-    public static final String DRIVER_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.DRIVER_NAME);
+    public static final String DRIVER_NAME_LABEL = KomodoService.protectPrefix(DataVirtLexicon.Connection.DRIVER_NAME);
 
     public static final String TYPE_LABEL = "keng__type";
 

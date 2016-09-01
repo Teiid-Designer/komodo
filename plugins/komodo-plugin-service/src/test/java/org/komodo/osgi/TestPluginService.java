@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -25,12 +25,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.jcr.Node;
+
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.TeiidService;
@@ -121,7 +124,7 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         TeiidVersion TEIID_8_12_4 = Version.TEIID_8_12_4.get();
         versions.contains(TEIID_8_12_4);
         DefaultTeiidVersion TEIID_8_12_x = new DefaultTeiidVersion(
-                                                                                       TeiidVersion.EIGHT, 
+                                                                                       TeiidVersion.EIGHT,
                                                                                        TeiidVersion.ONE + TeiidVersion.TWO,
                                                                                        TeiidVersion.WILDCARD);
         versions.contains(TEIID_8_12_x);

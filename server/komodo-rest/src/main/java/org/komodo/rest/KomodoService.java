@@ -24,10 +24,12 @@ package org.komodo.rest;
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+
 import java.io.StringWriter;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,8 +41,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
+
 import org.komodo.core.KEngine;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Vdb;
@@ -58,7 +60,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+
 import com.google.gson.Gson;
 
 /**
@@ -189,7 +193,7 @@ public abstract class KomodoService implements V1Constants {
         } else if (acceptableMediaTypes.contains(MediaType.APPLICATION_XML_TYPE)) {
             ErrorResponse errResponse = new ErrorResponse(errorMessage);
 
-            JAXBElement<ErrorResponse> xmlErrResponse = new JAXBElement<ErrorResponse>(
+            JAXBElement<ErrorResponse> xmlErrResponse = new JAXBElement<>(
                                                                                         new QName("error"), //$NON-NLS-1$
                                                                                         ErrorResponse.class,
                                                                                         errResponse);
@@ -428,11 +432,11 @@ public abstract class KomodoService implements V1Constants {
     }
 
     protected Dataservice findDataservice(UnitOfWork uow, String dataserviceName) throws KException {
-        if (! this.wsMgr.hasChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE ) ) {
+        if (! this.wsMgr.hasChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE ) ) {
             return null;
         }
 
-        final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+        final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
         final Dataservice dataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
 
         LOGGER.debug( "Dataservice '{0}' was found", dataserviceName ); //$NON-NLS-1$
@@ -440,11 +444,11 @@ public abstract class KomodoService implements V1Constants {
     }
 
     protected Datasource findDatasource(UnitOfWork uow, String datasourceName) throws KException {
-        if (! this.wsMgr.hasChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
+        if (! this.wsMgr.hasChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE ) ) {
             return null;
         }
 
-        final KomodoObject kobject = this.wsMgr.getChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+        final KomodoObject kobject = this.wsMgr.getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
         final Datasource datasource = this.wsMgr.resolve( uow, kobject, Datasource.class );
 
         LOGGER.debug( "Datasource '{0}' was found", datasourceName ); //$NON-NLS-1$

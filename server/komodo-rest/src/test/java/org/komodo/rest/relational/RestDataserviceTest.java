@@ -25,8 +25,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+
 import java.net.URI;
+
 import javax.ws.rs.core.UriBuilder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
@@ -37,7 +40,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.mockito.Mockito;
-import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class RestDataserviceTest {
@@ -49,7 +52,7 @@ public final class RestDataserviceTest {
     private static final KomodoType kType = KomodoType.DATASERVICE;
     private static final String DESCRIPTION = "my description";
     private static final String SERVICE_VDB_NAME = "serviceVdbName";
-    private static final int SERVICE_VDB_VERSION = 1;
+    private static final String SERVICE_VDB_VERSION = "1";
     private static final String SERVICE_VIEW_MODEL = "serviceViewModel";
     private static final String SERVICE_VIEW = "serviceView";
 
@@ -82,7 +85,7 @@ public final class RestDataserviceTest {
         Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
 
         Descriptor dataserviceType = Mockito.mock(Descriptor.class);
-        when(dataserviceType.getName()).thenReturn(VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        when(dataserviceType.getName()).thenReturn(DataVirtLexicon.DataService.NODE_TYPE);
 
         Dataservice theDataservice = Mockito.mock(Dataservice.class);
         Mockito.when(theDataservice.getPrimaryType(transaction)).thenReturn(dataserviceType);
@@ -150,35 +153,35 @@ public final class RestDataserviceTest {
         this.dataservice.setId(newName);
         assertEquals(this.dataservice.getId(), newName);
     }
-    
+
     @Test
     public void shouldSetDescription() {
         final String newDescription = "blah";
         this.dataservice.setDescription(newDescription);
         assertEquals(this.dataservice.getDescription(), newDescription);
     }
-    
+
     @Test
     public void shouldSetServiceVdbName() {
         final String newServiceVdb = "blah";
         this.dataservice.setServiceVdbName(newServiceVdb);
         assertEquals(this.dataservice.getServiceVdbName(), newServiceVdb);
     }
-    
+
     @Test
     public void shouldSetServiceVdbVersion() {
-        final int newServiceVdbVersion = 2;
+        final String newServiceVdbVersion = "2";
         this.dataservice.setServiceVdbVersion(newServiceVdbVersion);
         assertEquals(this.dataservice.getServiceVdbVersion(), newServiceVdbVersion);
     }
-    
+
     @Test
     public void shouldSetServiceViewModel() {
         final String newServiceViewModel = "blah";
         this.dataservice.setServiceViewModel(newServiceViewModel);
         assertEquals(this.dataservice.getServiceViewModel(), newServiceViewModel);
     }
-    
+
     @Test
     public void shouldSetServiceView() {
         final String newServiceView = "blah";

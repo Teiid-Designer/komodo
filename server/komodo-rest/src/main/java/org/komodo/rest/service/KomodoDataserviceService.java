@@ -29,9 +29,11 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_SERVICE_DNE;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -46,8 +48,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+
 import org.komodo.core.KEngine;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
@@ -65,6 +67,8 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -125,7 +129,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 dataServices = this.wsMgr.findDataservices( uow );
                 LOGGER.debug( "getDataservices:found '{0}' Dataservices", dataServices.length ); //$NON-NLS-1$
             } else {
-                final String[] dataservicePaths = this.wsMgr.findByType( uow, KomodoLexicon.DataService.NODE_TYPE, null, searchPattern, false );
+                final String[] dataservicePaths = this.wsMgr.findByType( uow, DataVirtLexicon.DataService.NODE_TYPE, null, searchPattern, false );
 
                 if ( dataservicePaths.length == 0 ) {
                     dataServices = Dataservice.NO_DATASERVICES;
@@ -212,7 +216,7 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICES_ERROR);
         }
     }
-    
+
     /**
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -265,7 +269,7 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICE_ERROR, dataserviceName);
         }
     }
-    
+
     /**
      * Create a new DataService in the komodo repository
      * @param headers
@@ -328,7 +332,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
         try {
             uow = createTransaction( "createDataservice", false ); //$NON-NLS-1$
-            
+
             // Error if the repo already contains a dataservice with the supplied name.
             if ( this.wsMgr.hasChild( uow, dataserviceName ) ) {
                 String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_ALREADY_EXISTS);
@@ -336,10 +340,10 @@ public final class KomodoDataserviceService extends KomodoService {
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
-            
+
             // create new Dataservice
             return doAddDataservice( uow, uriInfo.getBaseUri(), mediaTypes, restDataservice );
-            
+
         } catch (final Exception e) {
             if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
                 uow.rollback();
@@ -352,7 +356,7 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR, dataserviceName);
         }
     }
-    
+
     /**
      * Clone a DataService in the komodo repository
      * @param headers
@@ -413,7 +417,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
         try {
             uow = createTransaction( "cloneDataservice", false ); //$NON-NLS-1$
-            
+
             // Error if the repo already contains a dataservice with the supplied name.
             if ( this.wsMgr.hasChild( uow, newDataserviceName ) ) {
                 String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS);
@@ -421,13 +425,13 @@ public final class KomodoDataserviceService extends KomodoService {
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
-            
+
             // create new Dataservice
             // must be an update
-            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
             final Dataservice oldDataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
             final RestDataservice oldEntity = entityFactory.create(oldDataservice, uriInfo.getBaseUri(), uow );
-            
+
             final Dataservice dataservice = this.wsMgr.createDataservice( uow, null, newDataserviceName);
 
             setProperties( uow, dataservice, oldEntity );
@@ -447,7 +451,7 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_DATASERVICE_ERROR);
         }
     }
-    
+
     /**
      * Update a Dataservice in the komodo repository
      * @param headers
@@ -512,7 +516,7 @@ public final class KomodoDataserviceService extends KomodoService {
             }
 
             // must be an update
-            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
             final Dataservice dataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
 
             // Transfers the properties from the rest object to the created komodo service.
@@ -572,19 +576,19 @@ public final class KomodoDataserviceService extends KomodoService {
             throw new KomodoRestException( RelationalMessages.getString( DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR, dataserviceName ), e );
         }
     }
-    
+
     // Sets Dataservice properties using the supplied RestDataservice object
     private void setProperties(final UnitOfWork uow, Dataservice dataService, RestDataservice restDataService) throws KException {
         // 'New' = requested RestDataservice properties
         String newDescription = restDataService.getDescription();
-        
+
         // 'Old' = current Dataservice properties
         String oldDescription = dataService.getDescription(uow);
-        
+
         // Description
         if ( !StringUtils.equals(newDescription, oldDescription) ) {
             dataService.setDescription( uow, newDescription );
-        } 
+        }
     }
 
     /**
@@ -617,8 +621,8 @@ public final class KomodoDataserviceService extends KomodoService {
             uow = createTransaction("removeDataserviceFromWorkspace", false); //$NON-NLS-1$
 
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repo );
-            KomodoObject dataservice = mgr.getChild(uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE);
-            
+            KomodoObject dataservice = mgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
+
             if (dataservice == null)
                 return Response.noContent().build();
 
@@ -640,5 +644,5 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR);
         }
     }
-    
+
 }

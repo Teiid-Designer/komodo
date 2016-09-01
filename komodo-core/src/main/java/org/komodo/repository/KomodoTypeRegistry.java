@@ -24,6 +24,7 @@ package org.komodo.repository;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
@@ -31,6 +32,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -110,7 +112,7 @@ public class KomodoTypeRegistry implements StringConstants {
     }
 
     private KeyInValueHashMap<KomodoType, TypeIdentifier> kTypeIndex =
-                    new KeyInValueHashMap<KomodoType, TypeIdentifier>(new KTypeAdapter());
+                    new KeyInValueHashMap<>(new KTypeAdapter());
 
     private KomodoTypeRegistry() {
 
@@ -120,11 +122,21 @@ public class KomodoTypeRegistry implements StringConstants {
 
         index(KomodoType.DATA_TYPE_RESULT_SET, TeiidDdlLexicon.CreateProcedure.RESULT_DATA_TYPE);
 
-        index(KomodoType.DATASERVICE, KomodoLexicon.DataService.NODE_TYPE);
+        index(KomodoType.DATASERVICE, DataVirtLexicon.DataService.NODE_TYPE);
 
-        index(KomodoType.DATASOURCE, KomodoLexicon.DataSource.NODE_TYPE);
+        index(KomodoType.DATASOURCE, DataVirtLexicon.Connection.NODE_TYPE);
 
-        index(KomodoType.DRIVER, KomodoLexicon.Driver.NODE_TYPE);
+        index(KomodoType.DRIVER, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+        index(KomodoType.DRIVER_ENTRY, DataVirtLexicon.ResourceEntry.DRIVER_ENTRY_NODE_TYPE);
+
+        index(KomodoType.UDF_FILE, DataVirtLexicon.ResourceFile.UDF_FILE_NODE_TYPE);
+        index(KomodoType.UDF_ENTRY, DataVirtLexicon.ResourceEntry.UDF_ENTRY_NODE_TYPE);
+
+        index(KomodoType.DDL_FILE, DataVirtLexicon.ResourceFile.DDL_FILE_NODE_TYPE);
+        index(KomodoType.DDL_FILE, DataVirtLexicon.ResourceEntry.DDL_ENTRY_NODE_TYPE);
+
+        index(KomodoType.RESOURCE, DataVirtLexicon.ResourceFile.NODE_TYPE);
+        index(KomodoType.RESOURCE_ENTRY, DataVirtLexicon.ResourceEntry.NODE_TYPE);
 
         index(KomodoType.FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
@@ -210,7 +222,7 @@ public class KomodoTypeRegistry implements StringConstants {
         if (lexiconType == null)
             return Collections.emptySet();
 
-        Set<TypeIdentifier> identifiers = new HashSet<TypeIdentifier>();
+        Set<TypeIdentifier> identifiers = new HashSet<>();
         for (TypeIdentifier identifier : kTypeIndex.values()) {
             if (identifier.getLexiconType().equals(lexiconType))
                 identifiers.add(identifier);

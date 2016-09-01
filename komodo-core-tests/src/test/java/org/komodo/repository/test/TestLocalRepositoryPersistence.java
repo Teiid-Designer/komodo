@@ -29,12 +29,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +59,7 @@ import org.komodo.utils.FileUtils;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestLocalRepositoryPersistence extends AbstractLoggingTest implements Sequencing {
@@ -340,7 +343,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
     }
 
     private KomodoObject createMySqlDriver(UnitOfWork uow, KomodoObject parent, String name) throws Exception {
-        KomodoObject driver = parent.addChild(uow, name, KomodoLexicon.Driver.NODE_TYPE);
+        KomodoObject driver = parent.addChild(uow, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         InputStream contentStream = TestUtilities.mySqlDriver();
         assertNotNull(contentStream);
         byte[] content = FileUtils.write(contentStream);
@@ -401,7 +404,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
 
         // Find the objects to confirm what we expect to happen
         uow = _repo.createTransaction("test-search-type", true, null);
-        List<KomodoObject> results = _repo.searchByType(uow, KomodoLexicon.Driver.NODE_TYPE);
+        List<KomodoObject> results = _repo.searchByType(uow, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         assertEquals(testObjectCount, results.size());
         uow.commit();
 
@@ -414,7 +417,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
 
         // Find the test nodes to confirm repo was persisted
         uow = _repo.createTransaction("test-search-type", true, null);
-        results = _repo.searchByType(uow, KomodoLexicon.Driver.NODE_TYPE);
+        results = _repo.searchByType(uow, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         assertEquals(testObjectCount, results.size());
 
         //
