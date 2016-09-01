@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Properties;
+
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
@@ -73,6 +74,7 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
@@ -927,7 +929,9 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                 if (teiidDataSrc == null)
                     continue;
 
-                KomodoObject kobject = cachedTeiid.addChild( transaction, teiidDataSrc.getName(), KomodoLexicon.DataSource.NODE_TYPE );
+                KomodoObject kobject = cachedTeiid.addChild( transaction,
+                                                             teiidDataSrc.getName(),
+                                                             DataVirtLexicon.Connection.NODE_TYPE );
                 Datasource dataSrc = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
                 dataSrc.setDriverName(transaction, teiidDataSrc.getType());

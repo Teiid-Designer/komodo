@@ -24,6 +24,7 @@ package org.komodo.relational;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 
@@ -87,6 +88,11 @@ public class Messages implements StringConstants {
          * An error message indicating a VDB entry could not be removed because it was not found.
          */
         ENTRY_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a empty resources was being exported.
+         */
+        EXPORT_FAILED_NO_CONTENT,
 
         /**
          * An error message indicating a function could not be removed.
@@ -194,6 +200,11 @@ public class Messages implements StringConstants {
         REFERENCED_COLUMN_NOT_FOUND,
 
         /**
+         * An error message indicating a data service referenced resource could not be found.
+         */
+        REFERENCED_RESOURCE_NOT_FOUND,
+
+        /**
          * An error message indicating a table with a specified JCR UUID could not be found.
          */
         REFERENCED_TABLE_NOT_FOUND,
@@ -290,7 +301,7 @@ public class Messages implements StringConstants {
         }
 
     }
-    
+
     /**
      * Messages relating to the datasource parser.
      */
@@ -334,6 +345,46 @@ public class Messages implements StringConstants {
          * An error message indicating the vdb cannot be found in the data service
          */
         DATA_SERVICE_VDB_NOT_FOUND,
+
+        /**
+         * A message indicating a data service is being deployed.
+         */
+        DATA_SERVICE_START_DEPLOY,
+
+        /**
+         * A message indicating a data service has been successfully deployed.
+         */
+        DATA_SERVICE_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * A message indicating a connection is being deployed.
+         */
+        DATA_SERVICE_CONNECTION_START_DEPLOY,
+
+        /**
+         * A message indicating a connection has been successfully deployed.
+         */
+        DATA_SERVICE_CONNECTION_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * A message indicating a driver is being deployed.
+         */
+        DATA_SERVICE_DRIVER_START_DEPLOY,
+
+        /**
+         * A message indicating a driver has been successfully deployed.
+         */
+        DATA_SERVICE_DRIVER_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * A message indicating a VDB is being deployed.
+         */
+        DATA_SERVICE_VDB_START_DEPLOY,
+
+        /**
+         * A message indicating a VDB has been successfully deployed.
+         */
+        DATA_SERVICE_VDB_SUCCESSFULLY_DEPLOYED,
 
         /**
          * An error message indicating the vdb contents cannot be exported from the data service

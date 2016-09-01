@@ -23,16 +23,17 @@ package org.komodo.relational.datasource.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import java.util.Arrays;
+
 import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoType;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class DatasourceImplTest extends RelationalModelTest {
@@ -75,24 +76,10 @@ public final class DatasourceImplTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldSetProfileName() throws Exception {
-        String newValue = "myConnectionProfile";
-        this.datasource.setProfileName( getTransaction(), newValue );
-        assertThat( this.datasource.getProfileName( getTransaction() ), is( newValue ) );
-    }
-
-    @Test
     public void shouldSetJdbc() throws Exception {
         boolean isJdbc = false;
         this.datasource.setJdbc( getTransaction(), isJdbc );
         assertThat( this.datasource.isJdbc( getTransaction() ), is( isJdbc ) );
-    }
-
-    @Test
-    public void shouldSetPreview() throws Exception {
-        boolean isPreview = true;
-        this.datasource.setPreview( getTransaction(), isPreview );
-        assertThat( this.datasource.isPreview( getTransaction() ), is( isPreview ) );
     }
 
     @Test
@@ -109,19 +96,8 @@ public final class DatasourceImplTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldHaveDefaultPreview() throws Exception {
-        assertThat( this.datasource.isPreview( getTransaction() ), is( Datasource.DEFAULT_PREVIEW ) );
-    }
-
-    @Test
     public void shouldHaveId() throws Exception {
         assertThat( this.datasource.getName( getTransaction() ), is( DS_NAME ) );
-    }
-
-    @Test
-    public void shouldHaveJdbcProperty() throws Exception {
-        String[] propNames = this.datasource.getPropertyNames( getTransaction() );
-        assertThat( Arrays.asList(propNames).contains(KomodoLexicon.DataSource.JDBC), is( true ) );
     }
 
     @Test
@@ -145,7 +121,7 @@ public final class DatasourceImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.datasource.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataSource.NODE_TYPE ) );
+        assertThat( this.datasource.getPrimaryType( getTransaction() ).getName(), is( DataVirtLexicon.Connection.NODE_TYPE ) );
     }
 
     @Test
@@ -162,8 +138,6 @@ public final class DatasourceImplTest extends RelationalModelTest {
         this.datasource.setExternalLocation(getTransaction(), extLoc );
 
         this.datasource.setJdbc(getTransaction(), false);
-        this.datasource.setPreview(getTransaction(), true);
-        this.datasource.setProfileName( getTransaction(), "dsProfileName" );
         this.datasource.setJndiName(getTransaction(), "java:/jndiName");
         this.datasource.setDriverName(getTransaction(), "dsDriver");
         this.datasource.setClassName(getTransaction(), "dsClassname");
@@ -172,7 +146,7 @@ public final class DatasourceImplTest extends RelationalModelTest {
 
         byte[] xml = this.datasource.export(getTransaction(), new Properties());
         String xmlString = new String(xml);
- 
+
         assertThat( xmlString.contains(DS_NAME), is( true ) );
         assertThat( xmlString.contains("\t"), is( false ) );
         assertThat( xmlString.contains( description ), is( true ) );
@@ -182,8 +156,6 @@ public final class DatasourceImplTest extends RelationalModelTest {
     @Test
     public void shouldExportTabbed() throws Exception {
         this.datasource.setJdbc(getTransaction(), false);
-        this.datasource.setPreview(getTransaction(), true);
-        this.datasource.setProfileName( getTransaction(), "dsProfileName" );
         this.datasource.setJndiName(getTransaction(), "java:/jndiName");
         this.datasource.setDriverName(getTransaction(), "dsDriver");
         this.datasource.setClassName(getTransaction(), "dsClassname");

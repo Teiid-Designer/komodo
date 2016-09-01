@@ -30,11 +30,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +62,7 @@ import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -132,68 +135,68 @@ public final class TeiidImplTest extends RelationalModelTest {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.getHost(), is( HostProvider.DEFAULT_HOST ) );
     }
-    
+
     @Test
     public void shouldSetHost() throws Exception {
         String newValue = "NewHost";
         this.teiid.setHost( getTransaction(), newValue );
         assertThat( this.teiid.getHost( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldHaveDefaultTeiidInstanceUrl() throws Exception {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.getUrl(), is( TeiidConnectionInfo.UrlConstructor.createDefaultTeiidConnectionUrl()) );
     }
-    
+
     @Test
     public void shouldCheckDefaultIsConnected() throws Exception {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.isConnected(), is( false ) );
     }
-    
+
     @Test
     public void shouldSetAdminSecure() throws Exception {
         boolean newValue = false;
         this.teiid.setAdminSecure( getTransaction(), newValue );
         assertThat( this.teiid.isAdminSecure( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetAdminUser() throws Exception {
         String newValue = "MyUser";
         this.teiid.setAdminUser( getTransaction(), newValue );
         assertThat( this.teiid.getAdminUser( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetAdminPassword() throws Exception {
         String newValue = "pword";
         this.teiid.setAdminPassword( getTransaction(), newValue );
         assertThat( this.teiid.getAdminPassword( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetAdminPort() throws Exception {
         int newValue = 8888;
         this.teiid.setAdminPort( getTransaction(), newValue );
         assertThat( this.teiid.getAdminPort( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetJdbcPassword() throws Exception {
         String newValue = "pword";
         this.teiid.setJdbcPassword( getTransaction(), newValue );
         assertThat( this.teiid.getJdbcPassword( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetJdbcSecure() throws Exception {
         boolean newValue = true;
         this.teiid.setJdbcSecure( getTransaction(), newValue );
         assertThat( this.teiid.isJdbcSecure( getTransaction() ), is( newValue ) );
     }
-        
+
     @Test
     public void shouldHaveId() throws Exception {
         assertThat( this.teiid.getName( getTransaction() ), is( TEIID_NAME ) );
@@ -233,7 +236,7 @@ public final class TeiidImplTest extends RelationalModelTest {
     public void shouldHaveDefaultJdbcPasswordAfterConstruction() throws Exception {
         assertThat( this.teiid.getJdbcPassword( getTransaction() ), is( TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD ) );
     }
-    
+
     @Test
     public void shouldHaveDefaultJdbcSecureAfterConstruction() throws Exception {
         assertThat( this.teiid.isJdbcSecure( getTransaction() ), is( TeiidJdbcInfo.DEFAULT_SECURE ) );
@@ -306,7 +309,7 @@ public final class TeiidImplTest extends RelationalModelTest {
         assertEquals(this.teiid.getJdbcUsername(getTransaction()), cachedTeiid.getJdbcUsername(getTransaction()));
         assertEquals(this.teiid.getVersion(getTransaction()), cachedTeiid.getVersion(getTransaction()));
 
-        KomodoObject[] cDataSrcs = cachedTeiid.getChildrenOfType(getTransaction(), KomodoLexicon.DataSource.NODE_TYPE);
+        KomodoObject[] cDataSrcs = cachedTeiid.getChildrenOfType(getTransaction(), DataVirtLexicon.Connection.NODE_TYPE);
         assertNotNull(cDataSrcs);
         assertEquals(1, cDataSrcs.length);
         assertEquals(dsName, cDataSrcs[0].getName(getTransaction()));

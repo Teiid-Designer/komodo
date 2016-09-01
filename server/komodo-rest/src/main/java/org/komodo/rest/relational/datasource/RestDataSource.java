@@ -23,7 +23,7 @@ package org.komodo.rest.relational.datasource;
 
 import java.net.URI;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
@@ -32,6 +32,7 @@ import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A data source that can be used by GSON to build a JSON document representation.
@@ -41,27 +42,17 @@ public final class RestDataSource extends RestBasicEntity {
     /**
      * Label used to describe jndi name
      */
-    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.JNDI_NAME);
+    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(DataVirtLexicon.Connection.JNDI_NAME);
 
     /**
      * Label used to describe driver name
      */
-    public static final String DRIVER_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.DRIVER_NAME);
-
-    /**
-     * Label used to describe profile name
-     */
-    public static final String PROFILE_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.PROFILE_NAME);
+    public static final String DRIVER_NAME_LABEL = KomodoService.protectPrefix(DataVirtLexicon.Connection.DRIVER_NAME);
 
     /**
      * Label used to describe jdbc
      */
-    public static final String JDBC_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.JDBC);
-
-    /**
-     * Label used to describe preview
-     */
-    public static final String PREVIEW_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.PREVIEW);
+    public static final String JDBC_LABEL = KomodoService.protectPrefix(DataVirtLexicon.Connection.TYPE);
 
     /**
      * An empty array of data sources.
@@ -87,9 +78,7 @@ public final class RestDataSource extends RestBasicEntity {
 
         setJndiName(dataSource.getJndiName(uow));
         setDriverName(dataSource.getDriverName(uow));
-        setProfileName(dataSource.getProfileName(uow));
         setJdbc(dataSource.isJdbc(uow));
-        setPreview(dataSource.isPreview(uow));
 
         addExecutionProperties(uow, dataSource);
 
@@ -135,22 +124,6 @@ public final class RestDataSource extends RestBasicEntity {
     }
 
     /**
-     * @return the profile name (can be empty)
-     */
-    public String getProfileName() {
-        Object profile = tuples.get(PROFILE_NAME_LABEL);
-        return profile != null ? profile.toString() : null;
-    }
-
-    /**
-     * @param profileName
-     *        the new profile name
-     */
-    public void setProfileName(final String profileName) {
-        tuples.put(PROFILE_NAME_LABEL, profileName);
-    }
-
-    /**
      * @return whether data source is JDBC
      */
     public boolean isJdbc() {
@@ -165,18 +138,4 @@ public final class RestDataSource extends RestBasicEntity {
         tuples.put(JDBC_LABEL, jdbc);
     }
 
-    /**
-     * @return whether data source is a preview
-     */
-    public boolean isPreview() {
-        Object preview = tuples.get(PREVIEW_LABEL);
-        return preview != null ? Boolean.parseBoolean(preview.toString()) : false;
-    }
-
-    /**
-     * @param preview
-     */
-    public void setPreview(boolean preview) {
-        tuples.put(PREVIEW_LABEL, preview);
-    }
 }

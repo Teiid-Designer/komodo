@@ -85,11 +85,10 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String datasourceCreated;
     public static String datasourceDeleted;
     public static String datasourceExported;
-    public static String datasourceInputFileIsEmpty;
     public static String datasourceNotFound;
     public static String datasourceOverwriteDisabled;
     public static String datasourceParserErrors;
-    public static String datasourcesUploaded;
+    public static String datasourceUploaded;
     public static String deleteDatasourceError;
     public static String deleteSchemaError;
     public static String deleteTeiidError;

@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<dataSourceSet>
-	<dataSource name="DashboardDS" jdbc="true">
-		<property name="track-statements">NOWARN</property>
-		<property name="connectable">false</property>
-		<property name="connection-url">jdbc:h2:file:${jboss.server.data.dir}/teiid-dashboard/teiid-dashboard-ds;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1</property>
-		<property name="jndiName">java:jboss/datasources/DashboardDS</property>
-		<property name="share-prepared-statements">false</property>
-		<property name="driverName">h2</property>
-		<property name="statistics-enabled">false</property>
-		<property name="validate-on-match">false</property>
-		<property name="allow-multiple-users">false</property>
-		<property name="password">sa</property>
-		<property name="user-name">sa</property>
-		<property name="use-fast-fail">false</property>
-		<property name="set-tx-query-timeout">false</property>
-		<property name="spy">false</property>
-	</dataSource>
-</dataSourceSet>
+<jdbc-connection name="DashboardDS">
+    <jndi-name>java:jboss/datasources/DashboardDS</jndi-name>
+    <driver-name>h2</driver-name>
+	<property name="track-statements">NOWARN</property>
+	<property name="connectable">false</property>
+	<property name="connection-url">jdbc:h2:file:${jboss.server.data.dir}/teiid-dashboard/teiid-dashboard-ds;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1</property>
+	<property name="share-prepared-statements">false</property>
+	<property name="statistics-enabled">false</property>
+	<property name="validate-on-match">false</property>
+	<property name="allow-multiple-users">false</property>
+	<property name="password">sa</property>
+	<property name="user-name">sa</property>
+	<property name="use-fast-fail">false</property>
+	<property name="set-tx-query-timeout">false</property>
+	<property name="spy">false</property>
+</jdbc-connection>

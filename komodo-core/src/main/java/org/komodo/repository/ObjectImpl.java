@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -36,6 +37,7 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
@@ -194,7 +196,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @param komodoRepository
      *        the repository where the object is located (cannot be <code>null</code>)
      * @param path
-     *        the workspace path (can be empty if object exists at the workspace root)
+     *        the workspace path (cannot be <code>null</code> or empty)
      * @param index
      *        the object index (value is zero for non-SNS)
      * @throws KException
@@ -616,7 +618,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             }
 
             if ( kids.length != 0 ) {
-                final List< KomodoObject > matches = new ArrayList< KomodoObject >( kids.length );
+                final List< KomodoObject > matches = new ArrayList< >( kids.length );
 
                 for ( final KomodoObject kid : kids ) {
                     if ( type.equals( kid.getPrimaryType( transaction ).getName() ) || kid.hasDescriptor( transaction, type ) ) {
@@ -1027,7 +1029,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         try {
-            final List< String > names = new ArrayList< String >();
+            final List< String > names = new ArrayList< >();
 
             for ( final PropertyIterator iter = node( transaction ).getProperties(); iter.hasNext(); ) {
                 final String name = iter.nextProperty().getName();
@@ -1075,7 +1077,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        List<Descriptor> descriptors = new ArrayList<Descriptor>();
+        List<Descriptor> descriptors = new ArrayList<>();
         descriptors.add(getPrimaryType(transaction));
         descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
 
@@ -1087,7 +1089,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         KomodoType result = KomodoType.UNKNOWN;
-        if (identifiers == null || identifiers.isEmpty()) {
+        if (identifiers.isEmpty()) {
             // No identifiers but could be DDL Statements container
             String nodeName = getName(transaction);
             if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(nodeName))
@@ -1166,6 +1168,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
+    @SuppressWarnings( "unused" )
     @Override
     public boolean hasChild( final UnitOfWork transaction,
                              final String name,
@@ -1267,7 +1270,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     @Override
     public final boolean hasRawChild( final UnitOfWork transaction,
                                       final String name,
-                                      final String typeName ) throws KException {
+                                      final String typeName ) {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$

@@ -23,19 +23,21 @@ package org.komodo.relational;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.driver.Driver;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -147,7 +149,7 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
         final Dataservice ds = mgr.createDataservice( getTransaction(), parent, serviceName );
 
-        assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataService.NODE_TYPE ) );
+        assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( DataVirtLexicon.DataService.NODE_TYPE ) );
         assertThat( ds.getName( getTransaction() ), is( serviceName ) );
         return ds;
     }
@@ -165,21 +167,24 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
         final Datasource ds = mgr.createDatasource( getTransaction(), parent, dsName );
 
-        assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataSource.NODE_TYPE ) );
+        assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( DataVirtLexicon.Connection.NODE_TYPE ) );
         assertThat( ds.getName( getTransaction() ), is( dsName ) );
         return ds;
     }
 
-    protected Driver createDriver( final String driverName ) throws Exception {
+    protected Driver createDriver( final String driverName,
+                                   final byte[] content ) throws Exception {
         return createDriver( driverName, null );
     }
 
     protected Driver createDriver( final String driverName,
-                                           final KomodoObject parent ) throws Exception {
+                                   final KomodoObject parent,
+                                   final byte[] content ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Driver driver = mgr.createDriver( getTransaction(), parent, driverName );
+        final Driver driver = mgr.createDriver( getTransaction(), parent, driverName, content );
 
-        assertThat( driver.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Driver.NODE_TYPE ) );
+        assertThat( driver.getPrimaryType( getTransaction() ).getName(),
+                    is( DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE ) );
         assertThat( driver.getName( getTransaction() ), is( driverName ) );
         return driver;
     }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -230,7 +231,52 @@ public enum KomodoType {
     /**
      * Unknown Type
      */
-    UNKNOWN;
+    UNKNOWN,
+
+    /**
+     * Type for a data service file.
+     */
+    RESOURCE,
+
+    /**
+     * Type for a DDL file.
+     */
+    DDL_FILE,
+
+    /**
+     * Type for a UDF file.
+     */
+    UDF_FILE,
+
+    /**
+     * Type for a data service VDB entry.
+     */
+    VDB_DATA_SERVICE_ENTRY,
+
+    /**
+     * Type for a data service connection entry.
+     */
+    CONNECTION_ENTRY,
+
+    /**
+     * Type for a data service driver file entry.
+     */
+    DRIVER_ENTRY,
+
+    /**
+     * Type for a data service DDL file entry.
+     */
+    DDL_ENTRY,
+
+    /**
+     * Type for a data service resource file entry.
+     */
+    RESOURCE_ENTRY,
+
+    /**
+     * Type for a data service UDF file entry.
+     */
+    UDF_ENTRY;
 
     private Collection<String> aliases;
 
@@ -243,7 +289,7 @@ public enum KomodoType {
     private KomodoType(String... aliases) {
         this();
         if (aliases != null) {
-            this.aliases = new ArrayList<String>(aliases.length);
+            this.aliases = new ArrayList<>(aliases.length);
             for (String alias : aliases) {
                 this.aliases.add(alias);
             }
@@ -308,7 +354,7 @@ public enum KomodoType {
      * @return all the string definitions of the types
      */
     public static List<String> getTypes() {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (KomodoType kType : values()) {
             names.add(kType.getType());
         }

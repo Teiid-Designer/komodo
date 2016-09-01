@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
@@ -36,6 +37,7 @@ import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.Messages;
 import org.komodo.repository.KSequencerController;
@@ -45,6 +47,7 @@ import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -64,9 +67,9 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
     private boolean sequencingActive = false;
 
     // List appended to by running sequencers detailing their unique identifiers
-    private List<String> runningSequencers = new ArrayList<String>();
+    private List<String> runningSequencers = new ArrayList<>();
 
-    private Set<KSequencerListener> listeners = new HashSet<KSequencerListener>();
+    private Set<KSequencerListener> listeners = new HashSet<>();
 
     /**
      * Create new instance
@@ -155,6 +158,52 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         return true;
     }
 
+    private boolean isConnectionSequenceable( final Property property ) {
+        try {
+            if ( !property.getName().equals( JcrConstants.JCR_DATA ) ) {
+                return false;
+            }
+
+            final Node node = property.getParent();
+
+            if ( !node.getName().equals( JcrConstants.JCR_CONTENT ) ) {
+                return false;
+            }
+
+            // make sure output node is a connection node
+            final Node parentNode = node.getParent();
+
+            return ( ( parentNode != null )
+                     && parentNode.getPrimaryNodeType().getName().equals( DataVirtLexicon.Connection.NODE_TYPE ) );
+        } catch ( final RepositoryException e ) {
+            KLog.getLogger().error( "KSequencers.isConnectionSequenceable", e ); //$NON-NLS-1$
+            return false;
+        }
+    }
+
+    private boolean isDataServiceSequenceable( final Property property ) {
+        try {
+            if ( !property.getName().equals( JcrConstants.JCR_DATA ) ) {
+                return false;
+            }
+
+            final Node node = property.getParent();
+
+            if ( !node.getName().equals( JcrConstants.JCR_CONTENT ) ) {
+                return false;
+            }
+
+            // make sure output node is a data service node
+            final Node parentNode = node.getParent();
+
+            return ( ( parentNode != null )
+                     && parentNode.getPrimaryNodeType().getName().equals( DataVirtLexicon.DataService.NODE_TYPE ) );
+        } catch ( final RepositoryException e ) {
+            KLog.getLogger().error( "KSequencers.isDataServiceSequenceable", e ); //$NON-NLS-1$
+            return false;
+        }
+    }
+
     private boolean isDdlSequenceable(Property property) {
         try {
             String propertyName = property.getName();
@@ -210,6 +259,14 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         if (isTsqlSequenceable(property))
             return SequencerType.TSQL;
 
+        if ( isDataServiceSequenceable( property ) ) {
+            return SequencerType.DATA_SERVICE;
+        }
+
+        if ( isConnectionSequenceable( property ) ) {
+            return SequencerType.CONNECTION;
+        }
+
         return null;
     }
 
@@ -220,6 +277,12 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
             case DDL:
             case TSQL:
                 return ModeshapeUtils.childrenCount(oldNode) < ModeshapeUtils.childrenCount(newNode);
+            case CONNECTION:
+                return newNode.hasProperty( DataVirtLexicon.Connection.TYPE );
+            case DATA_SERVICE:
+                return newNode.hasNodes();
+            default:
+                break;
         }
 
         return false;
@@ -290,7 +353,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         if (node == null)
             return;
 
-        List<NodeType> types = new ArrayList<NodeType>();
+        List<NodeType> types = new ArrayList<>();
         types.add(node.getPrimaryNodeType());
         types.addAll(Arrays.asList(node.getMixinNodeTypes()));
 
@@ -381,8 +444,16 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         sequencingActive = true;
 
         Node outputNode = property.getParent();
-        if (SequencerType.VDB.equals(sequencerType))
-            outputNode = outputNode.getParent();
+
+        switch (sequencerType) {
+            case VDB:
+            case CONNECTION:
+            case DATA_SERVICE:
+                outputNode = outputNode.getParent();
+                break;
+            default:
+                break;
+        }
 
         return sequence(sequencerType, property, outputNode, eventId);
     }

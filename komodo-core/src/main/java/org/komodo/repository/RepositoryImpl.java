@@ -22,6 +22,7 @@
 package org.komodo.repository;
 
 import static org.komodo.repository.Messages.Komodo.ERROR_REPO_HAS_CHANGES;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
@@ -41,6 +43,7 @@ import javax.jcr.ValueFactory;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Environment;
@@ -459,9 +462,9 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
     protected static final KLog LOGGER = KLog.getLogger();
 
-    private final Set< RepositoryClient > clients = new HashSet< RepositoryClient >();
+    private final Set< RepositoryClient > clients = new HashSet< >();
     private final Id id;
-    private final Set< RepositoryObserver > observers = new HashSet< RepositoryObserver >();
+    private final Set< RepositoryObserver > observers = new HashSet< >();
     private final Type type;
     private ValidationManager validationMgr;
 
@@ -625,7 +628,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         }
 
         final Session session = getSession(transaction);
-        List<KomodoObject> results = new ArrayList<KomodoObject>();
+        List<KomodoObject> results = new ArrayList<>();
 
         try {
             QueryManager queryMgr = session.getWorkspace().getQueryManager();
@@ -877,7 +880,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                          jcrUuid);
         }
 
-        final String sql = "SELECT * FROM [nt:unstructured] WHERE [jcr:uuid] = '" + jcrUuid + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+        final String sql = "SELECT * FROM [nt:base] WHERE [jcr:uuid] = '" + jcrUuid + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 
         try {
             assert (transaction instanceof UnitOfWorkImpl);

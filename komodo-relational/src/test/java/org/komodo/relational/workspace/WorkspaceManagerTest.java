@@ -31,9 +31,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -301,7 +303,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         for (int i = 0; i < 5; ++i) {
             createVdb((prefix + ++vdbCount), (VDB_PATH + i));
         }
-        
+
         createDataservice();
 
         commit(); // must save before running a query

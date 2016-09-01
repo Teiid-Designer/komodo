@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vdb name="Portfolio" version="1">
+
+<description>The Portfolio Dynamic VDB</description>
+<connection-type>BY_VERSION</connection-type>
+<property name="UseConnectorMetadata" value="true"></property>
+
+<model name="MarketData" type="PHYSICAL">
+<source name="text-connector" translator-name="file" connection-jndi-name="java:/marketdata-file"></source>
+</model>
+<model name="Accounts" type="PHYSICAL">
+<property name="importer.useFullSchemaName" value="false"></property>
+<source name="h2-connector" translator-name="h2" connection-jndi-name="java:/accounts-ds"></source>
+</model>
+<model name="PersonalValuations" type="PHYSICAL">
+<property name="importer.ExcelFileName" value="otherholdings.xls"></property>
+<property name="importer.headerRowNumber" value="1"></property>
+<source name="excelconnector" translator-name="excel" connection-jndi-name="java:/excel-file"></source>
+<metadata type="DDL">
+<![CDATA[SET NAMESPACE 'http://www.teiid.org/translator/excel/2014' AS teiid_excel;
+
+CREATE FOREIGN TABLE Sheet1 (
+	ROW_ID integer OPTIONS ("SEARCHABLE" 'All_Except_Like', "teiid_excel:CELL_NUMBER" 'ROW_ID'),
+	ACCOUNT_ID integer OPTIONS ("SEARCHABLE" 'Unsearchable', "teiid_excel:CELL_NUMBER" '1'),
+	PRODUCT_TYPE string OPTIONS ("SEARCHABLE" 'Unsearchable', "teiid_excel:CELL_NUMBER" '2'),
+	PRODUCT_VALUE string OPTIONS ("SEARCHABLE" 'Unsearchable', "teiid_excel:CELL_NUMBER" '3'),
+	PRIMARY KEY(ROW_ID)
+) OPTIONS ("teiid_excel:FIRST_DATA_ROW_NUMBER" '2', "teiid_excel:FILE" 'otherholdings.xls');
+]]>
+
+</metadata>
+</model>
+<model name="Stocks" type="VIRTUAL">
+<metadata type="DDL">
+<![CDATA[CREATE VIEW StockPrices (
+	symbol string,
+	price bigdecimal
+)
+AS
+SELECT SP.symbol, SP.price FROM (EXEC MarketData.getTextFiles('*.txt')) AS f, TEXTTABLE(f.file COLUMNS symbol string, price bigdecimal HEADER) AS SP;
+
+CREATE VIEW Stock (
+	product_id integer,
+	symbol string,
+	price bigdecimal,
+	company_name varchar(256)
+)
+AS
+SELECT A.ID, S.symbol, S.price, A.COMPANY_NAME FROM StockPrices AS S, Accounts.PRODUCT AS A WHERE S.symbol = A.SYMBOL;
+]]>
+
+</metadata>
+</model>
+<model name="StocksMatModel" type="VIRTUAL">
+<metadata type="DDL">
+<![CDATA[CREATE VIEW stockPricesMatView (
+	product_id integer,
+	symbol string,
+	price bigdecimal,
+	company_name varchar(256)
+) OPTIONS ("UPDATABLE" 'TRUE', "teiid_relALLOW_MATVIEW_MANAGEMENT" 'true', "teiid_relMATVIEW_ONERROR_ACTION" 'THROW_EXCEPTION', "teiid_relMATVIEW_AFTER_LOAD_SCRIPT" 'execute accounts.native('''')', "teiid_relMATVIEW_SHARE_SCOPE" 'NONE', "MATERIALIZED_TABLE" 'Accounts.h2_stock_mat', "teiid_relMATVIEW_TTL" '120000', "teiid_relON_VDB_DROP_SCRIPT" 'DELETE FROM Accounts.status WHERE Name=''stock'' AND schemaname = ''Stocks''', "teiid_relMATVIEW_STATUS_TABLE" 'status', "MATERIALIZED" 'TRUE', "teiid_relMATVIEW_BEFORE_LOAD_SCRIPT" 'execute accounts.native(''truncate table h2_stock_mat'');', "teiid_relMATERIALIZED_STAGE_TABLE" 'Accounts.h2_stock_mat')
+AS
+SELECT A.ID, S.symbol, S.price, A.COMPANY_NAME FROM Stocks.StockPrices AS S, Accounts.PRODUCT AS A WHERE S.symbol = A.SYMBOL;
+]]>
+
+</metadata>
+</model>
+
+</vdb>

@@ -22,6 +22,7 @@
 package org.komodo.relational.commands.datasource;
 
 import java.util.List;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
@@ -76,19 +77,11 @@ public final class SetDatasourcePropertyCommand extends DatasourceShellCommand {
                 datasource.setDriverName( transaction, value );
             } else if ( CLASS_NAME.equals( name ) ) {
                 datasource.setClassName( transaction, value );
-            } else if ( PROFILE_NAME.equals( name ) ) {
-                datasource.setProfileName( transaction, value );
             } else if ( JDBC.equals( name ) ) {
                 if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                     datasource.setJdbc( transaction, Boolean.parseBoolean( value ) );
                 } else {
                     errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC );
-                }
-            } else if ( PREVIEW.equals( name ) ) {
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    datasource.setPreview( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
                 }
             } else {
                 errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );

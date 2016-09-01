@@ -44,6 +44,16 @@ public interface KSequencerController {
         DDL("DDL Sequencer"), //$NON-NLS-1$
 
         /**
+         * Connection/DataSource Sequencer
+         */
+        CONNECTION("Connection Sequencer"), //$NON-NLS-1$
+
+        /**
+         * Data Service Sequencer
+         */
+        DATA_SERVICE("Data Service Sequencer"), //$NON-NLS-1$
+
+        /**
          * Teiid SQL Sequencer
          */
         TSQL("Teiid SQL Sequencer"); //$NON-NLS-1$

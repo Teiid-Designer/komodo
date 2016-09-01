@@ -25,6 +25,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -36,6 +37,7 @@ import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.repository.KomodoType;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -73,7 +75,7 @@ public final class FolderImplTest extends RelationalModelTest {
             }
         }
     }
-    
+
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat( this.folder.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Folder.NODE_TYPE ) );
@@ -88,7 +90,7 @@ public final class FolderImplTest extends RelationalModelTest {
     public void shouldAddFolder() throws Exception {
         final String name = "aFolder";
         final Folder anotherFolder = this.folder.addFolder(getTransaction(), name);
-        
+
         assertThat( anotherFolder, is( notNullValue() ) );
         assertThat( anotherFolder.getName( getTransaction() ), is( name ) );
         assertThat( this.folder.getFolders( getTransaction() ).length, is( 1 ) );
@@ -105,7 +107,7 @@ public final class FolderImplTest extends RelationalModelTest {
     public void shouldAddVdb() throws Exception {
         final String name = "aVdb";
         final Vdb vdb = this.folder.addVdb(getTransaction(), name, "externalPath");
-        
+
         assertThat( vdb, is( notNullValue() ) );
         assertThat( vdb.getName( getTransaction() ), is( name ) );
         assertThat( this.folder.getVdbs( getTransaction() ).length, is( 1 ) );
@@ -122,7 +124,7 @@ public final class FolderImplTest extends RelationalModelTest {
     public void shouldAddSchema() throws Exception {
         final String name = "schema";
         final Schema schema = this.folder.addSchema(getTransaction(), name);
-        
+
         assertThat( schema, is( notNullValue() ) );
         assertThat( schema.getName( getTransaction() ), is( name ) );
         assertThat( this.folder.getSchemas( getTransaction() ).length, is( 1 ) );
@@ -134,39 +136,39 @@ public final class FolderImplTest extends RelationalModelTest {
         assertThat( this.folder.getChild( getTransaction(), name ), is( schema ) );
         assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.Schema.NODE_TYPE ), is( schema ) );
     }
-    
+
     @Test
     public void shouldAddDatasource() throws Exception {
         final String name = "dataSource";
         final Datasource ds = this.folder.addDatasource(getTransaction(), name);
-        
+
         assertThat( ds, is( notNullValue() ) );
         assertThat( ds.getName( getTransaction() ), is( name ) );
         assertThat( this.folder.getDatasources( getTransaction() ).length, is( 1 ) );
         assertThat( this.folder.getChildren( getTransaction() )[0], is( instanceOf( Datasource.class ) ) );
 
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
-        assertThat( this.folder.hasChild( getTransaction(), name, KomodoLexicon.DataSource.NODE_TYPE ), is( true ) );
+        assertThat( this.folder.hasChild( getTransaction(), name, DataVirtLexicon.Connection.NODE_TYPE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
         assertThat( this.folder.getChild( getTransaction(), name ), is( ds ) );
-        assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.DataSource.NODE_TYPE ), is( ds ) );
+        assertThat( this.folder.getChild( getTransaction(), name, DataVirtLexicon.Connection.NODE_TYPE ), is( ds ) );
     }
-    
+
     @Test
     public void shouldAddDataservice() throws Exception {
         final String name = "dataService";
         final Dataservice service = this.folder.addDataservice(getTransaction(), name);
-        
+
         assertThat( service, is( notNullValue() ) );
         assertThat( service.getName( getTransaction() ), is( name ) );
         assertThat( this.folder.getDataservices( getTransaction() ).length, is( 1 ) );
         assertThat( this.folder.getChildren( getTransaction() )[0], is( instanceOf( Dataservice.class ) ) );
 
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
-        assertThat( this.folder.hasChild( getTransaction(), name, KomodoLexicon.DataService.NODE_TYPE ), is( true ) );
+        assertThat( this.folder.hasChild( getTransaction(), name, DataVirtLexicon.DataService.NODE_TYPE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
         assertThat( this.folder.getChild( getTransaction(), name ), is( service ) );
-        assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.DataService.NODE_TYPE ), is( service ) );
+        assertThat( this.folder.getChild( getTransaction(), name, DataVirtLexicon.DataService.NODE_TYPE ), is( service ) );
     }
-    
+
 }

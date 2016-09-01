@@ -27,8 +27,10 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
 import org.komodo.core.KEngine;
 import org.komodo.repository.internal.ModeshapeEngineThread;
 import org.komodo.repository.internal.ModeshapeEngineThread.Request;
@@ -304,6 +306,7 @@ public class LocalRepository extends RepositoryImpl {
                         @Override
                         public void errorOccurred( final Throwable error ) {
                             setState( State.ERROR );
+                            setError( error );
 
                             if (getCallback() == null) {
                                 KEngine.getInstance().getErrorHandler().error( error );
@@ -370,6 +373,7 @@ public class LocalRepository extends RepositoryImpl {
                 @Override
                 public void errorOccurred( final Throwable error ) {
                     setState( State.ERROR );
+                    setError( error );
 
                     if (getCallback() == null) {
                         KEngine.getInstance().getErrorHandler().error( error );

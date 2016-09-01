@@ -24,11 +24,13 @@ package org.komodo.relational.importer.ddl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;

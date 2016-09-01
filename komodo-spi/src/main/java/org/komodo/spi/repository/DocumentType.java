@@ -31,9 +31,9 @@ public class DocumentType implements StringConstants {
     public static final DocumentType VDB_XML = new DocumentType(StringConstants.VDB_DEPLOYMENT_SUFFIX);
 
     /**
-     * TDS
+     * CONNECTION
      */
-    public static final DocumentType TDS = new DocumentType(StringConstants.DS_SUFFIX);
+    public static final DocumentType CONNECTION = new DocumentType(StringConstants.CONNECTION_SUFFIX);
 
     /**
      * ZIP
@@ -87,8 +87,8 @@ public class DocumentType implements StringConstants {
         if (name.endsWith(VDB_DEPLOYMENT_SUFFIX))
             return DocumentType.VDB_XML;
 
-        if (name.endsWith(DS_SUFFIX))
-            return DocumentType.TDS;
+        if (name.endsWith(CONNECTION_SUFFIX))
+            return DocumentType.CONNECTION;
 
         int dotIndex = name.lastIndexOf(DOT);
         if (dotIndex == -1)

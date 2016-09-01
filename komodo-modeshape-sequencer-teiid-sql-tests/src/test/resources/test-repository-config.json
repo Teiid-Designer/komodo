@@ -6,11 +6,6 @@
     },
     "node-types" :
     [
-        "config/xmi.cnd",
-        "config/med.cnd",
-        "config/mmcore.cnd",
-        "config/relational.cnd",
-        "config/vdb.cnd",
         "config/TeiidSql.cnd",
         "config/komodo.cnd"
     ],

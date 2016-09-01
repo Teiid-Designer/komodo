@@ -23,6 +23,7 @@ package org.komodo.relational.teiid.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.relational.datasource.Datasource;
@@ -50,6 +51,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
@@ -420,7 +422,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        final List<Vdb> result = new ArrayList<Vdb>();
+        final List<Vdb> result = new ArrayList<>();
         for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns)) {
             final Vdb vdb = new VdbImpl(transaction, getRepository(), kobject.getAbsolutePath());
             result.add(vdb);
@@ -451,7 +453,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        final List<Translator> result = new ArrayList<Translator>();
+        final List<Translator> result = new ArrayList<>();
         for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Translator.TRANSLATOR, namePatterns)) {
             Translator translator = new TranslatorImpl(transaction, getRepository(), kobject.getAbsolutePath());
             result.add(translator);
@@ -469,8 +471,8 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        final List<Datasource> result = new ArrayList<Datasource>();
-        for (final KomodoObject kobject : super.getChildrenOfType(transaction, KomodoLexicon.DataSource.NODE_TYPE, namePatterns)) {
+        final List<Datasource> result = new ArrayList<>();
+        for (final KomodoObject kobject : super.getChildrenOfType(transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns)) {
             Datasource dataSource = new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
             result.add(dataSource);
         }
