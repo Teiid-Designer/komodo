@@ -43,6 +43,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
+import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.ArgCheck;
@@ -440,14 +441,33 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(teiid, "teiid"); //$NON-NLS-1$
 
-        //TODO: Complete this
-        
         DeployStatus status = new DeployStatus();
         TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
         
-        status.addProgressMessage("Starting deployment of driver "); //$NON-NLS-1$
-        status.addProgressMessage("Starting deployment of datasource "); //$NON-NLS-1$
-        status.addProgressMessage("Data source deployed to teiid"); //$NON-NLS-1$
+        try {
+            String dataSrcName = getName(uow);
+            status.addProgressMessage("Starting deployment of data source " + dataSrcName); //$NON-NLS-1$
+
+            String jndiName = getJndiName(uow);
+            String sourceType = getDriverName(uow);
+            Properties properties = getPropertiesForServerDeployment(uow, teiidInstance);
+
+            status.addProgressMessage("Attempting to deploy data source " + dataSrcName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            TeiidDataSource teiidDataSrc = teiidInstance.getOrCreateDataSource(dataSrcName,
+                                                                               jndiName,
+                                                                               sourceType,
+                                                                               properties);
+            if (teiidDataSrc == null) {
+                status.addErrorMessage("Data source " + dataSrcName + " failed to deploy"); //$NON-NLS-1$ //$NON-NLS-2$
+                return status;
+            }
+
+            status.addProgressMessage("Data source deployed " + dataSrcName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (Exception ex) {
+            status.addErrorMessage(ex);
+        }
+
         
         return status;
     }

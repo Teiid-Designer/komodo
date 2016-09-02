@@ -246,6 +246,12 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         Assert.assertEquals(1, _restApp.getDatasources(USER_NAME).length);
     }
 
+    protected void createDriver( String driverName ) throws Exception {
+        _restApp.createDriver(driverName);
+
+        Assert.assertEquals(1, _restApp.getDrivers().length);
+    }
+
     protected List<String> loadSampleSearches() throws Exception {
         List<String> searchNames = new ArrayList<>();
         Repository repository = _restApp.getDefaultRepository();

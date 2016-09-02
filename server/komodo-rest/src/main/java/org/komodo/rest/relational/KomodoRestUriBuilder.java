@@ -278,6 +278,15 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
+     * @return the URI to use when requesting a collection of Drivers in the workspace (never <code>null</code>)
+     */
+    public URI workspaceDriversUri() {
+        return UriBuilder.fromUri(this.baseUri)
+                                   .path(WORKSPACE_SEGMENT)
+                                   .path(DRIVERS_SEGMENT).build();
+    }
+
+    /**
      * @return the URI to use when requesting a collection of VDBs in the workspace (never <code>null</code>)
      */
     public URI workspaceVdbsUri() {

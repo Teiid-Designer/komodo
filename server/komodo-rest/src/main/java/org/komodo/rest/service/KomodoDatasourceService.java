@@ -181,8 +181,7 @@ public final class KomodoDatasourceService extends KomodoService {
             KomodoProperties properties = new KomodoProperties();
             for ( final Datasource dataSource : dataSources ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
-                    if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {
-                        RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
+                    if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {                        RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
                         entities.add(entity);
                         LOGGER.debug("getDatasources:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
                     } else {
@@ -586,16 +585,28 @@ public final class KomodoDatasourceService extends KomodoService {
     
     // Sets Datasource properties using the supplied RestDatasource object
     private void setProperties(final UnitOfWork uow, Datasource dataService, RestDataSource restDataSource) throws KException {
-//        // 'New' = requested RestDatasource properties
-//        String newDescription = restDataSource.getDescription();
-//        
-//        // 'Old' = current Datasource properties
-//        String oldDescription = dataService.getDescription(uow);
-//        
-//        // Description
-//        if ( !StringUtils.equals(newDescription, oldDescription) ) {
-//            dataService.setDescription( uow, newDescription );
-//        } 
+        // 'New' = requested RestDatasource properties
+        String newJndiName = restDataSource.getJndiName();
+        String newDriverName = restDataSource.getDriverName();
+        boolean newJdbc = restDataSource.isJdbc();
+        
+        // 'Old' = current Datasource properties
+        String oldJndiName = dataService.getJndiName(uow);
+        String oldDriverName = dataService.getDriverName(uow);
+        boolean oldJdbc = dataService.isJdbc(uow);
+        
+        // JndiName
+        if ( !StringUtils.equals(newJndiName, oldJndiName) ) {
+            dataService.setJndiName( uow, newJndiName );
+        } 
+        // DriverName
+        if ( !StringUtils.equals(newDriverName, oldDriverName) ) {
+            dataService.setDriverName( uow, newDriverName );
+        } 
+        // jdbc
+        if ( newJdbc != oldJdbc ) {
+            dataService.setJdbc( uow, newJdbc );
+        } 
     }
 
     /**

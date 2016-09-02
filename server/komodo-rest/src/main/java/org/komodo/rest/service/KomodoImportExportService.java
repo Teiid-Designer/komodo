@@ -374,6 +374,15 @@ public class KomodoImportExportService extends KomodoService {
 
             status.setSuccess(true);
             status.setName(storageRef.getRelativeRef());
+            
+            if(sta.getDocumentType().equals(DocumentType.JAR.toString())) {
+                String driverName = storageRef.getParameters().getProperty(StorageReference.DRIVER_NAME_KEY);
+                if(StringUtils.isBlank(driverName)) {
+                    driverName = StorageReference.DRIVER_NAME_DEFAULT;
+                }
+                status.setName(driverName);
+            }
+            
             status.setType(sta.getDocumentType().toString());
 
             return commit( uow, mediaTypes, status );

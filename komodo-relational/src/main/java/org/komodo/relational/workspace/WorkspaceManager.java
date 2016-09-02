@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.workspace;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.driver.Driver;
+import org.komodo.relational.driver.internal.DriverImpl;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.dsource.DatasourceImporter;
@@ -347,7 +349,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the driver object being created (can be <code>null</code>)
-     * @param sourceName
+     * @param driverName
      *        the name of the driver to create (cannot be empty)
      * @return the Driver object (never <code>null</code>)
      * @throws KException
@@ -735,6 +737,36 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
         return result;
     }
+    
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return all {@link Driver}s in the workspace
+     * @throws KException
+     *         if an error occurs
+     */
+    public Driver[] findDrivers( UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final String[] paths = findByType(transaction, KomodoLexicon.Driver.NODE_TYPE);
+        Driver[] result = null;
+
+        if (paths.length == 0) {
+            result = Driver.NO_DRIVERS;
+        } else {
+            result = new Driver[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new DriverImpl(transaction, getRepository(), path);
+            }
+        }
+
+        return result;
+    }
 
     /**
      * @param transaction
@@ -920,12 +952,30 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                 importer.importDdl(transaction, stream, parent, importOptions, importMessages);
             }
             else if (DocumentType.ZIP.equals(storageRef.getDocumentType())) {
-                    DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
-                    conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
+                DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
+                conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.JAR.equals(storageRef.getDocumentType())) {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                final byte[] buf = new byte[8192];
+                int length;
+
+                while ((length = stream.read(buf, 0, buf.length)) >= 0) {
+                    bos.write(buf, 0, length);
+                }
+
+                byte[] content = bos.toByteArray();
+                
+                String driverName = storageRef.getParameters().getProperty(StorageReference.DRIVER_NAME_KEY);
+                if(StringUtils.isBlank(driverName)) {
+                    driverName = StorageReference.DRIVER_NAME_DEFAULT;
+                }
+                Driver driver = RelationalModelFactory.createDriver(transaction, getRepository(), parent.getAbsolutePath(), driverName);
+                driver.setContent(transaction, content);
             }
             else {
-                    throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
-                                                            storageRef.getDocumentType()));
+                throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
+                                                        storageRef.getDocumentType()));
             }
 
             return importMessages;

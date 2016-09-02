@@ -27,6 +27,8 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.driver.Driver;
+import org.komodo.relational.driver.internal.DriverImpl;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
@@ -74,7 +76,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
 
     /**
-     * @param uow
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param srcTeiid
      *        the source teiid object
@@ -480,5 +482,49 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         }
 
         return result.toArray(new Datasource[result.size()]);
+    }
+
+    @Override
+    public Datasource getDataSource(UnitOfWork transaction, String name) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        if (hasChild(transaction, name, KomodoLexicon.DataSource.NODE_TYPE)) {
+            KomodoObject kobject = getChild(transaction, name, KomodoLexicon.DataSource.NODE_TYPE);
+            return new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
+        }
+
+        return null;
+    }
+
+    @Override
+    public Driver[] getDrivers(final UnitOfWork transaction, final String... namePatterns) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        final List<Driver> result = new ArrayList<Driver>();
+        for (final KomodoObject kobject : super.getChildrenOfType(transaction, KomodoLexicon.Driver.NODE_TYPE)) {
+            Driver driver = new DriverImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(driver);
+        }
+
+        if (result.isEmpty()) {
+            return new Driver[0];
+        }
+
+        return result.toArray(new Driver[result.size()]);
+    }
+
+    @Override
+    public Driver getDriver(UnitOfWork transaction, String name) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        if (hasChild(transaction, name, KomodoLexicon.Driver.NODE_TYPE)) {
+            KomodoObject kobject = getChild(transaction, name, KomodoLexicon.Driver.NODE_TYPE);
+            return new DriverImpl(transaction, getRepository(), kobject.getAbsolutePath());
+        }
+
+        return null;
     }
 }
