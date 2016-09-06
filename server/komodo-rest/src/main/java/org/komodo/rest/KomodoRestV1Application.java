@@ -46,8 +46,8 @@ import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.driver.Driver;
 import org.komodo.relational.importer.vdb.VdbImporter;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
@@ -687,22 +687,33 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         SynchronousCallback callback = new SynchronousCallback();
         UnitOfWork uow = repository.createTransaction(user, "Create Dataservice", false, callback); //$NON-NLS-1$
 
+        KomodoObject wkspace = repository.komodoWorkspace(uow);
         WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
-        Dataservice dataservice = wsMgr.createDataservice(uow, null, dataserviceName);
 
         VdbImporter importer = new VdbImporter(repository);
         ImportMessages importMessages = new ImportMessages();
         ImportOptions importOptions = new ImportOptions();
         importOptions.setOption(OptionKeys.HANDLE_EXISTING, ExistingNodeOptions.RETURN);
 
-        InputStream portfolioSample = KomodoUtilService.getVdbSample(KomodoUtilService.SAMPLES[1]);
-        InputStream nwindSample = KomodoUtilService.getVdbSample(KomodoUtilService.SAMPLES[4]);
-        
-        importer.importVdb(uow, portfolioSample, dataservice,
-                                               importOptions, importMessages);
+        String portfolioSample = KomodoUtilService.SAMPLES[1];
+        String nwSample = KomodoUtilService.SAMPLES[4];
+        InputStream portSampleStream = KomodoUtilService.getVdbSample(portfolioSample);
+        InputStream nwindSampleStream = KomodoUtilService.getVdbSample(nwSample);
 
-        importer.importVdb(uow, nwindSample, dataservice,
-                                               importOptions, importMessages);
+        importer.importVdb(uow, portSampleStream, wkspace, importOptions, importMessages);
+        importer.importVdb(uow, nwindSampleStream, wkspace, importOptions, importMessages);
+
+        KomodoObject pfSampleObj = wkspace.getChild(uow, "Portfolio");
+        Vdb pfVdb = wsMgr.resolve(uow, pfSampleObj, Vdb.class);
+
+        KomodoObject nwSampleObj = wkspace.getChild(uow, "Northwind");
+        Vdb nwVdb = wsMgr.resolve(uow, nwSampleObj, Vdb.class);
+
+        Dataservice dataservice = wsMgr.createDataservice(uow, wkspace, dataserviceName);
+        dataservice.setDescription(uow, "This is my dataservice");
+
+        dataservice.addVdb(uow, pfVdb);
+        dataservice.setServiceVdb(uow, nwVdb);
 
         uow.commit();
         callback.await(3, TimeUnit.MINUTES);
@@ -772,9 +783,9 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         Repository repository = this.kengine.getDefaultRepository();
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = repository.createTransaction("Create Driver", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction(Repository.SYSTEM_USER, "Create Driver", false, callback); //$NON-NLS-1$
 
-        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository);
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
         wsMgr.createDriver(uow, null, driverName);
 
         uow.commit();
@@ -787,9 +798,8 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      */
     public Driver[] getDrivers() throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
-        WorkspaceManager mgr = WorkspaceManager.getInstance(repository);
-
-        UnitOfWork uow = repository.createTransaction("Find drivers", true, null); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction(Repository.SYSTEM_USER, "Find drivers", true, null); //$NON-NLS-1$
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
         Driver[] drivers = mgr.findDrivers(uow);
         uow.commit();
 

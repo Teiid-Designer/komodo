@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -39,6 +39,7 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
@@ -53,6 +54,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.StringUtils;
 
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
@@ -210,7 +212,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setStorageType("file");
         storageAttr.setDocumentType(DocumentType.ZIP);
 
-        String dsName = "myService";
+        String dsName = "MyDataService";
         InputStream sampleDsStream = TestUtilities.sampleDataserviceExample();
 
         byte[] sampleBytes = TestUtilities.streamToBytes(sampleDsStream);
@@ -237,20 +239,79 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         assertTrue(workspace.hasChild(uow, dsName));
         KomodoObject dataservice = workspace.getChild(uow, dsName);
-        assertTrue(dataservice.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
-
-        WorkspaceManager mgr = WorkspaceManager.getInstance(getRestApp().getDefaultRepository(), uow);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
         Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
         assertNotNull(ds);
 
-        String vdbName = ds.getServiceVdbName(uow);
-        assertEquals(TestUtilities.TWEET_EXAMPLE_VDB_NAME, vdbName);
+        //
+        // Due to a hiccup, the portfolio vdb file entry in the dataservice zip is actually capitalized
+        //
+        Vdb[] vdbs = ds.getVdbs(uow, StringUtils.toCamelCase(TestUtilities.PORTFOLIO_VDB_FILE));
+        assertTrue(vdbs.length == 1);
+
+        String vdbName = ds.getServiceVdb(uow).getVdbName( uow );
+        assertEquals("DynamicProducts", vdbName);
+    }
+
+    @Test
+    public void shouldImportUSDataservice() throws Exception {
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
+                                                      getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.ZIP);
+
+        String dsName = "UsStatesService";
+        InputStream usDsStream = TestUtilities.usStatesDataserviceExample();
+
+        byte[] usBytes = TestUtilities.streamToBytes(usDsStream);
+        String content = Base64.getEncoder().encodeToString(usBytes);
+        storageAttr.setContent(content);
+
+        assertFalse(workspace.hasChild(uow, dsName));
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        assertTrue(workspace.hasChild(uow, dsName));
+        KomodoObject dataservice = workspace.getChild(uow, dsName);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
+        assertNotNull(ds);
+
+        Vdb vdb = ds.getServiceVdb(uow);
+        assertNotNull(vdb);
+
+        String vdbName = vdb.getVdbName( uow );
+        assertEquals("usstates", vdbName);
     }
 
     @Test
     public void shouldExportDataservice() throws Exception {
         loadVdbs();
-        String dsName = "myDataService";
+        String dsName = "MyDataService";
 
         getRestApp().createDataservice(dsName, true, USER_NAME);
 

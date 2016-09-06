@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataservice name="UsStatesService">
+  
+  <service-vdb-file 
+    path="usstates-vdb.xml"
+    publish="ifMissing"
+    vdbName="usstates"
+    vdbVersion="1" />
+
+    <connections>
+        <connection-file
+            path="connections/MySqlPool-connection.xml"
+            publish="ifMissing"
+            jndiName="java:/MySqlDS" />
+    </connections>
+
+    <drivers>
+        <driver-file path="drivers/mysql-connector-java-5.1.39-bin.jar" />
+    </drivers>
+
+</dataservice>

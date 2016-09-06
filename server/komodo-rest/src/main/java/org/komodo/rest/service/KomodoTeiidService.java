@@ -46,7 +46,7 @@ import org.komodo.core.KEngine;
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.driver.Driver;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Translator;
@@ -657,6 +657,10 @@ public class KomodoTeiidService extends KomodoService {
                                    @ApiParam(value = "Id of the data source to be fetched", required = true)
                                    final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         
         UnitOfWork uow = null;
@@ -664,7 +668,7 @@ public class KomodoTeiidService extends KomodoService {
             CachedTeiid cachedTeiid = importContent();
 
             // find DataSource
-            uow = createTransaction("getDataSource-" + datasourceName, true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDataSource-" + datasourceName, true); //$NON-NLS-1$
             Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
             if (dataSource == null)
                 return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
@@ -709,6 +713,10 @@ public class KomodoTeiidService extends KomodoService {
     public Response getDrivers(final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
@@ -716,7 +724,7 @@ public class KomodoTeiidService extends KomodoService {
             CachedTeiid cachedTeiid = importContent();
 
             // find drivers
-            uow = createTransaction("getDrivers", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDrivers", true); //$NON-NLS-1$
 
             Driver[] drivers = cachedTeiid.getDrivers(uow);
             LOGGER.debug("getDrivers:found '{0}' Drivers", drivers.length); //$NON-NLS-1$

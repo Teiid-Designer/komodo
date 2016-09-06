@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -23,12 +23,13 @@ package org.komodo.relational.importer.dsource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
 import org.junit.Test;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.relational.AbstractImporterTest;
@@ -39,10 +40,14 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.test.utils.TestUtilities;
+import org.teiid.modeshape.sequencer.dataservice.Connection;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
+@SuppressWarnings( { "javadoc",
+                     "nls" } )
 public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
 
-    private static final String MYSQL_USSTATES_TDS = "mysql-usstates.tds";
+    private static final String MYSQL_USSTATES_TDS = "mysql-usstates-connection.xml";
 
     private static final String TDS_NAME = "MySqlPool";
 
@@ -70,6 +75,10 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
         // cache current callback as a new one will be created when the commit occurs
         final SynchronousCallback testCallback = this.callback;
 
+        if (! importMessages.getErrorMessages().isEmpty()) {
+            fail("Import has error messages prior to commit: " + NEW_LINE + importMessages.errorMessagesToString());
+        }
+
         // Commit the transaction and handle any import exceptions
         commit(expectedState);
 
@@ -84,7 +93,7 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
     }
 
     /**
-     * Test Error condition - bad TDS file name supplied
+     * Test Error condition - bad CONNECTION file name supplied
      * Expected Outcome - Error message saying that the supplied file is not found
      */
     @Test
@@ -105,13 +114,13 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
     }
 
     /**
-     * Test Error condition - unreadable TDS file supplied.
+     * Test Error condition - unreadable CONNECTION file supplied.
      * Expected Outcome - Error Message saying that the supplied file is not readable
      */
     @Test
     public void testUnreadableTDSFile() throws Exception {
         InputStream tdsStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  TDS_DIRECTORY, MYSQL_USSTATES_TDS);
+                                                                  CONNECTION_DIRECTORY, MYSQL_USSTATES_TDS);
 
         File tmpFile = File.createTempFile("unreadableFile", ".tds");
         Files.copy(tdsStream, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -144,8 +153,8 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
     }
 
     /**
-     * Test Error condition - empty TDS string supplied
-     * Expected Outcome - Error Message saying that the supplied TDS string is empty
+     * Test Error condition - empty CONNECTION string supplied
+     * Expected Outcome - Error Message saying that the supplied CONNECTION string is empty
      */
     @Test
     public void testEmptyTDSString() throws Exception {
@@ -174,22 +183,22 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
 
     // Verifies a MySQL data source node
     private void verifyMySQLUSStatesTDS(KomodoObject dsNode) throws Exception {
-        verifyProperty(dsNode, KomodoLexicon.DataSource.DRIVER_NAME, MYSQL_DRIVER_NAME);
-        verifyProperty(dsNode, KomodoLexicon.DataSource.JNDI_NAME, "java:/MySqlDS");
+        verifyProperty(dsNode, DataVirtLexicon.Connection.DRIVER_NAME, MYSQL_DRIVER_NAME);
+        verifyProperty(dsNode, DataVirtLexicon.Connection.JNDI_NAME, "java:/MySqlDS");
         verifyProperty(dsNode, "connection-url", "jdbc:mysql://db4free.net:3306/usstates");
         verifyProperty(dsNode, "user-name", "komodo");
         verifyProperty(dsNode, "password", "XUMz4vBKuA2v");
-        verifyProperty(dsNode, KomodoLexicon.DataSource.JDBC, "true");
+        verifyProperty(dsNode, DataVirtLexicon.Connection.TYPE, Connection.Type.JDBC.name());
     }
 
     /**
-     * Test import of mysql-usstates.tds
+     * Test import of mysql-usstates-connection.xml
      * Expected outcome - successful creation
      */
     @Test
     public void testTdsImport_MySQLUSStates() throws Exception {
         InputStream tdsStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  TDS_DIRECTORY, MYSQL_USSTATES_TDS);
+                                                                  CONNECTION_DIRECTORY, MYSQL_USSTATES_TDS);
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -213,7 +222,7 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
     }
 
     /**
-     * Imports MySQL USStates TDS, then re-imports.  import of TDS into a parent
+     * Imports MySQL USStates CONNECTION, then re-imports.  import of CONNECTION into a parent
      * does a full replace of the existing content...
      * Expected outcome - successful creation with replacement of first import content
      */

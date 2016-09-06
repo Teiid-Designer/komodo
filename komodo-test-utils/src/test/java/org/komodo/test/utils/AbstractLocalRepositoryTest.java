@@ -27,11 +27,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.Node;
 import javax.jcr.PropertyIterator;
 import javax.jcr.Session;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -42,7 +45,6 @@ import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
@@ -72,7 +74,7 @@ import org.komodo.utils.KLog;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest implements StringConstants {
+public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest {
 
     private static final String TEST_REPOSITORY_CONFIG = "test-local-repository-in-memory-config.json";
 
@@ -234,8 +236,13 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         currTx.commit();
 
         assertThat( currCallback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
-        assertThat( currTx.getError(), is( nullValue() ) );
-        assertThat( currTx.getState(), is( expectedState ) );
+
+        if (expectedState == UnitOfWork.State.ERROR) {
+            assertThat( currTx.getState(), is( expectedState ) );
+        } else {
+            assertThat( currTx.getError(), is( nullValue() ) );
+            assertThat( currTx.getState(), is( expectedState ) );
+        }
 
         if ( currCallback instanceof TestTransactionListener ) {
             final boolean respond = ( UnitOfWork.State.COMMITTED == expectedState );

@@ -1,0 +1,7 @@
+ <resource-connection name="portfolioConnection">
+     <jndi-name>java:/jndiName</jndi-name>
+     <driver-name>portfolio-driver.jar</driver-name>
+     <property name="prop2">prop2Value</property>
+     <property name="prop1">prop1Value</property>
+     <driver-class>portfolioDriverClassname</driver-class>
+ </resource-connection>

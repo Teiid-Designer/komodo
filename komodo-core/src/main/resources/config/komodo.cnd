@@ -28,6 +28,7 @@
 <mix='http://www.jcp.org/jcr/mix/1.0'>
 <nt='http://www.jcp.org/jcr/nt/1.0'>
 <tko='http://www.teiid.org/komodo/1.0'>
+<dv = "http://www.jboss.org/dv/1.0">
 <tsql='http://www.teiid.org/sql/1.0'>
 <vdb = "http://www.metamatrix.com/metamodels/VirtualDatabase">
 <mmcore = "http://www.metamatrix.com/metamodels/Core">
@@ -52,6 +53,14 @@
  */
 [tko:libraryComponent] > mix:created, mix:versionable, mix:lockable mixin
   - tko:description (string)
+
+/*
+ * An abstract node type that does not allow same named siblings. Otherwise is identical to nt:unstructured.
+ */
+[tko:uniqueChildren] orderable abstract
+  - * (undefined) multiple
+  - * (undefined)
+  + * (nt:base) = tko:uniqueChildren version
 
 /*
  * The Komodo workspace keeps track of the Teiid servers, Komodo repositories, Teiid 
@@ -120,28 +129,14 @@
 [tko:cachedTeiid] > tko:teiidArchetype
  + * (vdb:virtualDatabase) copy
  + * (vdb:translator) copy
- + * (tko:dataSource) copy
- + * (tko:driver) copy
+ + * (dv:connection) copy
  - tko:timestamp (long)
 
 /*
  * The data source grouping node used by both the workspace and the library. Child nodes are data source definitions.
  */
 [tko:dataSources] > nt:unstructured
-  + * (tko:dataSource) copy
-
-/*
- * A data source either known by the workspace or known by the library.
- */
-[tko:dataSource] > nt:unstructured, tko:workspaceItem, tko:libraryComponent
-  - tko:jdbc (boolean) = 'true' mandatory autocreated
-  - tko:preview (boolean)
-  - tko:profileName (string)
-  - tko:jndiName (string)
-  - tko:driverName (string)
-  - tko:className (string)
-
-[tko:driver] > nt:file, tko:workspaceItem, tko:libraryComponent
+  + * (dv:connection) copy
 
 /*
  * The Komodo library identifies the Teiid artifacts intended to be reused by multiple VDBs, workspaces, or Komodo repositories.
@@ -162,8 +157,8 @@
 [tko:folder] > nt:unstructured
   + * (tko:folder) copy
   + * (tko:vdb) copy
-  + * (tko:dataSource) copy
-  + * (tko:dataService) copy
+  + * (dv:connection) copy
+  + * (dv:dataService) copy
   + * (tko:schema) copy
 
 /*
@@ -194,17 +189,7 @@
  * The data service grouping node used by the workspace. Child nodes are data services.
  */
 [tko:dataServices] > nt:unstructured
-  + * (tko:dataService) copy
-
-/*
- * A data service known by the workspace.
- */
-[tko:dataService] > nt:unstructured, mode:hashed, tko:libraryComponent
-  - vdb:description (string)
-  - tko:serviceVdb (string)
-  + * (tko:vdb) copy
-  + * (tko:dataSource) copy
-  + * (tko:driver) copy
+  + * (dv:dataService) copy
  
 /*
  * The VDB imports grouping node used by the library. Child nodes represent Import VDB definitions.

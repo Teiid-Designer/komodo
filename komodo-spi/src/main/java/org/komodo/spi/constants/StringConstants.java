@@ -367,7 +367,7 @@ public interface StringConstants {
   /**
    * XML Suffix
    */
-  String XML_SUFFIX = DOT + XML; //$NON-NLS-1$
+  String XML_SUFFIX = DOT + XML;
 
   /**
    * Vdb Deployment Suffix
@@ -375,18 +375,18 @@ public interface StringConstants {
   String VDB_DEPLOYMENT_SUFFIX = "-vdb" + XML_SUFFIX; //$NON-NLS-1$
 
   /**
-   * Datasource Suffix
+   * Connection Suffix
    */
-  String DS_SUFFIX = "tds"; //$NON-NLS-1$
+  String CONNECTION_SUFFIX = "-connection.xml"; //$NON-NLS-1$
 
   /**
    * jboss temp directory
    */
-  String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir";
+  String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir"; //$NON-NLS-1$
 
   /**
    * Java temp directory
    */
-  String JAVA_IO_TMPDIR = "java.io.tmpdir";
+  String JAVA_IO_TMPDIR = "java.io.tmpdir"; //$NON-NLS-1$
 }
 

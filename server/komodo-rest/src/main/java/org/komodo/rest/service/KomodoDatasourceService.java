@@ -24,6 +24,7 @@ package org.komodo.rest.service;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -38,8 +39,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+
 import org.komodo.core.KEngine;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
@@ -57,6 +58,8 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -121,7 +124,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 dataSources = getWorkspaceManager(uow).findDatasources( uow );
                 LOGGER.debug( "getDatasources:found '{0}' Datasources", dataSources.length ); //$NON-NLS-1$
             } else {
-                final String[] datasourcePaths = getWorkspaceManager(uow).findByType( uow, KomodoLexicon.DataSource.NODE_TYPE, null, searchPattern, false );
+                final String[] datasourcePaths = getWorkspaceManager(uow).findByType( uow, DataVirtLexicon.Connection.NODE_TYPE, null, searchPattern, false );
 
                 if ( datasourcePaths.length == 0 ) {
                     dataSources = Datasource.NO_DATASOURCES;
@@ -207,7 +210,7 @@ public final class KomodoDatasourceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCES_ERROR);
         }
     }
-    
+
     /**
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -264,7 +267,7 @@ public final class KomodoDatasourceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCE_ERROR, datasourceName);
         }
     }
-    
+
     /**
      * Create a new DataSource in the komodo repository
      * @param headers
@@ -331,7 +334,7 @@ public final class KomodoDatasourceService extends KomodoService {
 
         try {
             uow = createTransaction(principal, "createDatasource", false ); //$NON-NLS-1$
-            
+
             // Error if the repo already contains a datasource with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, datasourceName ) ) {
                 String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS);
@@ -339,10 +342,10 @@ public final class KomodoDatasourceService extends KomodoService {
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
-            
+
             // create new Datasource
             return doAddDatasource( uow, uriInfo.getBaseUri(), mediaTypes, restDatasource );
-            
+
         } catch (final Exception e) {
             if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
                 uow.rollback();
@@ -355,7 +358,7 @@ public final class KomodoDatasourceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, datasourceName);
         }
     }
-    
+
     /**
      * Clone a DataSource in the komodo repository
      * @param headers
@@ -420,7 +423,7 @@ public final class KomodoDatasourceService extends KomodoService {
 
         try {
             uow = createTransaction(principal, "cloneDatasource", false ); //$NON-NLS-1$
-            
+
             // Error if the repo already contains a datasource with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, newDatasourceName ) ) {
                 String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS);
@@ -428,10 +431,10 @@ public final class KomodoDatasourceService extends KomodoService {
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
-            
+
             // create new Datasource
             // must be an update
-            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
             final Datasource oldDatasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
             final RestDataSource oldEntity = entityFactory.create(oldDatasource, uriInfo.getBaseUri(), uow );
             
@@ -454,7 +457,7 @@ public final class KomodoDatasourceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_DATASOURCE_ERROR);
         }
     }
-    
+
     /**
      * Update a Datasource in the komodo repository
      * @param headers
@@ -522,7 +525,7 @@ public final class KomodoDatasourceService extends KomodoService {
             }
 
             // must be an update
-            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
             final Datasource datasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
 
             // Transfers the properties from the rest object to the created komodo service.
@@ -582,7 +585,7 @@ public final class KomodoDatasourceService extends KomodoService {
             throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, datasourceName ), e );
         }
     }
-    
+
     // Sets Datasource properties using the supplied RestDatasource object
     private void setProperties(final UnitOfWork uow, Datasource dataService, RestDataSource restDataSource) throws KException {
         // 'New' = requested RestDatasource properties
@@ -606,7 +609,7 @@ public final class KomodoDatasourceService extends KomodoService {
         // jdbc
         if ( newJdbc != oldJdbc ) {
             dataService.setJdbc( uow, newJdbc );
-        } 
+        }
     }
 
     /**
@@ -643,8 +646,8 @@ public final class KomodoDatasourceService extends KomodoService {
             uow = createTransaction(principal, "removeDatasourceFromWorkspace", false); //$NON-NLS-1$
 
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repo, uow );
-            KomodoObject datasource = mgr.getChild(uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
-            
+            KomodoObject datasource = mgr.getChild(uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE);
+
             if (datasource == null)
                 return Response.noContent().build();
 
@@ -666,5 +669,5 @@ public final class KomodoDatasourceService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_DELETE_DATASOURCE_ERROR);
         }
     }
-    
+
 }

@@ -28,11 +28,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.ws.rs.core.UriBuilder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -94,7 +97,6 @@ public final class RestDataSourceTest implements V1Constants {
         this.dataSource.setId(NAME);
         this.dataSource.setDriverName(DRIVER_NAME);
         this.dataSource.setJdbc(true);
-        this.dataSource.setPreview(true);
         this.dataSource.setJndiName(JNDI_NAME);
     }
 
@@ -105,7 +107,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
         assertThat( this.dataSource, is( thatDataSource ) );
@@ -125,7 +126,6 @@ public final class RestDataSourceTest implements V1Constants {
         assertThat( empty.getDriverName(), is( nullValue() ) );
         assertThat( empty.getJndiName(), is( nullValue() ) );
         assertThat( empty.isJdbc(), is( false ) );
-        assertThat( empty.isPreview(), is( false ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
         assertThat( empty.getLinks().size(), is( 0 ) );
     }
@@ -137,7 +137,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setProperties( this.dataSource.getProperties() );
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
@@ -151,7 +150,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setProperties( this.dataSource.getProperties() );
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
@@ -166,7 +164,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
         List<RestProperty> props = new ArrayList<>();
@@ -185,7 +182,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName() + "blah");
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setProperties( this.dataSource.getProperties() );
         thatDataSource.setLinks( this.dataSource.getLinks() );
 

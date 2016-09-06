@@ -201,6 +201,7 @@ public class RepositoryTools implements StringConstants {
     	StringBuilder sb = new StringBuilder();
         final Type type = property.getDescriptor( transaction ).getType();
         final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
+        final boolean propIsBinary = ( Type.BINARY == type );
 
     	if (property.isMultiple(transaction)) {
     		sb.append('[');
@@ -215,6 +216,9 @@ public class RepositoryTools implements StringConstants {
                         value = path;
                     }
                 }
+
+                if (propIsBinary)
+                    value = "*** binary value not shown ***";
 
     			sb.append(value);
     			if ((i + 1) < values.length)
@@ -231,6 +235,9 @@ public class RepositoryTools implements StringConstants {
                     value = path;
                 }
             }
+
+            if (propIsBinary)
+                value = "*** binary value not shown ***";
 
             sb.append(value);
     	}
@@ -289,17 +296,17 @@ public class RepositoryTools implements StringConstants {
             String indent = createIndent(object.getAbsolutePath());
             buffer.append(indent + object.getName(transaction) + NEW_LINE);
 
-            String[] propertyNames = object.getPropertyNames(transaction);
-
-            for (String propertyName : propertyNames) {
-                Property property = object.getProperty(transaction, propertyName);
-                buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
-            }
-
             //
             // Avoid relational filters of object's children
             //
             ObjectImpl bareObject = new ObjectImpl(object.getRepository(), object.getAbsolutePath(), object.getIndex());
+            String[] propertyNames = bareObject.getPropertyNames(transaction);
+
+            for (String propertyName : propertyNames) {
+                Property property = bareObject.getProperty(transaction, propertyName);
+                buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
+            }
+
             KomodoObject[] children = bareObject.getChildren(transaction);
             for (int i = 0; i < children.length; ++i)
                 children[i].accept(transaction, this);

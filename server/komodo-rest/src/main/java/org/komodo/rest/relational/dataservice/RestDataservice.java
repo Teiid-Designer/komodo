@@ -23,8 +23,10 @@ package org.komodo.rest.relational.dataservice;
 
 import java.net.URI;
 import java.util.Properties;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
@@ -90,18 +92,21 @@ public final class RestDataservice extends RestBasicEntity {
         Properties settings = getUriBuilder().createSettings(SettingNames.DATA_SERVICE_NAME, getId());
         URI parentUri = getUriBuilder().dataserviceParentUri(dataService, uow);
         getUriBuilder().addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, parentUri);
-        
-        setServiceVdbName(dataService.getServiceVdbName(uow));
-        setServiceVdbVersion(dataService.getServiceVdbVersion(uow));
-        setServiceViewModel(dataService.getServiceViewModelName(uow));
-        setServiceViewName(dataService.getServiceViewName(uow));
-        
+
+        Vdb serviceVdb = dataService.getServiceVdb(uow);
+        if (serviceVdb != null) {
+            setServiceVdbName(serviceVdb.getVdbName( uow ));
+            setServiceVdbVersion(Integer.toString(serviceVdb.getVersion( uow )));
+            setServiceViewModel(dataService.getServiceViewModelName(uow));
+            setServiceViewName(dataService.getServiceViewName(uow));
+        }
+
         addLink(new RestLink(LinkType.SELF, getUriBuilder().dataserviceUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().dataserviceUri(LinkType.PARENT, settings)));
         createChildLink();
         addLink(new RestLink(LinkType.VDBS, getUriBuilder().dataserviceUri(LinkType.VDBS, settings)));
     }
-    
+
     /**
      * @return the VDB description (can be empty)
      */
@@ -156,7 +161,7 @@ public final class RestDataservice extends RestBasicEntity {
     }
 
     /**
-     * @param serviceVdbName the service vdb name to set 
+     * @param serviceVdbName the service vdb name to set
      */
     public void setServiceVdbName(String serviceVdbName) {
         tuples.put(DATASERVICE_VDB_NAME_LABEL, serviceVdbName);
@@ -165,15 +170,15 @@ public final class RestDataservice extends RestBasicEntity {
     /**
      * @return the VDB description (can be empty)
      */
-    public int getServiceVdbVersion() {
+    public String getServiceVdbVersion() {
         Object version = tuples.get(DATASERVICE_VDB_VERSION_LABEL);
-        return version != null ? (int)version : 1;
+        return version != null ? version.toString() : "1"; //$NON-NLS-1$
     }
 
     /**
      * @param version the version to set
      */
-    public void setServiceVdbVersion(int version) {
+    public void setServiceVdbVersion( final String version) {
         tuples.put(DATASERVICE_VDB_VERSION_LABEL, version);
     }
 

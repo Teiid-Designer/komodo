@@ -33,8 +33,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
-import org.komodo.core.KomodoLexicon;
-import org.komodo.relational.driver.Driver;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
@@ -47,6 +46,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -91,6 +91,10 @@ public final class KomodoDriverService extends KomodoService {
     public Response getDrivers( final @Context HttpHeaders headers,
                                 final @Context UriInfo uriInfo ) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
@@ -98,14 +102,15 @@ public final class KomodoDriverService extends KomodoService {
             final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParamKeys.PATTERN );
 
             // find Drivers
-            uow = createTransaction( "getDrivers", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDrivers", true ); //$NON-NLS-1$
             Driver[] drivers = null;
+            WorkspaceManager wsMgr = getWorkspaceManager(uow);
 
             if ( StringUtils.isBlank( searchPattern ) ) {
-                drivers = this.wsMgr.findDrivers( uow );
+                drivers = wsMgr.findDrivers( uow );
                 LOGGER.debug( "getDrivers:found '{0}' Drivers", drivers.length ); //$NON-NLS-1$
             } else {
-                final String[] driverPaths = this.wsMgr.findByType( uow, KomodoLexicon.Driver.NODE_TYPE, null, searchPattern, false );
+                final String[] driverPaths = wsMgr.findByType( uow, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE, null, searchPattern, false );
 
                 if ( driverPaths.length == 0 ) {
                     drivers = Driver.NO_DRIVERS;
@@ -114,7 +119,7 @@ public final class KomodoDriverService extends KomodoService {
                     int i = 0;
 
                     for ( final String path : driverPaths ) {
-                        drivers[ i++ ] = this.wsMgr.resolve( uow, new ObjectImpl( this.wsMgr.getRepository(), path, 0 ), Driver.class );
+                        drivers[ i++ ] = wsMgr.resolve( uow, new ObjectImpl( wsMgr.getRepository(), path, 0 ), Driver.class );
                     }
 
                     LOGGER.debug( "getDrivers:found '{0}' Drivers using pattern '{1}'", drivers.length, searchPattern ); //$NON-NLS-1$

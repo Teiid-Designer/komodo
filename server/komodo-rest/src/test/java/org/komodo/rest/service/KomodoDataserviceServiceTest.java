@@ -106,7 +106,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
-        //System.out.println("Response:\n" + entity);
+//        System.out.println("Response:\n" + entity);
 
         RestDataservice dataservice = KomodoJsonMarshaller.unmarshall(entity, RestDataservice.class);
         assertNotNull(dataservice);

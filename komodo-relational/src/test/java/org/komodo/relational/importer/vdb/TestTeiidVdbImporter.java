@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -292,7 +294,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @UseConnectorMetadata=cached
          */
         verify(tweetNode.getParent(getTransaction()), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-        verifyMixinType(tweetNode, "mix:referenceable");
         verifyProperty(tweetNode, VdbLexicon.Vdb.NAME, "twitter");
         verifyProperty(tweetNode, VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
 
@@ -613,7 +614,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         KomodoObject myVdbExample = verify(allElementsNode.getParent(getTransaction()),
                                                                     TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME,
                                                                     VdbLexicon.Vdb.VIRTUAL_DATABASE,
-                                                                    "mix:referenceable");
+                                                                    null);
         assertEquals(allElementsNode, myVdbExample);
         verifyProperty(myVdbExample, VdbLexicon.Vdb.NAME, "myVDB");
         verifyProperty(myVdbExample, VdbLexicon.Vdb.DESCRIPTION, "vdb description");
@@ -1387,7 +1388,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         os.setCustomWhereClause(whereSql);
 
         List<KomodoObject> results = os.searchObjects(getTransaction());
-        List<String> paths = new ArrayList<String>(results.size());
+        List<String> paths = new ArrayList<>(results.size());
         for (KomodoObject ko : results)
             paths.add(ko.getAbsolutePath());
         Collections.sort(paths);

@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
@@ -41,6 +41,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A shell command to export a Datasource from Workspace context.
@@ -97,7 +98,8 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
             // Determine if the Datasource exists
             if ( workspaceContext
-                 && !getWorkspaceManager(getTransaction()).hasChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
+                 && !getWorkspaceManager(getTransaction()).hasChild( getTransaction(), datasourceName, DataVirtLexicon.Connection.NODE_TYPE ) ) {
+
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, datasourceName ), null );
             }
 
@@ -152,7 +154,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
         KomodoObject kobject = null;
 
         if ( workspaceContext ) {
-            kobject = getWorkspaceManager(getTransaction()).getChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+            kobject = getWorkspaceManager(getTransaction()).getChild( getTransaction(), datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
         } else {
             kobject = getContext();
         }

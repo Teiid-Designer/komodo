@@ -1,17 +1,23 @@
 /*
- * ModeShape (http://www.modeshape.org)
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
  
 //------------------------------------------------------------------------------
@@ -28,7 +34,7 @@
 // N O D E T Y P E S
 //------------------------------------------------------------------------------
 
-[vdb:virtualDatabase] > nt:unstructured, mode:hashed
+[vdb:virtualDatabase] > nt:unstructured, mode:hashed, mix:referenceable
  - vdb:name (string)
  - vdb:description (string) 
  - vdb:version (long) = '1' autocreated
@@ -40,6 +46,7 @@
  + vdb:dataRoles (vdb:dataRoles) copy
  + vdb:entries (vdb:entries) copy
  + vdb:importVdbs (vdb:importVdbs) copy
+ + vdb:resources (vdb:resources) copy // udf jars or other files contained in the VDB /lib directory
 
 [vdb:abstractModel] mixin
  - vdb:description (string)
@@ -58,6 +65,7 @@
  - mmcore:modelType (string) = 'PHYSICAL' autocreated < 'PHYSICAL','VIRTUAL'
  - vdb:metadataType (string) = 'DDL' autocreated
  - vdb:modelDefinition (string)
+ - vdb:ddlFileEntryPath (string) // if DDL-FILE metadata type, the path in the VDB of the DDL file
 
 [vdb:sources] > nt:unstructured
  + vdb:source (vdb:source) = vdb:source copy sns
@@ -72,7 +80,7 @@
 
 [vdb:marker] > nt:unstructured
  - vdb:severity (string) = 'WARNING' autocreated < 'WARNING','ERROR','INFO'
- - vdb:path (string) mandatory
+ - vdb:path (string) // if no value then marker is for model
  - vdb:message (string) mandatory
  
 [vdb:translators] > nt:unstructured
@@ -101,6 +109,9 @@
 [vdb:entry] > nt:unstructured
  - vdb:path (string) mandatory
  - vdb:description (string)
+
+[vdb:resources] > nt:unstructured
+ + * (nt:file) copy
 
 [vdb:permissions] > nt:unstructured
  + vdb:permission (vdb:permission) copy

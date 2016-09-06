@@ -6,6 +6,7 @@
     },
     "node-types" :
     [
+    	"config/dv.cnd",
         "config/xmi.cnd",
         "config/med.cnd",
         "config/mmcore.cnd",
@@ -67,30 +68,6 @@
             "nodeType" : "tko:schema",
             "workspaces" : "*",
             "columns" : "tko:rendition(STRING)"
-        },
-        "ddlTableStmtByQuery" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "teiidddl:createTable",
-            "workspaces" : "*",
-            "columns" : "teiidddl:queryExpression(STRING)"
-        },
-        "ddlViewStmtByQuery" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "teiidddl:createView",
-            "workspaces" : "*",
-            "columns" : "teiidddl:queryExpression(STRING)"
-        },
-        "ddlProcStmtByQuery" : {
-            "kind" : "value",
-            "provider" : "local",
-            "synchronous" : true,
-            "nodeType" : "teiidddl:createProcedure",
-            "workspaces" : "*",
-            "columns" : "teiidddl:statement(STRING)"
         }
     },
     "sequencing" : {

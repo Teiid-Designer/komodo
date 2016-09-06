@@ -26,7 +26,7 @@ import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.driver.Driver;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.internal.CachedTeiidImpl;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;

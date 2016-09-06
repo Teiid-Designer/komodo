@@ -22,7 +22,7 @@
 package org.komodo.relational.datasource;
 
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
@@ -32,6 +32,7 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -39,6 +40,8 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.teiid.modeshape.sequencer.dataservice.ConnectionReader;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A model of a datasource instance
@@ -46,26 +49,10 @@ import org.komodo.spi.runtime.TeiidInstance;
 public interface Datasource extends Exportable, RelationalObject {
 
     /**
-     * XML tag for jdbc attribute
+     * The file extension of connections.
      */
-    public static String XML_ATTR_JDBC = "jdbc"; //$NON-NLS-1$
-    /**
-     * XML tag for name attribute
-     */
-    public static String XML_ATTR_NAME = "name"; //$NON-NLS-1$
-    /**
-     * XML tag for property element
-     */
-    public static String XML_ELEM_PROPERTY = "property"; //$NON-NLS-1$
-    /**
-     * XML tag for dataSource element
-     */
-    public static String XML_ELEM_DATASOURCE = "dataSource"; //$NON-NLS-1$
-    /**
-     * XML tag for dataSourceSet element
-     */
-    public static String XML_ELEM_DATASOURCE_SET = "dataSourceSet"; //$NON-NLS-1$
-    
+    DocumentType DOC_TYPE = new DocumentType( ConnectionReader.FILE_EXTENSION );
+
     /**
      * The type identifier.
      */
@@ -90,12 +77,12 @@ public interface Datasource extends Exportable, RelationalObject {
      * The default value for the <code>preview</code> property. Value is {@value} .
      */
     boolean DEFAULT_PREVIEW = false;
-    
+
     /**
      * The resolver of a {@link Datasource}.
      */
     public static final TypeResolver< Datasource > RESOLVER = new TypeResolver< Datasource >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -112,7 +99,7 @@ public interface Datasource extends Exportable, RelationalObject {
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createDatasource( transaction, parent, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -122,7 +109,7 @@ public interface Datasource extends Exportable, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -132,7 +119,7 @@ public interface Datasource extends Exportable, RelationalObject {
         public Class< DatasourceImpl > owningClass() {
             return DatasourceImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -142,9 +129,9 @@ public interface Datasource extends Exportable, RelationalObject {
         @Override
         public boolean resolvable( final UnitOfWork transaction,
                                    final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.DataSource.NODE_TYPE );
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, DataVirtLexicon.Connection.NODE_TYPE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -159,8 +146,18 @@ public interface Datasource extends Exportable, RelationalObject {
             }
             return new DatasourceImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#getDocumentType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    default DocumentType getDocumentType( final UnitOfWork transaction ) {
+        return DOC_TYPE;
+    }
 
     /**
      * @param uow
@@ -233,7 +230,7 @@ public interface Datasource extends Exportable, RelationalObject {
      * @throws KException if error occurs
      */
     void setDriverName(UnitOfWork transaction, String driverName) throws KException;
-    
+
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
@@ -249,22 +246,6 @@ public interface Datasource extends Exportable, RelationalObject {
      * @throws KException if error occurs
      */
     void setClassName(UnitOfWork transaction, String className) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return profile name of this datasource.  (may be <code>null</code>)
-     * @throws KException if error occurs
-     */
-    String getProfileName(UnitOfWork transaction) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param profileName profile name of this datasource
-     * @throws KException if error occurs
-     */
-    void setProfileName(UnitOfWork transaction, String profileName) throws KException;
 
     /**
      * @param transaction
@@ -285,33 +266,17 @@ public interface Datasource extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return 'true' if a Preview source, 'false' if not.
-     * @throws KException if error occurs
-     */
-    boolean isPreview(UnitOfWork transaction) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param isPreview 'true' if source is Preview, 'false' if not.
-     * @throws KException if error occurs
-     */
-    void setPreview(UnitOfWork transaction, boolean isPreview) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param teiidInstance the teiid instance for deployment
      * @return the properties for server deployment
      * @throws Exception if error occurs
      */
     Properties getPropertiesForServerDeployment(UnitOfWork transaction, TeiidInstance teiidInstance) throws Exception;
-    
+
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param teiid 
+     * @param teiid
      *        the Teiid instance
      * @return the deployment status of this data source to the given teiid
      */

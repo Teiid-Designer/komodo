@@ -1500,7 +1500,7 @@ public class TestUtilities implements StringConstants {
         try {
             zipfile = new ZipFile(zipFile);
         } catch (IOException e) {
-            fail("Zip file created is corrupt " + e.getLocalizedMessage());
+            fail("Zip file test failed: " + e.getLocalizedMessage());
         } finally {
             try {
                 if (zipfile != null) {

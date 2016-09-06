@@ -134,6 +134,11 @@
 				<artifactId>teiid-modeshape-sequencer-ddl</artifactId>
 				<version>${version.teiid.modeshape}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid.modeshape</groupId>
+				<artifactId>teiid-modeshape-sequencer-dataservice</artifactId>
+				<version>${version.teiid.modeshape}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.infinispan</groupId>
@@ -213,6 +218,10 @@
 		<dependency>
             <groupId>org.jboss.teiid.modeshape</groupId>
             <artifactId>teiid-modeshape-sequencer-vdb</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>org.jboss.teiid.modeshape</groupId>
+            <artifactId>teiid-modeshape-sequencer-dataservice</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.jcr</groupId>

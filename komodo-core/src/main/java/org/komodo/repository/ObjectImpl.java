@@ -183,7 +183,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @param komodoRepository
      *        the repository where the object is located (cannot be <code>null</code>)
      * @param path
-     *        the workspace path (can be empty if object exists at the workspace root)
+     *        the workspace path (cannot be <code>null</code> or empty)
      * @param index
      *        the object index (value is zero for non-SNS)
      * @throws KException
@@ -602,7 +602,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             }
 
             if ( kids.length != 0 ) {
-                final List< KomodoObject > matches = new ArrayList< KomodoObject >( kids.length );
+                final List< KomodoObject > matches = new ArrayList< >( kids.length );
 
                 for ( final KomodoObject kid : kids ) {
                     if ( type.equals( kid.getPrimaryType( transaction ).getName() ) || kid.hasDescriptor( transaction, type ) ) {
@@ -1041,7 +1041,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         try {
-            final List< String > names = new ArrayList< String >();
+            final List< String > names = new ArrayList< >();
 
             for ( final PropertyIterator iter = node( transaction ).getProperties(); iter.hasNext(); ) {
                 final String name = iter.nextProperty().getName();
@@ -1092,6 +1092,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         checkSecurity(transaction, OperationType.READ_OPERATION);
 
         List<Descriptor> descriptors = new ArrayList<Descriptor>();
+
         descriptors.add(getPrimaryType(transaction));
         descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
 
@@ -1103,7 +1104,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         KomodoType result = KomodoType.UNKNOWN;
-        if (identifiers == null || identifiers.isEmpty()) {
+        if (identifiers.isEmpty()) {
             // No identifiers but could be DDL Statements container
             String nodeName = getName(transaction);
             if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(nodeName))
