@@ -73,7 +73,7 @@
                 <repository>
                     <id>redhat-techpreview-all-repository</id>
                     <name>Red Hat Tech Preview repository (all)</name>
-                    <url>http://maven.repository.redhat.com/techpreview/all/</url>
+                    <url>http://origin-maven.repository.redhat.com/techpreview/all/</url>
                     <layout>default</layout>
                     <releases>
                         <enabled>true</enabled>
@@ -89,7 +89,7 @@
                 <pluginRepository>
                     <id>redhat-techpreview-all-repository</id>
                     <name>Red Hat Tech Preview repository (all)</name>
-                    <url>http://maven.repository.redhat.com/techpreview/all/</url>
+                    <url>http://origin-maven.repository.redhat.com/techpreview/all/</url>
                     <layout>default</layout>
                     <releases>
                         <enabled>true</enabled>
@@ -162,7 +162,7 @@
         <repository>
           <id>jboss-earlyaccess</id>
           <name>JBoss Early Access</name>
-          <url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+          <url>https://origin-maven.repository.redhat.com/earlyaccess/all/</url>
           <layout>default</layout>
           <releases>
             <enabled>true</enabled>
