@@ -498,9 +498,8 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void respond( final Object results ) {
-                if (!engineThread.isRunning()) {
+                if (engineThread != null && !engineThread.isRunning()) {
                     LocalRepository.this.state = State.NOT_REACHABLE;
-                    notifyObservers();
                 }
 
                 //
@@ -508,8 +507,15 @@ public class LocalRepository extends RepositoryImpl {
                 // hence this defunct engineThread must be discarded to ensure a clean restart
                 //
                 engineThread = null;
+
+                notifyObservers();
             }
         };
+
+        if (engineThread == null) {
+            callback.respond(null);
+            return;
+        }
 
         KLog.getLogger().debug("LocalRepository.stopRepository() post stop request"); //$NON-NLS-1$
         this.engineThread.accept(new Request(RequestType.STOP, callback));
