@@ -26,6 +26,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import java.net.URL;
@@ -103,7 +104,13 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest {
 
         // Wait for the starting of the repository or timeout of 1 minute
         if (!_repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
-            throw new RuntimeException("Local repository did not start");
+            fail("Test timed-out waiting for local repository to start");
+        }
+
+        Throwable startupError = _repoObserver.getError();
+        if (startupError != null) {
+            startupError.printStackTrace();
+            fail("Repository error occurred on startup: " + startupError.getMessage());
         }
 
         { // verify initial content (see initialContent.xml)
@@ -134,17 +141,15 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest {
         assertNotNull(_repo);
         assertNotNull(_repoObserver);
 
-        if (State.REACHABLE.equals(_repo.getState())) {
-            _repoObserver.resetLatch();
+        _repoObserver.resetLatch();
 
-            RepositoryClient client = mock(RepositoryClient.class);
-            RepositoryClientEvent event = RepositoryClientEvent.createShuttingDownEvent(client);
-            _repo.notify(event);
-        }
+        RepositoryClient client = mock(RepositoryClient.class);
+        RepositoryClientEvent event = RepositoryClientEvent.createShuttingDownEvent(client);
+        _repo.notify(event);
 
         try {
             if (! _repoObserver.getLatch().await(TIME_TO_WAIT, TimeUnit.MINUTES))
-                throw new RuntimeException("Local repository was not stopped");
+                fail("Local repository was not stopped");
         } finally {
             _repo.removeObserver(_repoObserver);
             _repoObserver = null;

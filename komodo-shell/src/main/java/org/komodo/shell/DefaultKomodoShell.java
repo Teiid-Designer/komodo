@@ -378,12 +378,19 @@ public class DefaultKomodoShell implements KomodoShell {
         
         // Latch for awaiting the start of the default repository
         final CountDownLatch updateLatch = new CountDownLatch( 1 );
+        final Throwable[] engineError = new Throwable[1];
 
         // Observer attached to the default repository for listening for the change of state
         RepositoryObserver stateObserver = new RepositoryObserver() {
 
             @Override
             public void eventOccurred() {
+                updateLatch.countDown();
+            }
+
+            @Override
+            public void errorOccurred(Throwable e) {
+                engineError[0] = e;
                 updateLatch.countDown();
             }
         };
@@ -411,8 +418,12 @@ public class DefaultKomodoShell implements KomodoShell {
         // Cancel timer and display repository message
         timer.cancel();
 
-        if ( localRepoWaiting ) displayMessage( SPACE + I18n.bind( ShellI18n.componentStarted ) );
-        else displayMessage( SPACE + I18n.bind( ShellI18n.localRepositoryTimeoutError ) );
+        if ( localRepoWaiting && engineError[0] == null)
+            displayMessage( SPACE + I18n.bind( ShellI18n.componentStarted ) );
+        else if (engineError[0] != null)
+            displayMessage(I18n.bind( ShellI18n.engineStartingError, engineError[0].getMessage()));
+        else
+            displayMessage( SPACE + I18n.bind( ShellI18n.localRepositoryTimeoutError ) );
 
         displayMessage( NEW_LINE );
         displayMessage( NEW_LINE );

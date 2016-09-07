@@ -430,7 +430,7 @@ public class LocalRepository extends RepositoryImpl {
 
     }
 
-    private void createEngineThread() {
+    private void createEngineThread() throws Exception {
         if (engineThread != null && engineThread.isAlive()) return;
 
         if (engineThread != null && !engineThread.isAlive()) {
@@ -441,7 +441,7 @@ public class LocalRepository extends RepositoryImpl {
                     String stackTrace = StringUtils.exceptionToString(error);
                     msg = msg + NEW_LINE + stackTrace;
                 }
-            throw new RuntimeException(msg);
+            throw new Exception(msg);
         }
 
         engineThread = new ModeshapeEngineThread(getId());
@@ -451,13 +451,18 @@ public class LocalRepository extends RepositoryImpl {
     private void startRepository() {
         if (this.state == State.REACHABLE) return;
 
-        createEngineThread();
+        try {
+            createEngineThread();
+        } catch (Exception e) {
+            errorObservers(e);
+            return;
+        }
 
         RequestCallback callback = new RequestCallback() {
 
             @Override
             public void errorOccurred( final Throwable error ) {
-                throw new RuntimeException(error);
+                errorObservers(error);
             }
 
             @Override
@@ -483,7 +488,7 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void errorOccurred( final Throwable error ) {
-                throw new RuntimeException(error);
+                errorObservers(error);
             }
 
             /**
@@ -552,7 +557,7 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void errorOccurred( final Throwable error ) {
-                throw new RuntimeException(error);
+                errorObservers(error);
             }
 
             /**

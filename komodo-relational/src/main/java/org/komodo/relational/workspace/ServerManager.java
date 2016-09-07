@@ -138,6 +138,11 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
                     instances.remove(ServerManager.this);
                 }
             }
+
+            @Override
+            public void errorOccurred(Throwable e) {
+                // Nothing to do
+            }
         });
     }
 

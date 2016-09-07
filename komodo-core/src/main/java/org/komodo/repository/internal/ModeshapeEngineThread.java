@@ -243,7 +243,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             LOGGER.debug("ModeshapeEngineThread: No callback assigned"); //$NON-NLS-1$
     }
 
-    private void errorCallback(final Request request, Exception e) {
+    private void errorCallback(final Request request, Throwable e) {
         if (request.getCallback() != null) {
             request.getCallback().errorOccurred(e);
         }
@@ -517,7 +517,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             sequencers = new KSequencers( identifier );
 
             respondCallback(request, null);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             LOGGER.error(Messages.getString(Messages.Komodo.ERROR_STARTING_ENGINE, ex));
             errorCallback(request, ex);
         }

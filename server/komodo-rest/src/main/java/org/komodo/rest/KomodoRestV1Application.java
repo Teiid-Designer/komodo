@@ -411,6 +411,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     private static final TimeUnit UNIT = TimeUnit.MINUTES;
 
     private KEngine kengine;
+    private Throwable engineException;
     private CountDownLatch latch;
     private final Set< Object > singletons;
 
@@ -556,6 +557,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         this.latch.countDown();
     }
 
+    @Override
+    public void errorOccurred(Throwable e) {
+        this.engineException = e;
+        this.latch.countDown();
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -588,7 +595,14 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         try {
             kengine.start();
             started = this.latch.await( TIMEOUT, UNIT );
-        } catch ( final Exception e ) {
+            if (engineException != null) {
+                //
+                // latch was released due to the engine throwing an error rather than starting
+                //
+                throw engineException;
+            }
+
+        } catch ( final Throwable e ) {
             throw new WebApplicationException( e, Status.INTERNAL_SERVER_ERROR );
         }
 

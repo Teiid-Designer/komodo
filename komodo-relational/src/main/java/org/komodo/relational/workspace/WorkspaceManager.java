@@ -286,6 +286,11 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                     instances.remove(WorkspaceManager.this);
                 }
             }
+
+            @Override
+            public void errorOccurred(Throwable e) {
+                // Nothing to do
+            }
         });
     }
 

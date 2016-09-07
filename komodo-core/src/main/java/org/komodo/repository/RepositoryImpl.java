@@ -1250,6 +1250,19 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         }
     }
 
+    protected void errorObservers(Throwable e) {
+        final Set<RepositoryObserver> copy = new HashSet<>(this.observers);
+
+        for (final RepositoryObserver observer : copy) {
+            try {
+                // Ensure all observers are informed even if one throws an exception
+                observer.errorOccurred(e);
+            } catch (final Exception ex) {
+                KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      *

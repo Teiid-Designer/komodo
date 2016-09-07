@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
@@ -99,8 +100,15 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
             FileUtils.removeDirectoryAndChildren(testDb);
     }
 
-    private void initLocalRepository(Class<?> loaderClass, String configFile) throws Exception {
+    private void checkRepoObserverErrors() throws Exception {
+        Throwable startupError = _repoObserver.getError();
+        if (startupError != null) {
+            startupError.printStackTrace();
+            fail("Repository error occurred on startup: " + startupError.getMessage());
+        }
+    }
 
+    private void initLocalRepository(Class<?> loaderClass, String configFile) throws Exception {
         URL configUrl = loaderClass.getResource(configFile);
         assertNotNull(configUrl);
 
@@ -118,10 +126,13 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         final RepositoryClientEvent event = RepositoryClientEvent.createStartedEvent(client);
         _repo.notify(event);
 
-        // Wait for the starting of the repository or timeout of 5 minutes
-        if (!_repoObserver.getLatch().await(5, TimeUnit.MINUTES)) {
-            throw new RuntimeException("Local repository did not start");
+        // Wait for the starting of the repository or timeout of 1 minute
+        if (!_repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
+            checkRepoObserverErrors();
+            fail("Test timed-out waiting for local repository to start");
         }
+
+        checkRepoObserverErrors();
     }
 
     private void initLocalRepository(String configFile) throws Exception {
@@ -137,21 +148,20 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
         assertNotNull(_repoObserver);
 
-        if (State.REACHABLE.equals(_repo.getState())) {
-            _repoObserver.resetLatch();
+        _repoObserver.resetLatch();
 
-            RepositoryClient client = mock(RepositoryClient.class);
-            RepositoryClientEvent event = RepositoryClientEvent.createShuttingDownEvent(client);
-            _repo.notify(event);
+        RepositoryClient client = mock(RepositoryClient.class);
+        RepositoryClientEvent event = RepositoryClientEvent.createShuttingDownEvent(client);
+        _repo.notify(event);
+
+        try {
+            if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
+                fail("Local repository was not stopped");
+        } finally {
+            _repo.removeObserver(_repoObserver);
+            _repoObserver = null;
+            _repo = null;
         }
-
-        if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
-            throw new RuntimeException("Local repository was not stopped");
-
-        _repo.removeObserver(_repoObserver);
-
-        _repoObserver = null;
-        _repo = null;
     }
 
     @Before
