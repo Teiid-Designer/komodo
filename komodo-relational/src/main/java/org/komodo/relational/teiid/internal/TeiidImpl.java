@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Properties;
-
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
@@ -73,7 +72,6 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
@@ -881,121 +879,58 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         ServerManager mgr = ServerManager.getInstance(getRepository());
         CachedTeiid cachedTeiid = mgr.createCachedTeiid(transaction, this);
 
-        TeiidInstance teiidInstance = getTeiidInstance(transaction);
-        if (teiidInstance == null) {
-            throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_ERROR));
-        }
+        // Gets a teiid instance and connects if not connected
+        TeiidInstance teiidInstance = getConnectedTeiidInstance(transaction);
 
+        // Get the teiid instance artifacts and add them to CachedTeiid
         try {
-            teiidInstance.connect();
-            if (! teiidInstance.isConnected()) {
-                throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
-            }
-
             Collection<TeiidVdb> instVdbs = teiidInstance.getVdbs();
-            if (instVdbs == null)
-                instVdbs = Collections.emptyList();
+            if (instVdbs == null) instVdbs = Collections.emptyList();
 
             Collection<TeiidDataSource> instDataSrcs = teiidInstance.getDataSources();
-            if (instDataSrcs == null)
-                instDataSrcs = Collections.emptyList();
+            if (instDataSrcs == null) instDataSrcs = Collections.emptyList();
 
             Collection<TeiidTranslator> instTranslators = teiidInstance.getTranslators();
-            if (instTranslators == null)
-                instTranslators = Collections.emptyList();
+            if (instTranslators == null) instTranslators = Collections.emptyList();
 
             Collection<String> instDataSourceTypeNames = teiidInstance.getDataSourceTypeNames();
-            if (instDataSourceTypeNames == null)
-                instDataSourceTypeNames = Collections.emptyList();
+            if (instDataSourceTypeNames == null) instDataSourceTypeNames = Collections.emptyList();
 
-            //
-            // Process the vdbs
-            //
+            // Add VDBs to CachedTeiid
             for (TeiidVdb teiidVdb : instVdbs) {
                 if (teiidVdb == null)
                     continue;
 
                 // Export the vdb content into a string
                 String content = teiidVdb.export();
-                if (content == null)
-                    continue;
-
                 if (StringUtils.isEmpty(content))
                     continue;
 
-                String vdbName = teiidVdb.getName();
-
-                // Output the content to a temp file
-                File tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
-                Files.write(Paths.get(tempFile.getPath()), content.getBytes());
-
-                KomodoObject kobject = cachedTeiid.addChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-                Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath());
-                vdb.setOriginalFilePath(transaction, tempFile.getAbsolutePath());
-                vdb.setVdbName( transaction, vdbName );
-
-                KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
-                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
+                // Add VDB to CachedTeiid
+                addOrReplaceCachedVdb(transaction, teiidVdb, cachedTeiid);
             }
 
+            // Add DataSources to CachedTeiid
             for (TeiidDataSource teiidDataSrc : instDataSrcs) {
                 if (teiidDataSrc == null)
                     continue;
 
-                KomodoObject kobject = cachedTeiid.addChild( transaction,
-                                                             teiidDataSrc.getName(),
-                                                             DataVirtLexicon.Connection.NODE_TYPE );
-                Datasource dataSrc = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-
-                dataSrc.setDriverName(transaction, teiidDataSrc.getType());
-                dataSrc.setJndiName(transaction, teiidDataSrc.getJndiName());
-
-                for (Entry<Object, Object> property : teiidDataSrc.getProperties().entrySet()) {
-                    String key = property.getKey().toString();
-                    if (TeiidInstance.DATASOURCE_DRIVERNAME.equals(key) ||
-                            TeiidInstance.DATASOURCE_JNDINAME.equals(key))
-                        continue; // Already set as explicit fields
-
-                    dataSrc.setProperty(transaction, key, property.getValue());
-                }
+                addOrReplaceCachedDataSource(transaction, teiidDataSrc, cachedTeiid);
             }
 
+            // Add Translators to CachedTeiid
             for (TeiidTranslator teiidTranslator : instTranslators) {
                 if (teiidTranslator == null)
                     continue;
-
-                KomodoObject kObject = cachedTeiid.addChild(transaction,
-                                                            teiidTranslator.getName(),
-                                                            VdbLexicon.Translator.TRANSLATOR);
-                TranslatorImpl translator = new TranslatorImpl(transaction,
-                                                               getRepository(),
-                                                               kObject.getAbsolutePath());
-                translator.setDescription(transaction, teiidTranslator.getDescription());
-                String type = teiidTranslator.getType() != null ? teiidTranslator.getType() : teiidTranslator.getName();
-                translator.setType(transaction, type);
-                Properties props = teiidTranslator.getProperties();
-                for (Entry<Object, Object> entry : props.entrySet()) {
-                    translator.setProperty(transaction, entry.getKey().toString(), entry.getValue());
-                }
+                addOrReplaceCachedTranslator(transaction, teiidTranslator, cachedTeiid);
             }
             
+            // Add Drivers to CachedTeiid
             for (String teiidDSType : instDataSourceTypeNames) {
                 if (teiidDSType == null)
                     continue;
 
-                KomodoObject driver = cachedTeiid.addChild(transaction,
-                                                           teiidDSType,
-                                                           DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
-
-                byte[] content = new byte[1024];
-                KomodoObject fileNode;
-                if (! driver.hasChild(transaction, JcrLexicon.CONTENT.getString()))
-                    fileNode = driver.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
-                else
-                    fileNode = driver.getChild(transaction, JcrLexicon.CONTENT.getString());
-
-                ByteArrayInputStream stream = new ByteArrayInputStream(content);
-                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), stream);
+                addOrReplaceCachedDriver(transaction, teiidDSType, cachedTeiid);
             }
 
             
@@ -1004,6 +939,244 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         }
 
         return cachedTeiid;
+    }
+
+    @Override
+    public void updateCacheWithServerVdb(UnitOfWork transaction, String vdbName) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        // If the CachedTeiid exists, refresh the VDBs
+        CachedTeiid cachedTeiid = getCachedTeiid(transaction);
+        if(cachedTeiid!=null) {
+            TeiidInstance teiidInstance = getConnectedTeiidInstance(transaction);
+
+            try {
+                TeiidVdb instVdb = teiidInstance.getVdb(vdbName);
+                if(instVdb==null) return;
+
+                addOrReplaceCachedVdb(transaction, instVdb, cachedTeiid);
+            } catch (Exception ex) {
+                throw new KException(ex);
+            }            
+        }
+    }
+    
+    @Override
+    public void updateCacheWithServerDataSource(UnitOfWork transaction, String dataSourceName) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        // If the CachedTeiid exists, replace the DataSource
+        CachedTeiid cachedTeiid = getCachedTeiid(transaction);
+        if(cachedTeiid!=null) {
+            TeiidInstance teiidInstance = getConnectedTeiidInstance(transaction);
+
+            try {
+                TeiidDataSource instDataSrc = teiidInstance.getDataSource(dataSourceName);
+                if (instDataSrc == null) return;
+                
+                addOrReplaceCachedDataSource(transaction, instDataSrc, cachedTeiid);
+            } catch (Exception ex) {
+                throw new KException(ex);
+            }            
+        }
+    }
+    
+    @Override
+    public void updateCacheWithServerTranslator(UnitOfWork transaction, String translatorName) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        // If the CachedTeiid exists, replace the Translator
+        CachedTeiid cachedTeiid = getCachedTeiid(transaction);
+        if(cachedTeiid!=null) {
+            TeiidInstance teiidInstance = getConnectedTeiidInstance(transaction);
+
+            try {
+                TeiidTranslator instTranslator = teiidInstance.getTranslator(translatorName);
+                if (instTranslator == null) return;
+
+                addOrReplaceCachedTranslator(transaction, instTranslator, cachedTeiid);
+                
+            } catch (Exception ex) {
+                throw new KException(ex);
+            }            
+        }
+    }
+    
+    @Override
+    public void updateCacheWithServerDriver(UnitOfWork transaction, String driverName) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        // If the CachedTeiid exists, replace the Driver
+        CachedTeiid cachedTeiid = getCachedTeiid(transaction);
+        if(cachedTeiid!=null) {
+            TeiidInstance teiidInstance = getConnectedTeiidInstance(transaction);
+
+            try {
+                Collection<String> instDataSourceTypeNames = teiidInstance.getDataSourceTypeNames();
+                if(instDataSourceTypeNames.contains(driverName)) {
+                    addOrReplaceCachedDriver(transaction, driverName, cachedTeiid);
+                }
+            } catch (Exception ex) {
+                throw new KException(ex);
+            }            
+        }
+    }
+    
+    /*
+     * Get a connected teiid instance.  If there is a problem getting the instance or connecting - an exception is thrown.
+     */
+    private TeiidInstance getConnectedTeiidInstance(UnitOfWork transaction) throws KException {
+        TeiidInstance teiidInstance = getTeiidInstance(transaction);
+        if (teiidInstance == null) {
+            throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_ERROR));
+        }
+        try {
+            teiidInstance.connect();
+            if (! teiidInstance.isConnected()) {
+                throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
+            }
+        } catch (Exception ex) {
+            throw new KException(ex);
+        }
+        return teiidInstance;
+    }
+    
+    /*
+     * Returns the CachedTeiid instance if it exists.  If doesnt exist, null is returned.
+     */
+    private CachedTeiid getCachedTeiid(UnitOfWork transaction) throws KException {
+        CachedTeiid cachedTeiid = null;
+        
+        KomodoObject teiidCache = getRepository().komodoTeiidCache(transaction);
+        final String id = getName(transaction);
+        if (teiidCache.hasChild(transaction, id)) {
+            KomodoObject child = teiidCache.getChild(transaction, id);
+            cachedTeiid = CachedTeiid.RESOLVER.resolve(transaction, child);
+        } 
+        
+        return cachedTeiid;
+    }
+        
+    /*
+     * Adds the server VDB to CachedTeiid.  If there is a VDB with same name in CachedTeiid, it is replaced
+     */
+    private void addOrReplaceCachedVdb(UnitOfWork transaction, TeiidVdb teiidVdb, CachedTeiid cachedTeiid) throws Exception {
+        String vdbName = teiidVdb.getName();
+        
+        // Export the vdb content into a string
+        String content = teiidVdb.export();
+        if (content == null || StringUtils.isEmpty(content)) return;
+
+        // Output the content to a temp file
+        File tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
+        Files.write(Paths.get(tempFile.getPath()), content.getBytes());
+
+        KomodoObject vdbsFolder = cachedTeiid.getChild(transaction, CachedTeiid.VDBS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        
+        // Removes currently cached object, if it exists
+        if(vdbsFolder.hasChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            KomodoObject existingObj = vdbsFolder.getChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            existingObj.remove(transaction);
+        }
+
+        KomodoObject kobject = vdbsFolder.addChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath());
+        vdb.setOriginalFilePath(transaction, tempFile.getAbsolutePath());
+        vdb.setVdbName( transaction, vdbName );
+
+        KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
+        fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
+    }
+    
+    /*
+     * Adds the server DataSource to CachedTeiid.  If there is a DataSource with same name in CachedTeiid, it is replaced
+     */
+    private void addOrReplaceCachedDataSource(UnitOfWork transaction, TeiidDataSource teiidDS, CachedTeiid cachedTeiid) throws Exception {
+        String dataSourceName = teiidDS.getName();
+        
+        KomodoObject dataSourcesFolder = cachedTeiid.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+
+        // Removes currently cached object, if it exists
+        if(dataSourcesFolder.hasChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
+            KomodoObject existingObj = dataSourcesFolder.getChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE);
+            existingObj.remove(transaction);
+        }
+
+        KomodoObject kobject = dataSourcesFolder.addChild( transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE );
+        Datasource dataSrc = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+
+        dataSrc.setDriverName(transaction, teiidDS.getType());
+        dataSrc.setJndiName(transaction, teiidDS.getJndiName());
+
+        for (Entry<Object, Object> property : teiidDS.getProperties().entrySet()) {
+            String key = property.getKey().toString();
+            if (TeiidInstance.DATASOURCE_DRIVERNAME.equals(key) ||
+                    TeiidInstance.DATASOURCE_JNDINAME.equals(key))
+                continue; // Already set as explicit fields
+
+            dataSrc.setProperty(transaction, key, property.getValue());
+        }
+    }
+
+    /*
+     * Adds the server Translator to CachedTeiid.  If there is a Translator with same name in CachedTeiid, it is replaced
+     */
+    private void addOrReplaceCachedTranslator(UnitOfWork transaction, TeiidTranslator teiidTranslator, CachedTeiid cachedTeiid) throws Exception {
+        String translatorName = teiidTranslator.getName();
+        
+        KomodoObject translatorsFolder = cachedTeiid.getChild(transaction, CachedTeiid.TRANSLATORS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        
+        // Removes currently cached object, if it exists
+        if(translatorsFolder.hasChild(transaction, translatorName, VdbLexicon.Translator.TRANSLATOR)) {
+            KomodoObject existingObj = translatorsFolder.getChild(transaction, translatorName, VdbLexicon.Translator.TRANSLATOR);
+            existingObj.remove(transaction);
+        }
+        
+        // create the new object
+        KomodoObject kObject = translatorsFolder.addChild(transaction,
+                                                          translatorName,
+                                                          VdbLexicon.Translator.TRANSLATOR);
+        TranslatorImpl translator = new TranslatorImpl(transaction,
+                                                       getRepository(),
+                                                       kObject.getAbsolutePath());
+        translator.setDescription(transaction, teiidTranslator.getDescription());
+        String type = teiidTranslator.getType() != null ? teiidTranslator.getType() : teiidTranslator.getName();
+        translator.setType(transaction, type);
+        Properties props = teiidTranslator.getProperties();
+        for (Entry<Object, Object> entry : props.entrySet()) {
+            translator.setProperty(transaction, entry.getKey().toString(), entry.getValue());
+        }
+    }
+
+    /*
+     * Adds the server Driver to CachedTeiid.  If there is a Driver with same name in CachedTeiid, it is replaced
+     */
+    private void addOrReplaceCachedDriver(UnitOfWork transaction, String driverName, CachedTeiid cachedTeiid) throws Exception {
+        KomodoObject driversFolder = cachedTeiid.getChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+
+        // Removes currently cached object, if it exists
+        if(driversFolder.hasChild(transaction, driverName, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE)) {
+            KomodoObject existingObj = driversFolder.getChild(transaction, driverName, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+            existingObj.remove(transaction);
+        }
+        
+        KomodoObject driver = driversFolder.addChild(transaction,
+                                                     driverName,
+                                                     DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+
+        byte[] content = new byte[1024];
+        KomodoObject fileNode;
+        if (! driver.hasChild(transaction, JcrLexicon.CONTENT.getString()))
+            fileNode = driver.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
+        else
+            fileNode = driver.getChild(transaction, JcrLexicon.CONTENT.getString());
+
+        ByteArrayInputStream stream = new ByteArrayInputStream(content);
+        fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), stream);
     }
 
     @Override
@@ -1213,7 +1386,6 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
             return result;
 
         } catch (KException ex) {
-            KLog.getLogger().info("PANIC! HashCode threw an exception" + ex.getMessage());
             KEngine.getInstance().getErrorHandler().error(ex);
             if (uow != null)
                 uow.rollback();

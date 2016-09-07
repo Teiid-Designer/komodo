@@ -40,9 +40,15 @@ import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GE
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_TRANSLATOR_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDBS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDB_ERROR;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -51,8 +57,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
@@ -71,6 +82,9 @@ import org.komodo.rest.Messages;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestBasicEntity.ResourceNotFound;
 import org.komodo.rest.relational.KomodoProperties;
+import org.komodo.rest.relational.RelationalMessages;
+import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.relational.response.RestVdbCondition;
 import org.komodo.rest.relational.response.RestVdbDataRole;
@@ -113,134 +127,392 @@ public final class KomodoVdbService extends KomodoService {
         super( engine );
     }
 
-//    /**
-//     * @param headers
-//     *        the request headers (never <code>null</code>)
-//     * @param uriInfo
-//     *        the request URI information (never <code>null</code>)
-//     * @param vdbName
-//     *        the VDB name (cannot be empty)
-//     * @param vdbJson
-//     *        the VDB JSON representation (cannot be <code>null</code>)
-//     * @return a JSON representation of the new VDB (never <code>null</code>)
-//     * @throws KomodoRestException
-//     *         if there is an error creating the VDB
-//     */
-//    @PUT
-//    @Path( "{vdbName}" )
-//    @Produces( MediaType.APPLICATION_JSON )
-//    public Response addOrUpdateVdb( final @Context HttpHeaders headers,
-//                                    final @Context UriInfo uriInfo,
-//                                    final @PathParam( "vdbName" ) String vdbName,
-//                                    final String vdbJson) throws KomodoRestException {
-//        if ( vdbJson == null ) {
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_MISSING_VDB ) );
-//        }
-//
-//        final RestVdb restVdb = KomodoJsonMarshaller.unmarshall( vdbJson, RestVdb.class );
-//
-//        if ( StringUtils.isBlank( restVdb.getId() ) ) {
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
-//        }
-//
-//        // if name parameter is different than JSON name then do a rename if it exists
-//        final String vdbNameJson = restVdb.getId();
-//        UnitOfWork uow = null;
-//
-//        try {
-//            uow = createTransaction(principal, "addOrUpdateVdb", false ); //$NON-NLS-1$
-//            final boolean exists = getWorkspaceManager(uow).hasChild( uow, vdbName );
-//            final boolean namesMatch = vdbName.equals( vdbNameJson );
-//
-//            if ( !exists && !namesMatch ) {
-//                throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_VDB_NAME_ERROR, vdbName, vdbNameJson ) );
-//            }
-//
-//            // create new VDB
-//            if ( !exists ) {
-//                return doAddVdb( uow, uriInfo.getBaseUri(), restVdb );
-//            }
-//
-//            // must be an update
-//            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-//            final Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
-//
-//            // TODO parse the JSON input to set VDB properties and children
-//
-//            // rename if names did not match
-//            if ( !namesMatch ) {
-//                vdb.rename( uow, vdbNameJson );
-//            }
-//
-//            KomodoProperties properties = new KomodoProperties();
-//            properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
-//            final RestVdb entity = entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties);
-//            LOGGER.debug("addOrUpdateVdb:VDB '{0}' entity was constructed", vdb.getName(uow)); //$NON-NLS-1$
-//            final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
-//            return response;
-//        } catch ( final Exception e ) {
-//            if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
-//                uow.rollback();
-//            }
-//
-//            if ( e instanceof KomodoRestException ) {
-//                throw ( KomodoRestException )e;
-//            }
-//
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
-//        }
-//    }
-//
-//    /**
-//     * @param headers
-//     *        the request headers (never <code>null</code>)
-//     * @param uriInfo
-//     *        the request URI information (never <code>null</code>)
-//     * @param vdbJson
-//     *        the VDB JSON representation (cannot be <code>null</code>)
-//     * @return a JSON representation of the new VDB (never <code>null</code>)
-//     * @throws KomodoRestException
-//     *         if there is an error creating the VDB
-//     */
-//    @POST
-//    @Consumes( MediaType.APPLICATION_JSON )
-//    @Produces( MediaType.APPLICATION_JSON )
-//    public Response addVdb( final @Context HttpHeaders headers,
-//                            final @Context UriInfo uriInfo,
-//                            final String vdbJson ) throws KomodoRestException {
-//        if ( vdbJson == null ) {
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_MISSING_VDB ) );
-//        }
-//
-//        final RestVdb restVdb = KomodoJsonMarshaller.unmarshall( vdbJson, RestVdb.class );
-//
-//        if ( StringUtils.isBlank( restVdb.getId() ) ) {
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
-//        }
-//
-//        UnitOfWork uow = null;
-//        final String vdbName = restVdb.getId();
-//
-//        try {
-//            uow = createTransaction(principal, "createVdb", false ); //$NON-NLS-1$
-//
-//            if ( getWorkspaceManager(uow).hasChild( uow, vdbName ) ) {
-//                throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_VDB_EXISTS ) );
-//            }
-//
-//            return doAddVdb( uow, uriInfo.getBaseUri(), restVdb );
-//        } catch ( final Exception e ) {
-//            if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
-//                uow.rollback();
-//            }
-//
-//            if ( e instanceof KomodoRestException ) {
-//                throw ( KomodoRestException )e;
-//            }
-//
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
-//        }
-//    }
+    /**
+     * Create a new Vdb in the komodo repository
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the vdb name (cannot be empty)
+     * @param vdbJson
+     *        the Vdb JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the new vdb (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the DataSource
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.VDB_PLACEHOLDER )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Create a vdb in the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response createVdb( final @Context HttpHeaders headers,
+                               final @Context UriInfo uriInfo,
+                               final @PathParam( "vdbName" ) String vdbName,
+                               final String vdbJson) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the Vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_VDB_NAME);
+        }
+
+        final RestVdb restVdb = KomodoJsonMarshaller.unmarshall( vdbJson, RestVdb.class );
+        final String jsonVdbName = restVdb.getId();
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonVdbName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_VDB_NAME);
+        }
+
+        // Error if the name parameter is different than JSON name
+        final boolean namesMatch = vdbName.equals( jsonVdbName );
+        if ( !namesMatch ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_VDB_NAME_DONT_MATCH_ERROR, vdbName, jsonVdbName);
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "createVdb", false ); //$NON-NLS-1$
+            
+            // Error if the repo already contains a vdb with the supplied name.
+            if ( getWorkspaceManager(uow).hasChild( uow, vdbName ) ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_VDB_ALREADY_EXISTS, vdbName);
+            }
+            
+            // create new Vdb
+            return doAddVdb( uow, uriInfo.getBaseUri(), mediaTypes, restVdb );
+            
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_ERROR, vdbName);
+        }
+    }
+    
+    private Response doAddVdb( final UnitOfWork uow,
+                               final URI baseUri,
+                               final List<MediaType> mediaTypes,
+                               final RestVdb restVdb ) throws KomodoRestException {
+        assert( !uow.isRollbackOnly() );
+        assert( uow.getState() == State.NOT_STARTED );
+        assert( restVdb != null );
+
+        final String vdbName = restVdb.getId();
+        try {
+            final Vdb vdb = getWorkspaceManager(uow).createVdb( uow, null, vdbName, "path");  //$NON-NLS-1$
+
+            // Transfers the properties from the rest object to the created komodo service.
+            setProperties(uow, vdb, restVdb);
+
+            final RestVdb entity = entityFactory.create(vdb, baseUri, uow );
+            final Response response = commit( uow, mediaTypes, entity );
+            return response;
+        } catch ( final Exception e ) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_ERROR, vdbName ), e );
+        }
+    }
+
+    /**
+     * Update a Vdb in the komodo repository
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the vdb name (cannot be empty)
+     * @param vdbJson
+     *        the vdb JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the updated vdb (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error updating the vdb
+     */
+    @PUT
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.VDB_PLACEHOLDER )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Update a vdb in the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response updateVdb( final @Context HttpHeaders headers,
+                               final @Context UriInfo uriInfo,
+                               final @PathParam( "vdbName" ) String vdbName,
+                               final String vdbJson) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_MISSING_VDB_NAME);
+        }
+
+
+        final RestVdb restVdb = KomodoJsonMarshaller.unmarshall( vdbJson, RestVdb.class );
+        final String jsonVdbName = restVdb.getId();
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonVdbName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_VDB_NAME);
+        }
+
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "updateVdb", false ); //$NON-NLS-1$
+
+            WorkspaceManager wMgr = getWorkspaceManager(uow);
+            final boolean exists = wMgr.hasChild( uow, vdbName );
+            // Error if the specified service does not exist
+            if ( !exists ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_DNE);
+            }
+
+            // must be an update
+            final KomodoObject kobject = wMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            final Vdb vdb = wMgr.resolve( uow, kobject, Vdb.class );
+
+            // Transfers the properties from the rest object to the created komodo service.
+            setProperties(uow, vdb, restVdb);
+
+            // rename if names did not match
+            final boolean namesMatch = vdbName.equals( jsonVdbName );
+            if ( !namesMatch ) {
+                vdb.rename( uow, jsonVdbName );
+            }
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestVdb entity = entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("updateVdb: vdb '{0}' entity was updated", vdb.getName(uow)); //$NON-NLS-1$
+            final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
+            return response;
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_ERROR);
+        }
+    }
+
+    /**
+     * Clone a Vdb in the komodo repository
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the Vdb name (cannot be empty)
+     * @param newVdbName
+     *        the new Vdb name (cannot be empty)
+     * @return a JSON representation of the new Vdb (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the Vdb
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CLONE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VDB_PLACEHOLDER )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Clone a VDB in the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response cloneVdb( final @Context HttpHeaders headers,
+                              final @Context UriInfo uriInfo,
+                              final @PathParam( "vdbName" ) String vdbName,
+                              final String newVdbName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the Vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CLONE_MISSING_NAME);
+        }
+
+        // Error if the new Vdb name is missing
+        if ( StringUtils.isBlank( newVdbName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CLONE_MISSING_NEW_NAME);
+        }
+
+        // Error if the name parameter and new name are the same
+        final boolean namesMatch = vdbName.equals( newVdbName );
+        if ( namesMatch ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CLONE_SAME_NAME_ERROR, newVdbName);
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "cloneVdb", false ); //$NON-NLS-1$
+            
+            WorkspaceManager wMgr = getWorkspaceManager(uow);
+            // Error if the repo already contains a vdb with the supplied name.
+            if ( wMgr.hasChild( uow, newVdbName ) ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CLONE_ALREADY_EXISTS);
+            }
+            
+            // Get the existing VDB to clone
+            final KomodoObject kobject = wMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            final Vdb oldVdb = wMgr.resolve( uow, kobject, Vdb.class );
+
+            // Get VDB content
+            oldVdb.setVdbName(uow, newVdbName);  // Change VDBName to new name so xml has desired new name
+            boolean oldHadDeploymentProperty = oldVdb.hasProperty(uow, "deployment-name"); //$NON-NLS-1$
+            if(oldHadDeploymentProperty) {
+                oldVdb.setProperty(uow, "deployment-name", newVdbName + "-vdb.xml");  //$NON-NLS-1$ //$NON-NLS-2$                
+            }
+            
+            byte[] vdbXml = oldVdb.export(uow, null); 
+            InputStream vdbStream = new ByteArrayInputStream(vdbXml);
+            oldVdb.setVdbName(uow, vdbName);     // Change VDBName back to original name (TODO fix importer to handle this)
+            if(oldHadDeploymentProperty) {
+                oldVdb.setProperty(uow, "deployment-name", vdbName + "-vdb.xml");  //$NON-NLS-1$ //$NON-NLS-2$
+            }
+
+            // Import to create a new Vdb in the workspace
+            VdbImporter importer = new VdbImporter(this.repo);
+            final ImportOptions importOptions = new ImportOptions();
+            importOptions.setOption( OptionKeys.NAME, newVdbName );
+            ImportMessages importMessages = new ImportMessages();
+            importer.importVdb(uow, vdbStream, this.repo.komodoWorkspace(uow), importOptions, importMessages);
+
+            if(importMessages.hasError()) {
+                LOGGER.debug("cloneVDB for '{0}' failed", newVdbName); //$NON-NLS-1$
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CLONE_VDB_ERROR, vdbName);
+            }
+                        
+            // Get the newly created VDB
+            final KomodoObject kobject2 = wMgr.getChild( uow, newVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            final Vdb vdb = wMgr.resolve( uow, kobject2, Vdb.class );
+
+            final RestVdb entity = entityFactory.create(vdb, uriInfo.getBaseUri(), uow );
+            final Response response = commit( uow, mediaTypes, entity );
+            return response;
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_CLONE_VDB_ERROR, vdbName);
+        }
+    }
+    
+    // Sets VDB properties using the supplied RestVdb object
+    private void setProperties(final UnitOfWork uow, Vdb vdb, RestVdb restVdb) throws KException {
+        // 'New' = requested RestVdb properties
+        String newDescription = restVdb.getDescription();
+        String newConnType = restVdb.getConnectionType();
+        String newOrigFilePath = restVdb.getOriginalFilePath();
+        int newVersion = restVdb.getVersion();
+
+        // 'Old' = current Vdb properties
+        String oldDescription = vdb.getDescription(uow);
+        String oldConnType = vdb.getConnectionType(uow);
+        String oldOrigFilePath = vdb.getOriginalFilePath(uow);
+        int oldVersion = vdb.getVersion(uow);
+
+        // Description
+        if ( !StringUtils.equals(newDescription, oldDescription) ) {
+            vdb.setDescription( uow, newDescription );
+        } 
+        // ConnectionType
+        if ( !StringUtils.equals(newConnType, oldConnType) ) {
+            vdb.setConnectionType( uow, newConnType );
+        } 
+        // Original FilePath
+        if ( !StringUtils.equals(newOrigFilePath, oldOrigFilePath) ) {
+            vdb.setOriginalFilePath( uow, newOrigFilePath );
+        } 
+        // version
+        if ( newVersion != oldVersion ) {
+            vdb.setVersion( uow, newVersion );
+        } 
+    }
+
+    // Sets Model properties using the supplied RestVdbModel object
+    private void setProperties(final UnitOfWork uow, Model model, RestVdbModel restVdbModel) throws KException {
+        // 'New' = requested RestVdbModel properties
+        String newDescription = restVdbModel.getDescription();
+        boolean newIsVisible = restVdbModel.isVisible();
+
+        // 'Old' = current Model properties
+        String oldDescription = model.getDescription(uow);
+        boolean oldIsVisible = model.isVisible(uow);
+
+        // Description
+        if ( !StringUtils.equals(newDescription, oldDescription) ) {
+            model.setDescription( uow, newDescription );
+        } 
+
+        // IsVisible
+        if ( newIsVisible != oldIsVisible ) {
+            model.setVisible(uow, newIsVisible);
+        } 
+        
+        model.isVisible(uow);
+    }
+
+    // Sets ModelSource properties using the supplied RestVdbModel object
+    private void setProperties(final UnitOfWork uow, ModelSource modelSource, RestVdbModelSource restVdbModelSource) throws KException {
+        // 'New' = requested RestVdbModelSource properties
+        String newTranslator = restVdbModelSource.getTranslator();
+        String newJndi = restVdbModelSource.getJndiName();
+
+        // 'Old' = current ModelSource properties
+        String oldTranslator = modelSource.getTranslatorName(uow);
+        String oldJndi = modelSource.getJndiName(uow);
+
+        // Translator
+        if ( !StringUtils.equals(newTranslator, oldTranslator) ) {
+            modelSource.setTranslatorName( uow, newTranslator );
+        } 
+        // JNDI
+        if ( !StringUtils.equals(newJndi, oldJndi) ) {
+            modelSource.setJndiName( uow, newJndi );
+        } 
+    }
 
     private Model findModel(UnitOfWork uow, List<MediaType> mediaTypes,
                                                 String modelName, Vdb vdb) throws KException {
@@ -289,99 +561,72 @@ public final class KomodoVdbService extends KomodoService {
 
         return permission;
     }
+    
+    /**
+     * Delete the specified Vdb from the komodo repository
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the name of the vdb to remove (cannot be <code>null</code>)
+     * @return a JSON document representing the results of the removal
+     * @throws KomodoRestException
+     *         if there is a problem performing the delete
+     */
+    @DELETE
+    @Path("{vdbName}")
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Delete a vdb from the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response deleteVdb( final @Context HttpHeaders headers,
+                               final @Context UriInfo uriInfo,
+                               final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
-//    /**
-//     * @param headers
-//     *        the request headers (never <code>null</code>)
-//     * @param uriInfo
-//     *        the request URI information (never <code>null</code>)
-//     * @param vdbName
-//     *        the id of the VDB being deleted (cannot be empty)
-//     * @return the JSON representation of the VDB that was deleted (never <code>null</code>)
-//     * @throws KomodoRestException
-//     *         if there is a problem deleting the specified workspace VDB or constructing the JSON representation
-//     */
-//    @DELETE
-//    @Path( "{vdbName}" )
-//    @Produces( MediaType.APPLICATION_JSON )
-//    public Response deleteVdb( final @Context HttpHeaders headers,
-//                               final @Context UriInfo uriInfo,
-//                               final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
-//        UnitOfWork uow = null;
-//
-//        try {
-//            uow = createTransaction(principal, "deleteVdb", false ); //$NON-NLS-1$
-//
-//            // make sure VDB exists
-//            if ( getWorkspaceManager(uow).hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
-//                final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-//                final Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
-//                vdb.remove( uow );
-//
-//                LOGGER.debug( "deleteVdb:VDB '{0}' was deleted", vdbName ); //$NON-NLS-1$
-//                final Response response = commit( uow, headers.getAcceptableMediaTypes(), RestBasicEntity.NO_CONTENT );
-//
-//                return response;
-//            }
-//
-//            LOGGER.debug( "deleteVdb:VDB '{0}' was not found to delete", vdbName ); //$NON-NLS-1$
-//            return commit( uow, headers.getAcceptableMediaTypes(), new ResourceNotFound( vdbName, Messages.getString( DELETE_OPERATION_NAME ) ) );
-//        } catch ( final Exception e ) {
-//            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
-//                uow.rollback();
-//            }
-//
-//            if ( e instanceof KomodoRestException ) {
-//                throw ( KomodoRestException )e;
-//            }
-//
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_VDBS_ERROR, vdbName ), e );
-//        }
-//    }
-//
-//    private Response doAddVdb( final UnitOfWork uow,
-//                               final URI baseUri,
-//                               final RestVdb restVdb ) throws KomodoRestException {
-//        assert( !uow.isRollbackOnly() );
-//        assert( uow.getState() == State.NOT_STARTED );
-//        assert( restVdb != null );
-//
-//        final String vdbName = restVdb.getId();
-//        String extPath = Messages.getString( NO_VALUE );
-//
-//        //TODO
-//
-//        try {
-//            // see if there is a external file path set
-//            if ( !StringUtils.isBlank( restVdb.getOriginalFilePath() ) ) {
-//                extPath = restVdb.getOriginalFilePath();
-//            }
-//
-//            final Vdb vdb = getWorkspaceManager(uow).createVdb( uow, null, vdbName, extPath );
-//            LOGGER.debug( "doAddVdb:VDB '{0}' was created", vdbName ); //$NON-NLS-1$
-//
-//            // TODO parse the JSON input to set VDB properties and children
-//            if ( !StringUtils.isBlank( restVdb.getDescription() ) ) {
-//                vdb.setDescription( uow, restVdb.getDescription() );
-//            }
-//
-//            final RestVdb entity = buildVdbEntity( vdb, baseUri, uow );
-//            final Response response = commit( uow, entity );
-//            return response;
-//        } catch ( final Exception e ) {
-//            if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
-//                uow.rollback();
-//            }
-//
-//            if ( e instanceof KomodoRestException ) {
-//                throw ( KomodoRestException )e;
-//            }
-//
-//            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
-//        }
-//
-//        return null;
-//    }
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_VDB_NAME);
+        }
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "removeVdbFromWorkspace", false); //$NON-NLS-1$
+
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            KomodoObject vdb = mgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            
+            if (vdb == null)
+                return Response.noContent().build();
+
+            mgr.delete(uow, vdb);
+
+            KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
+            kso.addAttribute(vdbName, "Successfully deleted"); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_DELETE_VDB_ERROR);
+        }
+    }
 
     /**
      * @param headers
@@ -506,7 +751,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_VDBS_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_VDBS_ERROR);
         }
     }
 
@@ -564,7 +809,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
         }
     }
 
@@ -631,7 +876,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_MODELS_ERROR, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_MODELS_ERROR, vdbName);
         }
     }
 
@@ -700,7 +945,321 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_MODEL_ERROR, modelName, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_MODEL_ERROR, modelName, vdbName);
+        }
+    }
+
+    /**
+     * Create a new Model in the specified VDB
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the vdb name (cannot be empty)
+     * @param modelName
+     *        the model name (cannot be empty)
+     * @param modelJson
+     *        the Model JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the new model (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the Model
+     */
+    @POST
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.MODEL_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Create a Model in a VDB")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response createModel( final @Context HttpHeaders headers,
+                                 final @Context UriInfo uriInfo,
+                                 final @PathParam( "vdbName" ) String vdbName,
+                                 final @PathParam( "modelName" ) String modelName,
+                                 final String modelJson) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the VDB name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_VDB_NAME);
+        }
+
+        // Error if the Model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_MODEL_NAME);
+        }
+
+        final RestVdbModel restVdbModel = KomodoJsonMarshaller.unmarshall( modelJson, RestVdbModel.class );
+        final String jsonModelName = restVdbModel.getId();
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonModelName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_MODEL_NAME);
+        }
+
+        // Error if the name parameter is different than JSON name
+        final boolean namesMatch = modelName.equals( jsonModelName );
+        if ( !namesMatch ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MODEL_NAME_DONT_MATCH_ERROR, modelName, jsonModelName);
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "createModel", false ); //$NON-NLS-1$
+            
+            // Get the specified VDB parent
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            KomodoObject kobject = mgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            Vdb vdb = mgr.resolve( uow, kobject, Vdb.class );
+            
+            if (vdb == null)
+                return Response.noContent().build();
+            
+            // Error if the VDB already contains a Model with the supplied name.
+            if( vdb.getModels(uow, modelName).length != 0 ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_VDB_MODEL_ALREADY_EXISTS, modelName);
+            }
+            
+            // create a new Model in the VDB
+            return doAddModel( uow, uriInfo.getBaseUri(), mediaTypes, vdb, restVdbModel );
+            
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_MODEL_ERROR, vdbName);
+        }
+    }
+    
+    private Response doAddModel( final UnitOfWork uow,
+                               final URI baseUri,
+                               final List<MediaType> mediaTypes,
+                               Vdb vdb,
+                               final RestVdbModel restVdbModel ) throws KomodoRestException {
+        assert( !uow.isRollbackOnly() );
+        assert( uow.getState() == State.NOT_STARTED );
+        assert( vdb != null );
+        assert( restVdbModel != null );
+
+        final String modelName = restVdbModel.getId();
+        try {
+            Model newModel = vdb.addModel(uow, modelName);
+
+            // Transfers the properties from the rest object to the created komodo service.
+            setProperties(uow, newModel, restVdbModel);
+
+            final RestVdbModel entity = entityFactory.create(newModel, baseUri, uow );
+            final Response response = commit( uow, mediaTypes, entity );
+            return response;
+        } catch ( final Exception e ) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_MODEL_ERROR, modelName ), e );
+        }
+    }
+
+    /**
+     * Update a Model in the specified VDB
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the vdb name (cannot be empty)
+     * @param modelName
+     *        the model name (cannot be empty)
+     * @param modelJson
+     *        the model JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the updated model (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error updating the model
+     */
+    @PUT
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.MODEL_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Update a Model in the VDB")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response updateModel( final @Context HttpHeaders headers,
+                                 final @Context UriInfo uriInfo,
+                                 final @PathParam( "vdbName" ) String vdbName,
+                                 final @PathParam( "modelName" ) String modelName,
+                                 final String modelJson) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_MISSING_VDB_NAME);
+        }
+
+        // Error if the model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_MISSING_MODEL_NAME);
+        }
+
+        final RestVdbModel restVdbModel = KomodoJsonMarshaller.unmarshall( modelJson, RestVdbModel.class );
+        final String jsonModelName = restVdbModel.getId();
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonModelName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_MODEL_NAME);
+        }
+
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "updateVdbModel", false ); //$NON-NLS-1$
+
+            // Get the specified VDB parent
+            KomodoObject kobject = getWorkspaceManager(uow).getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
+            
+            if (vdb == null) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_DNE);
+            }
+            
+            // Error if the VDB already contains a Model with the supplied name.
+            Model[] models = vdb.getModels(uow, modelName);
+            if( models.length == 0 ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_VDB_MODEL_ALREADY_EXISTS, modelName);
+            }
+
+            // Transfers the properties from the rest object to the model
+            setProperties(uow, models[0], restVdbModel);
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestVdbModel entity = entityFactory.create(models[0], uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("updateVdbModel: VdbModel '{0}' entity was updated", models[0].getName(uow)); //$NON-NLS-1$
+            final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
+            return response;
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_MODEL_ERROR);
+        }
+    }
+
+    /**
+     * Delete the specified Model from the specified VDB
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the name of the vdb (cannot be <code>null</code>)
+     * @param modelName
+     *        the name of the model to remove (cannot be <code>null</code>)
+     * @return a JSON document representing the results of the removal
+     * @throws KomodoRestException
+     *         if there is a problem performing the delete
+     */
+    @DELETE
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.MODEL_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Delete a Model from the VDB")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response deleteModel( final @Context HttpHeaders headers,
+                                 final @Context UriInfo uriInfo,
+                                 final @PathParam( "vdbName" ) String vdbName,
+                                 final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the Vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_VDB_NAME);
+        }
+        
+        // Error if the Model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_MODEL_NAME);
+        }
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "removeModelFromVdb", false); //$NON-NLS-1$
+
+            // Get the specified VDB parent
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            KomodoObject kobject = mgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            Vdb vdb = mgr.resolve( uow, kobject, Vdb.class );
+            
+            if (vdb == null)
+                return Response.noContent().build();
+            
+            Model[] models = vdb.getModels(uow, modelName);
+            if(models.length==0) {
+                return Response.noContent().build();
+            }
+            
+            vdb.removeModel(uow, modelName);
+            
+            KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
+            kso.addAttribute(modelName, "Successfully deleted"); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_DELETE_VDB_MODEL_ERROR);
         }
     }
 
@@ -767,7 +1326,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_TRANSLATORS_ERROR, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_TRANSLATORS_ERROR, vdbName);
         }
     }
 
@@ -853,7 +1412,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_TRANSLATOR_ERROR, translatorName, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_TRANSLATOR_ERROR, translatorName, vdbName);
         }
     }
 
@@ -920,7 +1479,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_IMPORTS_ERROR, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_IMPORTS_ERROR, vdbName);
         }
     }
 
@@ -1006,7 +1565,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_IMPORT_ERROR, importName, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_IMPORT_ERROR, importName, vdbName);
         }
     }
 
@@ -1073,7 +1632,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_DATA_ROLES_ERROR, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_DATA_ROLES_ERROR, vdbName);
         }
     }
 
@@ -1142,7 +1701,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_DATA_ROLE_ERROR, dataRoleId, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_DATA_ROLE_ERROR, dataRoleId, vdbName);
         }
     }
 
@@ -1172,7 +1731,7 @@ public final class KomodoVdbService extends KomodoService {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getSources( final @Context HttpHeaders headers,
+    public Response getModelSources( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
@@ -1220,7 +1779,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_SOURCES_ERROR, modelName, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_SOURCES_ERROR, modelName, vdbName);
         }
     }
 
@@ -1254,7 +1813,7 @@ public final class KomodoVdbService extends KomodoService {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getSource( final @Context HttpHeaders headers,
+    public Response getModelSource( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
@@ -1325,7 +1884,375 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_SOURCE_ERROR, sourceName, modelName, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_SOURCE_ERROR, sourceName, modelName, vdbName);
+        }
+    }
+
+    /**
+     * Create a new model source in the specified vdb model.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param modelName
+     *        the id of the model being retrieved (cannot be empty)
+     * @param sourceName
+     *        the id of the source being retrieved (cannot be empty)
+     * @param sourceJson
+     *        the ModelSource JSON representation (cannot be <code>null</code>)
+     * @return the JSON representation of the Model source (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB model or constructing the JSON representation
+     */
+    @POST
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.SOURCE_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response createModelSource( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            final @PathParam( "modelName" ) String modelName,
+                            @ApiParam(value = "Id of the model source to be fetched", required = true)
+                            final @PathParam( "sourceName" ) String sourceName,
+                            final String sourceJson) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the VDB name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_VDB_NAME);
+        }
+
+        // Error if the Model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_MODEL_NAME);
+        }
+
+        // Error if the ModelSource name is missing
+        if (StringUtils.isBlank( sourceName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_MODEL_SOURCE_NAME);
+        }
+
+        final RestVdbModelSource restVdbModelSource = KomodoJsonMarshaller.unmarshall( sourceJson, RestVdbModelSource.class );
+        final String jsonModelSourceName = restVdbModelSource.getId();
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonModelSourceName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_MODEL_SOURCE_NAME);
+        }
+
+        // Error if the name parameter is different than JSON name
+        final boolean namesMatch = sourceName.equals( jsonModelSourceName );
+        if ( !namesMatch ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MODEL_SOURCE_NAME_DONT_MATCH_ERROR, sourceName, jsonModelSourceName);
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "createModelSource", false ); //$NON-NLS-1$
+            
+            // Get the specified VDB parent
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            KomodoObject kobject = mgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            Vdb vdb = mgr.resolve( uow, kobject, Vdb.class );
+            
+            if (vdb == null)
+                return Response.noContent().build();
+            
+            Model[] models = vdb.getModels(uow, modelName);
+            if (models.length == 0) {
+                return Response.noContent().build();
+            }
+            Model model = models[0];
+            // Error if the VDB model already contains a Source with the supplied name.
+            if( model.getSources(uow, sourceName).length != 0 ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_VDB_MODEL_SOURCE_ALREADY_EXISTS, sourceName);
+            }
+            
+            // create a new ModelSource in the VDB Model
+            return doAddModelSource( uow, uriInfo.getBaseUri(), mediaTypes, model, restVdbModelSource );
+            
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_MODEL_SOURCE_ERROR, vdbName);
+        }
+    }
+    
+    private Response doAddModelSource( final UnitOfWork uow,
+                                 final URI baseUri,
+                                 final List<MediaType> mediaTypes,
+                                 Model model,
+                                 final RestVdbModelSource restVdbModelSource ) throws KomodoRestException {
+        assert( !uow.isRollbackOnly() );
+        assert( uow.getState() == State.NOT_STARTED );
+        assert( model != null );
+        assert( restVdbModelSource != null );
+
+        final String sourceName = restVdbModelSource.getId();
+        try {
+            ModelSource newSource = model.addSource(uow, sourceName);
+
+            // Transfers the properties from the rest object to the created model source
+            setProperties(uow, newSource, restVdbModelSource);
+
+            final RestVdbModelSource entity = entityFactory.create(newSource, baseUri, uow );
+            final Response response = commit( uow, mediaTypes, entity );
+            return response;
+        } catch ( final Exception e ) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_MODEL_SOURCE_ERROR, sourceName ), e );
+        }
+    }
+    
+    /**
+     * Update a model source in the specified VDB model.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param modelName
+     *        the id of the model being retrieved (cannot be empty)
+     * @param sourceName
+     *        the id of the source being retrieved (cannot be empty)
+     * @param sourceJson
+     *        the ModelSource JSON representation (cannot be <code>null</code>)
+     * @return the JSON representation of the VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @PUT
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.SOURCE_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 404, message = "No source could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response updateModelSource( final @Context HttpHeaders headers,
+                                       final @Context UriInfo uriInfo,
+                                       @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                                       final @PathParam( "vdbName" ) String vdbName,
+                                       @ApiParam(value = "Id of the model to be fetched", required = true)
+                                       final @PathParam( "modelName" ) String modelName,
+                                       @ApiParam(value = "Id of the model source to be fetched", required = true)
+                                       final @PathParam( "sourceName" ) String sourceName,
+                                       final String sourceJson) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_MISSING_VDB_NAME);
+        }
+
+        // Error if the model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_MISSING_MODEL_NAME);
+        }
+
+        // Error if the modelSource name is missing
+        if (StringUtils.isBlank( sourceName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_MISSING_MODEL_SOURCE_NAME);
+        }
+
+        final RestVdbModelSource restVdbModelSource = KomodoJsonMarshaller.unmarshall( sourceJson, RestVdbModelSource.class );
+        final String jsonModelSourceName = restVdbModelSource.getId();
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonModelSourceName ) ) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_MODEL_SOURCE_NAME);
+        }
+
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "updateModelSource", false ); //$NON-NLS-1$
+
+            // Get the specified VDB parent
+            KomodoObject kobject = getWorkspaceManager(uow).getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
+            
+            if (vdb == null) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_DNE);
+            }
+            
+            // Error if the VDB already contains a Model with the supplied name.
+            Model[] models = vdb.getModels(uow, modelName);
+            if( models.length == 0 ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_MODEL_DNE);
+            }
+            Model model = models[0];
+
+            // Error if the VDB Model already contains a Source with the supplied name.
+            ModelSource[] sources = model.getSources(uow, sourceName);
+            if( sources.length == 0 ) {
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_VDB_MODEL_SOURCE_ALREADY_EXISTS, modelName);
+            }
+
+            // Transfers the properties from the rest object to the model
+            setProperties(uow, sources[0], restVdbModelSource);
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestVdbModelSource entity = entityFactory.create(sources[0], uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("updateVdbModelSource: VdbModelSource '{0}' entity was updated", sources[0].getName(uow)); //$NON-NLS-1$
+            final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
+            return response;
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_UPDATE_VDB_MODEL_SOURCE_ERROR);
+        }
+    }
+    
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param modelName
+     *        the id of the model being retrieved (cannot be empty)
+     * @param sourceName
+     *        the id of the source being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @DELETE
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.SOURCE_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 404, message = "No source could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response deleteModelSource( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            final @PathParam( "modelName" ) String modelName,
+                            @ApiParam(value = "Id of the model source to be fetched", required = true)
+                            final @PathParam( "sourceName" ) String sourceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the Vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_VDB_NAME);
+        }
+        
+        // Error if the Model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_MODEL_NAME);
+        }
+        
+        // Error if the ModelSource name is missing
+        if (StringUtils.isBlank( sourceName )) {
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_MODEL_SOURCE_NAME);
+        }
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "removeModelSourceFromModel", false); //$NON-NLS-1$
+
+            // Get the specified VDB parent
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            KomodoObject kobject = mgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            Vdb vdb = mgr.resolve( uow, kobject, Vdb.class );
+            
+            if (vdb == null)
+                return Response.noContent().build();
+            
+            Model[] models = vdb.getModels(uow, modelName);
+            if(models.length==0) {
+                return Response.noContent().build();
+            }
+            Model model = models[0];
+            
+            model.removeSource(uow, sourceName);
+            
+            KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
+            kso.addAttribute(modelName, "Successfully deleted"); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_DELETE_VDB_MODEL_SOURCE_ERROR);
         }
     }
 
@@ -1344,9 +2271,9 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSIONS_SEGMENT)
+           V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSIONS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Find all permissions belonging to the vdb data role", response = RestVdbPermission[].class)
     @ApiResponses(value = {
@@ -1403,7 +2330,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_PERMISSIONS_ERROR, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_PERMISSIONS_ERROR, vdbName);
         }
     }
 
@@ -1424,10 +2351,10 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSION_PLACEHOLDER)
+           V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSION_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Find the named permission belonging to the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
@@ -1480,7 +2407,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_PERMISSION_ERROR, permissionId, dataRoleId, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_PERMISSION_ERROR, permissionId, dataRoleId, vdbName);
         }
     }
 
@@ -1501,11 +2428,11 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.CONDITIONS_SEGMENT)
+           V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.CONDITIONS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Find the conditions belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
@@ -1564,7 +2491,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_CONDITIONS_ERROR, permissionId, dataRoleId, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_CONDITIONS_ERROR, permissionId, dataRoleId, vdbName);
         }
     }
 
@@ -1587,12 +2514,12 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.CONDITIONS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.CONDITION_PLACEHOLDER)
+           V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.CONDITIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.CONDITION_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Find the condition belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
@@ -1676,7 +2603,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_CONDITION_ERROR, conditionId, permissionId, dataRoleId, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_CONDITION_ERROR, conditionId, permissionId, dataRoleId, vdbName);
         }
     }
 
@@ -1697,11 +2624,11 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.MASKS_SEGMENT)
+           V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MASKS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Find the masks belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
@@ -1760,7 +2687,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_MASKS_ERROR, permissionId, dataRoleId, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_MASKS_ERROR, permissionId, dataRoleId, vdbName);
         }
     }
 
@@ -1783,12 +2710,12 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
-                V1Constants.MASKS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.MASK_PLACEHOLDER)
+           V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MASKS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.MASK_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Find the mask belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
@@ -1872,7 +2799,7 @@ public final class KomodoVdbService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_MASK_ERROR, maskId, permissionId, dataRoleId, vdbName);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_MASK_ERROR, maskId, permissionId, dataRoleId, vdbName);
         }
     }
 }

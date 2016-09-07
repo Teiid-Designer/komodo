@@ -47,6 +47,23 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * The default expiration time of all cached teiid objects in the teiid cache
      */
     int DEFAULT_TEIID_CACHE_THRESHOLD = 10 * 60 * 1000;
+    
+    /**
+     * The folder under which all cached vdbs will be placed
+     */
+    String VDBS_FOLDER = "vdbs";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached dataSources will be placed
+     */
+    String DATA_SOURCES_FOLDER = "dataSources";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached translators will be placed
+     */
+    String TRANSLATORS_FOLDER = "translators";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached drivers will be placed
+     */
+    String DRIVERS_FOLDER = "drivers";  //$NON-NLS-1$
 
     /**
      * The type identifier.
@@ -72,10 +89,10 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
          */
         @Override
         public CachedTeiid create( final UnitOfWork transaction,
-                             final Repository repository,
-                             final KomodoObject parent,
-                             final String id,
-                             final RelationalProperties properties ) throws KException {
+                                   final Repository repository,
+                                   final KomodoObject parent,
+                                   final String id,
+                                   final RelationalProperties properties ) throws KException {
             return new CachedTeiidImpl(transaction, repository, id);
         }
 
@@ -202,6 +219,36 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      *         if an error occurs
      */
     Driver getDriver(final UnitOfWork transaction, String name) throws KException;
+
+    /**
+     * Removes a Vdb from the cache, if present
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name the Vdb name
+     * @throws KException
+     *         if an error occurs
+     */
+    void removeVdb(final UnitOfWork transaction, String name) throws KException;
+
+    /**
+     * Removes a dataSource from the cache, if present
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name the dataSource name
+     * @throws KException
+     *         if an error occurs
+     */
+    void removeDataSource(final UnitOfWork transaction, String name) throws KException;
+
+    /**
+     * Removes a driver from the cache, if present
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name the driver name
+     * @throws KException
+     *         if an error occurs
+     */
+    void removeDriver(final UnitOfWork transaction, String name) throws KException;
 
     /**
      * @param uow

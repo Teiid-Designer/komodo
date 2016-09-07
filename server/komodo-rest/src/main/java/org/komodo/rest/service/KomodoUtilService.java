@@ -154,7 +154,7 @@ public final class KomodoUtilService extends KomodoService {
         try {
             return commit(uow, mediaTypes, repoStatus);
         } catch (Exception ex) {
-            return createErrorResponse(mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
         }
     }
 
@@ -319,17 +319,11 @@ public final class KomodoUtilService extends KomodoService {
 
             KomodoType komodoType = KomodoType.getKomodoType(ktype);
             if (komodoType == null) {
-                String msg = RelationalMessages.getString(
-                                                          RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype );
-                Object response = createErrorResponseEntity(mediaTypes, msg);
-                return Response.status(Status.NOT_FOUND).entity(response).build();
+                return createErrorResponse(Status.NOT_FOUND, mediaTypes, RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype);
             } else {
                 schema = KomodoJsonMarshaller.teiidElementSchema(komodoType);
                 if (EMPTY_STRING.equals(schema)) {
-                    String msg = RelationalMessages.getString(
-                                                          RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype );
-                    Object response = createErrorResponseEntity(mediaTypes, msg);
-                    return Response.status(Status.NOT_FOUND).entity(response).build();
+                    return createErrorResponse(Status.NOT_FOUND, mediaTypes, RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype);
                 }
             }
 
@@ -340,7 +334,7 @@ public final class KomodoUtilService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
         }
     }
 }

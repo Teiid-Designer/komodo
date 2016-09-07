@@ -103,6 +103,12 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         this.setJdbcSecure(transaction, srcTeiid.isJdbcSecure(transaction));
 
         this.setTimestamp(transaction, System.currentTimeMillis());
+        
+        // Add child folders which will contain the various types
+        this.addChild(transaction, CachedTeiid.VDBS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        this.addChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        this.addChild(transaction, CachedTeiid.TRANSLATORS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        this.addChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
     }
 
     @Override
@@ -135,7 +141,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
 
     /**
-     * @param transaction
+     * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid timestamp property (never empty)
      * @throws KException
@@ -151,7 +157,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
 
     protected void setTimestamp(UnitOfWork uow, long timestamp) throws KException {
-        setObjectProperty(uow, "setTimestamp", KomodoLexicon.CachedTeiid.TIMESTAMP, timestamp);
+        setObjectProperty(uow, "setTimestamp", KomodoLexicon.CachedTeiid.TIMESTAMP, timestamp); //$NON-NLS-1$
     }
 
     /**
@@ -423,8 +429,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        final List<Vdb> result = new ArrayList<>();
-        for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns)) {
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.VDBS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return new Vdb[0];
+        }
+
+        final List<Vdb> result = new ArrayList<Vdb>();
+        for (final KomodoObject kobject : folderNode.getChildrenOfType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns)) {
             final Vdb vdb = new VdbImpl(transaction, getRepository(), kobject.getAbsolutePath());
             result.add(vdb);
         }
@@ -441,8 +452,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        if (hasChild(transaction, name, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
-            KomodoObject kobject = getChild(transaction, name, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.VDBS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return null;
+        }
+
+        if (folderNode.hasChild(transaction, name, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             return new VdbImpl(transaction, getRepository(), kobject.getAbsolutePath());
         }
 
@@ -454,8 +470,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        final List<Translator> result = new ArrayList<>();
-        for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Translator.TRANSLATOR, namePatterns)) {
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.TRANSLATORS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return new Translator[0];
+        }
+
+        final List<Translator> result = new ArrayList<Translator>();
+        for (final KomodoObject kobject : folderNode.getChildrenOfType(transaction, VdbLexicon.Translator.TRANSLATOR, namePatterns)) {
             Translator translator = new TranslatorImpl(transaction, getRepository(), kobject.getAbsolutePath());
             result.add(translator);
         }
@@ -472,8 +493,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        final List<Datasource> result = new ArrayList<>();
-        for (final KomodoObject kobject : super.getChildrenOfType(transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns)) {
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return new Datasource[0];
+        }
+
+        final List<Datasource> result = new ArrayList<Datasource>();
+        for (final KomodoObject kobject : folderNode.getChildrenOfType(transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns)) {
             Datasource dataSource = new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
             result.add(dataSource);
         }
@@ -490,8 +516,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        if (hasChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE)) {
-            KomodoObject kobject = getChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE);
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return null;
+        }
+
+        if (folderNode.hasChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE);
             return new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
         }
 
@@ -502,6 +533,11 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     public Driver[] getDrivers(final UnitOfWork transaction, final String... namePatterns) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return new Driver[0];
+        }
 
         final List<Driver> result = new ArrayList<Driver>();
         for (final KomodoObject kobject : super.getChildrenOfType(transaction, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE)) {
@@ -521,11 +557,76 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        if (hasChild(transaction, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE)) {
-            KomodoObject kobject = getChild(transaction, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DRIVERS_FOLDER, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+        if(folderNode==null) {
+            return null;
+        }
+
+        if (folderNode.hasChild(transaction, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
             return new DriverImpl(transaction, getRepository(), kobject.getAbsolutePath());
         }
 
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.teiid.CachedTeiid#removeVdb(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void removeVdb(UnitOfWork transaction,
+                          String name) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.VDBS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return;
+        }
+
+        if (folderNode.hasChild(transaction, name, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            kobject.remove(transaction);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.teiid.CachedTeiid#removeDataSource(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void removeDataSource(UnitOfWork transaction,
+                                 String name) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return;
+        }
+
+        if (folderNode.hasChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE);
+            kobject.remove(transaction);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.teiid.CachedTeiid#removeDriver(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void removeDriver(UnitOfWork transaction,
+                             String name) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        if(folderNode==null) {
+            return;
+        }
+
+        if (folderNode.hasChild(transaction, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+            kobject.remove(transaction);
+        }
     }
 }

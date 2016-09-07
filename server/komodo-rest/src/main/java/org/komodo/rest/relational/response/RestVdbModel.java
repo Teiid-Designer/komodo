@@ -131,7 +131,7 @@ public final class RestVdbModel extends RestBasicEntity {
      */
     public Type getModelType() {
         Object type = tuples.get(MODEL_TYPE_LABEL);
-        return type != null ? Type.findType(type.toString()) : null;
+        return type != null ? Type.findType(type.toString()) : Type.DEFAULT_VALUE;
     }
 
     /**
@@ -146,7 +146,7 @@ public final class RestVdbModel extends RestBasicEntity {
      */
     public boolean isVisible() {
         Object visible = tuples.get(VISIBLE_LABEL);
-        return visible != null ? Boolean.parseBoolean(visible.toString()) : null;
+        return visible != null ? Boolean.parseBoolean(visible.toString()) : Model.DEFAULT_VISIBLE;
     }
 
     /**
@@ -161,7 +161,7 @@ public final class RestVdbModel extends RestBasicEntity {
      */
     public String getMetadataType() {
         Object type = tuples.get(METADATA_TYPE_LABEL);
-        return type != null ? type.toString() : null;
+        return type != null ? type.toString() : Model.DEFAULT_METADATA_TYPE;
     }
 
     /**

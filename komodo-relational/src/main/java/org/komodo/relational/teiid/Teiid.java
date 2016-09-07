@@ -149,6 +149,7 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
      * @return id of this teiid model
      * @throws KException
      */
+    @Override
     String getId(UnitOfWork uow) throws KException;
 
     /**
@@ -157,12 +158,13 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
      * @return the teiid version
      * @throws KException
      */
+    @Override
     TeiidVersion getVersion(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
      *         the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param the teiid version
+     * @param version the teiid version
      * @throws KException
      */
     void setVersion(UnitOfWork uow, TeiidVersion version) throws KException;
@@ -257,4 +259,44 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
      * @throws KException
      */
     CachedTeiid importContent(UnitOfWork transaction) throws KException;
+
+    /**
+     * Updates the teiid cache with the specified server VDB.  If cache object with same name exists, it is replaced.
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param vdbName 
+     *        the VDB name
+     * @throws KException
+     */
+    void updateCacheWithServerVdb(UnitOfWork uow, String vdbName) throws KException;
+    
+    /**
+     * Updates the teiid cache with the specified server DataSource.  If cache object with same name exists, it is replaced.
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param dataSourceName 
+     *        the DataSource name
+     * @throws KException
+     */
+    void updateCacheWithServerDataSource(UnitOfWork uow, String dataSourceName) throws KException;
+    
+    /**
+     * Updates the teiid cache with the specified server Translator.  If cache object with same name exists, it is replaced.
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param translatorName 
+     *        the Translator name
+     * @throws KException
+     */
+    void updateCacheWithServerTranslator(UnitOfWork uow, String translatorName) throws KException;
+    
+    /**
+     * Updates the teiid cache with the specified server Translator.  If cache object with same name exists, it is replaced.
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param driverName 
+     *        the Driver name
+     * @throws KException
+     */
+    void updateCacheWithServerDriver(UnitOfWork uow, String driverName) throws KException;
 }

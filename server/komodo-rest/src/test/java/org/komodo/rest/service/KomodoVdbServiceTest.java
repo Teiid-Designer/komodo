@@ -504,6 +504,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
         _uriBuilder.addSetting(settings, SettingNames.PARENT_PATH, parentUri);
         _uriBuilder.addSetting(settings, SettingNames.TRANSLATOR_NAME, "rest");
+        _uriBuilder.addSetting(settings, SettingNames.ADD_TRANSLATORS_SEGMENT, "true");
         URI uri = _uriBuilder.vdbTranslatorUri(LinkType.SELF, settings);
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
         ClientResponse<String> response = request.get(String.class);

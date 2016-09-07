@@ -31,6 +31,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.resource.Driver;
@@ -194,7 +195,7 @@ public final class KomodoDriverService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DRIVER_SERVICE_GET_DRIVERS_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.DRIVER_SERVICE_GET_DRIVERS_ERROR);
         }
     }
         

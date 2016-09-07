@@ -99,6 +99,11 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         TRANSLATOR_NAME,
 
         /**
+         * Indicates if adding Translators segment for VDB translators
+         */
+        ADD_TRANSLATORS_SEGMENT,
+
+        /**
          * Name of the data source
          */
         DATA_SOURCE_NAME,
@@ -140,12 +145,22 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         this.baseUri = baseUri;
     }
 
-    private boolean isCachedTeiid(UnitOfWork uow, KomodoObject kObject) throws KException {
+    private boolean isCachedTeiidFolder(UnitOfWork uow, KomodoObject kObject) throws KException {
         if (kObject == null)
             return false;
 
         Descriptor type = kObject.getPrimaryType(uow);
-        return type != null && KomodoLexicon.CachedTeiid.NODE_TYPE.equals(type.getName());
+        if (type == null) return false;
+
+        // Check this type is a folder, then check parent is CachedTeiid
+        if(KomodoLexicon.Folder.NODE_TYPE.equals(type.getName())) {
+            KomodoObject parentObj = kObject.getParent(uow);
+            if(parentObj != null) {
+                Descriptor parentType = parentObj.getPrimaryType(uow);
+                return parentType!=null && KomodoLexicon.CachedTeiid.NODE_TYPE.equals(parentType.getName());
+            }
+        }
+        return false;
     }
 
     private boolean isVdb(UnitOfWork uow, KomodoObject kObject) throws KException {
@@ -393,13 +408,11 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI vdbParentUri(Vdb vdb, UnitOfWork uow) throws KException {
         KomodoObject parent = vdb.getParent(uow);
-        URI parentUri;
-        if (isCachedTeiid(uow, parent))
-            parentUri = cacheTeiidVdbsUri(parent.getName(uow));
-        else
-            parentUri = workspaceVdbsUri();
+        if (isCachedTeiidFolder(uow, parent)) {
+            return cachedTeiidUri(parent.getName(uow));
+        }
 
-        return parentUri;
+        return workspaceVdbsUri();
     }
 
     /**
@@ -534,7 +547,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI vdbTranslatorParentUri(Translator translator, UnitOfWork uow) throws KException {
         KomodoObject parent = translator.getParent(uow);
-        if (isCachedTeiid(uow, parent)) {
+        if (isCachedTeiidFolder(uow, parent)) {
             return cachedTeiidUri(parent.getName(uow));
         }
         else if (isVdb(uow, parent)) {
@@ -562,9 +575,15 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         switch (linkType) {
             case SELF:
                 String name = setting(settings, SettingNames.TRANSLATOR_NAME);
-                result = UriBuilder.fromUri(parentUri)
-                                                .path(TRANSLATORS_SEGMENT)
-                                                .path(name).build();
+                // Adds translators segment if supplied.
+                if(settings.containsKey(SettingNames.ADD_TRANSLATORS_SEGMENT.name())) {
+                    result = UriBuilder.fromUri(parentUri)
+                    .path(TRANSLATORS_SEGMENT)
+                    .path(name).build();
+                } else {
+                    result = UriBuilder.fromUri(parentUri)
+                    .path(name).build();
+                }
                 break;
             case PARENT:
                 result = parentUri;
@@ -788,7 +807,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI dataSourceParentUri(Datasource dataSource, UnitOfWork uow) throws KException {
         KomodoObject parent = dataSource.getParent(uow);
-        if (isCachedTeiid(uow, parent)) {
+        if (isCachedTeiidFolder(uow, parent)) {
             return cachedTeiidUri(parent.getName(uow));
         }
 
@@ -811,8 +830,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             case SELF:
                 String name = setting(settings, SettingNames.DATA_SOURCE_NAME);
                 result = UriBuilder.fromUri(parentUri)
-                                                .path(DATA_SOURCES_SEGMENT)
-                                                .path(name).build();
+                                   .path(name).build();
                 break;
             case PARENT:
                 result = parentUri;

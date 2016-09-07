@@ -130,6 +130,8 @@
  + * (vdb:virtualDatabase) copy
  + * (vdb:translator) copy
  + * (dv:connection) copy
+ + * (dv:driverFile) copy
+ + * (tko:folder) copy
  - tko:timestamp (long)
 
 /*
@@ -160,6 +162,8 @@
   + * (dv:connection) copy
   + * (dv:dataService) copy
   + * (tko:schema) copy
+  + * (vdb:translator) copy
+  + * (dv:driverFile) copy
 
 /*
  * The schemas/models grouping node used by the library. Child nodes represent Teiid DDL.

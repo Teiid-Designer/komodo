@@ -174,20 +174,11 @@ public final class KomodoSearchService extends KomodoService {
         if (searchName == null && type == null && path == null &&
             parent == null && ancestor == null && contains == null && objectName == null) {
 
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
         }
 
         if (parent != null && ancestor != null) {
-
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR);
         }
 
         return Response.ok().build();
@@ -296,7 +287,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
         }
     }
 
@@ -351,11 +342,7 @@ public final class KomodoSearchService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.SEARCH_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.SEARCH_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -404,7 +391,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
         }
     }
 
@@ -478,7 +465,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_WKSP_SEARCHES_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SEARCH_SERVICE_WKSP_SEARCHES_ERROR);
         }
     }
 
@@ -540,7 +527,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_SAVE_SEARCH_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SEARCH_SERVICE_SAVE_SEARCH_ERROR);
         }
     }
 
@@ -602,7 +589,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_DELETE_SEARCH_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SEARCH_SERVICE_DELETE_SEARCH_ERROR);
         }
     }
 }
