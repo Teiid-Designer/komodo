@@ -5,12 +5,22 @@ This article provides instructions for installing and launching the VDB Builder 
 ### Installation options
 
 To install the VDB Builder cli, you have two options:
-1. Build latest source
-2. Download a pre-built kit
+1. Download a pre-built kit
+2. Build latest source
 
-### 1. Build latest source
+### 1. Download a pre-built kit
 
-To build a kit from the latest source:
+This is the preferred installation method.  A kit is available on sourceforge :
+
+1. Download the [VDB Builder zip](http://sourceforge.net/projects/teiid/files/vdb-builder/0.x%20Releases/vdbbuilder-console-0.0.4-20160908.zip/download)
+
+2. Copy the VDB Builder zip file into a folder on your file system and extract it.
+
+3. Open a terminal window at the install folder, then at the command prompt enter __`$ ./vdbbuilder.sh`__ 
+
+### 2. Build from source repository
+
+Alternately, you can build from our source repository.  To build a kit from the latest source:
 
 1. Go to our [GitHub Repository](https://github.com/Teiid-Designer/komodo) 
 
@@ -21,14 +31,4 @@ To build a kit from the latest source:
 4. Open a terminal window at the install folder, then at the command prompt enter __`$ ./vdbbuilder.sh`__ - as shown below
 
 ![CLI startup](img/cli-startup.png)
-
-### 2. Download a pre-build kit
-
-A pre-built zip file is also available on sourceforge :
-
-1. Download the [VDB Builder zip](http://sourceforge.net/projects/teiid/files/vdb-builder/0.x%20Releases/vdbbuilder-console-0.0.4-20160405.zip/download)
-
-2. Copy the VDB Builder zip file into a folder on your file system and extract it.
-
-3. Open a terminal window at the install folder, then at the command prompt enter __`$ ./vdbbuilder.sh`__ 
 
