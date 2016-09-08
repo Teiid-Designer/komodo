@@ -288,19 +288,24 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     private void waitForVdb(String vdbName) throws Exception {
         TeiidVdb vdb = null;
-        //
-        // Timeout after 30 seconds
-        //
-        for (int i = 0; vdb == null && i < 10; ++i) {
-            vdb = helperInstance.getVdb(vdbName);
-            if (vdb != null && vdb.isActive())
-                break; // Found it and its active
+        int TIMEOUT = 40;
 
-            if (i >= 10)
-                fail("Timed out waiting for vdb " + vdbName + " to become active");
+        //
+        // Timeout after 120 seconds
+        //
+        for (int i = 0; vdb == null || i < TIMEOUT; ++i) {
+            vdb = helperInstance.getVdb(vdbName);
+
+            System.out.println("Waiting on status of vdb " + vdbName + " active: " + vdb.isActive() + " loading: " + vdb.isLoading() + " ....");
+
+            if (vdb != null && vdb.isActive())
+                return; // Found it and its active
 
             wait(3);
+            helperInstance.reconnect();
         }
+
+        fail("Timed out waiting for vdb " + vdbName + " to become active");
     }
 
     private void wait(int seconds) {
