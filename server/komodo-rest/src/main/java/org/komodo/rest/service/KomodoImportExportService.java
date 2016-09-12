@@ -269,7 +269,7 @@ public class KomodoImportExportService extends KomodoService {
             String encContent = encode(content);
             status.setContent(encContent);
 
-            KLog.getLogger().info("Encrypted content of " + downloadableFile.getAbsolutePath() + ": " + encContent + " SIZE: "
+            KLog.getLogger().debug("Encrypted content of " + downloadableFile.getAbsolutePath() + ": " + encContent + " SIZE: "
                                   + downloadableFile.length());
 
         } finally {
