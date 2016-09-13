@@ -154,7 +154,7 @@ public final class KomodoUtilService extends KomodoService {
         try {
             return commit(uow, mediaTypes, repoStatus);
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
         }
     }
 
@@ -334,7 +334,7 @@ public final class KomodoUtilService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
         }
     }
 }

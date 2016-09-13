@@ -25,15 +25,11 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
-import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_JSON_MISSING_NAME;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
-import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_SERVICE_DNE;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -46,9 +42,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-
 import org.komodo.core.KEngine;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -68,7 +62,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -217,7 +210,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICES_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICES_ERROR);
         }
     }
 
@@ -274,7 +267,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICE_ERROR, dataserviceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICE_ERROR, dataserviceName);
         }
     }
 
@@ -315,20 +308,20 @@ public final class KomodoDataserviceService extends KomodoService {
 
         // Error if the dataservice name is missing
         if (StringUtils.isBlank( dataserviceName )) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_MISSING_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_MISSING_NAME);
         }
 
         final RestDataservice restDataservice = KomodoJsonMarshaller.unmarshall( dataserviceJson, RestDataservice.class );
         final String jsonDataserviceName = restDataservice.getId();
         // Error if the name is missing from the supplied json body
         if ( StringUtils.isBlank( jsonDataserviceName ) ) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.getString(DATASERVICE_SERVICE_JSON_MISSING_NAME));
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_JSON_MISSING_NAME);
         }
 
         // Error if the name parameter is different than JSON name
         final boolean namesMatch = dataserviceName.equals( jsonDataserviceName );
         if ( !namesMatch ) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, DATASERVICE_SERVICE_SERVICE_NAME_ERROR, dataserviceName, jsonDataserviceName);
+            return createErrorResponseWithForbidden(mediaTypes, DATASERVICE_SERVICE_SERVICE_NAME_ERROR, dataserviceName, jsonDataserviceName);
         }
 
         UnitOfWork uow = null;
@@ -338,7 +331,7 @@ public final class KomodoDataserviceService extends KomodoService {
             
             // Error if the repo already contains a dataservice with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, dataserviceName ) ) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_ALREADY_EXISTS);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_ALREADY_EXISTS);
             }
 
             // create new Dataservice
@@ -353,7 +346,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR, dataserviceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR, dataserviceName);
         }
     }
 
@@ -394,18 +387,18 @@ public final class KomodoDataserviceService extends KomodoService {
 
         // Error if the dataservice name is missing
         if (StringUtils.isBlank( dataserviceName )) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_MISSING_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_MISSING_NAME);
         }
 
         // Error if the new dataservice name is missing
         if ( StringUtils.isBlank( newDataserviceName ) ) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_MISSING_NEW_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_MISSING_NEW_NAME);
         }
 
         // Error if the name parameter and new name are the same
         final boolean namesMatch = dataserviceName.equals( newDataserviceName );
         if ( namesMatch ) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR, newDataserviceName);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR, newDataserviceName);
         }
 
         UnitOfWork uow = null;
@@ -415,7 +408,7 @@ public final class KomodoDataserviceService extends KomodoService {
             
             // Error if the repo already contains a dataservice with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, newDataserviceName ) ) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS);
             }
 
             // create new Dataservice
@@ -440,7 +433,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_DATASERVICE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_DATASERVICE_ERROR);
         }
     }
 
@@ -481,8 +474,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
         // Error if the dataservice name is missing 
         if (StringUtils.isBlank( dataserviceName )) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, 
-                                       RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_MISSING_NAME));
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_MISSING_NAME);
         }
 
 
@@ -490,8 +482,7 @@ public final class KomodoDataserviceService extends KomodoService {
         final String jsonDataserviceName = restDataservice.getId();
         // Error if the name is missing from the supplied json body
         if ( StringUtils.isBlank( jsonDataserviceName ) ) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, 
-                                       RelationalMessages.getString(DATASERVICE_SERVICE_JSON_MISSING_NAME));
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_JSON_MISSING_NAME);
         }
 
         UnitOfWork uow = null;
@@ -501,8 +492,7 @@ public final class KomodoDataserviceService extends KomodoService {
             final boolean exists = getWorkspaceManager(uow).hasChild( uow, dataserviceName );
             // Error if the specified service does not exist
             if ( !exists ) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, 
-                                           RelationalMessages.getString(DATASERVICE_SERVICE_UPDATE_SERVICE_DNE));
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_SERVICE_DNE);
             }
 
             // must be an update
@@ -532,7 +522,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR);
         }
     }
 
@@ -635,7 +625,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR);
         }
     }
 

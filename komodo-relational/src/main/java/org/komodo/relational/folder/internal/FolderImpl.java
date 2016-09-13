@@ -23,6 +23,7 @@ package org.komodo.relational.folder.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.dataservice.Dataservice;

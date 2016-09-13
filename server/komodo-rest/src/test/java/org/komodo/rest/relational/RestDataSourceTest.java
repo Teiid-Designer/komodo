@@ -28,11 +28,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.ws.rs.core.UriBuilder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;

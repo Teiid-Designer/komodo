@@ -69,16 +69,6 @@ public final class RestVdb extends RestBasicEntity {
     public static final String VERSION_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.VERSION);
 
     /**
-     * Version default if not set
-     */
-    public static final int VERSION_DEFAULT = 1;
-
-    /**
-     * original file path default
-     */
-    public static final String PATH_DEFAULT = "path"; //$NON-NLS-1$
-
-    /**
      * Constructor for use when deserializing
      */
     public RestVdb() {
@@ -160,7 +150,7 @@ public final class RestVdb extends RestBasicEntity {
      */
     public String getOriginalFilePath() {
         Object path = tuples.get(FILE_PATH_LABEL);
-        return path != null ? path.toString() : PATH_DEFAULT;
+        return path != null ? path.toString() : null;
     }
 
     /**
@@ -205,7 +195,7 @@ public final class RestVdb extends RestBasicEntity {
      */
     public int getVersion() {
         Object version = tuples.get(VERSION_LABEL);
-        return version != null ? Integer.parseInt(version.toString()) : VERSION_DEFAULT;
+        return version != null ? Integer.parseInt(version.toString()) : 1;
     }
 
     /**

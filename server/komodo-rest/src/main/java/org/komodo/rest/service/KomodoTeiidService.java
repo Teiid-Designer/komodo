@@ -187,26 +187,21 @@ public class KomodoTeiidService extends KomodoService {
                                                                            List<MediaType> mediaTypes) {
         if (adminUser == null && adminPasswd == null && adminSecure == null &&
             jdbcUser == null && jdbcPasswd == null && jdbcSecure == null) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_EMPTY_CREDENTIAL_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_EMPTY_CREDENTIAL_ERROR);
         }
 
         return Response.ok().build();
     }
 
     private Response checkFileAttributes(KomodoFileAttributes kfa, List<MediaType> mediaTypes) throws Exception {
-        String errorMessage = null;
         if (kfa == null || (kfa.getName() == null && kfa.getContent() == null))
-            errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
 
         if (kfa.getName() == null)
-            errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_NAME);
 
         if (kfa.getContent() == null)
-            errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_CONTENT);
-
-        if (errorMessage != null) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, errorMessage);
-        }
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_CONTENT);
 
         return Response.ok().build();
     }
@@ -284,7 +279,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_STATUS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_STATUS_ERROR);
         }
     }
 
@@ -335,7 +330,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_VDBS_STATUS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_VDBS_STATUS_ERROR);
         }
     }
 
@@ -385,7 +380,7 @@ public class KomodoTeiidService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -488,7 +483,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_VDBS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_VDBS_ERROR);
         }
     }
 
@@ -552,7 +547,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
+            return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
         }
     }
     
@@ -642,7 +637,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.VDB_TO_REPO_IMPORT_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.VDB_TO_REPO_IMPORT_ERROR);
         }
     }
         
@@ -694,9 +689,9 @@ public class KomodoTeiidService extends KomodoService {
             String title = RelationalMessages.getString(RelationalMessages.Info.VDB_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
             if (! hasDynamicVdb(vdbName, teiidInstance)) {
-                // Remove the VDB from cachedTeiid
+                // Make sure Vdb state is current in the cachedTeiid
                 CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-                cachedTeiid.removeVdb(uow,vdbName);
+                cachedTeiid.refreshVdbs(uow, teiidInstance, vdbName);
                 
                 status.addAttribute(vdbName,
                                     RelationalMessages.getString(RelationalMessages.Info.VDB_SUCCESSFULLY_UNDEPLOYED));
@@ -715,7 +710,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, vdbName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, vdbName);
         }
     }
     
@@ -767,9 +762,9 @@ public class KomodoTeiidService extends KomodoService {
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
             if (! hasDataSource(dataSourceName, teiidInstance)) {
-                // Remove the DataSource from cachedTeiid
+                // Make sure DataSource state is current in cachedTeiid
                 CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-                cachedTeiid.removeVdb(uow,dataSourceName);
+                cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceName);
                 
                 status.addAttribute(dataSourceName,
                                     RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_UNDEPLOYED));
@@ -788,7 +783,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, dataSourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, dataSourceName);
         }
     }
     
@@ -853,7 +848,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
+            return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
         }
     }
 
@@ -875,7 +870,7 @@ public class KomodoTeiidService extends KomodoService {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getTranslators(final @Context HttpHeaders headers,
-                                   final @Context UriInfo uriInfo) throws KomodoRestException {
+                                                   final @Context UriInfo uriInfo) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -915,7 +910,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TRANSLATORS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TRANSLATORS_ERROR);
         }
     }
 
@@ -977,7 +972,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCES_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCES_ERROR);
         }
     }
     
@@ -1038,7 +1033,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_ERROR, datasourceName);
         }
     }
 
@@ -1100,7 +1095,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DRIVERS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DRIVERS_ERROR);
         }
     }
 
@@ -1143,7 +1138,7 @@ public class KomodoTeiidService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -1166,8 +1161,9 @@ public class KomodoTeiidService extends KomodoService {
             // Await the deployment to end
             Thread.sleep(2000);
 
-            // update the cached driver
-            teiidNode.updateCacheWithServerDriver(uow,kfa.getName());
+            // Make sure Driver state is current in the cachedTeiid
+            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
+            cachedTeiid.refreshDrivers(uow, teiidInstance, kfa.getName());
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
@@ -1214,9 +1210,9 @@ public class KomodoTeiidService extends KomodoService {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response removeDriver(final @Context HttpHeaders headers,
-                                 final @Context UriInfo uriInfo,
-                                 @ApiParam(value = "Name of the driver to be removed", required = true)
-                                 final @PathParam( "driverName" ) String driverName) throws KomodoRestException {
+                                   final @Context UriInfo uriInfo,
+                                   @ApiParam(value = "Name of the driver to be removed", required = true)
+                                    final @PathParam( "driverName" ) String driverName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1242,9 +1238,9 @@ public class KomodoTeiidService extends KomodoService {
             String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
             if (! hasDataSourceDriver(driverName, teiidInstance)) {
-                // Remove the Driver from cachedTeiid
+                // Make sure driver state is current in the cachedTeiid
                 CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-                cachedTeiid.removeDriver(uow, driverName);
+                cachedTeiid.refreshDrivers(uow, teiidInstance, driverName);
                 
                 status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UNDEPLOYED));
@@ -1263,7 +1259,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_DRIVER_ERROR, driverName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_DRIVER_ERROR, driverName);
         }
     }
 
@@ -1309,10 +1305,10 @@ public class KomodoTeiidService extends KomodoService {
         try {
             kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
             if (kpa.getPath() == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SERVICE_MISSING_PATH);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SERVICE_MISSING_PATH);
             }
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -1324,12 +1320,12 @@ public class KomodoTeiidService extends KomodoService {
 
             List<KomodoObject> dataServices = this.repo.searchByPath(uow, kpa.getPath());
             if (dataServices.size() == 0) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
             }
 
             Dataservice dataService = getWorkspaceManager(uow).resolve(uow, dataServices.get(0), Dataservice.class);
             if (dataService == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
             }
 
             //
@@ -1340,19 +1336,32 @@ public class KomodoTeiidService extends KomodoService {
             // Await the deployment to end
             Thread.sleep(500);
 
-            // Update the cached Objects
+            // Make sure Dataservice constituents are current in the cachedTeiid
+            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            // DataSources
             Datasource[] dataSources = dataService.getConnections(uow);
-            for(Datasource dataSource : dataSources) {
-                teiidNode.updateCacheWithServerDataSource(uow, dataSource.getName(uow));
+            String[] dataSourceNames = new String[dataSources.length];
+            for(int i=0; i<dataSources.length; i++) {
+                dataSourceNames[i] = dataSources[i].getName(uow);
             }
+            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceNames);
+            
+            // Drivers
             Driver[] drivers = dataService.getDrivers(uow);
-            for(Driver driver : drivers) {
-                teiidNode.updateCacheWithServerDriver(uow, driver.getName(uow));
+            String[] driverNames = new String[drivers.length];
+            for(int i=0; i<drivers.length; i++) {
+                driverNames[i] = drivers[i].getName(uow);
             }
+            cachedTeiid.refreshDrivers(uow, teiidInstance, driverNames);
+            
+            // VDBs
             Vdb[] vdbs = dataService.getVdbs(uow);
-            for(Vdb vdb : vdbs) {
-                teiidNode.updateCacheWithServerVdb(uow, vdb.getName(uow));
+            String[] vdbNames = new String[vdbs.length];
+            for(int i=0; i<vdbs.length; i++) {
+                vdbNames[i] = vdbs[i].getName(uow);
             }
+            cachedTeiid.refreshVdbs(uow, teiidInstance, vdbNames);
             
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
@@ -1434,10 +1443,10 @@ public class KomodoTeiidService extends KomodoService {
         try {
             kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
             if (kpa.getPath() == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SOURCE_MISSING_PATH);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SOURCE_MISSING_PATH);
             }
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -1449,12 +1458,12 @@ public class KomodoTeiidService extends KomodoService {
 
             List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
             if (dataSources.size() == 0) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
             }
 
             Datasource dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Datasource.class);
             if (dataSource == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
             }
 
             //
@@ -1465,8 +1474,10 @@ public class KomodoTeiidService extends KomodoService {
             // Await the deployment to end
             Thread.sleep(500);
 
-            // Update the cached datasource
-            teiidNode.updateCacheWithServerDataSource(uow,dataSource.getName(uow));
+            // Make sure Datasource is current in the CachedTeiid
+            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSource.getName(uow));
             
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
@@ -1548,10 +1559,10 @@ public class KomodoTeiidService extends KomodoService {
         try {
             kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
             if (kpa.getPath() == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_VDB_MISSING_PATH);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_VDB_MISSING_PATH);
             }
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -1563,12 +1574,12 @@ public class KomodoTeiidService extends KomodoService {
 
             List<KomodoObject> vdbs = this.repo.searchByPath(uow, kpa.getPath());
             if (vdbs.size() == 0) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_VDB_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_VDB_FOUND);
             }
 
             Vdb vdb = getWorkspaceManager(uow).resolve(uow, vdbs.get(0), Vdb.class);
             if (vdb == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_VDB_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_VDB_FOUND);
             }
 
             //
@@ -1579,8 +1590,10 @@ public class KomodoTeiidService extends KomodoService {
             // Await the deployment to end
             Thread.sleep(500);
             
-            // update the cached vdb
-            teiidNode.updateCacheWithServerVdb(uow,vdb.getName(uow));
+            // Make sure Vdb is current in the CachedTeiid
+            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            cachedTeiid.refreshVdbs(uow, teiidInstance, vdb.getName(uow));
             
             String title = RelationalMessages.getString(RelationalMessages.Info.VDB_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
@@ -1681,14 +1694,14 @@ public class KomodoTeiidService extends KomodoService {
         try {
             kqa = KomodoJsonMarshaller.unmarshall(queryAttribute, KomodoQueryAttribute.class);
             if (kqa.getQuery() == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_QUERY_MISSING_QUERY);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_QUERY_MISSING_QUERY);
             }
 
             if (kqa.getTarget() == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_QUERY_MISSING_TARGET);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_QUERY_MISSING_TARGET);
             }
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
@@ -1777,7 +1790,7 @@ public class KomodoTeiidService extends KomodoService {
 
         ConnectivityType pingKind = ExecutionAdmin.ConnectivityType.findType(pingType);
         if (pingKind == null) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_PING_MISSING_TYPE);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_PING_MISSING_TYPE);
         }
 
         UnitOfWork uow = null;
@@ -1820,7 +1833,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR);
         }
     }
 }

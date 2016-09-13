@@ -37,6 +37,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * A model of a cached live teiid server instance
@@ -89,10 +90,10 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
          */
         @Override
         public CachedTeiid create( final UnitOfWork transaction,
-                                   final Repository repository,
-                                   final KomodoObject parent,
-                                   final String id,
-                                   final RelationalProperties properties ) throws KException {
+                             final Repository repository,
+                             final KomodoObject parent,
+                             final String id,
+                             final RelationalProperties properties ) throws KException {
             return new CachedTeiidImpl(transaction, repository, id);
         }
 
@@ -221,34 +222,48 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
     Driver getDriver(final UnitOfWork transaction, String name) throws KException;
 
     /**
-     * Removes a Vdb from the cache, if present
+     * Refresh VDBs with the supplied names
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name the Vdb name
+     * @param teiidInstance the teiid instance
+     * @param vdbNames the Vdb names
      * @throws KException
      *         if an error occurs
      */
-    void removeVdb(final UnitOfWork transaction, String name) throws KException;
+    void refreshVdbs(final UnitOfWork transaction, TeiidInstance teiidInstance, final String... vdbNames) throws KException;
 
     /**
-     * Removes a dataSource from the cache, if present
+     * Refresh DataSources with the supplied names
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name the dataSource name
+     * @param teiidInstance the teiid instance
+     * @param dataSourceNames the dataSource names
      * @throws KException
      *         if an error occurs
      */
-    void removeDataSource(final UnitOfWork transaction, String name) throws KException;
+    void refreshDataSources(final UnitOfWork transaction, TeiidInstance teiidInstance, String... dataSourceNames) throws KException;
 
     /**
-     * Removes a driver from the cache, if present
+     * Refresh Translators with the supplied names
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name the driver name
+     * @param teiidInstance the teiid instance
+     * @param translatorNames the translator names
      * @throws KException
      *         if an error occurs
      */
-    void removeDriver(final UnitOfWork transaction, String name) throws KException;
+    void refreshTranslators(final UnitOfWork transaction, TeiidInstance teiidInstance, String... translatorNames) throws KException;
+
+    /**
+     * Refresh Drivers with the supplied names
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance
+     * @param driverNames the driver names
+     * @throws KException
+     *         if an error occurs
+     */
+    void refreshDrivers(final UnitOfWork transaction, TeiidInstance teiidInstance, String... driverNames) throws KException;
 
     /**
      * @param uow

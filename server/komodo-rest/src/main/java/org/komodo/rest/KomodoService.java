@@ -200,8 +200,8 @@ public abstract class KomodoService implements V1Constants {
         } catch (Exception ex) {
             return new SecurityPrincipal(null, 
                                          createErrorResponse(Status.UNAUTHORIZED,
-                                                             headers.getAcceptableMediaTypes(),                                                    
-                                                             ex, SECURITY_FAILURE_ERROR));
+                                                                                 headers.getAcceptableMediaTypes(),
+                                                                                 ex, SECURITY_FAILURE_ERROR));
         }        
     }
 
@@ -290,6 +290,16 @@ public abstract class KomodoService implements V1Constants {
             resultMsg = RelationalMessages.getString(errorType, errorMsgInputs);
 
         return createErrorResponse(returnCode, mediaTypes, resultMsg);
+    }
+
+    protected Response createErrorResponseWithForbidden(List<MediaType> mediaTypes, Throwable ex,
+                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
+        return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, errorType, errorMsgInputs);
+    }
+    
+    protected Response createErrorResponseWithForbidden(List<MediaType> mediaTypes,
+                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
+        return createErrorResponse(Status.FORBIDDEN, mediaTypes, errorType, errorMsgInputs);
     }
     
     protected Response createErrorResponse(Status returnCode, List<MediaType> mediaTypes, String resultMsg) {

@@ -84,12 +84,12 @@ public class KomodoImportExportService extends KomodoService {
         Map<String, String> parameters = sta.getParameters();
         if (sta == null ||
             (sta.getStorageType() == null && sta.getArtifactPath() == null && parameters == null)) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR);
         }
 
         Set<String> supportedTypes = PluginService.getInstance().getSupportedStorageTypes();
         if (! supportedTypes.contains(sta.getStorageType())) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_UNSUPPORTED_TYPE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_UNSUPPORTED_TYPE_ERROR);
         }
 
         StorageService storageService = PluginService.getInstance().getStorageService(sta.getStorageType());
@@ -105,8 +105,8 @@ public class KomodoImportExportService extends KomodoService {
                 continue; // This is handled separately in import/export and can be populated if missing
 
             if (! parameters.containsKey(descriptor.getName())) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_MISSING_PARAMETER_ERROR,
-                                           descriptor.getName());
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_MISSING_PARAMETER_ERROR,
+                                                        descriptor.getName());
             }
         }
 
@@ -175,7 +175,7 @@ public class KomodoImportExportService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         ImportExportStatus status = new ImportExportStatus();
@@ -186,12 +186,12 @@ public class KomodoImportExportService extends KomodoService {
             String artifactPath = sta.getArtifactPath();
             KomodoObject kObject = repo.getFromWorkspace(uow, artifactPath);
             if (kObject == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR, artifactPath);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR, artifactPath);
             }
 
             Exportable artifact = getWorkspaceManager(uow).resolve(uow, kObject, Exportable.class);
             if (artifact == null) {
-                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_ARTIFACT_NOT_EXPORTABLE_ERROR, artifactPath);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_ARTIFACT_NOT_EXPORTABLE_ERROR, artifactPath);
             }
 
             DocumentType documentType = artifact.getDocumentType(uow);
@@ -301,7 +301,7 @@ public class KomodoImportExportService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         File cttFile = null;
@@ -425,7 +425,7 @@ public class KomodoImportExportService extends KomodoService {
             return commit(uow, mediaTypes, restStorageTypes);
 
         } catch (Exception e) {
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e,
+            return createErrorResponseWithForbidden(mediaTypes, e,
                                        RelationalMessages.Error.IMPORT_EXPORT_SERVICE_STORAGE_TYPES_ERROR);
         }
     }
