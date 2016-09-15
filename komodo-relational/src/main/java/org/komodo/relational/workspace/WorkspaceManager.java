@@ -175,32 +175,6 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     /**
      * @param repository
      *        the repository whose workspace manager is being requested (cannot be <code>null</code>)
-     * @param owner
-     *        the owner of this workspace manager (cannot be <code>null</code>)
-     *
-     * @return the singleton instance for the given repository (never <code>null</code>)
-     * @throws KException
-     *         if there is an error obtaining the workspace manager
-     */
-    public static WorkspaceManager getInstance( Repository repository, String owner ) throws KException {
-        WorkspaceManager instance = instances.get(repository.getId());
-
-        if ( instance == null ) {
-            // We must create a transaction here so that it can be passed on to the constructor. Since the
-            // node associated with the WorkspaceManager always exists we don't have to create it.
-            final UnitOfWork uow = repository.createTransaction(owner, "createWorkspaceManager", false, null ); //$NON-NLS-1$
-            instance = new WorkspaceManager(repository, uow);
-            uow.commit();
-
-            instances.add( instance );
-        }
-
-        return instance;
-    }
-
-    /**
-     * @param repository
-     *        the repository whose workspace manager is being requested (cannot be <code>null</code>)
      * @param transaction
      *        the transaction containing the user name of the owner of this workspace manager
      *        (if <code>null</code> then this manager is owner by the system user and has the workspace root as its path)
@@ -210,13 +184,25 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *         if there is an error obtaining the workspace manager
      */
     public static WorkspaceManager getInstance( Repository repository, UnitOfWork transaction) throws KException {
-        String owner;
-        if (transaction == null)
-            owner = Repository.SYSTEM_USER;
-        else
-            owner = transaction.getUserName();
+        boolean txNotProvided = transaction == null;
 
-        return getInstance(repository, owner);
+        if (txNotProvided)
+            transaction = repository.createTransaction(Repository.SYSTEM_USER, "createWorkspaceManager", false, null ); //$NON-NLS-1$
+
+        WorkspaceManager instance = instances.get(repository.getId());
+
+        if ( instance == null ) {
+            // We must create a transaction here so that it can be passed on to the constructor. Since the
+            // node associated with the WorkspaceManager always exists we don't have to create it.
+            instance = new WorkspaceManager(repository, transaction);
+
+            if (txNotProvided)
+                transaction.commit();
+
+            instances.add( instance );
+        }
+
+        return instance;
     }
 
     /**

@@ -25,17 +25,18 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,11 +76,15 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.RepositoryImpl;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageReference;
 import org.komodo.test.utils.TestUtilities;
@@ -928,5 +933,29 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         wsMgr.importArtifact(getTransaction(), parent, reference);
 
         assertTrue(parent.hasChild(getTransaction(), TestUtilities.SAMPLE_VDB_NAME));
+    }
+
+    @Test
+    public void shouldCreateWorkspaceForNewUser() throws Exception {
+            String newUser = "newUser";
+
+            SynchronousCallback callback = new TestTransactionListener();
+            UnitOfWork tx = createTransaction(newUser, (this.name.getMethodName()), false, callback);
+
+            String userWksp = RepositoryImpl.komodoWorkspacePath(tx);
+
+            List<KomodoObject> results = _repo.searchByPath(sysTx(), userWksp);
+            sysCommit();
+            assertTrue(results.isEmpty());
+
+            WorkspaceManager wksp = WorkspaceManager.getInstance(_repo, tx);
+            boolean hasChild = wksp.hasChild(tx, "someNode");
+            assertFalse(hasChild);
+            commit(tx, State.COMMITTED);
+
+            results = _repo.searchByPath(sysTx(), userWksp);
+            sysCommit();
+            assertFalse(results.isEmpty());
+            assertEquals(1, results.size());
     }
 }
