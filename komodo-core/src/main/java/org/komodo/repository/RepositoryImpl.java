@@ -588,11 +588,28 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         this.id = id;
     }
 
-    protected void checkSecurity(UnitOfWork transaction, String nodePath, OperationType operationType) throws KException {
+    /**
+     * Called prior to each external API method. Prepares the object at the given nodePath
+     * to be acted upon by the transaction, including testing if such operation violates any
+     * security constraints and ensuring that a user-space is available in the workspace.
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code>)
+     * @param nodePath the path to a repository node
+     * @param operationType the type of the operation to be performed
+     * @throws KException if an error occurs
+     */
+    protected void provision(UnitOfWork transaction, String nodePath, OperationType operationType) throws KException {
         String userWksp = komodoWorkspacePath(transaction);
 
         if (isSystemTx(transaction))
             return; // System can do what it wishes
+
+        /*
+         * Ensures that a user workspace is always available so truly dynamic
+         * and guarantees that the user space is available to the current tx.
+         */
+        komodoWorkspace(transaction);
 
         switch (operationType) {
             case READ_OPERATION:
@@ -689,13 +706,13 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     }
 
     @Override
-    public void checkSecurity(UnitOfWork transaction, KomodoObject object, OperationType operationType) throws KException {
+    public void provision(UnitOfWork transaction, KomodoObject object, OperationType operationType) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(object, "object not found");
 
         String nodePath = object.getAbsolutePath();
-        checkSecurity(transaction, nodePath, operationType);
+        provision(transaction, nodePath, operationType);
     }
 
     /**
@@ -1047,7 +1064,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             }
         }
 
-        checkSecurity(transaction, nodePath, operationType);
+        provision(transaction, nodePath, operationType);
 
         return nodePath;
     }

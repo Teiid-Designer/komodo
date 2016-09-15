@@ -51,9 +51,11 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestLocalRepository extends AbstractLocalRepositoryTest {
@@ -284,6 +286,57 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertThat(rootNode, is(notNullValue()));
         assertThat(rootNode.getName(getTransaction()), is(TEST_USER));
         assertThat(rootNode.getPrimaryType(getTransaction()).getName(), is(KomodoLexicon.Home.NODE_TYPE));
+    }
+
+    @Test
+    public void shouldDynamicallyCreateWorkspaceHomeofNewUser() throws Exception {
+        String newUser = "newUser";
+
+        SynchronousCallback callback = new TestTransactionListener();
+        UnitOfWork tx = createTransaction(newUser, (this.name.getMethodName()), false, callback);
+
+        String userWksp = RepositoryImpl.komodoWorkspacePath(tx);
+
+        List<KomodoObject> results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertTrue(results.isEmpty());
+
+        //
+        // getFromWorkspace dynamically creates user home
+        //
+        KomodoObject userHome = _repo.getFromWorkspace(tx, userWksp);
+        assertNotNull(userHome);
+        commit(tx, State.COMMITTED);
+
+        results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertFalse(results.isEmpty());
+    }
+
+    @Test
+    public void shouldDynamicallyCreateWorkspaceHomeofNewUser2() throws Exception {
+        String newUser = "newUser";
+
+        SynchronousCallback callback = new TestTransactionListener();
+        UnitOfWork tx = createTransaction(newUser, (this.name.getMethodName()), false, callback);
+
+        String userWksp = RepositoryImpl.komodoWorkspacePath(tx);
+
+        List<KomodoObject> results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertTrue(results.isEmpty());
+
+        //
+        // _repo.checkSettings() dynamically creates user home
+        //
+        KomodoObject wkspObject = new ObjectImpl(_repo, userWksp, 0);
+        KomodoObject vdb = wkspObject.addChild(tx, "testVdb", VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull(vdb);
+        commit(tx, State.COMMITTED);
+
+        results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertFalse(results.isEmpty());
     }
 
     @Test( timeout = 60000 )

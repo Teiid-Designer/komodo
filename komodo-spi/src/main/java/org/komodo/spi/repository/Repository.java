@@ -268,7 +268,9 @@ public interface Repository {
     }
 
     /**
-     * Tests whether the given object can be acted upon by the transaction
+     * Prepares the given object to be acted upon by the transaction, including testing if
+     * such operation violates any security constraints and ensuring that a user-space is
+     * available in the workspace.
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
@@ -279,7 +281,7 @@ public interface Repository {
      *
      * @throws KException if security failure occurs
      */
-    void checkSecurity(UnitOfWork transaction, KomodoObject object, OperationType requestType) throws KException;
+    void provision(UnitOfWork transaction, KomodoObject object, OperationType requestType) throws KException;
 
     /**
      * @param transaction

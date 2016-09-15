@@ -200,14 +200,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         this.index = index;
     }
 
-    protected void checkSecurity(UnitOfWork transaction, OperationType operationType) throws KException {
-        getRepository().checkSecurity(transaction, this, operationType);
+    protected void provision(UnitOfWork transaction, OperationType operationType) throws KException {
+        getRepository().provision(transaction, this, operationType);
     }
 
     private void internalSetProperty( final UnitOfWork transaction,
                                       final String name,
                                       final Object... values ) throws Exception {
-        checkSecurity(transaction, OperationType.MODIFY_OPERATION);
+        provision(transaction, OperationType.MODIFY_OPERATION);
 
         final Session session = getSession( transaction );
         final Node node = session.getNode( getAbsolutePath() );
@@ -392,7 +392,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.CHILD_OPERATION);
+        provision(transaction, OperationType.CHILD_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("objectimpl-addChild: transaction = {0}, name = {1}, primaryType = {2}", //$NON-NLS-1$
@@ -430,7 +430,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(descriptorNames, "descriptorNames"); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.MODIFY_OPERATION);
+        provision(transaction, OperationType.MODIFY_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("objectimpl-addDescriptor: transaction = {0}, descriptorNames = {1}", //$NON-NLS-1$
@@ -486,7 +486,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final Node node = node(transaction).getNode(name);
@@ -513,7 +513,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         { // try if one child with that name first
             final KomodoObject kobject = getChild( transaction, name );
@@ -560,7 +560,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         assert ( transaction != null );
         assert ( transaction.getState() == State.NOT_STARTED );
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if (!itr.hasNext()) {
             return KomodoObject.EMPTY_ARRAY;
@@ -590,7 +590,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             KomodoObject[] kids = null;
@@ -642,7 +642,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final Node node = node( transaction );
@@ -701,7 +701,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final String result = node(transaction).getName();
@@ -731,7 +731,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final NodeType nodeType = node(transaction).getPrimaryNodeType();
@@ -763,7 +763,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if ( LOGGER.isDebugEnabled() ) {
             LOGGER.debug( getterName + ": transaction = {0}", transaction.getName() ); //$NON-NLS-1$
@@ -832,7 +832,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( propName, "propName" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return null;
@@ -883,7 +883,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         NodeIterator itr = null;
 
@@ -911,7 +911,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final Node node = node( transaction );
@@ -939,7 +939,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if (RepositoryImpl.KOMODO_ROOT.equals( getAbsolutePath() )) {
             return null;
@@ -972,7 +972,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         //
         // Normally all reserved paths should return no properties. However,
@@ -1009,7 +1009,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return PropertyDescriptor.NO_DESCRIPTORS;
@@ -1034,7 +1034,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return StringConstants.EMPTY_ARRAY;
@@ -1089,7 +1089,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         List<Descriptor> descriptors = new ArrayList<Descriptor>();
 
@@ -1213,7 +1213,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( descriptorName );
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         boolean result = false;
 
@@ -1269,7 +1269,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final boolean result = node( transaction ).hasNode( name );
@@ -1294,7 +1294,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             if ( hasRawChild( transaction, name ) ) {
@@ -1322,7 +1322,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final boolean result = node( transaction ).hasNodes();
@@ -1345,7 +1345,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return false;
@@ -1369,7 +1369,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.READ_OPERATION);
+        provision(transaction, OperationType.READ_OPERATION);
 
         try {
             final JcrTools tools = new JcrTools(true);
@@ -1389,7 +1389,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.REMOVE_OPERATION);
+        provision(transaction, OperationType.REMOVE_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug( "objectimpl-remove: transaction = {0}, path = {1}", transaction.getName(), getAbsolutePath() ); //$NON-NLS-1$
@@ -1416,7 +1416,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(names, "names"); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.CHILD_OPERATION);
+        provision(transaction, OperationType.CHILD_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("objectimpl-removeChild: transaction = {0}, names = {1}", //$NON-NLS-1$
@@ -1454,7 +1454,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(descriptorNames, "descriptorNames"); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.MODIFY_OPERATION);
+        provision(transaction, OperationType.MODIFY_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("objectimpl-removeDescriptor: transaction = {0}, mixins = {1}", //$NON-NLS-1$
@@ -1486,7 +1486,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( newName, "newName" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.MODIFY_OPERATION);
+        provision(transaction, OperationType.MODIFY_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug( "objectimpl-rename: transaction = {0}, old path = {1}, new name = {2}", //$NON-NLS-1$
@@ -1575,7 +1575,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, OperationType.MODIFY_OPERATION);
+        provision(transaction, OperationType.MODIFY_OPERATION);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("setPrimaryType: transaction = {0}, typeName = {1}", transaction.getName(), typeName); //$NON-NLS-1$
@@ -1653,7 +1653,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        checkSecurity(transaction, visitor.getRequestType());
+        provision(transaction, visitor.getRequestType());
 
         visitor.visit(transaction, this);
     }

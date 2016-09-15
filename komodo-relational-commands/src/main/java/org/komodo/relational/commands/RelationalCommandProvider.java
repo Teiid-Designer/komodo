@@ -79,7 +79,7 @@ public class RelationalCommandProvider implements ShellCommandProvider {
     @SuppressWarnings( "unchecked" )
     @Override
     public WorkspaceManager resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository(), uow.getUserName());
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository(), uow);
         if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
             return wkspMgr;
         }
