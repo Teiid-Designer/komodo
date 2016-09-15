@@ -21,29 +21,15 @@
  */
 package org.komodo.relational.teiid.internal;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map.Entry;
-import java.util.Properties;
-
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
-import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
-import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.vdb.internal.TranslatorImpl;
-import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
@@ -63,21 +49,14 @@ import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
-import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
-import org.komodo.spi.runtime.TeiidTranslator;
-import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.KLog;
-import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
-import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
-import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * Implementation of teiid instance model
@@ -881,124 +860,19 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         ServerManager mgr = ServerManager.getInstance(getRepository());
         CachedTeiid cachedTeiid = mgr.createCachedTeiid(transaction, this);
 
-        TeiidInstance teiidInstance = getTeiidInstance(transaction);
-        if (teiidInstance == null) {
-            throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_ERROR));
-        }
+        // Gets a teiid instance and connects if not connected
+        TeiidInstance teiidInstance = getConnectedTeiidInstance(transaction);
 
+        // Do a full refresh of each type
         try {
-            teiidInstance.connect();
-            if (! teiidInstance.isConnected()) {
-                throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
-            }
-
-            Collection<TeiidVdb> instVdbs = teiidInstance.getVdbs();
-            if (instVdbs == null)
-                instVdbs = Collections.emptyList();
-
-            Collection<TeiidDataSource> instDataSrcs = teiidInstance.getDataSources();
-            if (instDataSrcs == null)
-                instDataSrcs = Collections.emptyList();
-
-            Collection<TeiidTranslator> instTranslators = teiidInstance.getTranslators();
-            if (instTranslators == null)
-                instTranslators = Collections.emptyList();
-
-            Collection<String> instDataSourceTypeNames = teiidInstance.getDataSourceTypeNames();
-            if (instDataSourceTypeNames == null)
-                instDataSourceTypeNames = Collections.emptyList();
-
-            //
-            // Process the vdbs
-            //
-            for (TeiidVdb teiidVdb : instVdbs) {
-                if (teiidVdb == null)
-                    continue;
-
-                // Export the vdb content into a string
-                String content = teiidVdb.export();
-                if (content == null)
-                    continue;
-
-                if (StringUtils.isEmpty(content))
-                    continue;
-
-                String vdbName = teiidVdb.getName();
-
-                // Output the content to a temp file
-                File tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
-                Files.write(Paths.get(tempFile.getPath()), content.getBytes());
-
-                KomodoObject kobject = cachedTeiid.addChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-                Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath());
-                vdb.setOriginalFilePath(transaction, tempFile.getAbsolutePath());
-                vdb.setVdbName( transaction, vdbName );
-
-                KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
-                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
-            }
-
-            for (TeiidDataSource teiidDataSrc : instDataSrcs) {
-                if (teiidDataSrc == null)
-                    continue;
-
-                KomodoObject kobject = cachedTeiid.addChild( transaction,
-                                                             teiidDataSrc.getName(),
-                                                             DataVirtLexicon.Connection.NODE_TYPE );
-                Datasource dataSrc = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-
-                dataSrc.setDriverName(transaction, teiidDataSrc.getType());
-                dataSrc.setJndiName(transaction, teiidDataSrc.getJndiName());
-
-                for (Entry<Object, Object> property : teiidDataSrc.getProperties().entrySet()) {
-                    String key = property.getKey().toString();
-                    if (TeiidInstance.DATASOURCE_DRIVERNAME.equals(key) ||
-                            TeiidInstance.DATASOURCE_JNDINAME.equals(key))
-                        continue; // Already set as explicit fields
-
-                    dataSrc.setProperty(transaction, key, property.getValue());
-                }
-            }
-
-            for (TeiidTranslator teiidTranslator : instTranslators) {
-                if (teiidTranslator == null)
-                    continue;
-
-                KomodoObject kObject = cachedTeiid.addChild(transaction,
-                                                            teiidTranslator.getName(),
-                                                            VdbLexicon.Translator.TRANSLATOR);
-                TranslatorImpl translator = new TranslatorImpl(transaction,
-                                                               getRepository(),
-                                                               kObject.getAbsolutePath());
-                translator.setDescription(transaction, teiidTranslator.getDescription());
-                String type = teiidTranslator.getType() != null ? teiidTranslator.getType() : teiidTranslator.getName();
-                translator.setType(transaction, type);
-                Properties props = teiidTranslator.getProperties();
-                for (Entry<Object, Object> entry : props.entrySet()) {
-                    translator.setProperty(transaction, entry.getKey().toString(), entry.getValue());
-                }
-            }
-            
-            for (String teiidDSType : instDataSourceTypeNames) {
-                if (teiidDSType == null)
-                    continue;
-
-                KomodoObject driver = cachedTeiid.addChild(transaction,
-                                                           teiidDSType,
-                                                           DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
-
-                byte[] content = new byte[1024];
-                KomodoObject fileNode;
-                if (! driver.hasChild(transaction, JcrLexicon.CONTENT.getString()))
-                    fileNode = driver.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
-                else
-                    fileNode = driver.getChild(transaction, JcrLexicon.CONTENT.getString());
-
-                ByteArrayInputStream stream = new ByteArrayInputStream(content);
-                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), stream);
-            }
-
-            
+            // VDBs
+            cachedTeiid.refreshVdbs(transaction, teiidInstance);
+            // DataSources
+            cachedTeiid.refreshDataSources(transaction, teiidInstance);
+            // Translators
+            cachedTeiid.refreshTranslators(transaction, teiidInstance);
+            // Drivers
+            cachedTeiid.refreshDrivers(transaction, teiidInstance);
         } catch (Exception ex) {
             throw new KException(ex);
         }
@@ -1006,6 +880,25 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         return cachedTeiid;
     }
 
+    /*
+     * Get a connected teiid instance.  If there is a problem getting the instance or connecting - an exception is thrown.
+     */
+    private TeiidInstance getConnectedTeiidInstance(UnitOfWork transaction) throws KException {
+        TeiidInstance teiidInstance = getTeiidInstance(transaction);
+        if (teiidInstance == null) {
+            throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_ERROR));
+        }
+        try {
+            teiidInstance.connect();
+            if (! teiidInstance.isConnected()) {
+                throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
+            }
+        } catch (Exception ex) {
+            throw new KException(ex);
+        }
+        return teiidInstance;
+    }
+    
     @Override
     public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;
@@ -1213,7 +1106,6 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
             return result;
 
         } catch (KException ex) {
-            KLog.getLogger().info("PANIC! HashCode threw an exception" + ex.getMessage());
             KEngine.getInstance().getErrorHandler().error(ex);
             if (uow != null)
                 uow.rollback();

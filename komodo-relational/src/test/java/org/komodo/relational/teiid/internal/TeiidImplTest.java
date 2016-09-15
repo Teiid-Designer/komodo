@@ -63,7 +63,6 @@ import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.StringUtils;
-import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -318,12 +317,13 @@ public final class TeiidImplTest extends RelationalModelTest {
         assertEquals(this.teiid.getJdbcUsername(getTransaction()), cachedTeiid.getJdbcUsername(getTransaction()));
         assertEquals(this.teiid.getVersion(getTransaction()), cachedTeiid.getVersion(getTransaction()));
 
-        KomodoObject[] cDataSrcs = cachedTeiid.getChildrenOfType(getTransaction(), DataVirtLexicon.Connection.NODE_TYPE);
+        KomodoObject[] cDataSrcs = cachedTeiid.getDataSources(getTransaction());
+        
         assertNotNull(cDataSrcs);
         assertEquals(1, cDataSrcs.length);
         assertEquals(dsName, cDataSrcs[0].getName(getTransaction()));
 
-        KomodoObject[] cVdbs = cachedTeiid.getChildrenOfType(getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject[] cVdbs = cachedTeiid.getVdbs(getTransaction());
         assertNotNull(cVdbs);
         assertEquals(2, cVdbs.length);
 
@@ -336,7 +336,7 @@ public final class TeiidImplTest extends RelationalModelTest {
                 fail();
         }
 
-        KomodoObject[] cTranslators = cachedTeiid.getChildrenOfType(getTransaction(), VdbLexicon.Translator.TRANSLATOR);
+        KomodoObject[] cTranslators = cachedTeiid.getTranslators(getTransaction());
         assertNotNull(cTranslators);
         assertEquals(1, cTranslators.length);
         assertEquals(trName, cTranslators[0].getName(getTransaction()));

@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +29,14 @@ import java.util.Properties;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.internal.ModelImpl;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
@@ -54,6 +57,7 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
@@ -1237,4 +1241,40 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
     public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         return DocumentType.VDB_XML;
     }
+    
+    @Override
+    public DeployStatus deploy(UnitOfWork uow, Teiid teiid) {
+        ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiid, "teiid"); //$NON-NLS-1$
+
+        DeployStatus status = new DeployStatus();
+        TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+        
+        try {
+            String vdbName = getName(uow);
+            status.addProgressMessage("Starting deployment of vdb " + vdbName); //$NON-NLS-1$
+
+            status.addProgressMessage("Attempting to deploy VDB " + vdbName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            // Get VDB content
+            byte[] vdbXml = export(uow, null);
+            if (vdbXml == null || vdbXml.length == 0) {
+                status.addErrorMessage("VDB " + vdbName + " content is empty"); //$NON-NLS-1$ //$NON-NLS-2$
+                return status;
+            }
+
+            String vdbToDeployName = getName(uow);
+            String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
+            teiidInstance.deployDynamicVdb(vdbDeploymentName, new ByteArrayInputStream(vdbXml));
+
+            status.addProgressMessage("VDB deployed " + vdbName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (Exception ex) {
+            status.addErrorMessage(ex);
+        }
+
+        
+        return status;
+    }
+    
 }

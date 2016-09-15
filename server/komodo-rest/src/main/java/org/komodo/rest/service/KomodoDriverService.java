@@ -194,7 +194,7 @@ public final class KomodoDriverService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DRIVER_SERVICE_GET_DRIVERS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DRIVER_SERVICE_GET_DRIVERS_ERROR);
         }
     }
         

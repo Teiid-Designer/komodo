@@ -149,6 +149,7 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
      * @return id of this teiid model
      * @throws KException
      */
+    @Override
     String getId(UnitOfWork uow) throws KException;
 
     /**
@@ -157,12 +158,13 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
      * @return the teiid version
      * @throws KException
      */
+    @Override
     TeiidVersion getVersion(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
      *         the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param the teiid version
+     * @param version the teiid version
      * @throws KException
      */
     void setVersion(UnitOfWork uow, TeiidVersion version) throws KException;

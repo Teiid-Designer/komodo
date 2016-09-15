@@ -404,6 +404,54 @@ public class Messages implements StringConstants {
     }
 
     /**
+     * Messages for CachedTeiid
+     */
+    public enum CachedTeiid {
+
+        /**
+         * An error message indicating get Vdbs from server failed.
+         */
+        GET_SERVER_VDBS_ERROR,
+
+        /**
+         * An error message indicating get a Vdb from server failed.
+         */
+        GET_SERVER_VDB_ERROR,
+
+        /**
+         * An error message indicating get DataSources from server failed.
+         */
+        GET_SERVER_DATA_SOURCES_ERROR,
+
+        /**
+         * An error message indicating get a DataSource from server failed.
+         */
+        GET_SERVER_DATA_SOURCE_ERROR,
+
+        /**
+         * An error message indicating get Drivers from server failed.
+         */
+        GET_SERVER_DRIVERS_ERROR,
+
+        /**
+         * An error message indicating get Translators from server failed.
+         */
+        GET_SERVER_TRANSLATORS_ERROR,
+
+        /**
+         * An error message indicating get a Translator from server failed.
+         */
+        GET_SERVER_TRANSLATOR_ERROR;
+
+
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    /**
      * @param enumValue the value
      * @return the name
      */

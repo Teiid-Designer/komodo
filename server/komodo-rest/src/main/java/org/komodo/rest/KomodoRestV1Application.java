@@ -157,6 +157,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String ABOUT = "about"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for a Vdb in the Komodo workspace.
+         */
+        String VDB_SEGMENT = "vdb"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of VDBs in the Komodo workspace.
          */
         String VDBS_SEGMENT = "vdbs"; //$NON-NLS-1$
@@ -167,6 +172,21 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String VDB_PLACEHOLDER = "{vdbName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for clone.
+         */
+        String CLONE_SEGMENT = "clone"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for copy to repo.
+         */
+        String COPY_TO_REPO = "copyToRepo"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for undeploy.
+         */
+        String UNDEPLOY = "undeploy"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of DataServices in the Komodo workspace.
          */
         String DATA_SERVICES_SEGMENT = "dataservices"; //$NON-NLS-1$
@@ -175,11 +195,6 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI path segment for a DataService in the Komodo workspace.
          */
         String DATA_SERVICE_SEGMENT = "dataservice"; //$NON-NLS-1$
-
-        /**
-         * The name of the URI path segment for DataService clone in the Komodo workspace.
-         */
-        String CLONE_DATA_SERVICE_SEGMENT = "clone"; //$NON-NLS-1$
 
         /**
          * Placeholder added to an URI to allow a specific data service id
@@ -195,11 +210,6 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI path segment for a Datasource in the Komodo workspace.
          */
         String DATA_SOURCE_SEGMENT = "datasource"; //$NON-NLS-1$
-
-        /**
-         * The name of the URI path segment for Datasource clone in the Komodo workspace.
-         */
-        String CLONE_DATA_SOURCE_SEGMENT = "clone"; //$NON-NLS-1$
 
         /**
          * Placeholder added to an URI to allow a specific data source id

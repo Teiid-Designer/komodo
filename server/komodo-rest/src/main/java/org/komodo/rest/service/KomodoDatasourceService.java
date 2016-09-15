@@ -24,7 +24,6 @@ package org.komodo.rest.service;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -37,9 +36,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-
 import org.komodo.core.KEngine;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -59,7 +56,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -184,7 +180,8 @@ public final class KomodoDatasourceService extends KomodoService {
             KomodoProperties properties = new KomodoProperties();
             for ( final Datasource dataSource : dataSources ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
-                    if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {                        RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
+                    if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {                        
+                        RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
                         entities.add(entity);
                         LOGGER.debug("getDatasources:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
                     } else {
@@ -207,7 +204,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCES_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCES_ERROR);
         }
     }
 
@@ -264,7 +261,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCE_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCE_ERROR, datasourceName);
         }
     }
 
@@ -305,29 +302,20 @@ public final class KomodoDatasourceService extends KomodoService {
 
         // Error if the datasource name is missing
         if (StringUtils.isBlank( datasourceName )) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_MISSING_NAME);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_MISSING_NAME);
         }
 
         final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( datasourceJson, RestDataSource.class );
         final String jsonDatasourceName = restDatasource.getId();
         // Error if the name is missing from the supplied json body
         if ( StringUtils.isBlank( jsonDatasourceName ) ) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_JSON_MISSING_NAME);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_JSON_MISSING_NAME);
         }
 
         // Error if the name parameter is different than JSON name
         final boolean namesMatch = datasourceName.equals( jsonDatasourceName );
         if ( !namesMatch ) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_SOURCE_NAME_ERROR, datasourceName, jsonDatasourceName);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_SOURCE_NAME_ERROR, datasourceName, jsonDatasourceName);
         }
 
         UnitOfWork uow = null;
@@ -337,10 +325,7 @@ public final class KomodoDatasourceService extends KomodoService {
 
             // Error if the repo already contains a datasource with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, datasourceName ) ) {
-                String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS);
-
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS);
             }
 
             // create new Datasource
@@ -355,7 +340,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, datasourceName);
         }
     }
 
@@ -374,7 +359,7 @@ public final class KomodoDatasourceService extends KomodoService {
      *         if there is an error creating the DataSource
      */
     @POST
-    @Path( StringConstants.FORWARD_SLASH + V1Constants.CLONE_DATA_SOURCE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CLONE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Clone a datasource in the workspace")
     @ApiResponses(value = {
@@ -396,27 +381,18 @@ public final class KomodoDatasourceService extends KomodoService {
 
         // Error if the datasource name is missing
         if (StringUtils.isBlank( datasourceName )) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NAME);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NAME);
         }
 
         // Error if the new datasource name is missing
         if ( StringUtils.isBlank( newDatasourceName ) ) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NEW_NAME);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NEW_NAME);
         }
 
         // Error if the name parameter and new name are the same
         final boolean namesMatch = datasourceName.equals( newDatasourceName );
         if ( namesMatch ) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR, newDatasourceName);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR, newDatasourceName);
         }
 
         UnitOfWork uow = null;
@@ -426,10 +402,7 @@ public final class KomodoDatasourceService extends KomodoService {
 
             // Error if the repo already contains a datasource with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, newDatasourceName ) ) {
-                String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS);
-
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS);
             }
 
             // create new Datasource
@@ -454,7 +427,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_DATASOURCE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_DATASOURCE_ERROR);
         }
     }
 
@@ -495,20 +468,14 @@ public final class KomodoDatasourceService extends KomodoService {
 
         // Error if the datasource name is missing
         if (StringUtils.isBlank( datasourceName )) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_MISSING_NAME);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_MISSING_NAME);
         }
 
         final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( datasourceJson, RestDataSource.class );
         final String jsonDatasourceName = restDatasource.getId();
         // Error if the name is missing from the supplied json body
         if ( StringUtils.isBlank( jsonDatasourceName ) ) {
-            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_JSON_MISSING_NAME);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_JSON_MISSING_NAME);
         }
 
         UnitOfWork uow = null;
@@ -518,10 +485,7 @@ public final class KomodoDatasourceService extends KomodoService {
             final boolean exists = getWorkspaceManager(uow).hasChild( uow, datasourceName );
             // Error if the specified service does not exist
             if ( !exists ) {
-                String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_SOURCE_DNE);
-
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_SOURCE_DNE);
             }
 
             // must be an update
@@ -551,7 +515,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_DATASOURCE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_DATASOURCE_ERROR);
         }
     }
 
@@ -666,7 +630,7 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_DELETE_DATASOURCE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_DELETE_DATASOURCE_ERROR);
         }
     }
 

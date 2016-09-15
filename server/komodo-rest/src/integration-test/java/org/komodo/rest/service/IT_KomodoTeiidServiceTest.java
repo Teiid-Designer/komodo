@@ -497,7 +497,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;
         assertNotNull(vdbName, vdb.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
-        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
+        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + V1Constants.VDBS_SEGMENT + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
         assertTrue(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
@@ -544,7 +544,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;
         assertNotNull(vdbName, vdb.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
-        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
+        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + V1Constants.VDBS_SEGMENT + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
         assertTrue(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());

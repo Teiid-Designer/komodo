@@ -60,7 +60,27 @@ public final class RelationalMessages {
          * Driver successfully deployed
          */
         DRIVER_SUCCESSFULLY_UNDEPLOYED,
+        
+        /**
+         * VDB undeployment request sent but not yet undeployed
+         */
+        VDB_UNDEPLOYMENT_REQUEST_SENT,
 
+        /**
+         * Vdb successfully deployed
+         */
+        VDB_SUCCESSFULLY_UNDEPLOYED,
+
+        /**
+         * DataSource undeployment request sent but not yet undeployed
+         */
+        DATA_SOURCE_UNDEPLOYMENT_REQUEST_SENT,
+
+        /**
+         * DataSource successfully deployed
+         */
+        DATA_SOURCE_SUCCESSFULLY_UNDEPLOYED,
+        
         /**
          * Data service status title
          */
@@ -89,7 +109,32 @@ public final class RelationalMessages {
         /**
          * Data source deployed with errors
          */
-        DATA_SOURCE_DEPLOYED_WITH_ERRORS;
+        DATA_SOURCE_DEPLOYED_WITH_ERRORS,
+
+        /**
+         * Vdb status title
+         */
+        VDB_DEPLOYMENT_STATUS_TITLE,
+
+        /**
+         * Vdb successfully deployed
+         */
+        VDB_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * Vdb deployed with errors
+         */
+        VDB_DEPLOYED_WITH_ERRORS,
+
+        /**
+         * Vdb transfer to repo status title
+         */
+        VDB_TO_REPO_STATUS_TITLE,
+
+        /**
+         * Vdb transfer to repo success
+         */
+        VDB_TO_REPO_SUCCESS;
 
         /**
          * {@inheritDoc}
@@ -293,9 +338,89 @@ public final class RelationalMessages {
         VDB_DESCRIPTOR_BUILDER_ERROR,
 
         /**
+         * An error indicating create attempt was missing a VDB name
+         */
+        VDB_SERVICE_CREATE_MISSING_VDB_NAME,
+ 
+        /**
+         * An error indicating create attempt was missing a Model name
+         */
+        VDB_SERVICE_CREATE_MISSING_MODEL_NAME,
+ 
+        /**
+         * An error indicating create attempt was missing a ModelSource name
+         */
+        VDB_SERVICE_CREATE_MISSING_MODEL_SOURCE_NAME,
+ 
+        /**
          * An error indicating a VDB could not be created.
          */
         VDB_SERVICE_CREATE_VDB_ERROR,
+
+        /**
+         * An error indicating a VDB model could not be created.
+         */
+        VDB_SERVICE_CREATE_VDB_MODEL_ERROR,
+
+        /**
+         * An error indicating a VDB model source could not be created.
+         */
+        VDB_SERVICE_CREATE_VDB_MODEL_SOURCE_ERROR,
+
+        /**
+         * An error indicating a request to clone a VDB failed
+         */
+        VDB_SERVICE_CLONE_VDB_ERROR,
+        
+        /**
+         * An error indicating clone attempt failed because same name already exists
+         */
+        VDB_SERVICE_CLONE_ALREADY_EXISTS,
+        
+        /**
+         * An error indicating clone attempt was missing a name
+         */
+        VDB_SERVICE_CLONE_MISSING_NAME,
+ 
+        /**
+         * An error indicating clone attempt was missing a new VDB name
+         */
+        VDB_SERVICE_CLONE_MISSING_NEW_NAME,
+ 
+        /**
+         * An error indicating the desired new clone name is same as VDB being cloned
+         */
+        VDB_SERVICE_CLONE_SAME_NAME_ERROR,
+        
+        /**
+         * An error indicating a VDB could not be deleted.
+         */
+        VDB_SERVICE_DELETE_VDB_ERROR,
+
+        /**
+         * An error indicating a VDB model could not be deleted.
+         */
+        VDB_SERVICE_DELETE_VDB_MODEL_ERROR,
+
+        /**
+         * An error indicating a VDB model source could not be deleted.
+         */
+        VDB_SERVICE_DELETE_VDB_MODEL_SOURCE_ERROR,
+
+        /**
+         * An error indicating a request to update a vdb failed
+         */
+        VDB_SERVICE_UPDATE_VDB_ERROR,
+
+        /**
+         * An error indicating a request to update a vdb failed
+         */
+        VDB_SERVICE_UPDATE_VDB_MODEL_ERROR,
+
+        /**
+         * An error indicating a request to update a vdb model source failed
+         */
+        VDB_SERVICE_UPDATE_VDB_MODEL_SOURCE_ERROR,
 
         /**
          * An error indicating a JSON document representing the VDBs in the workspace could not be retrieved.
@@ -390,23 +515,93 @@ public final class RelationalMessages {
         /**
          * An error when creating a VDB indicating the input VDB JSON document was missing.
          */
-        VDB_SERVICE_MISSING_VDB,
+        VDB_SERVICE_MISSING_JSON_VDB,
 
         /**
          * An error indicating the VDB name is missing from the input JSON document.
          */
-        VDB_SERVICE_MISSING_VDB_NAME,
+        VDB_SERVICE_MISSING_JSON_VDB_NAME,
 
+        /**
+         * An error indicating the Model name is missing from the input JSON document.
+         */
+        VDB_SERVICE_MISSING_JSON_MODEL_NAME,
+
+        /**
+         * An error indicating the ModelSource name is missing from the input JSON document.
+         */
+        VDB_SERVICE_MISSING_JSON_MODEL_SOURCE_NAME,
+
+        /**
+         * An error indicating update attempt was missing a VDB name
+         */
+        VDB_SERVICE_UPDATE_MISSING_VDB_NAME,
+        
+        /**
+         * An error indicating update attempt was missing a Model name
+         */
+        VDB_SERVICE_UPDATE_MISSING_MODEL_NAME,
+        
+        /**
+         * An error indicating update attempt was missing a ModelSource name
+         */
+        VDB_SERVICE_UPDATE_MISSING_MODEL_SOURCE_NAME,
+        
+        /**
+         * An error indicating that the vdb does not exist
+         */
+        VDB_SERVICE_UPDATE_VDB_DNE,
+        
+        /**
+         * An error indicating that the Vdb model does not exist
+         */
+        VDB_SERVICE_UPDATE_VDB_MODEL_DNE,
+        
         /**
          * An error indicating a VDB with the specified name already exists and therefore cannot be created.
          */
-        VDB_SERVICE_VDB_EXISTS,
+        VDB_SERVICE_VDB_ALREADY_EXISTS,
 
         /**
-         * An error indicating the parameter and JSON VDB name does not match for a VDB being created.
+         * An error indicating a VDB model with the specified name already exists and therefore cannot be created.
          */
-        VDB_SERVICE_VDB_NAME_ERROR,
+        VDB_SERVICE_VDB_MODEL_ALREADY_EXISTS,
 
+        /**
+         * An error indicating a VDB ModelSource with the specified name already exists and therefore cannot be created.
+         */
+        VDB_SERVICE_VDB_MODEL_SOURCE_ALREADY_EXISTS,
+
+        /**
+         * An error indicating the parameter and JSON VDB name does not match.
+         */
+        VDB_SERVICE_VDB_NAME_DONT_MATCH_ERROR,
+
+        /**
+         * An error indicating the parameter and JSON Model name does not match.
+         */
+        VDB_SERVICE_MODEL_NAME_DONT_MATCH_ERROR,
+
+        /**
+         * An error indicating the parameter and JSON ModelSource name does not match.
+         */
+        VDB_SERVICE_MODEL_SOURCE_NAME_DONT_MATCH_ERROR,
+
+        /**
+         * An error indicating delete attempt was missing a VDB name
+         */
+        VDB_SERVICE_DELETE_MISSING_VDB_NAME,
+        
+        /**
+         * An error indicating delete attempt was missing a Model name
+         */
+        VDB_SERVICE_DELETE_MISSING_MODEL_NAME,
+        
+        /**
+         * An error indicating delete attempt was missing a ModelSource name
+         */
+        VDB_SERVICE_DELETE_MISSING_MODEL_SOURCE_NAME,
+        
         /**
          * An error indicating an exception occurred while importing a sample vdb
          */
@@ -442,6 +637,11 @@ public final class RelationalMessages {
          */
         VDB_SAMPLE_IMPORT_VDB_EXISTS,
 
+        /**
+         * Error transferring vdb from server to repo
+         */
+        VDB_TO_REPO_IMPORT_ERROR,
+        
         /**
          * An error occurred while trying to obtain the teiid schema
          */
@@ -563,9 +763,39 @@ public final class RelationalMessages {
         TEIID_SERVICE_FILE_ATTRIB_NO_CONTENT,
 
         /**
-         * An error indicating a teiid driver failure
+         * An error indicating a teiid dataService deployment failure
          */
-        TEIID_SERVICE_DRIVER_ERROR,
+        TEIID_SERVICE_DEPLOY_DATA_SERVICE_ERROR,
+
+        /**
+         * An error indicating a teiid dataSource deployment failure
+         */
+        TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR,
+
+        /**
+         * An error indicating a teiid DataSource undeploy failure
+         */
+        TEIID_SERVICE_UNDEPLOY_DATA_SOURCE_ERROR,
+
+        /**
+         * An error indicating a teiid Vdb deployment failure
+         */
+        TEIID_SERVICE_DEPLOY_VDB_ERROR,
+
+        /**
+         * An error indicating a teiid Vdb undeploy failure
+         */
+        TEIID_SERVICE_UNDEPLOY_VDB_ERROR,
+        
+        /**
+         * An error indicating a teiid driver deployment failure
+         */
+        TEIID_SERVICE_DEPLOY_DRIVER_ERROR,
+
+        /**
+         * An error indicating a teiid driver undeployment failure
+         */
+        TEIID_SERVICE_UNDEPLOY_DRIVER_ERROR,
 
         /**
          * An error indicating a name is missing while deploying a data service
@@ -586,6 +816,16 @@ public final class RelationalMessages {
          * No data source could be found while trying to deploy
          */
         TEIID_SERVICE_NO_DATA_SOURCE_FOUND,
+
+        /**
+         * No VDB could be found while trying to deploy
+         */
+        TEIID_SERVICE_NO_VDB_FOUND,
+
+        /**
+         * An error indicating a name is missing while deploying a VDB
+         */
+        TEIID_SERVICE_VDB_MISSING_PATH,
 
         /**
          * No query specified for the query operation

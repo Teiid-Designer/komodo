@@ -263,7 +263,7 @@ public abstract class KomodoService implements V1Constants {
     }
 
     protected Response createErrorResponse(Status returnCode, List<MediaType> mediaTypes, Throwable ex,
-                                                                       RelationalMessages.Error errorType, Object... errorMsgInputs) {
+                                           RelationalMessages.Error errorType, Object... errorMsgInputs) {
         String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
 
         StringBuffer buf = new StringBuffer(errorMsg).append(HTML_NEW_LINE);
@@ -278,13 +278,33 @@ public abstract class KomodoService implements V1Constants {
         else
             resultMsg = RelationalMessages.getString(errorType, errorMsgInputs, buf.toString());
 
-        Object responseEntity = createErrorResponseEntity(mediaTypes, resultMsg);
-        return Response.status(returnCode).entity(responseEntity).build();
+        return createErrorResponse(returnCode, mediaTypes, resultMsg);
+    }
+    
+    protected Response createErrorResponse(Status returnCode, List<MediaType> mediaTypes,
+                                           RelationalMessages.Error errorType, Object... errorMsgInputs) {
+        String resultMsg = null;
+        if (errorMsgInputs == null || errorMsgInputs.length == 0)
+            resultMsg = RelationalMessages.getString(errorType);
+        else
+            resultMsg = RelationalMessages.getString(errorType, errorMsgInputs);
+
+        return createErrorResponse(returnCode, mediaTypes, resultMsg);
     }
 
-    protected Response createErrorResponse(List<MediaType> mediaTypes, Throwable ex,
-                                                                       RelationalMessages.Error errorType, Object... errorMsgInputs) {
+    protected Response createErrorResponseWithForbidden(List<MediaType> mediaTypes, Throwable ex,
+                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
         return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, errorType, errorMsgInputs);
+    }
+    
+    protected Response createErrorResponseWithForbidden(List<MediaType> mediaTypes,
+                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
+        return createErrorResponse(Status.FORBIDDEN, mediaTypes, errorType, errorMsgInputs);
+    }
+    
+    protected Response createErrorResponse(Status returnCode, List<MediaType> mediaTypes, String resultMsg) {
+        Object responseEntity = createErrorResponseEntity(mediaTypes, resultMsg);
+        return Response.status(returnCode).entity(responseEntity).build();
     }
 
     protected ResponseBuilder notAcceptableMediaTypesBuilder() {

@@ -165,7 +165,7 @@ public final class RestVdb extends RestBasicEntity {
      */
     public boolean isPreview() {
         Object preview = tuples.get(PREVIEW_LABEL);
-        return preview != null ? Boolean.parseBoolean(preview.toString()) : null;
+        return preview != null ? Boolean.parseBoolean(preview.toString()) : false;
     }
 
     /**
@@ -195,7 +195,7 @@ public final class RestVdb extends RestBasicEntity {
      */
     public int getVersion() {
         Object version = tuples.get(VERSION_LABEL);
-        return version != null ? Integer.parseInt(version.toString()) : null;
+        return version != null ? Integer.parseInt(version.toString()) : 1;
     }
 
     /**
