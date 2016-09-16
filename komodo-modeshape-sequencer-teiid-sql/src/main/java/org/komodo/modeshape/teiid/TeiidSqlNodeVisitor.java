@@ -40,10 +40,10 @@ import org.komodo.modeshape.teiid.language.SortSpecification;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.lexicon.TeiidSqlConstants;
-import org.komodo.spi.lexicon.TeiidSqlContext;
 import org.komodo.spi.lexicon.TeiidSqlConstants.NonReserved;
 import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
 import org.komodo.spi.lexicon.TeiidSqlConstants.Tokens;
+import org.komodo.spi.lexicon.TeiidSqlContext;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.*;
 import org.komodo.spi.query.AggregateFunctions;
@@ -53,10 +53,10 @@ import org.komodo.spi.query.DisplayMode;
 import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.query.MatchMode;
-import org.komodo.spi.query.PredicateQuantifier;
-import org.komodo.spi.query.TriggerEvent;
 import org.komodo.spi.query.Operation;
 import org.komodo.spi.query.ParameterInfo;
+import org.komodo.spi.query.PredicateQuantifier;
+import org.komodo.spi.query.TriggerEvent;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -742,6 +742,9 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
                     break;
                 case INSERT:
                     insert(context);
+                    break;
+			    case CREATE:
+                    createLocalTempTable(context);
                     break;
                 case STORED_PROCEDURE:
                     storedProcedure(context);
@@ -1677,6 +1680,77 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
             }
         }
 
+        return null;
+    }
+
+    public Object createLocalTempTable(TeiidSqlContext context) throws Exception {
+        Node node = (Node)context.get(NODE_KEY);
+
+        append(CREATE);
+        append(SPACE);
+        append(LOCAL);
+        append(SPACE);
+        append(TEMPORARY);
+        append(SPACE);
+        append(TABLE);
+        append(SPACE);
+
+        Node table = reference(node, Create.TABLE_REF_NAME);
+        visit(table);
+
+        append(OPEN_BRACKET);
+
+        tableColumns(context);
+        primaryKey(context);
+
+        append(CLOSE_BRACKET);
+        String onCommit = propertyString(node, Create.ON_COMMIT_PROP_NAME);
+        if (onCommit != null && onCommit.equals(Create.ON_COMMIT_PROP_VALUE)) {
+            append(SPACE);
+            append(ON);
+            append(SPACE);
+            append(COMMIT);
+            append(SPACE);
+            append(PRESERVE);
+            append(SPACE);
+            append(ROWS);
+        }
+
+        return null;
+    }
+
+    public Object primaryKey(TeiidSqlContext context) throws Exception {
+        Node node = (Node) context.get(NODE_KEY);
+        Iterator<Node> pkColumns = references(node, Create.PRIMARY_KEY_COLUMNS_REF_NAME);
+        if(pkColumns.hasNext()){
+            append(COMMA);
+            append(SPACE);
+            append(PRIMARY);
+            append(SPACE);
+            append(KEY);
+            append(OPEN_BRACKET);
+            for (int i = 0; pkColumns.hasNext(); ++i) {
+            if (i > 0)
+                append(COMMA + SPACE);
+            Node pkColumn = pkColumns.next();
+            append(propertyString(pkColumn,Symbol.SHORT_NAME_PROP_NAME));
+            }
+            append(CLOSE_BRACKET);
+        }
+        return null;
+    }
+
+    public Object tableColumns(TeiidSqlContext context) throws Exception {
+        Node node = (Node) context.get(NODE_KEY);
+        Iterator<Node> columns = references(node, Create.COLUMNS_REF_NAME);
+        for (int i = 0; columns.hasNext(); ++i) {
+            if (i > 0)
+                append(COMMA + SPACE);
+            Node column = columns.next();
+            append(propertyString(column,Symbol.SHORT_NAME_PROP_NAME));
+            append(SPACE);
+            append(propertyString(column,Expression.TYPE_CLASS_PROP_NAME));
+        }
         return null;
     }
 

@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -113,32 +113,32 @@ public class TeiidSqlLexicon implements StringConstants {
 	 * tsql:isDistinctCriteria
 	 */
 	public interface IsDistinctCriteria extends PredicateCriteria {
-	
+
 	    String ID = Namespace.PREFIX + COLON + "isDistinctCriteria";
-	
+
 	    /**
 	     * NEGATED Property
 	     */
 	    String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
-	
+
 	    Class<?> NEGATED_PROP_TYPE =  Boolean.class;
-	
+
 	    boolean NEGATED_PROP_MULTIPLE = false;
-	
+
 	    /**
 	     * LEFT_ROW_VALUE Reference
 	     */
 	    String LEFT_ROW_VALUE_REF_NAME = Namespace.PREFIX + COLON + "leftRowValue";
-	
+
 	    Class<?> LEFT_ROW_VALUE_REF_TYPE =  GroupSymbol.class;
-	
+
 	    boolean LEFT_ROW_VALUE_REF_MULTIPLE = false;
-	
+
 	    /**
 	     * RIGHT_ROW_VALUE Reference
 	     */
 	    String RIGHT_ROW_VALUE_REF_NAME = Namespace.PREFIX + COLON + "leftRowValue";
-	
+
 	    Class<?> RIGHT_ROW_VALUE_REF_TYPE =  GroupSymbol.class;
 
 	    boolean RIGHT_ROW_VALUE_REF_MULTIPLE = false;
@@ -197,6 +197,29 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean LABEL_PROP_MULTIPLE = false;
 
 	}
+
+	/**
+     * tsql:create
+     */
+    public interface Create extends LanguageObject {
+
+        String ID = Namespace.PREFIX + COLON + "create";
+
+        boolean IS_ABSTRACT = false;
+
+        String ON_COMMIT_PROP_NAME="onCommit";
+        String ON_COMMIT_PROP_VALUE="PRESERVE_ROWS";
+        String COLUMNS_REF_NAME = Namespace.PREFIX + COLON + "column";
+        Class<?> COLUMNS_REF_TYPE =  ElementSymbol.class;
+        boolean COLUMNS_REF_MULTIPLE = true;
+
+        String PRIMARY_KEY_COLUMNS_REF_NAME = Namespace.PREFIX + COLON + "primaryKeyColumn";
+        Class<?> PRIMARY_KEY_COLUMNS_REF_TYPE =  ElementSymbol.class;
+        boolean PRIMARY_KEY_COLUMNS_REF_MULTIPLE = true;
+
+        String TABLE_REF_NAME = Namespace.PREFIX + COLON + "table";
+
+    }
 
 	/**
 	 * tsql:criteria
@@ -3009,7 +3032,7 @@ public class TeiidSqlLexicon implements StringConstants {
 		/**
 		 * Character used to delimit name components in a symbol
 		 */
-		String SEPARATOR = DOT; 
+		String SEPARATOR = DOT;
 
 		/**
 		 * NAME Property
@@ -3936,6 +3959,8 @@ public class TeiidSqlLexicon implements StringConstants {
 		LABELED (Labeled.ID, Labeled.class),
 
 		CRITERIA (Criteria.ID, Criteria.class),
+
+		CREATE (Create.ID,Create.class),
 
 		ABSTRACT_COMPARE_CRITERIA (AbstractCompareCriteria.ID, AbstractCompareCriteria.class),
 

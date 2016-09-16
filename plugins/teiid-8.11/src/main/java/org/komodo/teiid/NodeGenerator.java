@@ -46,6 +46,7 @@ import org.teiid.query.sql.lang.CacheHint;
 import org.teiid.query.sql.lang.Command;
 import org.teiid.query.sql.lang.CompareCriteria;
 import org.teiid.query.sql.lang.CompoundCriteria;
+import org.teiid.query.sql.lang.Create;
 import org.teiid.query.sql.lang.Delete;
 import org.teiid.query.sql.lang.DynamicCommand;
 import org.teiid.query.sql.lang.ExistsCriteria;
@@ -1152,6 +1153,24 @@ public class NodeGenerator extends AbstractNodeGenerator<LanguageObject>implemen
 
                 visitObject(node, TeiidSqlLexicon.CreateProcedureCommand.BLOCK_REF_NAME, obj.getBlock());
                 visitObject(node, TeiidSqlLexicon.CreateProcedureCommand.VIRTUAL_GROUP_REF_NAME, obj.getVirtualGroup());
+
+            } catch (Exception ex) {
+                setError(ex);
+            }
+        }
+
+        @Override
+        public void visit(Create obj){
+            if (errorOccurred())
+                return;
+
+            try {
+                Node node = transform(obj);
+                if(obj.getCommitAction()!=null)
+                    setProperty(node, TeiidSqlLexicon.Create.ON_COMMIT_PROP_NAME, obj.getCommitAction().toString());
+                visitObject(node,TeiidSqlLexicon.Create.TABLE_REF_NAME,obj.getGroup());
+                visitObjects(node, TeiidSqlLexicon.Create.COLUMNS_REF_NAME, obj.getColumnSymbols());
+                visitObjects(node,TeiidSqlLexicon.Create.PRIMARY_KEY_COLUMNS_REF_NAME,obj.getPrimaryKey());
 
             } catch (Exception ex) {
                 setError(ex);

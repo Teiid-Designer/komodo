@@ -180,7 +180,13 @@
 	+ tsql:into (tsql:into)
 	+ tsql:criteria (tsql:criteria)
 	+ tsql:groupBy (tsql:groupBy)
-
+	
+[tsql:create] > tsql:command mixin
+	- tsql:onCommit (string)
+	+ tsql:table (tsql:groupSymbol)
+	+ tsql:tableColumn (tsql:multipleElementSymbol)
+	+ tsql:primaryKeyColumn (tsql:multipleElementSymbol)
+	
 [tsql:setQuery]	>	tsql:queryCommand mixin
 	- tsql:operation (string) < "UNION", "INTERSECT", "EXCEPT"
 	- tsql:all (boolean)

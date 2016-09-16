@@ -36,6 +36,7 @@ import org.komodo.spi.lexicon.TeiidSqlLexicon.Block;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.CommandStatement;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.CompareCriteria;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.Constant;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Create;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.CreateProcedureCommand;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.DeclareStatement;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.DerivedColumn;
@@ -1771,6 +1772,42 @@ public abstract class AbstractTestTeiidSqlSequencer extends AbstractTSqlSequence
         verifyUnaryFromClauseGroup(fromNode, From.CLAUSES_REF_NAME, 1, "g");
 
         verifySql("SELECT ROW_NUMBER() OVER (PARTITION BY x ORDER BY y) FROM g", fileNode);
+    }
+
+    @Test
+    public void testLocalTable() throws Exception {
+        String sql = "Create local TEMPORARY table x(c1 boolean, c2 byte, c3 string);";
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
+
+        Node createNode = verify(fileNode, Create.ID, Create.ID);
+
+        Node tableNode = verify(createNode, Create.TABLE_REF_NAME, GroupSymbol.ID);
+        verifyProperty(tableNode, Symbol.SHORT_NAME_PROP_NAME, "x");
+
+        Node columnNode=verify(createNode,Create.COLUMNS_REF_NAME,ElementSymbol.ID);
+        verifyProperty(columnNode, Symbol.SHORT_NAME_PROP_NAME, "c1");
+        verifyProperty(columnNode,Expression.TYPE_CLASS_PROP_NAME,"BOOLEAN");
+
+        verifySql("CREATE LOCAL TEMPORARY TABLE x(c1 BOOLEAN, c2 BYTE, c3 STRING)", fileNode);
+    }
+
+    @Test
+    public void testLocalTablePreserveRows() throws Exception {
+        String sql = "Create local TEMPORARY table x(c1 boolean, c2 byte, c3 string, primary key (c2, c3)) ON COMMIT PRESERVE ROWS;";
+        Node fileNode = sequenceSql(sql, TSQL_QUERY);
+
+        Node createNode = verify(fileNode, Create.ID, Create.ID);
+
+        Node tableNode = verify(createNode, Create.TABLE_REF_NAME, GroupSymbol.ID);
+        verifyProperty(tableNode, Symbol.SHORT_NAME_PROP_NAME, "x");
+
+        Node columnNode=verify(createNode,Create.COLUMNS_REF_NAME,ElementSymbol.ID);
+        verifyProperty(columnNode, Symbol.SHORT_NAME_PROP_NAME, "c1");
+        verifyProperty(columnNode,Expression.TYPE_CLASS_PROP_NAME,"BOOLEAN");
+
+        verify(createNode,Create.PRIMARY_KEY_COLUMNS_REF_NAME,ElementSymbol.ID);
+
+        verifySql("CREATE LOCAL TEMPORARY TABLE x(c1 BOOLEAN, c2 BYTE, c3 STRING, PRIMARY KEY(c2, c3)) ON COMMIT PRESERVE ROWS", fileNode);
     }
 
 }

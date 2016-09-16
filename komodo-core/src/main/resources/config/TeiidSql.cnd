@@ -180,6 +180,12 @@
 	+ tsql:from (tsql:from)
 	+ tsql:criteria (tsql:criteria)
 	+ tsql:select (tsql:select)
+	
+[tsql:create] > tsql:command mixin
+	- tsql:onCommit (string)
+	+ tsql:table (tsql:groupSymbol)
+	+ tsql:tableColumn (tsql:multipleElementSymbol)
+	+ tsql:primaryKeyColumn (tsql:multipleElementSymbol)	
 
 [tsql:setQuery]	>	tsql:queryCommand mixin
 	- tsql:all (boolean)

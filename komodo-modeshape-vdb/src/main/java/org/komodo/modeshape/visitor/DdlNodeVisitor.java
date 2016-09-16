@@ -29,21 +29,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.jcr.Node;
 import javax.jcr.Property;
+import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NodeType;
-
 import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.spi.lexicon.TeiidSqlConstants.NonReserved;
 import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
-import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -111,6 +110,10 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
         CREATE_FUNCTION(TeiidDdlLexicon.CreateProcedure.FUNCTION_STATEMENT),
 
+        CREATE_GLOBAL_TEMP_TABLE(TeiidDdlLexicon.CreateTable.GLOBAL_TEMP_TABLE_STATEMENT),
+
+        CREATE_FOREIGN_TEMP_TABLE(TeiidDdlLexicon.CreateTable.FOREIGN_TEMP_TABLE_STATEMENT),
+
         UNKNOWN(UNDEFINED);
 
         private String nodeTypeId;
@@ -140,15 +143,9 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
     }
 
-    private enum TableType {
-        TABLE,
-        VIEW,
-        GLOBAL_TEMP_TABLE;
-    }
-
     private class CreateObjectContext {
 
-        private TableType tableType = TableType.TABLE;
+        private MixinTypeName tableType=MixinTypeName.UNKNOWN;
 
         private boolean virtual = false;
 
@@ -168,11 +165,11 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             this.virtual = virtual;
         }
 
-        public TableType getTableType() {
+        public MixinTypeName getTableType() {
             return tableType;
         }
 
-        public void setTableType(TableType tableType) {
+        public void setTableType(MixinTypeName tableType) {
             this.tableType = tableType;
         }
     }
@@ -567,7 +564,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
         ColumnContext columnContext = createColumnContext(tableElement);
 
-        if (TableType.GLOBAL_TEMP_TABLE == context.getTableType() && columnContext.isAutoIncremented() &&
+        if (MixinTypeName.CREATE_GLOBAL_TEMP_TABLE == context.getTableType() && columnContext.isAutoIncremented() &&
             columnContext.isNotNull() &&
             DataTypeName.INTEGER.equals(columnContext.getDataTypeName())) {
             append(escapeSinglePart(tableElement.getName()));
@@ -735,10 +732,10 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
     private void tabulation(Node tabulation, CreateObjectContext context) throws Exception {
         append(SPACE);
-
         addTableBody(tabulation, context);
 
-        if (TableType.GLOBAL_TEMP_TABLE != context.getTableType()) {
+        if (
+            MixinTypeName.CREATE_FOREIGN_TEMP_TABLE !=context.getTableType()) {
             if (context.isVirtual()) {
                 TeiidSqlNodeVisitor visitor = new TeiidSqlNodeVisitor(getVersion());
                 String teiidSql = visitor.getTeiidSql(tabulation);
@@ -763,15 +760,61 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         append(CREATE).append(SPACE);
 
         if (context.isPhysical()) {
-            context.setTableType(TableType.TABLE);
+            context.setTableType(MixinTypeName.CREATE_TABLE);
             append(FOREIGN).append(SPACE).append(TABLE);
-        }
-        else {
-            context.setTableType(TableType.GLOBAL_TEMP_TABLE);
-            append(GLOBAL).append(SPACE).append(TEMPORARY).append(SPACE).append(TABLE);
         }
 
         tabulation(table, context);
+    }
+
+    /**
+     * @param node
+     * @throws RepositoryException
+     */
+    private void globalTempTable(Node temptable) throws Exception {
+       if (! includeTables)
+            return;
+
+       if (!hasMixinType(temptable, TeiidDdlLexicon.CreateTable.GLOBAL_TEMP_TABLE_STATEMENT))
+            return;
+
+       append(NEW_LINE);
+       append(CREATE).append(SPACE).append(GLOBAL).append(SPACE).append(TEMPORARY).append(SPACE).append(TABLE);
+       CreateObjectContext context = new CreateObjectContext();
+       context.setPhysical(false);
+       context.setTableType(MixinTypeName.CREATE_GLOBAL_TEMP_TABLE);
+       context.setPhysical(true);
+       tabulation(temptable,context);
+    }
+
+    /**
+     * @param node
+     * @throws RepositoryException
+     */
+    private void foreignTempTable(Node temptable) throws Exception {
+       if (! includeTables)
+            return;
+
+       if (!hasMixinType(temptable, TeiidDdlLexicon.CreateTable.FOREIGN_TEMP_TABLE_STATEMENT))
+            return;
+
+       append(NEW_LINE);
+       append(CREATE).append(SPACE).append(FOREIGN).append(SPACE).append(TEMPORARY).append(SPACE).append(TABLE);
+       CreateObjectContext context = new CreateObjectContext();
+       context.setPhysical(false);
+       context.setTableType(MixinTypeName.CREATE_FOREIGN_TEMP_TABLE);
+       context.setPhysical(true);
+       tabulation(temptable,context);
+       PropertyIterator props=temptable.getProperties();
+       Property property;
+       String schemaRef=null;
+       while(props.hasNext()){
+          property= props.nextProperty();
+          if(property.getName().equals(TeiidDdlLexicon.CreateTable.SCHEMA_REFERENCE)){
+              schemaRef=property.getValue().getString();
+          }
+       }
+       append(SPACE).append(ON).append(SPACE).append(schemaRef).append(SEMI_COLON);
     }
 
     private void view(Node view) throws Exception {
@@ -785,7 +828,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
         CreateObjectContext context = new CreateObjectContext();
         context.setVirtual(true);
-        context.setTableType(TableType.VIEW);
+        context.setTableType(MixinTypeName.CREATE_VIEW);
 
         append(CREATE).append(SPACE).append(VIEW);
 
@@ -982,6 +1025,12 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
                     function(node);
                     append(NEW_LINE);
                     break;
+                case CREATE_GLOBAL_TEMP_TABLE:
+                    globalTempTable(node);
+                    break;
+                case CREATE_FOREIGN_TEMP_TABLE:
+                    foreignTempTable(node);
+                    break;
                 case UNKNOWN:
                 default:
                     // Not a node we are interested in but may contain such nodes
@@ -991,6 +1040,8 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             throw new RepositoryException(ex);
         }
     }
+
+
 
     @Override
     public void visit(Property property) {

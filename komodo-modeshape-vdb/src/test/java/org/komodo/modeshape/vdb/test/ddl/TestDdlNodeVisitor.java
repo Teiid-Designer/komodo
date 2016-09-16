@@ -340,16 +340,82 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
     }
 
-    @Ignore
+
     @Test( timeout = 5000000 )
     public void testGlobalTemporaryTable() throws Exception {
-        String ddl = "CREATE GLOBAL TEMPORARY TABLE myTemp (" + NEW_LINE +
-                            TAB + "x string," + NEW_LINE +
-                            TAB + "y SERIAL," + NEW_LINE +
-                            TAB + "PRIMARY KEY(x)" + NEW_LINE +
-                            ")";
-        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myTemp");
+        String ddl = "CREATE GLOBAL TEMPORARY TABLE myGlobalTemp (" + NEW_LINE +
+                            TAB + "a SERIAL," + NEW_LINE +
+                            TAB + "b varchar(20)," + NEW_LINE +
+                            TAB + "c string," + NEW_LINE +
+                            TAB + "d boolean," + NEW_LINE +
+                            TAB + "e byte," + NEW_LINE +
+                            TAB + "f tinyint," + NEW_LINE +
+                            TAB + "g short," + NEW_LINE +
+                            TAB + "h smallint," + NEW_LINE +
+                            TAB + "i char(3)," + NEW_LINE +
+                            TAB + "j integer," + NEW_LINE +
+                            TAB + "k long," + NEW_LINE +
+                            TAB + "l bigint," + NEW_LINE +
+                            TAB + "m float," + NEW_LINE +
+                            TAB + "n real," + NEW_LINE +
+                            TAB + "o double," + NEW_LINE +
+                            TAB + "p bigdecimal(5,10)," + NEW_LINE +
+                            TAB + "q date," + NEW_LINE +
+                            TAB + "r time," + NEW_LINE +
+                            TAB + "s timestamp," + NEW_LINE +
+                            TAB + "t blob," + NEW_LINE +
+                            TAB + "u clob," + NEW_LINE +
+                            TAB + "v xml," + NEW_LINE +
+                            TAB + "PRIMARY KEY(a, b)" + NEW_LINE +
+                            ") OPTIONS (\"FOO\" 'BAR', \"UPDATABLE\" 'true');";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myGlobalTemp");
     }
+
+    @Test( timeout = 5000000 )
+    public void testForeignTemporaryTable() throws Exception {
+        String ddl = "CREATE FOREIGN TEMPORARY TABLE myForeignTemp (" + NEW_LINE +
+                            TAB + "a integer," + NEW_LINE +
+                            TAB + "b varchar(20)," + NEW_LINE +
+                            TAB + "c string," + NEW_LINE +
+                            TAB + "d boolean," + NEW_LINE +
+                            TAB + "e byte," + NEW_LINE +
+                            TAB + "f tinyint," + NEW_LINE +
+                            TAB + "g short," + NEW_LINE +
+                            TAB + "h smallint," + NEW_LINE +
+                            TAB + "i char(3)," + NEW_LINE +
+                            TAB + "j integer," + NEW_LINE +
+                            TAB + "k long," + NEW_LINE +
+                            TAB + "l bigint," + NEW_LINE +
+                            TAB + "m float," + NEW_LINE +
+                            TAB + "n real," + NEW_LINE +
+                            TAB + "o double," + NEW_LINE +
+                            TAB + "p bigdecimal(5,10)," + NEW_LINE +
+                            TAB + "q date," + NEW_LINE +
+                            TAB + "r time," + NEW_LINE +
+                            TAB + "s timestamp," + NEW_LINE +
+                            TAB + "t blob," + NEW_LINE +
+                            TAB + "u clob," + NEW_LINE +
+                            TAB + "v xml," + NEW_LINE +
+                            TAB + "PRIMARY KEY(a, b)" + NEW_LINE +
+                            ") ON pm1;";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myForeignTemp");
+    }
+
+    @Test( timeout = 5000000 )
+    public void testMultipleTemporaryTable() throws Exception {
+        String ddl = "CREATE FOREIGN TEMPORARY TABLE myForeignTemp (" + NEW_LINE +
+                            TAB + "a integer," + NEW_LINE +
+                            TAB + "b varchar(20)," + NEW_LINE +
+                            TAB + "c string," + NEW_LINE +
+                            TAB + "PRIMARY KEY(a, b)" + NEW_LINE +") ON pm1;"+ NEW_LINE +
+                            "CREATE GLOBAL TEMPORARY TABLE myGlobalTemp (" + NEW_LINE +
+                            TAB + "a integer," + NEW_LINE +
+                            TAB + "b varchar(20)," + NEW_LINE +
+                            TAB + "c string," + NEW_LINE +
+                            TAB + "PRIMARY KEY(a, b)" + NEW_LINE +");";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myForeignTemp");
+    }
+
 
     @Test( timeout = 5000000 )
     public void testArrayTypes() throws Exception {
@@ -365,4 +431,15 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
+    @Test(timeout = 5000000)
+    public void testLocalTempTable() throws Exception {
+        String ddl ="CREATE VIRTUAL PROCEDURE getData(IN p1 integer) RETURNS TABLE (col string)"+NEW_LINE +
+        "OPTIONS (\"UPDATECOUNT\" '0')"+NEW_LINE+
+       "AS"+ NEW_LINE +
+        "BEGIN"+ NEW_LINE +
+    "CREATE LOCAL TEMPORARY TABLE x(c1 BOOLEAN, c2 BYTE, c3 STRING, PRIMARY KEY(c2, c3));"    + NEW_LINE +
+    "SELECT * FROM data;"+ NEW_LINE +
+        "END;";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
+    }
 }
