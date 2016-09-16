@@ -491,7 +491,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(200, response.getStatus());
 
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
-        assertTrue(vdbs.length == 1);
+        assertFalse(vdbs.length == 0);
 
         RestVdb vdb = vdbs[0];
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;

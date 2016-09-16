@@ -348,7 +348,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
-     * @return the URI to use when requesting a collection of VDBs in the workspace (never <code>null</code>)
+     * @return the URI to use when requesting a collection of VDBs in a teiid cache (never <code>null</code>)
      */
     public URI cacheTeiidVdbsUri(String teiidId) {
         return UriBuilder.fromUri(cachedTeiidUri(teiidId))
@@ -409,7 +409,8 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     public URI vdbParentUri(Vdb vdb, UnitOfWork uow) throws KException {
         KomodoObject parent = vdb.getParent(uow);
         if (isCachedTeiidFolder(uow, parent)) {
-            return cachedTeiidUri(parent.getName(uow));
+            KomodoObject cachedTeiid = parent.getParent(uow);
+            return cacheTeiidVdbsUri(cachedTeiid.getName(uow));
         }
 
         return workspaceVdbsUri();

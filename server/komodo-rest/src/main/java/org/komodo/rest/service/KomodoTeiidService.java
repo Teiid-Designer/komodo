@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -59,7 +58,6 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.relational.workspace.WorkspaceManager;
-import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.CallbackTimeoutException;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
@@ -110,6 +108,11 @@ import io.swagger.annotations.ApiResponses;
 public class KomodoTeiidService extends KomodoService {
 
     /**
+     * Time to wait after deploying/undeploying an artifact from the teiid instance
+     */
+    private final static int DEPLOYMENT_WAIT_TIME = 2000;
+
+    /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
      * @throws WebApplicationException
@@ -124,7 +127,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction(SYSTEM_USER, "getTeiidStatus", false); //$NON-NLS-1$
+            uow = systemTx("getTeiidStatus", false); //$NON-NLS-1$
             Teiid teiid = serverManager.getDefaultServer(uow);
             uow.commit();
 
@@ -138,30 +141,154 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
-    private CachedTeiid importContent() throws KException, CallbackTimeoutException {
-        Teiid teiid = getDefaultTeiid();
-        SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = createTransaction(SYSTEM_USER, "import-teiid-content", false, callback); //$NON-NLS-1$
-        CachedTeiid cachedTeiid = teiid.importContent(uow);
-
-        // Commit the transaction to allow the sequencers to run
-        uow.commit();
-
+    private CachedTeiid importContent(Teiid teiid) throws KException {
+        UnitOfWork uow = null;
         try {
-            if (! callback.await(3, TimeUnit.MINUTES)) {
-                throw new CallbackTimeoutException();
-            }
-        } catch (Exception ex) {
-            throw new KException(ex);
-        }
+            uow = systemTx("import-teiid-content", false);
+            CachedTeiid cachedTeiid = teiid.importContent(uow);
 
-        return cachedTeiid;
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            // Await the sequencers to finish
+            awaitCallback(uow);
+
+            return cachedTeiid;
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
+    }
+
+    private synchronized void refreshCachedDataSources(Teiid teiid, String... dataSourceNames) throws KException {
+        CachedTeiid cachedTeiid = importContent(teiid);
+
+        UnitOfWork uow = null;
+        try {
+            uow = systemTx("refresh-teiid-content", false);
+            TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+
+            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceNames);
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            // Await the sequencers to finish
+            awaitCallback(uow);
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
+    }
+
+    private synchronized void refreshCachedDrivers(Teiid teiid, String... driverNames) throws KException {
+        CachedTeiid cachedTeiid = importContent(teiid);
+
+        UnitOfWork uow = null;
+        try {
+            uow = systemTx("refresh-teiid-content", false);
+            TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+
+            cachedTeiid.refreshDrivers(uow, teiidInstance, driverNames);
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            // Await the sequencers to finish
+            awaitCallback(uow);
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
+    }
+
+    private synchronized void refreshCachedVdbs(Teiid teiid, String... vdbNames) throws KException {
+        CachedTeiid cachedTeiid = importContent(teiid);
+
+        UnitOfWork uow = null;
+        try {
+            uow = systemTx("refresh-teiid-content", false);
+            TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+
+            cachedTeiid.refreshVdbs(uow, teiidInstance, vdbNames);
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            // Await the sequencers to finish
+            awaitCallback(uow);
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
+    }
+
+    private synchronized void refreshCachedFromDataService(Teiid teiid, Dataservice dataService) throws KException {
+        CachedTeiid cachedTeiid = importContent(teiid);
+
+        UnitOfWork uow = null;
+        try {
+            uow = systemTx("refresh-teiid-content", false);
+            TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+
+            // DataSources
+            Datasource[] dataSources = dataService.getConnections(uow);
+            String[] dataSourceNames = new String[dataSources.length];
+            for (int i = 0; i < dataSources.length; i++) {
+                dataSourceNames[i] = dataSources[i].getJndiName(uow);
+            }
+            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceNames);
+
+            // Drivers
+            Driver[] drivers = dataService.getDrivers(uow);
+            String[] driverNames = new String[drivers.length];
+            for (int i = 0; i < drivers.length; i++) {
+                driverNames[i] = drivers[i].getName(uow);
+            }
+            cachedTeiid.refreshDrivers(uow, teiidInstance, driverNames);
+
+            // VDBs
+            Vdb[] vdbs = dataService.getVdbs(uow);
+            String[] vdbNames = new String[vdbs.length];
+            for (int i = 0; i < vdbs.length; i++) {
+                vdbNames[i] = vdbs[i].getName(uow);
+            }
+            cachedTeiid.refreshVdbs(uow, teiidInstance, vdbNames);
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            // Await the sequencers to finish
+            awaitCallback(uow);
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
     }
 
     private String getSchema(UnitOfWork uow, String vdbName, String modelName) throws Exception {
-        Teiid teiid = getDefaultTeiid();
+        Teiid teiidNode = getDefaultTeiid();
         
-        TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+        TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
         if (teiidInstance == null) {
             throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_ERROR));
         }
@@ -206,32 +333,98 @@ public class KomodoTeiidService extends KomodoService {
         return Response.ok().build();
     }
 
-    private boolean hasDataSourceDriver(String driverName, TeiidInstance instance) throws Exception {
-        Collection<DataSourceDriver> drivers = instance.getDataSourceDrivers();
-        for (DataSourceDriver driver : drivers) {
-            if (driver.getName().startsWith(driverName)) return true;
-        }
+    private boolean hasDataSourceDriver(String driverName, Teiid teiidNode) throws Exception {
 
-        return false;
+        UnitOfWork uow = null;
+        boolean hasDriver = false;
+
+        try {
+            uow = systemTx("refresh-teiid-content", true);
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            teiidInstance.reconnect();
+
+            Collection<DataSourceDriver> drivers = teiidInstance.getDataSourceDrivers();
+            for (DataSourceDriver driver : drivers) {
+                if (driver.getName().startsWith(driverName)) {
+                    hasDriver = true;
+                    break;
+                }
+            }
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            return hasDriver;
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
     }
     
-    private boolean hasDynamicVdb(String vdbName, TeiidInstance instance) throws Exception {
-        Collection<TeiidVdb> vdbs = instance.getVdbs();
-        for (TeiidVdb vdb : vdbs) {
-            if (vdb.getName().startsWith(vdbName)) return true;
-        }
+    private boolean hasDynamicVdb(String vdbName, Teiid teiidNode) throws Exception {
+        UnitOfWork uow = null;
+        boolean hasVdb = false;
 
-        return false;
+        try {
+            uow = systemTx("refresh-teiid-content", true);
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            teiidInstance.reconnect();
+
+            Collection<TeiidVdb> vdbs = teiidInstance.getVdbs();
+            for (TeiidVdb vdb : vdbs) {
+                if (vdb.getName().startsWith(vdbName)) {
+                    hasVdb = true;
+                    break;
+                }
+            }
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            return hasVdb;
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
     }
 
-    private boolean hasDataSource(String dataSourceName, TeiidInstance instance) throws Exception {
-        Collection<TeiidDataSource> datasources = instance.getDataSources();
-        for (TeiidDataSource datasource : datasources) {
-            if (datasource.getName().startsWith(dataSourceName))
-                return true;
-        }
+    private boolean hasDataSource(String dataSourceName, Teiid teiidNode) throws Exception {
+        UnitOfWork uow = null;
+        boolean hasDataSource = false;
 
-        return false;
+        try {
+            uow = systemTx("refresh-teiid-content", true);
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            teiidInstance.reconnect();
+
+            Collection<TeiidDataSource> datasources = teiidInstance.getDataSources();
+            for (TeiidDataSource datasource : datasources) {
+                if (datasource.getName().startsWith(dataSourceName)) {
+                    hasDataSource = true;
+                    break;
+                }
+            }
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            return hasDataSource;
+
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
     }
 
     /**
@@ -262,10 +455,10 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiid = getDefaultTeiid();
+            Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "getTeiidStatus", true); //$NON-NLS-1$
-            RestTeiidStatus status = new RestTeiidStatus(uriInfo.getBaseUri(), teiid, uow);
+            RestTeiidStatus status = new RestTeiidStatus(uriInfo.getBaseUri(), teiidNode, uow);
 
             // create response
             return commit(uow, mediaTypes, status);
@@ -452,7 +645,8 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find VDBs
             uow = createTransaction(principal, "getVdbs", true); //$NON-NLS-1$
@@ -522,7 +716,8 @@ public class KomodoTeiidService extends KomodoService {
         
         UnitOfWork uow = null;
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find VDB
             uow = createTransaction(principal, "getVdb-" + vdbName, true); //$NON-NLS-1$
@@ -583,7 +778,8 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find VDB
             uow = createTransaction(principal, "copyVdbsIntoRepo", false); //$NON-NLS-1$
@@ -684,15 +880,14 @@ public class KomodoTeiidService extends KomodoService {
             teiidInstance.undeployDynamicVdb(vdbName);
 
             // Await the undeployment to end
-            Thread.sleep(2000);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             String title = RelationalMessages.getString(RelationalMessages.Info.VDB_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (! hasDynamicVdb(vdbName, teiidInstance)) {
+            if (! hasDynamicVdb(vdbName, teiidNode)) {
                 // Make sure Vdb state is current in the cachedTeiid
-                CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-                cachedTeiid.refreshVdbs(uow, teiidInstance, vdbName);
-                
+                refreshCachedVdbs(teiidNode, vdbName);
+
                 status.addAttribute(vdbName,
                                     RelationalMessages.getString(RelationalMessages.Info.VDB_SUCCESSFULLY_UNDEPLOYED));
             } else
@@ -757,15 +952,14 @@ public class KomodoTeiidService extends KomodoService {
             teiidInstance.deleteDataSource(dataSourceName);
 
             // Await the undeployment to end
-            Thread.sleep(2000);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (! hasDataSource(dataSourceName, teiidInstance)) {
+            if (! hasDataSource(dataSourceName, teiidNode)) {
                 // Make sure DataSource state is current in cachedTeiid
-                CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-                cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceName);
-                
+                refreshCachedDataSources(teiidNode, dataSourceName);
+
                 status.addAttribute(dataSourceName,
                                     RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_UNDEPLOYED));
             } else
@@ -880,7 +1074,8 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find translators
             uow = createTransaction(principal, "getTranslators", true); //$NON-NLS-1$
@@ -942,7 +1137,8 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find translators
             uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
@@ -1009,7 +1205,8 @@ public class KomodoTeiidService extends KomodoService {
         
         UnitOfWork uow = null;
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find DataSource
             uow = createTransaction(principal, "getDataSource-" + datasourceName, true); //$NON-NLS-1$
@@ -1065,7 +1262,8 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find drivers
             uow = createTransaction(principal, "getDrivers", true); //$NON-NLS-1$
@@ -1159,15 +1357,14 @@ public class KomodoTeiidService extends KomodoService {
             teiidInstance.deployDriver(kfa.getName(), driverFile);
 
             // Await the deployment to end
-            Thread.sleep(2000);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             // Make sure Driver state is current in the cachedTeiid
-            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-            cachedTeiid.refreshDrivers(uow, teiidInstance, kfa.getName());
+            refreshCachedDrivers(teiidNode, kfa.getName());
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (hasDataSourceDriver(kfa.getName(), teiidInstance))
+            if (hasDataSourceDriver(kfa.getName(), teiidNode))
                 status.addAttribute(kfa.getName(),
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED));
             else
@@ -1233,15 +1430,13 @@ public class KomodoTeiidService extends KomodoService {
             teiidInstance.undeployDriver(driverName);
 
             // Await the undeployment to end
-            Thread.sleep(2000);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (! hasDataSourceDriver(driverName, teiidInstance)) {
-                // Make sure driver state is current in the cachedTeiid
-                CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-                cachedTeiid.refreshDrivers(uow, teiidInstance, driverName);
-                
+            if (! hasDataSourceDriver(driverName, teiidNode)) {
+                refreshCachedDrivers(teiidNode, driverName);
+
                 status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UNDEPLOYED));
             } else
@@ -1334,35 +1529,11 @@ public class KomodoTeiidService extends KomodoService {
             DeployStatus deployStatus = dataService.deploy(uow, teiidNode);
 
             // Await the deployment to end
-            Thread.sleep(500);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             // Make sure Dataservice constituents are current in the cachedTeiid
-            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
-            // DataSources
-            Datasource[] dataSources = dataService.getConnections(uow);
-            String[] dataSourceNames = new String[dataSources.length];
-            for(int i=0; i<dataSources.length; i++) {
-                dataSourceNames[i] = dataSources[i].getName(uow);
-            }
-            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceNames);
-            
-            // Drivers
-            Driver[] drivers = dataService.getDrivers(uow);
-            String[] driverNames = new String[drivers.length];
-            for(int i=0; i<drivers.length; i++) {
-                driverNames[i] = drivers[i].getName(uow);
-            }
-            cachedTeiid.refreshDrivers(uow, teiidInstance, driverNames);
-            
-            // VDBs
-            Vdb[] vdbs = dataService.getVdbs(uow);
-            String[] vdbNames = new String[vdbs.length];
-            for(int i=0; i<vdbs.length; i++) {
-                vdbNames[i] = vdbs[i].getName(uow);
-            }
-            cachedTeiid.refreshVdbs(uow, teiidInstance, vdbNames);
-            
+            refreshCachedFromDataService(teiidNode, dataService);
+
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
 
@@ -1472,12 +1643,10 @@ public class KomodoTeiidService extends KomodoService {
             DeployStatus deployStatus = dataSource.deploy(uow, teiidNode);
 
             // Await the deployment to end
-            Thread.sleep(500);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             // Make sure Datasource is current in the CachedTeiid
-            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
-            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSource.getName(uow));
+            refreshCachedDataSources(teiidNode, dataSource.getJndiName(uow));
             
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
@@ -1588,13 +1757,11 @@ public class KomodoTeiidService extends KomodoService {
             DeployStatus deployStatus = vdb.deploy(uow, teiidNode);
 
             // Await the deployment to end
-            Thread.sleep(500);
+            Thread.sleep(DEPLOYMENT_WAIT_TIME);
             
             // Make sure Vdb is current in the CachedTeiid
-            CachedTeiid cachedTeiid = teiidNode.importContent(uow);
-            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
-            cachedTeiid.refreshVdbs(uow, teiidInstance, vdb.getName(uow));
-            
+            refreshCachedVdbs(teiidNode, vdb.getName(uow));
+
             String title = RelationalMessages.getString(RelationalMessages.Info.VDB_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
 

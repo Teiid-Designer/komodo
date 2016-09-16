@@ -507,6 +507,28 @@ public abstract class KomodoService implements V1Constants {
         return vdb;
     }
 
+    protected UnitOfWork systemTx(String description, boolean rollback) throws KException {
+        SynchronousCallback callback = new SynchronousCallback();
+        return createTransaction(SYSTEM_USER, description, rollback, callback); //$NON-NLS-1$
+    }
+
+    protected void awaitCallback(UnitOfWork transaction) throws KException {
+        if (transaction == null)
+            return;
+
+        UnitOfWorkListener callback = transaction.getCallback();
+        if (! (callback instanceof SynchronousCallback))
+            return;
+
+        try {
+            if (! ((SynchronousCallback) callback).await(3, TimeUnit.MINUTES)) {
+                throw new CallbackTimeoutException();
+            }
+        } catch (Exception ex) {
+            throw new KException(ex);
+        }
+    }
+
     protected Dataservice findDataservice(UnitOfWork uow, String dataserviceName) throws KException {
         if (! getWorkspaceManager(uow).hasChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE ) ) {
             return null;

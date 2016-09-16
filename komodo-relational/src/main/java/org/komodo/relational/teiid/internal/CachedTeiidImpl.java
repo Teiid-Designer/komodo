@@ -45,6 +45,7 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -594,9 +595,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isNotNull(teiidInstance, "teiidInstance"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
 
         try {
-            teiidInstance.connect();
+            teiidInstance.reconnect();
             if (! teiidInstance.isConnected()) {
                 throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
             }
@@ -641,7 +643,24 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             }
         }
     }
-    
+
+    // ######################################
+    //
+    // Taken from Teiid's AdminFactory$Admin so mirrors
+    // the teiid mechanism to remove the java context from
+    // a JNDI identifier.
+    //
+    // ######################################
+
+    private static final String JAVA_CONTEXT = "java:/";
+
+    private String removeJavaContext(String deployedName) {
+        if (deployedName.startsWith(JAVA_CONTEXT)) {
+            deployedName = deployedName.substring(6);
+        }
+        return deployedName;
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.relational.teiid.CachedTeiid#refreshDataSources(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.runtime.TeiidInstance, java.lang.String[])
      */
@@ -651,9 +670,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
                                    String... dataSourceNames) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
 
         try {
-            teiidInstance.connect();
+            teiidInstance.reconnect();
             if (! teiidInstance.isConnected()) {
                 throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
             }
@@ -687,6 +707,8 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         
         // Names supplied, update only the specified DataSources.
         for(String dataSourceName : dataSourceNames) {
+            dataSourceName = removeJavaContext(dataSourceName);
+
             TeiidDataSource teiidDataSource;
             try {
                 teiidDataSource = teiidInstance.getDataSource(dataSourceName);
@@ -708,9 +730,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
                                    String... translatorNames) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
 
         try {
-            teiidInstance.connect();
+            teiidInstance.reconnect();
             if (! teiidInstance.isConnected()) {
                 throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
             }
@@ -765,9 +788,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
                                String... driverNames) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
 
         try {
-            teiidInstance.connect();
+            teiidInstance.reconnect();
             if (! teiidInstance.isConnected()) {
                 throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
             }
