@@ -45,6 +45,7 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.resource.Driver;
@@ -675,6 +676,30 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         KomodoObject workspace = repository.komodoWorkspace(uow);
         VdbImporter importer = new VdbImporter(repository);
         importer.importVdb(uow, vdbStream, workspace, importOptions, importMessages);
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Import a dataservice into the komodo engine
+     *
+     * @param dsStream dataservice input stream
+     * @param user initiating import
+     *
+     * @throws Exception if error occurs
+     */
+    public void importDataservice(InputStream dsStream, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Import Dataservice", false, callback); //$NON-NLS-1$
+
+        ImportOptions importOptions = new ImportOptions();
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+        DataserviceConveyor dsConveyor = new DataserviceConveyor(repository);
+        dsConveyor.dsImport(uow, dsStream, workspace, importOptions, importMessages);
         uow.commit();
         callback.await(3, TimeUnit.MINUTES);
     }

@@ -37,7 +37,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.komodo.spi.KException;
@@ -728,6 +733,8 @@ public class FileUtils implements StringConstants {
       * @throws IOException
       */
      public static String streamToString(InputStream inStream) throws IOException {
+         ArgCheck.isNotNull(inStream, "input stream");
+
          BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
          StringBuilder builder = new StringBuilder();
          String line;
@@ -738,6 +745,33 @@ public class FileUtils implements StringConstants {
 
          return builder.toString().trim();
      }
+
+     /**
+      * @param inStream stream to convert
+      * @return <code>byte[]</code>
+      * @throws IOException if error occurs
+      */
+    public static byte[] streamToByteArray(InputStream inStream) throws IOException {
+        ArgCheck.isNotNull(inStream, "input stream");
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        try {
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = inStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            buffer.flush();
+            return buffer.toByteArray();
+        } finally {
+            buffer.close();
+
+            if (inStream != null)
+                inStream.close();
+        }
+    }
 
      public static String tempDirectory() {
          // If deployed to a jboss server then try and use its tmp directory
@@ -778,6 +812,81 @@ public class FileUtils implements StringConstants {
          }
      }
 
-    private FileUtils() {
+    /**
+     * Extract a zip file to the given destination directory.
+     *
+     * @param fileStream a file stream to a zip file. Cannot be <code>null</code>.
+     *                  Will be closed on completion.
+     * @param destDirectory the directory in which the zip file should be extracted. Cannot be <code>null</code>
+     *
+     * @throws Exception if an error occurs
+     *
+     * Note: This function uses a {@link ZipFile} with a temp file to extract
+     *            the {@link InputStream}. This is necessary since {@link ZipInputStream}
+     *            cannot be relied upon to return all entries hence fails some of the time to
+     *            extract all files.
+     */
+    public static void zipExtract(InputStream fileStream, File destDirectory) throws Exception {
+        ArgCheck.isNotNull(fileStream, "file stream");
+        ArgCheck.isNotNull(destDirectory, "destination directory");
+        ArgCheck.isTrue(destDirectory.isDirectory(), "destination is not a directory");
+
+        File tmpFile = null;
+        ZipFile zipFile = null;
+        try {
+            tmpFile = File.createTempFile(destDirectory.getName(), DOT + ZIP);
+            write(fileStream, tmpFile);
+
+            zipFile = new ZipFile(tmpFile);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            if (!entries.hasMoreElements())
+                return;
+
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                InputStream zipStream = null;
+
+                try {
+                    String name = entry.getName();
+
+                    final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+                    zipStream = zipFile.getInputStream(entry);
+                    File newFile = new File(destDirectory + File.separator + name);
+
+                    //
+                    // creates all non existent directories
+                    //
+                    if (entry.isDirectory()) {
+                        Files.createDirectories(newFile.toPath());
+                        continue;
+                    } else {
+                        Files.createDirectories(newFile.getParentFile().toPath());
+                    }
+
+                    FileOutputStream fos = new FileOutputStream(newFile);
+
+                    int len;
+                    while ((len = zipStream.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+
+                    fos.close();
+
+                } finally {
+                    if (zipStream != null)
+                        zipStream.close();
+                }
+            }
+        } finally {
+            if (zipFile != null)
+                zipFile.close();
+
+            if (tmpFile != null)
+                tmpFile.delete();
+        }
     }
+
+     private FileUtils() {
+     }
 }

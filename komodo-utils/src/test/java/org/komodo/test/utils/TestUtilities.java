@@ -34,9 +34,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,6 +49,8 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.CoreLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import org.w3c.dom.Attr;
@@ -1509,6 +1516,59 @@ public class TestUtilities implements StringConstants {
                 }
             } catch (IOException e) {}
         }
+    }
+
+    /**
+     * Return a list of a zip file's contents
+     *
+     * @param zipName the name of the zip file. Cannot be <code>null</code>
+     * @param fileStream a file stream to a zip file. Cannot be <code>null</code>
+     *                  Will be closed on completion.
+     *
+     * @throws Exception if an error occurs
+     *
+     * Note: This function uses a {@link ZipFile} with a temp file to return the entries
+     *            of the {@link InputStream}. This is necessary since {@link ZipInputStream}
+     *            cannot be relied upon to return all entries.
+     */
+    public static List<String> zipEntries(String zipName, InputStream fileStream) throws Exception {
+        ArgCheck.isNotNull(zipName, "zip name");
+        ArgCheck.isNotNull(fileStream, "file stream");
+
+        List<String> entries = new ArrayList<>();
+        File tmpFile = null;
+        ZipFile zipFile = null;
+        try {
+            tmpFile = File.createTempFile(zipName, DOT + ZIP);
+            FileUtils.write(fileStream, tmpFile);
+
+            zipFile = new ZipFile(tmpFile);
+            Enumeration<? extends ZipEntry> zEntries = zipFile.entries();
+            while (zEntries.hasMoreElements()) {
+                ZipEntry entry = zEntries.nextElement();
+                String fileName = entry.getName();
+                String entryName = zipName == null ? fileName : zipName + FORWARD_SLASH + fileName;
+
+                // Remove trailing forward slashes
+                if (entryName.endsWith(FORWARD_SLASH))
+                    entryName = entryName.substring(0, entryName.length() - 1);
+
+                entries.add(entryName);
+            }
+        } finally {
+            try {
+                if (zipFile != null) {
+                    zipFile.close();
+                    zipFile = null;
+                }
+
+                if (tmpFile != null)
+                    tmpFile.delete();
+            } catch (IOException e) {
+            }
+        }
+
+        return entries;
     }
 
     /**

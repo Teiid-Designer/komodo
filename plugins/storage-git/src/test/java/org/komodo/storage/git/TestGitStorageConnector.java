@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
@@ -47,6 +49,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -276,6 +279,65 @@ public class TestGitStorageConnector implements StringConstants {
                 FileUtils.write(TestUtilities.sampleExample(), tmpFile2);
                 compareFileContents(tmpFile1, tmpFile2);
             }
+        }
+    }
+
+    @Test
+    public void testWriteZipToRepositoryAsDirectory() throws Exception {
+        localTmpDir = new File(tmpDir, "localTmpDir-" + timestamp);
+        Properties parameters = new Properties();
+        parameters.setProperty(GitStorageConnector.REPO_DEST_PROPERTY, localTmpDir.getAbsolutePath());
+        parameters.setProperty(GitStorageConnector.REPO_PATH_PROPERTY, myGitDir.getAbsolutePath());
+
+        connector = new GitStorageConnector(parameters);
+        connector.refresh();
+
+        String dsName = "us-states";
+
+        UnitOfWork transaction = mock(UnitOfWork.class);
+        when(transaction.getState()).thenReturn(State.NOT_STARTED);
+
+        Exportable artifact = mock(Exportable.class);
+        InputStream usStatesExample = TestUtilities.usStatesDataserviceExample();
+        byte[] usStatesArr = FileUtils.streamToByteArray(usStatesExample);
+
+        parameters = new Properties();
+        parameters.setProperty(GitStorageConnector.FILE_PATH_PROPERTY, DocumentType.ZIP.fileName(dsName));
+
+        when(artifact.export(transaction, parameters)).thenReturn(usStatesArr);
+        when(artifact.getName(transaction)).thenReturn(dsName);
+        when(artifact.getDocumentType(transaction)).thenReturn(DocumentType.ZIP);
+
+        connector.write(artifact, transaction, parameters);
+
+        //
+        // Test the artifact was pushed by walking the origin repository
+        //
+        usStatesExample = TestUtilities.usStatesDataserviceExample();
+        List<String> zipEntries = TestUtilities.zipEntries(dsName, usStatesExample);
+
+        Repository repository = myGit.getRepository();
+        ObjectId commitId = repository.resolve(Constants.HEAD);
+        try (RevWalk revWalk = new RevWalk(repository)) {
+            RevCommit commit = revWalk.parseCommit(commitId);
+            RevTree tree = commit.getTree();
+
+            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+                treeWalk.addTree(tree);
+                treeWalk.setRecursive(false);
+                while (treeWalk.next()) {
+                    zipEntries.remove(treeWalk.getPathString());
+
+                    if (treeWalk.isSubtree())
+                        treeWalk.enterSubtree();
+                }
+            }
+
+            //
+            // All entries in the original zip have been extracted
+            // and pushed to the git repository
+            //
+            assertTrue("Remaining entries: " + Arrays.toString(zipEntries.toArray(new String[0])), zipEntries.isEmpty());
         }
     }
 

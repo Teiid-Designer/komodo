@@ -29,14 +29,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.tika.io.IOUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.vdb.Vdb;
@@ -57,6 +67,76 @@ import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
 
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
+
+    private File myGitDir;
+
+    private Git myGit;
+
+    private File gitRepoDest;
+
+    private void initGitRepository() throws Exception {
+        String tmpDirPath = System.getProperty("java.io.tmpdir");
+        File tmpDir = new File(tmpDirPath);
+
+        long timestamp = System.currentTimeMillis();
+        myGitDir = new File(tmpDir, "mygit-" + timestamp);
+        assertTrue(myGitDir.mkdir());
+
+        myGit = Git.init()
+                            .setDirectory(myGitDir)
+                            .setBare(true)
+                            .call();
+        assertNotNull(myGit);
+
+        // Need to initialise the master branch
+        // as jgit does not automatically create on
+        File seedDir = new File(tmpDir, "seedDir-" + timestamp);
+        Git seedGit = Git.cloneRepository()
+                                    .setURI(myGitDir.getAbsolutePath())
+                                    .setDirectory(seedDir)
+                                    .call();
+
+        File tweetVdbFile = new File(seedDir, TestUtilities.TWEET_EXAMPLE_NAME + TestUtilities.TWEET_EXAMPLE_SUFFIX);
+        assertTrue(tweetVdbFile.createNewFile());
+        FileUtils.write(TestUtilities.tweetExample(), tweetVdbFile);
+        assertTrue(tweetVdbFile.length() > 0);
+
+        seedGit.add()
+                    .addFilepattern(DOT)
+                    .call();
+        seedGit.commit().setMessage("First Commit").call();
+        seedGit.push().call();
+
+        FileUtils.removeDirectoryAndChildren(seedDir);
+
+        //
+        // Local git repository
+        //
+        String dirName = System.currentTimeMillis() + HYPHEN;
+        gitRepoDest = new File(FileUtils.tempDirectory(), dirName);
+        gitRepoDest.mkdir();
+    }
+
+    private void destroyGitRepository() throws Exception {
+        if (gitRepoDest != null)
+            FileUtils.removeDirectoryAndChildren(gitRepoDest);
+
+        if (myGit != null)
+            myGit.close();
+
+        if (myGitDir != null)
+            FileUtils.removeDirectoryAndChildren(myGitDir);
+    }
+
+    @Before
+    public void setup() throws Exception {
+        initGitRepository();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        destroyGitRepository();
+    }
 
     @Test
     public void shouldNotImportVdbBlankPayload() throws Exception {
@@ -309,7 +389,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
     }
 
     @Test
-    public void shouldExportDataservice() throws Exception {
+    public void shouldExportDataserviceToFile() throws Exception {
         loadVdbs();
         String dsName = "MyDataService";
 
@@ -358,6 +438,72 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         dsZip.deleteOnExit();
         FileUtils.write(decBytes, dsZip);
         TestUtilities.testZipFile(dsZip);
+    }
+
+    @Test
+    public void shouldExportDataserviceToGit() throws Exception {
+        loadDataServices();
+
+        String dsName = "UsStatesService";
+        List<String> zipEntries = TestUtilities.zipEntries(dsName, TestUtilities.usStatesDataserviceExample());
+        System.out.println(zipEntries);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                            .path(V1Constants.EXPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("git");
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + USER_NAME + FORWARD_SLASH + dsName);
+
+        storageAttr.setParameter("repo-path-property", "file://" + myGitDir);
+        storageAttr.setParameter("repo-dest-property", gitRepoDest.getAbsolutePath());
+        storageAttr.setParameter("author-name-property", "user");
+        storageAttr.setParameter("author-email-property", "user@user.com");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertNotNull(entity);
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        //
+        // Test that the git storage connector really did export the data service
+        //
+        org.eclipse.jgit.lib.Repository repository = myGit.getRepository();
+        ObjectId commitId = repository.resolve(Constants.HEAD);
+        try (RevWalk revWalk = new RevWalk(repository)) {
+            RevCommit commit = revWalk.parseCommit(commitId);
+            RevTree tree = commit.getTree();
+
+            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+                treeWalk.addTree(tree);
+                treeWalk.setRecursive(false);
+                while (treeWalk.next()) {
+                    zipEntries.remove(treeWalk.getPathString());
+
+                    if (treeWalk.isSubtree())
+                        treeWalk.enterSubtree();
+                }
+            }
+
+            //
+            // All entries in the original zip have been extracted
+            // and pushed to the git repository
+            //
+            assertTrue("Remaining entries: " + Arrays.toString(zipEntries.toArray(new String[0])), zipEntries.isEmpty());
+        }
     }
 
     @Test

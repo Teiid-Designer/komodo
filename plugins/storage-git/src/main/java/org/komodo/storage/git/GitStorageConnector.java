@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -51,6 +52,7 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.storage.StorageConnector;
@@ -389,6 +391,13 @@ public class GitStorageConnector implements StorageConnector {
         return status.isSuccessful();
     }
 
+    private String directory(String path, DocumentType documentType) {
+        if (! path.endsWith(documentType.toString()))
+            return path;
+
+        return path.substring(0, path.lastIndexOf(DOT + documentType.toString()));
+    }
+
     @Override
     public void write(Exportable artifact, UnitOfWork transaction, Properties parameters) throws Exception {
         ArgCheck.isNotNull(parameters);
@@ -396,8 +405,6 @@ public class GitStorageConnector implements StorageConnector {
         ArgCheck.isNotEmpty(destination);
 
         cloneRepository();
-
-        File destFile = new File(git.getRepository().getWorkTree(), destination);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSS");
         Date now = new Date();
@@ -420,15 +427,32 @@ public class GitStorageConnector implements StorageConnector {
         // Write the file contents
         //
         byte[] contents = artifact.export(transaction, parameters);
-        FileUtils.write(contents, destFile);
 
-        // Stage the file for committing
+        File destFile;
+        DocumentType documentType = artifact.getDocumentType(transaction);
+        if (DocumentType.ZIP.equals(documentType)) {
+            //
+            // Do not want to add binary zip files to a git repository
+            //
+            destination = directory(destination, documentType);
+            destFile = new File(git.getRepository().getWorkTree(), destination);
+
+            Files.createDirectories(destFile.toPath());
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(contents);
+            FileUtils.zipExtract(byteStream, destFile);
+        }
+        else {
+            destFile = new File(git.getRepository().getWorkTree(), destination);
+            FileUtils.write(contents, destFile);
+        }
+
+        // Stage the file(s) for committing
         git.add()
             .addFilepattern(destination)
             .call();
 
         //
-        // Commit the file
+        // Commit the file(s)
         //
         String author = parameters.getProperty(GitStorageConnector.AUTHOR_NAME_PROPERTY, "anonymous");
         String authorEmail = parameters.getProperty(GitStorageConnector.AUTHOR_EMAIL_PROPERTY, "anon@komodo.org");

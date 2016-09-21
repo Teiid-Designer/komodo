@@ -12,10 +12,6 @@
 	<description>Storage connector for accessing a git repository</description>
 	<packaging>bundle</packaging>
 
-	<properties>
-		<version.jgit>[4.3.0,4.4.0)</version.jgit>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
