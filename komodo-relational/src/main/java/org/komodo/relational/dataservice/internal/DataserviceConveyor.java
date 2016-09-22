@@ -540,7 +540,13 @@ public class DataserviceConveyor implements StringConstants {
                     if ( deploy ) {
                         deployVdb( transaction, entry, teiidInstance, status );
                     }
+                // No Service VDB - log error
+                } else {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_VDB_NOT_FOUND,dsName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
                 }
+                
             }
 
             //
