@@ -80,6 +80,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.Messages;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestBasicEntity.ResourceNotFound;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
@@ -446,6 +447,7 @@ public final class KomodoVdbService extends KomodoService {
         String newConnType = restVdb.getConnectionType();
         String newOrigFilePath = restVdb.getOriginalFilePath();
         int newVersion = restVdb.getVersion();
+        List<RestProperty> newProperties = restVdb.getProperties();
 
         // 'Old' = current Vdb properties
         String oldDescription = vdb.getDescription(uow);
@@ -470,6 +472,11 @@ public final class KomodoVdbService extends KomodoService {
         if ( newVersion != oldVersion ) {
             vdb.setVersion( uow, newVersion );
         } 
+        
+        // Set new properties
+        for(RestProperty newProp : newProperties) {
+            vdb.setProperty(uow, newProp.getName(), newProp.getValue());
+        }
     }
 
     // Sets Model properties using the supplied RestVdbModel object
@@ -477,6 +484,7 @@ public final class KomodoVdbService extends KomodoService {
         // 'New' = requested RestVdbModel properties
         String newDescription = restVdbModel.getDescription();
         boolean newIsVisible = restVdbModel.isVisible();
+        List<RestProperty> newProperties = restVdbModel.getProperties();
 
         // 'Old' = current Model properties
         String oldDescription = model.getDescription(uow);
@@ -490,9 +498,12 @@ public final class KomodoVdbService extends KomodoService {
         // IsVisible
         if ( newIsVisible != oldIsVisible ) {
             model.setVisible(uow, newIsVisible);
-        } 
+        }
         
-        model.isVisible(uow);
+        // Set new properties
+        for(RestProperty newProp : newProperties) {
+            model.setProperty(uow, newProp.getName(), newProp.getValue());
+        }
     }
 
     // Sets ModelSource properties using the supplied RestVdbModel object
@@ -500,6 +511,7 @@ public final class KomodoVdbService extends KomodoService {
         // 'New' = requested RestVdbModelSource properties
         String newTranslator = restVdbModelSource.getTranslator();
         String newJndi = restVdbModelSource.getJndiName();
+        List<RestProperty> newProperties = restVdbModelSource.getProperties();
 
         // 'Old' = current ModelSource properties
         String oldTranslator = modelSource.getTranslatorName(uow);
@@ -513,6 +525,10 @@ public final class KomodoVdbService extends KomodoService {
         if ( !StringUtils.equals(newJndi, oldJndi) ) {
             modelSource.setJndiName( uow, newJndi );
         } 
+        // Set new properties
+        for(RestProperty newProp : newProperties) {
+            modelSource.setProperty(uow, newProp.getName(), newProp.getValue());
+        }
     }
 
     private Model findModel(UnitOfWork uow, List<MediaType> mediaTypes,

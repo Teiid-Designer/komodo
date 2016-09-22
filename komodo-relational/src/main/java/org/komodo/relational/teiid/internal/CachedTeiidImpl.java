@@ -638,7 +638,14 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             } catch (Exception ex) {
                 throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_VDB_ERROR, vdbName));
             }
-            if(teiidVdb!=null) {
+            // No server vdb found, remove the cached vdb
+            if(teiidVdb==null) {
+                if(folderNode.hasChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+                    KomodoObject existingObj = folderNode.getChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                    existingObj.remove(transaction);
+                }
+            // Update the cached vdb
+            } else {
                 updateVdb(transaction, folderNode, teiidVdb);
             }
         }
@@ -715,7 +722,14 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             } catch (Exception ex) {
                 throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCES_ERROR,dataSourceName));
             }
-            if(teiidDataSource!=null) {
+            // No server datasource found, remove the cached datasource
+            if(teiidDataSource==null) {
+                if(folderNode.hasChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
+                    KomodoObject existingObj = folderNode.getChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE);
+                    existingObj.remove(transaction);
+                }
+            // Update the cached source
+            } else { 
                 updateDataSource(transaction, folderNode, teiidDataSource);
             }
         }
@@ -773,7 +787,14 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             } catch (Exception ex) {
                 throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_TRANSLATOR_ERROR,translatorName));
             }
-            if(teiidTranslator!=null) {
+            // No server translator found, remove the cached translator
+            if(teiidTranslator==null) {
+                if(folderNode.hasChild(transaction, translatorName, VdbLexicon.Translator.TRANSLATOR)) {
+                    KomodoObject existingObj = folderNode.getChild(transaction, translatorName, VdbLexicon.Translator.TRANSLATOR);
+                    existingObj.remove(transaction);
+                }
+            // Update the cached translator
+            } else {
                 updateTranslator(transaction, folderNode, teiidTranslator);
             }
         }
@@ -804,6 +825,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         }
         KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
+        Set<String> dsTypeNames;
+        try {
+            dsTypeNames = teiidInstance.getDataSourceTypeNames();
+        } catch (Exception ex) {
+            throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DRIVERS_ERROR));
+        }
+        
         // No names supplied, remove all from the cache then refresh all
         if( driverNames==null || driverNames.length==0 ) {
             KomodoObject[] kobjs = folderNode.getChildren(transaction);
@@ -811,21 +839,23 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
                 kobj.remove(transaction);
             }
 
-            Set<String> dsTypeNames;
-            try {
-                dsTypeNames = teiidInstance.getDataSourceTypeNames();
-            } catch (Exception ex) {
-                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DRIVERS_ERROR));
-            }
-            
             for(String dsTypeName : dsTypeNames) {
                 updateDriver(transaction, folderNode, dsTypeName);
             }
         }
         
-        // Names supplied, update only the specified DataSources.
+        // Names supplied, update only the specified Drivers.
         for(String driverName : driverNames) {
-            updateDriver(transaction, folderNode, driverName);
+            // No server driver found, remove the cached driver
+            if(!dsTypeNames.contains(driverName)) {
+                if(folderNode.hasChild(transaction, driverName, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE)) {
+                    KomodoObject existingObj = folderNode.getChild(transaction, driverName, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+                    existingObj.remove(transaction);
+                }
+            // Update the cached driver
+            } else {
+                updateDriver(transaction, folderNode, driverName);
+            }
         }
     }
 
@@ -846,8 +876,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
             Files.write(Paths.get(tempFile.getPath()), content.getBytes());
         } catch (Exception ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
+            throw new KException(ex);
         }
 
         // Removes currently cached object, if it exists
