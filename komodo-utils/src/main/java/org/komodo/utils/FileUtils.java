@@ -28,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -43,6 +44,7 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.komodo.spi.KException;
@@ -834,7 +836,7 @@ public class FileUtils implements StringConstants {
         File tmpFile = null;
         ZipFile zipFile = null;
         try {
-            tmpFile = File.createTempFile(destDirectory.getName(), DOT + ZIP);
+            tmpFile = File.createTempFile(destDirectory.getName(), ZIP_SUFFIX);
             write(fileStream, tmpFile);
 
             zipFile = new ZipFile(tmpFile);
@@ -887,6 +889,77 @@ public class FileUtils implements StringConstants {
         }
     }
 
-     private FileUtils() {
-     }
+    private static void zipAddDirectory(String basePath, ZipOutputStream zos, File srcDirectory) throws Exception {
+        File[] files = srcDirectory.listFiles();
+
+        if (files.length == 0)
+            return;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                String path = basePath + file.getName() + FORWARD_SLASH;
+                zos.putNextEntry(new ZipEntry(path));
+                zipAddDirectory(path, zos, file);
+                zos.closeEntry();
+                continue;
+            }
+
+            FileInputStream fin = null;
+            try {
+                byte[] buffer = new byte[4096];
+                fin = new FileInputStream(file);
+                zos.putNextEntry(new ZipEntry(basePath + file.getName()));
+
+                int length;
+                while ((length = fin.read(buffer)) > 0) {
+                    zos.write(buffer, 0, length);
+                }
+
+                zos.closeEntry();
+                fin.close();
+
+            } finally {
+                if (fin != null)
+                    fin.close();
+            }
+        }
+    }
+
+    /**
+     * Creates a zip file from the contents of the given directory
+     *
+     * @param srcDirectory the directory to zip-up
+     * @param zipFile the destination zip file
+     * @return the file handle of the new zip file
+     *
+     * @throws Exception if error occurs
+     */
+    public static File zipFromDirectory(File srcDirectory, File zipFile) throws Exception {
+        ArgCheck.isNotNull(srcDirectory, "srcDirectory");
+        ArgCheck.isTrue(srcDirectory.isDirectory(), "source is not a directory");
+        ArgCheck.isNotNull(zipFile, "zipFile");
+
+        FileOutputStream fos = null;
+        ZipOutputStream zos = null;
+        try {
+            if (zipFile.exists())
+                zipFile.delete();
+
+            fos = new FileOutputStream(zipFile);
+            zos = new ZipOutputStream(fos);
+
+            zipAddDirectory(EMPTY_STRING, zos, srcDirectory);
+
+            return zipFile;
+        } finally {
+            if (zos != null)
+                zos.close();
+
+            if (fos != null)
+                fos.close();
+        }
+    }
+
+    private FileUtils() {
+    }
 }

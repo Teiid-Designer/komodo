@@ -22,6 +22,7 @@
 package org.komodo.relational.workspace;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -1011,14 +1012,16 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
         ArgCheck.isNotNull(storageRef, "storageRef"); //$NON-NLS-1$
 
+        StorageConnector connector = null;
+        InputStream stream = null;
         try {
             StorageService storageService = PluginService.getInstance().getStorageService(storageRef.getStorageType());
             if (storageService == null)
                 throw new KException(Messages.getString(Relational.STORAGE_TYPE_INVALID,
                                                         storageRef.getStorageType()));
 
-            StorageConnector connector = storageService.getConnector(storageRef.getParameters());
-            InputStream stream = connector.read(storageRef.getParameters());
+            connector = storageService.getConnector(storageRef.getParameters());
+            stream = connector.read(storageRef.getParameters());
 
             ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
@@ -1066,6 +1069,18 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
         } catch (Exception e) {
             throw handleError(e);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // Nothing required
+                }
+            }
+
+            if (connector != null) {
+                connector.dispose();
+            }
         }
     }
 

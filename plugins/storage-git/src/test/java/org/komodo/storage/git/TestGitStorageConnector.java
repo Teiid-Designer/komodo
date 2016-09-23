@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +73,15 @@ public class TestGitStorageConnector implements StringConstants {
         FORWARD_SLASH + NEW_LINE +
         FORWARD_SLASH + SUB_DIR + NEW_LINE +
         FORWARD_SLASH + SUB_DIR + FORWARD_SLASH + TEST_VDB_3_XML + NEW_LINE +
-        FORWARD_SLASH + TEST_VDB_XML + NEW_LINE;
+        FORWARD_SLASH + TEST_VDB_XML + NEW_LINE +
+        FORWARD_SLASH + "usstates" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "META-INF" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "META-INF" + FORWARD_SLASH + "dataservice.xml" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "connections" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "connections" + FORWARD_SLASH + "MySqlPool-connection.xml" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "drivers" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "drivers" + FORWARD_SLASH + "mysql-connector-java-5.1.39-bin.jar" + NEW_LINE +
+        FORWARD_SLASH + "usstates" + FORWARD_SLASH + "usstates-vdb.xml" + NEW_LINE;
 
     private File tmpDir;
 
@@ -94,6 +103,26 @@ public class TestGitStorageConnector implements StringConstants {
 
     private void compareFileContents(File original, File fileToCompare) throws IOException {
         assertTrue(org.apache.commons.io.FileUtils.contentEquals(original, fileToCompare));
+    }
+
+    private void compareDirContents(File original, File dir2Cmp) throws Exception {
+        assertNotNull(original);
+        assertTrue(original.isDirectory());
+        assertNotNull(dir2Cmp);
+        assertTrue(dir2Cmp.isDirectory());
+
+        for (File orig : original.listFiles()) {
+            File cmp = new File(orig.getAbsolutePath().replaceAll(original.getName(), dir2Cmp.getName()));
+            assertTrue(cmp.exists());
+            assertTrue(orig.isDirectory() == cmp.isDirectory());
+
+            if (orig.isDirectory()) {
+                compareDirContents(orig, cmp);
+                continue;
+            }
+
+            compareFileContents(orig, cmp);
+        }
     }
 
     @Before
@@ -133,6 +162,15 @@ public class TestGitStorageConnector implements StringConstants {
         assertTrue(subDirVdbFile.createNewFile());
         FileUtils.write(TestUtilities.tweetExample(), subDirVdbFile);
         assertTrue(subDirVdbFile.length() > 0);
+
+        File usStatesZipFile = new File(tmpDir, TestUtilities.US_STATES_VDB_NAME + ZIP_SUFFIX);
+        FileUtils.write(TestUtilities.usStatesDataserviceExample(), usStatesZipFile);
+        try (FileInputStream fis = new FileInputStream(usStatesZipFile)) {
+            File usStatesDir = new File(seedDir, TestUtilities.US_STATES_VDB_NAME);
+            usStatesDir.mkdir();
+            FileUtils.zipExtract(fis, usStatesDir);
+            usStatesZipFile.delete();
+        }
 
         seedGit.add()
                     .addFilepattern(DOT)
@@ -202,6 +240,44 @@ public class TestGitStorageConnector implements StringConstants {
         FileUtils.write(is, fileToCompare);
 
         compareFileContents(original, fileToCompare);
+    }
+
+    @Test
+    public void testLocalRepositoryReadDirectory() throws Exception {
+        localTmpDir = new File(tmpDir, "localTmpDir-" + timestamp);
+        Properties parameters = new Properties();
+        parameters.setProperty(GitStorageConnector.REPO_DEST_PROPERTY, localTmpDir.getAbsolutePath());
+        parameters.setProperty(GitStorageConnector.REPO_PATH_PROPERTY, myGitDir.getAbsolutePath());
+
+        connector = new GitStorageConnector(parameters);
+        connector.refresh();
+
+        parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, TestUtilities.US_STATES_VDB_NAME);
+        InputStream is = connector.read(parameters);
+        assertNotNull(is);
+
+        File original = createTempFile(TestUtilities.US_STATES_VDB_NAME, ZIP_SUFFIX);
+        FileUtils.write(TestUtilities.usStatesDataserviceExample(), original);
+        File origDir = new File(tmpDir, "original");
+        try (FileInputStream origFis = new FileInputStream(original)) {
+            origDir.mkdir();
+            FileUtils.zipExtract(origFis, origDir);
+        }
+
+        File fileToCompare = createTempFile(TestUtilities.US_STATES_VDB_NAME, ZIP_SUFFIX);
+        FileUtils.write(is, fileToCompare);
+        File file2CmpDir = new File(tmpDir, "file2cmp");
+        try (FileInputStream file2CmpFis = new FileInputStream(fileToCompare)) {
+            file2CmpDir.mkdir();
+            FileUtils.zipExtract(file2CmpFis, file2CmpDir);
+        }
+
+        try {
+            compareDirContents(origDir, file2CmpDir);
+        } finally {
+            FileUtils.removeDirectoryAndChildren(origDir);
+            FileUtils.removeDirectoryAndChildren(file2CmpDir);
+        }
     }
 
     @Test
@@ -292,7 +368,7 @@ public class TestGitStorageConnector implements StringConstants {
         connector = new GitStorageConnector(parameters);
         connector.refresh();
 
-        String dsName = "us-states";
+        String dsName = TestUtilities.US_STATES_VDB_NAME;
 
         UnitOfWork transaction = mock(UnitOfWork.class);
         when(transaction.getState()).thenReturn(State.NOT_STARTED);

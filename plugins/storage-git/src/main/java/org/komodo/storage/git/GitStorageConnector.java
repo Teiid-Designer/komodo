@@ -282,6 +282,8 @@ public class GitStorageConnector implements StorageConnector {
 
     private final CustomTransportConfigCallback transportConfigCallback;
 
+    private Set<String> filesForDisposal;
+
     public GitStorageConnector(Properties parameters) {
         ArgCheck.isNotNull(parameters);
         ArgCheck.isNotEmpty(parameters.getProperty(REPO_PATH_PROPERTY));
@@ -302,6 +304,13 @@ public class GitStorageConnector implements StorageConnector {
         };
 
         this.transportConfigCallback = new CustomTransportConfigCallback();
+    }
+
+    private void addToDisposalCache(File disposalFile) {
+        if (filesForDisposal == null)
+            filesForDisposal = new HashSet<String>();
+
+        filesForDisposal .add(disposalFile.getAbsolutePath());
     }
 
     private void cloneRepository() throws Exception {
@@ -351,7 +360,8 @@ public class GitStorageConnector implements StorageConnector {
         if (localRepoPath != null)
             return localRepoPath;
 
-        String dirName = System.currentTimeMillis() + HYPHEN;
+        String repoPath = parameters.getProperty(REPO_PATH_PROPERTY);
+        String dirName = "cloned-repo" + repoPath.hashCode();
         File repoDest = new File(FileUtils.tempDirectory(), dirName);
         repoDest.mkdir();
 
@@ -498,11 +508,21 @@ public class GitStorageConnector implements StorageConnector {
         String fileRef = getFilePath(parameters);
         ArgCheck.isNotNull(fileRef, "RelativeFileRef");
 
-        File destFile = new File(git.getRepository().getWorkTree(), fileRef);
-        if (destFile.exists())
-            return new FileInputStream(destFile);
+        File gitFile = new File(git.getRepository().getWorkTree(), fileRef);
+        if (! gitFile.exists())
+            throw new FileNotFoundException();
 
-        throw new FileNotFoundException();
+        FileInputStream fileStream;
+        if (gitFile.isDirectory()) {
+            File zipFileDest = File.createTempFile(gitFile.getName(), ZIP_SUFFIX);
+            File zipFile = FileUtils.zipFromDirectory(gitFile, zipFileDest);
+            addToDisposalCache(zipFile);
+            fileStream = new FileInputStream(zipFile);
+        } else {
+            fileStream = new FileInputStream(gitFile);
+        }
+
+        return fileStream;
     }
 
     @Override
@@ -558,6 +578,22 @@ public class GitStorageConnector implements StorageConnector {
     public void dispose() {
         if (git != null)
             git.close();
-    }
 
+        String destination = getDestination();
+        File destFile = new File(destination);
+        if (destFile.exists())
+            FileUtils.removeDirectoryAndChildren(destFile);
+
+        if (filesForDisposal != null) {
+            for (String filePath : filesForDisposal) {
+                File file = new File(filePath);
+                if (! file.exists())
+                    continue;
+
+                file.delete();
+            }
+
+            filesForDisposal = null;
+        }
+    }
 }

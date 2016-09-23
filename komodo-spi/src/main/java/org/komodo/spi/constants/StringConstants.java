@@ -370,6 +370,11 @@ public interface StringConstants {
   String XML_SUFFIX = DOT + XML;
 
   /**
+   * ZIP Suffix
+   */
+  String ZIP_SUFFIX = DOT + ZIP;
+
+  /**
    * Vdb Deployment Suffix
    */
   String VDB_DEPLOYMENT_SUFFIX = "-vdb" + XML_SUFFIX; //$NON-NLS-1$

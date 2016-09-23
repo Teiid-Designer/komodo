@@ -101,6 +101,15 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         FileUtils.write(TestUtilities.tweetExample(), tweetVdbFile);
         assertTrue(tweetVdbFile.length() > 0);
 
+        File usStatesZipFile = new File(tmpDir, TestUtilities.US_STATES_DATA_SERVICE_NAME + ZIP_SUFFIX);
+        FileUtils.write(TestUtilities.usStatesDataserviceExample(), usStatesZipFile);
+        try (FileInputStream fis = new FileInputStream(usStatesZipFile)) {
+            File usStatesDir = new File(seedDir, TestUtilities.US_STATES_DATA_SERVICE_NAME);
+            usStatesDir.mkdir();
+            FileUtils.zipExtract(fis, usStatesDir);
+            usStatesZipFile.delete();
+        }
+
         seedGit.add()
                     .addFilepattern(DOT)
                     .call();
@@ -350,12 +359,65 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setStorageType("file");
         storageAttr.setDocumentType(DocumentType.ZIP);
 
-        String dsName = "UsStatesService";
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
         InputStream usDsStream = TestUtilities.usStatesDataserviceExample();
 
         byte[] usBytes = TestUtilities.streamToBytes(usDsStream);
         String content = Base64.getEncoder().encodeToString(usBytes);
         storageAttr.setContent(content);
+
+        assertFalse(workspace.hasChild(uow, dsName));
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        assertTrue(workspace.hasChild(uow, dsName));
+        KomodoObject dataservice = workspace.getChild(uow, dsName);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
+        assertNotNull(ds);
+
+        Vdb vdb = ds.getServiceVdb(uow);
+        assertNotNull(vdb);
+
+        String vdbName = vdb.getVdbName( uow );
+        assertEquals("usstates", vdbName);
+    }
+
+    @Test
+    public void shouldImportUSDataserviceFromGit() throws Exception {
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
+                                                      getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("git");
+        storageAttr.setDocumentType(DocumentType.ZIP);
+        storageAttr.setParameter("repo-path-property", "file://" + myGitDir);
+        storageAttr.setParameter("file-path-property", dsName);
+        storageAttr.setParameter("author-name-property", "user");
+        storageAttr.setParameter("author-email-property", "user@user.com");
 
         assertFalse(workspace.hasChild(uow, dsName));
 
@@ -418,7 +480,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         //
         // Test that the file storage connector really did export the data service
         //
-        File tmpFile = new File(tmpDirPath, dsName + DOT + ZIP);
+        File tmpFile = new File(tmpDirPath, dsName + ZIP_SUFFIX);
         assertTrue(tmpFile.exists());
         tmpFile.deleteOnExit();
 
@@ -434,7 +496,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         byte[] decBytes = Base64.getDecoder().decode(content);
 
-        File dsZip = File.createTempFile("DSZip", DOT + ZIP);
+        File dsZip = File.createTempFile("DSZip", ZIP_SUFFIX);
         dsZip.deleteOnExit();
         FileUtils.write(decBytes, dsZip);
         TestUtilities.testZipFile(dsZip);

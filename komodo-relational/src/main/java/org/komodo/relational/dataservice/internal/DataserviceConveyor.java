@@ -226,7 +226,8 @@ public class DataserviceConveyor implements StringConstants {
         // 1st to extract the name, 2nd when its sequenced
         //
         long timestamp = System.currentTimeMillis();
-        File zipFile = new File(FileUtils.tempDirectory(), timestamp + DOT + ZIP);
+        File zipFile = new File(FileUtils.tempDirectory(), timestamp + ZIP_SUFFIX);
+        zipFile.deleteOnExit();
 
         try {
             FileUtils.write(srcStream, zipFile);

@@ -145,6 +145,11 @@ public class TestUtilities implements StringConstants {
     public static final String US_STATES_DATASERVICE_FILE = "usstates-dataservice.zip";
 
     /**
+     * US States Dataservice name
+     */
+    public static final String US_STATES_DATA_SERVICE_NAME = "UsStatesService";
+
+    /**
      * US States Dataservice Example vdb name
      */
     public static final String US_STATES_VDB_NAME = "usstates";
@@ -1539,7 +1544,7 @@ public class TestUtilities implements StringConstants {
         File tmpFile = null;
         ZipFile zipFile = null;
         try {
-            tmpFile = File.createTempFile(zipName, DOT + ZIP);
+            tmpFile = File.createTempFile(zipName, ZIP_SUFFIX);
             FileUtils.write(fileStream, tmpFile);
 
             zipFile = new ZipFile(tmpFile);
