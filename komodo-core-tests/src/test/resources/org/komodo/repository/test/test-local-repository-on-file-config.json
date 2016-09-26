@@ -6,13 +6,6 @@
     },
     "node-types" :
     [
-    	"config/dv.cnd",
-        "config/xmi.cnd",
-        "config/med.cnd",
-        "config/mmcore.cnd",
-        "config/relational.cnd",
-        "config/vdb.cnd",
-        "config/TeiidSql.cnd",
         "config/komodo.cnd"
     ],
     "workspaces" : {
@@ -84,6 +77,9 @@
         "removeDerivedContentWithOriginal" : true,
         "threadPool" : "modeshape-workers",
         "sequencers" : {
+            "VDB Dynamic Sequencer" : {
+				"classname" : "org.teiid.modeshape.sequencer.vdb.VdbDynamicSequencer"
+			},
             "DDL Sequencer" : {
                 "classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer"
             },
