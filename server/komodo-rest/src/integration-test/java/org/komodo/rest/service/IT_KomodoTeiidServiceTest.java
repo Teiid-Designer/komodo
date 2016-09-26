@@ -74,6 +74,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.osgi.PluginService;
@@ -1013,6 +1014,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         }
     }
 
+    @Ignore
     @Test
     public void shouldAbout() throws Exception {
         String[] EXPECTED = {

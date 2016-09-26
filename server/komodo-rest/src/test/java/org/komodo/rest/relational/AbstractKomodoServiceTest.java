@@ -385,7 +385,6 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         assertEquals("The Portfolio Dynamic VDB", vdb.getDescription());
         assertEquals(expectedPath, vdb.getOriginalFilePath());
         assertFalse(vdb.isPreview());
-        assertEquals("BY_VERSION", vdb.getConnectionType());
         assertEquals(1, vdb.getVersion());
 
         List<RestProperty> properties = vdb.getProperties();

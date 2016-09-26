@@ -625,7 +625,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(allElementsNode, myVdbExample);
         verifyProperty(myVdbExample, VdbLexicon.Vdb.NAME, "myVDB");
         verifyProperty(myVdbExample, VdbLexicon.Vdb.DESCRIPTION, "vdb description");
-        verifyProperty(myVdbExample, VdbLexicon.Vdb.CONNECTION_TYPE, "BY_VERSION");
+        verifyProperty(myVdbExample, VdbLexicon.Vdb.CONNECTION_TYPE, "NONE");
         verifyProperty(myVdbExample, VdbLexicon.Vdb.PREVIEW, Boolean.FALSE.toString());
         verifyProperty(myVdbExample, VdbLexicon.Vdb.VERSION, Integer.toString(1));
         verifyProperty(myVdbExample, "vdb-property2", "vdb-value2");
