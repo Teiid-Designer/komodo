@@ -505,17 +505,17 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         for(RestLink link : vdb.getLinks()) {
             switch(link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              vdbName,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }
@@ -552,17 +552,17 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         for(RestLink link : vdb.getLinks()) {
             switch(link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              vdbName,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }

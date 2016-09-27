@@ -28,7 +28,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import javax.ws.rs.core.UriBuilder;
@@ -41,6 +40,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -50,7 +50,7 @@ import org.mockito.Mockito;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class RestVdbTest {
+public final class RestVdbTest implements StringConstants {
 
     private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/").build();
     private static final URI BASE_TEIID_URI = UriBuilder.fromUri("http://localhost:8081/v1/teiid").build();
@@ -213,7 +213,7 @@ public final class RestVdbTest {
         
         Vdb theVdb = Mockito.mock(Vdb.class);
         Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
-        Mockito.when(theVdb.getAbsolutePath()).thenReturn(parentDataPath + File.separator + VDB_NAME);
+        Mockito.when(theVdb.getAbsolutePath()).thenReturn(parentDataPath + FORWARD_SLASH + VDB_NAME);
         Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
         Mockito.when(theVdb.hasChildren(transaction)).thenReturn(true);
         Mockito.when(theVdb.getPropertyNames(transaction)).thenReturn(new String[0]);
@@ -223,21 +223,21 @@ public final class RestVdbTest {
 
         RestVdb restVdb = new RestVdb(BASE_URI, theVdb, false, transaction);
         assertEquals(BASE_URI, restVdb.getBaseUri());
-        assertEquals(parentDataPath + File.separator + VDB_NAME, restVdb.getDataPath());
+        assertEquals(parentDataPath + FORWARD_SLASH + VDB_NAME, restVdb.getDataPath());
         Collection<RestLink> links = restVdb.getLinks();
         assertNotNull(links);
         for (RestLink link :  links) {
             switch (link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_TEIID_URI + File.separator +
-                                             cachedTeiid.getName(transaction) + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_TEIID_URI + FORWARD_SLASH +
+                                             cachedTeiid.getName(transaction) + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              VDB_NAME,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_TEIID_URI + File.separator +
-                                             cachedTeiid.getName(transaction) + File.separator +
+                    assertEquals(BASE_TEIID_URI + FORWARD_SLASH +
+                                             cachedTeiid.getName(transaction) + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
                     break;

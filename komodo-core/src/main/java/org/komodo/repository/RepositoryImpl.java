@@ -1030,7 +1030,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 return LIBRARY_ROOT;
             }
 
-            if (nodePath.charAt(0) == File.separatorChar) {
+            if (nodePath.charAt(0) == FORWARD_SLASH.charAt(0)) {
                 nodePath = LIBRARY_ROOT + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {
                 nodePath = LIBRARY_ROOT + FORWARD_SLASH + nodePath;
@@ -1057,7 +1057,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         // if path does not start with workspace root assume a relative path so insert workspace root
         if (!nodePath.startsWith(WORKSPACE_ROOT)) {
-            if (nodePath.charAt(0) == File.separatorChar) {
+            if (nodePath.charAt(0) == FORWARD_SLASH.charAt(0)) {
                 nodePath = userWksp + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {
                 nodePath = userWksp + FORWARD_SLASH + nodePath;

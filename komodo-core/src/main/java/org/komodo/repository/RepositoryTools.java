@@ -21,7 +21,6 @@
  */
 package org.komodo.repository;
 
-import java.io.File;
 import java.io.PrintStream;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -276,7 +275,7 @@ public class RepositoryTools implements StringConstants {
 
         private String createIndent(String path) {
             StringBuffer indent = new StringBuffer(TAB);
-            String[] levels = path.split(File.separator);
+            String[] levels = path.split(FORWARD_SLASH);
 
             for (int i = 0; i < levels.length; ++i) {
                 indent.append(TAB);
