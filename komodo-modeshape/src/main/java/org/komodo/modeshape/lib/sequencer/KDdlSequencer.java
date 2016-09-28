@@ -21,7 +21,6 @@
  */
 package org.komodo.modeshape.lib.sequencer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -103,11 +102,13 @@ public class KDdlSequencer extends TeiidDdlSequencer {
 
         while (children.hasNext()) {
             Node child = children.nextNode();
-            session.move(child.getPath(), outputNode.getPath() + File.separator + child.getName());
+            session.move(child.getPath(), outputNode.getPath() + "/" + child.getName());
+            if (! outputNode.hasNode(child.getName()))
+                throw new Exception("Failed to move DDL sequence node to output node");
         }
 
         session.removeItem(ddlStmtsNode.getPath());
-        return true;
+        return outputNode.hasNodes();
     }
 
 }

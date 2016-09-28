@@ -142,8 +142,15 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	assertTrue(tmpFile.exists());
     	assertTrue(tmpFile.length() > 0);
 
-    	// Make file unreadable
-    	tmpFile.setReadable(false);
+        // Make file unreadable
+        if (! tmpFile.setReadable(false)) {
+            //
+            // Cannot set the permissions on the file.
+            // Some platforms do not allow this, eg. Windows
+            // Abort the test
+            //
+            return;
+        }
 
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();

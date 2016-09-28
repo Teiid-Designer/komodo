@@ -16,9 +16,9 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+import java.io.File;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
-import org.komodo.relational.commands.workspace.UploadVdbCommandTest;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
@@ -29,14 +29,14 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class UploadModelCommandTest extends AbstractCommandTest {
 
-    private static final String UPLOAD_MODEL = UploadVdbCommandTest.class.getClassLoader().getResource("PartsOracle.ddl").getFile();
+    private static final File UPLOAD_MODEL = getResourceFile(UploadModelCommandTest.class, "PartsOracle.ddl"); 
 
     @Test
     public void shouldUploadPartsOraclePhysical() throws Exception {
         final String[] commands = { "workspace",
                                     "create-vdb testVdb vdbPath",
                                     "cd testVdb",
-                                    "upload-model myModel PHYSICAL " + UPLOAD_MODEL };
+                                    "upload-model myModel PHYSICAL " + UPLOAD_MODEL.getAbsolutePath() };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 

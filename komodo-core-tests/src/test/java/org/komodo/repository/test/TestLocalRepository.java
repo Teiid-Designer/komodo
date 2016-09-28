@@ -560,7 +560,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // Perform the search
         for (int i = 1; i <= 5; ++i) {
             List<KomodoObject> results = _repo.searchByPath(getTransaction(),
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test" + i);
+                                                           komodoWksp.getAbsolutePath() + FORWARD_SLASH + "test" + i);
             // Validate the results are as expected
             assertEquals(1, results.size());
             KomodoObject searchObject = results.iterator().next();

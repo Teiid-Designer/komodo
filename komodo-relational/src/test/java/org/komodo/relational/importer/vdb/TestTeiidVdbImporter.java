@@ -224,7 +224,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertTrue(tmpFile.length() > 0);
 
         // Make file unreadable
-        tmpFile.setReadable(false);
+        if (! tmpFile.setReadable(false)) {
+            //
+            // Cannot set the permissions on the file.
+            // Some platforms do not allow this, eg. Windows
+            // Abort the test
+            //
+            return;
+        }
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -1398,4 +1405,30 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertEquals(22, results.size());
     }
+
+    @Test
+    public void testPatientVdb() throws Exception {
+        InputStream vdbStream = TestUtilities.getResourceAsStream(TestUtilities.class, TestUtilities.RESOURCES_DIRECTORY, "patients-vdb.xml");
+        assertNotNull(vdbStream);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        executeImporter(vdbStream, workspace, importOptions, importMessages);
+
+        // Commit the transaction and handle any import exceptions
+        commitHandleErrors(importMessages);
+
+        // Test that a vdb was created
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), "patients", VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        KomodoObject patientModel = verify(vdbNode, "Patients", VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        verify(patientModel, "TheServiceView");
+    }
+
 }

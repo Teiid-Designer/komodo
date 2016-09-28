@@ -505,17 +505,17 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         for(RestLink link : vdb.getLinks()) {
             switch(link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              vdbName,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }
@@ -552,17 +552,17 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         for(RestLink link : vdb.getLinks()) {
             switch(link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              vdbName,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }
@@ -1016,12 +1016,11 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
     @Test
     public void shouldAbout() throws Exception {
         String[] EXPECTED = {
-            OPEN_BRACE + NEW_LINE,
-            "  \"Information\": " +  OPEN_BRACE + NEW_LINE,
-            "    \"Repository Workspace\": \"komodoLocalWorkspace\"," + NEW_LINE,
-            "    \"Repository Configuration\"", // Configuration Url contains local file names so impossible to test
-            "    \"Repository Vdb Total\": \"1\"" + NEW_LINE,
-            "  " + CLOSE_BRACE + NEW_LINE };
+                "\"Information\": " +  OPEN_BRACE + NEW_LINE,
+                "\"Repository Workspace\": \"komodoLocalWorkspace\"," + NEW_LINE,
+                "\"Repository Configuration\"", // Configuration Url contains local file names so impossible to test
+                "\"Repository Vdb Total\":",
+            };
 
         // get
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
@@ -1038,7 +1037,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         final String entity = response.getEntity();
         System.out.println("Response from uri " + uri + ":\n" + entity);
         for (String expected : EXPECTED) {
-            assertTrue(entity.contains(expected));
+            assertTrue(expected + " is not contained in " + entity, entity.contains(expected));
         }
     }
 }

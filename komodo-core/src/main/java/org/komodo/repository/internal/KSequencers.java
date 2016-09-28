@@ -388,7 +388,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         analyseDdlNodes(rootNode);
     }
 
-    private boolean sequence(SequencerType sequencerType, Property property,
+    private void sequence(SequencerType sequencerType, Property property,
                                                  Node outputNode, String eventId) throws Exception {
         KLog.getLogger().debug("Executing pre-sequencing of " + sequencerType.name() + " Sequencer for property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
         preSequenceClean(sequencerType, outputNode);
@@ -403,7 +403,9 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
             Node seqOutputNode = seqSession.getNode(outputNode.getPath());
 
             boolean status = seqSession.sequence(sequencerType.toString(), seqProperty, seqOutputNode);
-            if (status) {
+            if (!status)
+                KLog.getLogger().error("The sequence " + sequencerType.name() + " failed in some way");
+            else {
                 //
                 // Return flag is only a notional indicator that the sequencer executed successfully.
                 // Need to confirm that changes have actually been made to the output node.
@@ -431,8 +433,6 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
                 }
             }
 
-            return status;
-
         } finally {
             if (seqSession != null && seqSession.isLive())
                 seqSession.logout();
@@ -443,7 +443,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         return eventId + HYPHEN + sequencerType.name() + HYPHEN + property.getPath();
     }
 
-    private boolean sequence(SequencerType sequencerType, Property property, String eventId) throws Exception {
+    private void sequence(SequencerType sequencerType, Property property, String eventId) throws Exception {
         sequencingActive = true;
 
         Node outputNode = property.getParent();
@@ -458,7 +458,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
                 break;
         }
 
-        return sequence(sequencerType, property, outputNode, eventId);
+        sequence(sequencerType, property, outputNode, eventId);
     }
 
     private void notifySequencerCompletion(String eventUserData) {

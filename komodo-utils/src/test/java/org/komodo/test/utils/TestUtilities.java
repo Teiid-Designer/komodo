@@ -1193,7 +1193,7 @@ public class TestUtilities implements StringConstants {
         if (parentDirectory == null || parentDirectory.isEmpty())
             filePath = fileName + suffix;
         else
-            filePath = parentDirectory + File.separator + fileName + suffix;
+            filePath = parentDirectory + FORWARD_SLASH + fileName + suffix;
 
         InputStream fileStream = klazz.getClassLoader().getResourceAsStream(filePath);
         assertNotNull("File " + filePath + " does not exist", fileStream);
