@@ -224,7 +224,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertTrue(tmpFile.length() > 0);
 
         // Make file unreadable
-        tmpFile.setReadable(false);
+        if (! tmpFile.setReadable(false)) {
+            //
+            // Cannot set the permissions on the file.
+            // Some platforms do not allow this, eg. Windows
+            // Abort the test
+            //
+            return;
+        }
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();

@@ -130,7 +130,14 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
         assertTrue(tmpFile.length() > 0);
 
         // Make file unreadable
-        tmpFile.setReadable(false);
+        if (! tmpFile.setReadable(false)) {
+            //
+            // Cannot set the permissions on the file.
+            // Some platforms do not allow this, eg. Windows
+            // Abort the test
+            //
+            return;
+        }
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
