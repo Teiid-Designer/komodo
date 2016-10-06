@@ -107,7 +107,12 @@ public final class RestLink {
         /**
          * A link to a mask resource
          */
-        MASKS(KomodoType.VDB_MASK);
+        MASKS(KomodoType.VDB_MASK),
+
+        /**
+         * A link to a data service's connections
+         */
+        CONNECTIONS;
 
         private KomodoType kType;
 

@@ -168,6 +168,11 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_GET_DATASERVICE_ERROR,
 
         /**
+         * An error indicating an error occurred trying to obtain a dataservice's connections
+         */
+        DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR,
+
+        /**
          * An error indicating a request to create a dataservice failed
          */
         DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR,

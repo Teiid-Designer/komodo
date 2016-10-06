@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import org.jboss.resteasy.client.ClientRequest;
@@ -35,11 +36,14 @@ import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.dataservice.RestDataservice;
+import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.test.utils.TestUtilities;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTest {
@@ -113,5 +117,46 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         
         assertEquals(dataservice.getId(), DATASERVICE_NAME);
     }
-   
+
+    @Test
+    public void shouldGetDataserviceConnections() throws Exception {
+        loadDataServices();
+
+        // get
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.CONNECTIONS, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        System.out.println("Response:\n" + entity);
+
+        RestDataSource[] datasources = KomodoJsonMarshaller.unmarshallArray(entity, RestDataSource[].class);
+        assertNotNull(datasources);
+        assertEquals(1, datasources.length);
+
+        RestDataSource dataSource = datasources[0];
+        assertEquals("MySqlPool", dataSource.getId());
+        assertEquals("java:/MySqlDS", dataSource.getJndiName());
+        assertEquals("mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1", dataSource.getDriverName());
+
+        Collection<RestLink> links = dataSource.getLinks();
+        assertNotNull(links);
+        assertEquals(3, links.size());
+
+        for(RestLink link : links) {
+            LinkType rel = link.getRel();
+            assertTrue(LinkType.SELF.equals(rel) || LinkType.PARENT.equals(rel) || LinkType.CHILDREN.equals(rel));
+
+            if (LinkType.SELF.equals(rel)) {
+                String href = _uriBuilder.workspaceDatasourcesUri() + FORWARD_SLASH + dataSource.getId();
+                assertEquals(href, link.getHref().toString());
+            }
+        }
+    }
 }

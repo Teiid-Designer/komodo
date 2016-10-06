@@ -23,6 +23,7 @@ package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
@@ -45,6 +46,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
@@ -53,6 +55,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.dataservice.RestDataservice;
+import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.spi.KException;
@@ -629,4 +632,67 @@ public final class KomodoDataserviceService extends KomodoService {
         }
     }
 
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the id of the Dataservice of the connections being retrieved (cannot be empty)
+     * @return the JSON representation of the Connections (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace Dataservice connections
+     *         or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER +
+                   StringConstants.FORWARD_SLASH + V1Constants.CONNECTIONS_SEGMENT)
+    @Produces( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find a dataservice's connections ", response = RestDataservice.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnections( final @Context HttpHeaders headers,
+                                    final @Context UriInfo uriInfo,
+                                    @ApiParam(value = "Id of the dataservice connections to be fetched", required = true)
+                                    final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "getDataservice", true ); //$NON-NLS-1$
+
+            Dataservice dataservice = findDataservice(uow, dataserviceName);
+            if (dataservice == null)
+                return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
+
+            Datasource[] connections = dataservice.getConnections(uow);
+            List<RestDataSource> restConnections = new ArrayList<>(connections.length);
+            for (Datasource connection : connections) {
+                RestDataSource entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow);
+                restConnections.add(entity);
+                LOGGER.debug("getConnections:Connections from Dataservice '{0}' entity was constructed", dataserviceName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restConnections);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR, dataserviceName);
+        }
+    }
 }

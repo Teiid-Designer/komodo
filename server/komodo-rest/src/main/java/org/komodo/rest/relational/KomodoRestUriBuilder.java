@@ -782,10 +782,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 result = parentUri;
                 break;
             }
-            case IMPORTS:
-            case MODELS:
-            case TRANSLATORS:
-            case DATA_ROLES:
+            case CONNECTIONS:
             case VDBS:
             {
                 String dataserviceName = dataserviceName(settings);
