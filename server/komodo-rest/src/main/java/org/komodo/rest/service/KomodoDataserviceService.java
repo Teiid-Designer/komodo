@@ -27,10 +27,13 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -43,10 +46,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+
 import org.komodo.core.KEngine;
+import org.komodo.relational.ViewDdlBuilder;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
+import org.komodo.relational.model.Table;
+import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
@@ -57,6 +68,7 @@ import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -65,6 +77,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -441,6 +455,150 @@ public final class KomodoDataserviceService extends KomodoService {
     }
 
     /**
+     * Sets the service VDB for the specified Dataservice using the specified table and sourceModel
+     * The supplied table is used to generate the view DDL for the service vdb's view
+     * The supplied modelSource is used to generate the sourceModel for the service vdb
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceUpdateAttributes
+     *        the attributes for the update (cannot be empty)
+     * @return a JSON representation of the updated dataservice (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error updating the VDB
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VDB_FOR_SINGLE_TABLE )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Sets the dataservice vdb using parameters provided in the request body",
+                  notes = "Syntax of the json request body is of the form " +
+                          "{ dataserviceName='serviceName', viewTablePath='path/to/table', modelSourcePath='path/to/modelSource' }")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response setServiceVdbForSingleTable( final @Context HttpHeaders headers,
+    		final @Context UriInfo uriInfo,
+    		final String dataserviceUpdateAttributes) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Get the attributes for doing the service update
+        KomodoDataserviceUpdateAttributes attr;
+        try {
+        	attr = KomodoJsonMarshaller.unmarshall(dataserviceUpdateAttributes, KomodoDataserviceUpdateAttributes.class);
+            Response response = checkDataserviceUpdateAttributes(attr, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.DATASERVICE_SERVICE_REQUEST_PARSING_ERROR);
+        }
+        
+        // Inputs for constructing the Service VDB.  The paths should be obtained from the Attributes passed in.
+        String dataserviceName = attr.getDataserviceName();
+        // Error if the dataservice name is missing 
+        if (StringUtils.isBlank( dataserviceName )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_NAME);
+        }
+        String serviceVdbName = dataserviceName+"SvcVdb"; //$NON-NLS-1$
+        
+        String absTablePath = attr.getViewTablePath();
+        // Error if the viewTablePath is missing 
+        if (StringUtils.isBlank( absTablePath )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_TABLEPATH, dataserviceName);
+        }
+        
+        String absServiceModelSourcePath = attr.getModelSourcePath();
+        // Error if the modelSourcePath is missing 
+        if (StringUtils.isBlank( absServiceModelSourcePath )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_MODELSOURCE_PATH, dataserviceName);
+        }
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "setDataserviceServiceVDB", false ); //$NON-NLS-1$
+
+            // Check for existence of Dataservice, Table and ModelSource before continuing...
+            WorkspaceManager wkspMgr = getWorkspaceManager(uow);
+            
+            // Check for existence of DataService
+            final boolean exists = wkspMgr.hasChild( uow, dataserviceName );
+            if ( !exists ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_DNE);
+            }
+            final KomodoObject kobject = wkspMgr.getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
+            final Dataservice dataservice = wkspMgr.resolve( uow, kobject, Dataservice.class );
+
+            // Check for existence of Table
+            List<KomodoObject> tableObjs = wkspMgr.getRepository().searchByPath(uow, absTablePath);
+            if( tableObjs.isEmpty() || !Table.RESOLVER.resolvable(uow, tableObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SOURCE_TABLE_DNE, absTablePath);
+            }
+            Table sourceTable = Table.RESOLVER.resolve(uow, tableObjs.get(0));
+
+            // Check for existence of ModelSource
+            List<KomodoObject> modelObjs = wkspMgr.getRepository().searchByPath(uow, absServiceModelSourcePath);
+            if( modelObjs.isEmpty() || !ModelSource.RESOLVER.resolvable(uow, modelObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MODEL_SOURCE_DNE, absServiceModelSourcePath);
+            }
+            ModelSource svcModelSource = ModelSource.RESOLVER.resolve(uow, modelObjs.get(0));
+
+            // Find the service VDB definition for this Dataservice.  If one exists already, it is replaced.
+            dataservice.setServiceVdb(uow,null);
+            if(wkspMgr.hasChild(uow, serviceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            	KomodoObject svcVdbObj = wkspMgr.getChild(uow, serviceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            	svcVdbObj.remove(uow);
+            }
+            KomodoObject vdbObj = wkspMgr.createVdb(uow, null, serviceVdbName, serviceVdbName);
+            Vdb serviceVdb = Vdb.RESOLVER.resolve(uow, vdbObj);
+            
+            // Add to the ServiceVdb a virtual model for the View
+            Model viewModel = serviceVdb.addModel(uow, "SvcModel"); //$NON-NLS-1$
+            viewModel.setModelType(uow, Type.VIRTUAL);
+            
+            // Generate the ViewDDL using the specified table, then set the viewModel content.
+            String viewDdl = ViewDdlBuilder.getODataViewDdl(uow, "SvcView", sourceTable); //$NON-NLS-1$
+        	viewModel.setModelDefinition(uow, viewDdl);
+
+        	// Add a physical model of same name to the service VDB
+        	String svcModelSourceName = svcModelSource.getName(uow);
+        	Model sourceModel = serviceVdb.addModel(uow, svcModelSourceName);
+        	sourceModel.setModelType(uow, Type.PHYSICAL);
+
+        	// Add a ModelSource of same name to the physical model and set its Jndi and translator
+        	ModelSource modelSource = sourceModel.addSource(uow, svcModelSourceName);
+        	modelSource.setJndiName(uow, svcModelSource.getJndiName(uow));
+        	modelSource.setTranslatorName(uow, svcModelSource.getTranslatorName(uow));     
+            
+            // Set the service VDB on the dataservice
+            dataservice.setServiceVdb(uow, serviceVdb);
+
+            KomodoStatusObject kso = new KomodoStatusObject("Update DataService Status"); //$NON-NLS-1$
+            kso.addAttribute(dataserviceName, "Successfully updated"); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_SET_SERVICE_ERROR);
+        }
+    }
+
+    /**
      * Update a Dataservice in the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -495,7 +653,7 @@ public final class KomodoDataserviceService extends KomodoService {
             final boolean exists = getWorkspaceManager(uow).hasChild( uow, dataserviceName );
             // Error if the specified service does not exist
             if ( !exists ) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_SERVICE_DNE);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_DNE);
             }
 
             // must be an update
@@ -607,13 +765,16 @@ public final class KomodoDataserviceService extends KomodoService {
         try {
             uow = createTransaction(principal, "removeDataserviceFromWorkspace", false); //$NON-NLS-1$
 
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repo, uow );
-            KomodoObject dataservice = mgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
-            
-            if (dataservice == null)
-                return Response.noContent().build();
+            final WorkspaceManager wkspMgr = getWorkspaceManager(uow);
+            final boolean exists = wkspMgr.hasChild( uow, dataserviceName );
+            // Error if the specified service does not exist
+            if ( !exists ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_DNE);
+            }
 
-            mgr.delete(uow, dataservice);
+            KomodoObject dataservice = wkspMgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
+            
+            wkspMgr.delete(uow, dataservice);
 
             KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
             kso.addAttribute(dataserviceName, "Successfully deleted"); //$NON-NLS-1$
@@ -630,6 +791,16 @@ public final class KomodoDataserviceService extends KomodoService {
 
             return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR);
         }
+    }
+    
+    private Response checkDataserviceUpdateAttributes(KomodoDataserviceUpdateAttributes attr,
+    		List<MediaType> mediaTypes) throws Exception {
+    	
+    	if (attr == null || attr.getDataserviceName() == null || attr.getViewTablePath() == null || attr.getModelSourcePath() == null) {
+    		return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
+    	}
+
+    	return Response.ok().build();
     }
 
     /**

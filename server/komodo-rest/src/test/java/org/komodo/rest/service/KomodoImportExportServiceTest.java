@@ -49,6 +49,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
@@ -65,6 +66,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
@@ -594,4 +596,54 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
             assertTrue(name.equals("file") || name.equals("git"));
         }
     }
+    
+    @Test
+    public void shouldImportDdl() throws Exception {
+        String VDB_NAME = "testVDB";
+        String MODEL_NAME = "testModel";
+        createVdbModel(VDB_NAME, MODEL_NAME);
+        
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
+                                                      getClass().getSimpleName() + COLON + "importVdb" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        KomodoObject kObj = mgr.getChild(uow, VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb testVdb = Vdb.RESOLVER.resolve(uow, kObj);
+        Model[] models = testVdb.getModels(uow, MODEL_NAME);
+        Model testModel = models[0];
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.DDL);
+        String modelPath = testModel.getAbsolutePath();
+        storageAttr.setArtifactPath(modelPath);
+
+        String patientsDdlCnt = FileUtils.streamToString(TestUtilities.patientsDdl());
+        String content = Base64.getEncoder().encodeToString(patientsDdlCnt.getBytes());
+        storageAttr.setContent(content);
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(DDL, status.getType());
+        
+        assertTrue(testModel.hasChild(uow, "vdbwebtest.ER_VISIT"));
+    }
+
 }

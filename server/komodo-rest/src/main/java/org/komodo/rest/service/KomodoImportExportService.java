@@ -331,13 +331,22 @@ public class KomodoImportExportService extends KomodoService {
             }
 
             uow = createTransaction(principal, "importToWorkspace", false); //$NON-NLS-1$
+            KomodoObject importTarget = repo.komodoWorkspace(uow);
+            
+            // If artifact path is supplied, it is the target.  Otherwise default to workspace
+            String artifactPath = sta.getArtifactPath();
+            if(!StringUtils.isEmpty(artifactPath)) {
+            	importTarget = repo.getFromWorkspace(uow, artifactPath);
+                if (importTarget == null) {
+                    return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR, artifactPath);
+                }
+            }
 
-            KomodoObject workspace = repo.komodoWorkspace(uow);
             StorageReference storageRef = new StorageReference(sta.getStorageType(),
                                                                                    parameters,
                                                                                    new DocumentType(sta.getDocumentType()));
 
-            ImportMessages messages = getWorkspaceManager(uow).importArtifact(uow, workspace, storageRef);
+            ImportMessages messages = getWorkspaceManager(uow).importArtifact(uow, importTarget, storageRef);
             if (messages.hasError())
                 throw new Exception(messages.errorMessagesToString());
 

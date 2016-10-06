@@ -29,12 +29,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Rule;
@@ -54,6 +61,8 @@ import org.komodo.rest.relational.response.RestVdbImport;
 import org.komodo.rest.relational.response.RestVdbMask;
 import org.komodo.rest.relational.response.RestVdbModel;
 import org.komodo.rest.relational.response.RestVdbModelSource;
+import org.komodo.rest.relational.response.RestVdbModelTable;
+import org.komodo.rest.relational.response.RestVdbModelTableColumn;
 import org.komodo.rest.relational.response.RestVdbPermission;
 import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.repository.KomodoType;
@@ -374,6 +383,72 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
         Collection<RestLink> links = source.getLinks();
         assertEquals(3, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbModelTables() throws Exception {
+        loadVdbs();
+
+        // get
+        Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, TestUtilities.PARTS_VDB_NAME);
+        _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+        _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, "PartsSS");
+        URI modelUri = _uriBuilder.vdbModelUri(LinkType.SELF, settings);
+        URI uri = UriBuilder.fromUri(modelUri).path(LinkType.TABLES.uriName()).build();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entities = response.getEntity();
+        assertThat(entities, is(notNullValue()));
+
+        RestVdbModelTable[] tables = KomodoJsonMarshaller.unmarshallArray(entities, RestVdbModelTable[].class);
+        assertEquals(5, tables.length);
+
+        List<String> tableNames = new ArrayList<String>();
+        for(RestVdbModelTable table : tables) {
+        	tableNames.add(table.getId());
+        }
+        
+        assertTrue(tableNames.contains("PARTS"));
+        assertTrue(tableNames.contains("SHIP_VIA"));
+        assertTrue(tableNames.contains("STATUS"));
+        assertTrue(tableNames.contains("SUPPLIER"));
+        assertTrue(tableNames.contains("SUPPLIER_PARTS"));
+    }
+
+    @Test
+    public void shouldGetVdbModelTableColumns() throws Exception {
+        loadVdbs();
+
+        // get
+        Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, TestUtilities.PARTS_VDB_NAME);
+        _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+        _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, "PartsSS");
+        _uriBuilder.addSetting(settings, SettingNames.TABLE_NAME, "SUPPLIER_PARTS");
+        URI modelTableUri = _uriBuilder.vdbModelTableUri(LinkType.SELF, settings);
+        URI uri = UriBuilder.fromUri(modelTableUri).path(LinkType.COLUMNS.uriName()).build();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entities = response.getEntity();
+        assertThat(entities, is(notNullValue()));
+
+        RestVdbModelTableColumn[] columns = KomodoJsonMarshaller.unmarshallArray(entities, RestVdbModelTableColumn[].class);
+        assertEquals(4, columns.length);
+
+        List<String> columnNames = new ArrayList<String>();
+        Map<String,String> columnTypeMap = new HashMap<String,String>();
+        for(RestVdbModelTableColumn column : columns) {
+        	columnNames.add(column.getId());
+        	columnTypeMap.put(column.getId(), column.getDatatypeName());
+        }
+        
+        assertTrue(columnNames.contains("SUPPLIER_ID"));
+        assertTrue(columnTypeMap.get("SUPPLIER_ID").equalsIgnoreCase("string"));
+        assertTrue(columnNames.contains("PART_ID"));
+        assertTrue(columnTypeMap.get("PART_ID").equalsIgnoreCase("string"));
+        assertTrue(columnNames.contains("QUANTITY"));
+        assertTrue(columnTypeMap.get("QUANTITY").equalsIgnoreCase("bigdecimal"));
+        assertTrue(columnNames.contains("SHIPPER_ID"));
+        assertTrue(columnTypeMap.get("SHIPPER_ID").equalsIgnoreCase("bigdecimal"));
     }
 
     @Test

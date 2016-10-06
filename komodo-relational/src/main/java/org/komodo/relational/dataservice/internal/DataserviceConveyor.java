@@ -64,9 +64,11 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.api.JcrConstants;
 import org.teiid.modeshape.sequencer.dataservice.DataServiceManifest;
 import org.teiid.modeshape.sequencer.dataservice.DataServiceManifestReader;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * Handles importing and exporting of {@link Dataservice data services}.
@@ -399,7 +401,15 @@ public class DataserviceConveyor implements StringConstants {
             return;
         }
 
-        final String vdbDeploymentName = entry.getName( uow );
+        // Get Vdb deployment name
+        String vdbDeploymentName = null;
+        if ( vdb.hasProperty( uow, "deployment-name" ) ) { //$NON-NLS-1$
+            vdbDeploymentName = vdb.getProperty( uow, "deployment-name" ).getStringValue( uow ); //$NON-NLS-1$
+        }
+        if(StringUtils.isEmpty(vdbDeploymentName)) {
+        	vdbDeploymentName = vdb.getName(uow) + TeiidVdb.DYNAMIC_VDB_SUFFIX;
+        }
+
         final InputStream stream = new ByteArrayInputStream( vdbXml );
         teiidInstance.deployDynamicVdb( vdbDeploymentName, stream );
 

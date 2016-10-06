@@ -21,15 +21,15 @@
  */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.relational.response.RestVdbModelSource;
+import org.komodo.rest.relational.response.RestVdbModelTableColumn;
 
 /**
- * A GSON serializer/deserializer for {@link RestVdbModelSource}s.
+ * A GSON serializer/deserializer for {@link RestVdbModelTableColumn}s.
  */
-public final class VdbModelSourceSerializer extends BasicEntitySerializer<RestVdbModelSource> {
+public final class VdbModelTableColumnSerializer extends BasicEntitySerializer<RestVdbModelTableColumn> {
 
     @Override
-    protected RestVdbModelSource createEntity() {
-        return new RestVdbModelSource();
+    protected RestVdbModelTableColumn createEntity() {
+        return new RestVdbModelTableColumn();
     }
 }

@@ -22,6 +22,7 @@
 package org.komodo.rest.service;
 
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_COLUMNS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITIONS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_DATA_ROLES_ERROR;
@@ -36,15 +37,18 @@ import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GE
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_PERMISSION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_SOURCES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_SOURCE_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_TABLES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_TRANSLATORS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_TRANSLATOR_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDBS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDB_ERROR;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -58,12 +62,15 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.importer.vdb.VdbImporter;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
@@ -92,6 +99,8 @@ import org.komodo.rest.relational.response.RestVdbImport;
 import org.komodo.rest.relational.response.RestVdbMask;
 import org.komodo.rest.relational.response.RestVdbModel;
 import org.komodo.rest.relational.response.RestVdbModelSource;
+import org.komodo.rest.relational.response.RestVdbModelTable;
+import org.komodo.rest.relational.response.RestVdbModelTableColumn;
 import org.komodo.rest.relational.response.RestVdbPermission;
 import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.KException;
@@ -101,6 +110,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -543,6 +553,15 @@ public final class KomodoVdbService extends KomodoService {
         return model;
     }
 
+    private Table findTable(UnitOfWork uow, List<MediaType> mediaTypes, String tableName, Model model) throws KException {
+    	Table[] tables = model.getTables(uow, tableName);
+    	if(tables.length == 0) {
+    		return null;
+    	}
+    	LOGGER.debug( "Table '{0}' was found", tableName ); //$NON-NLS-1$
+    	return tables[0];
+    }
+    
     private DataRole findDataRole(UnitOfWork uow, List<MediaType> mediaTypes,
                                                       String dataRoleId, Vdb vdb) throws KException {
         DataRole[] dataRoles = vdb.getDataRoles(uow);
@@ -2270,6 +2289,173 @@ public final class KomodoVdbService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.VDB_SERVICE_DELETE_VDB_MODEL_SOURCE_ERROR);
+        }
+    }
+    
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param modelName
+     *        the id of the model being retrieved (cannot be empty)
+     * @return the JSON representation of the Model tables (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.TABLES_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find all tables of the model belonging to the vdb", response = RestVdbModelTable[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 200, message = "No tables could be found but an empty list is returned"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getModelTables( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "getTables", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            Model model = findModel(uow, mediaTypes, modelName, vdb);
+            if (model == null) {
+                return commitNoModelFound(uow, mediaTypes, modelName, vdbName);
+            }
+
+            Table[] tables = model.getTables(uow);
+            if (tables == null)
+            	tables = new Table[0];
+
+            List<RestVdbModelTable> restTables = new ArrayList<>(tables.length);
+            for (Table table : tables) {
+                RestVdbModelTable entity = entityFactory.create(table, uriInfo.getBaseUri(), uow);
+                restTables.add(entity);
+                LOGGER.debug("getTables:Table from Model '{0}' from VDB '{1}' entity was constructed", modelName, vdbName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restTables );
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_TABLES_ERROR, vdbName, modelName);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param modelName
+     *        the id of the model being retrieved (cannot be empty)
+     * @param tableName
+     *        the id of the table being retrieved (cannot be empty)
+     * @return the JSON representation of the Table Columns (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.TABLES_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.TABLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+           V1Constants.COLUMNS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find all columns of the specified vdb model table", response = RestVdbModelTableColumn[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 200, message = "No tables could be found but an empty list is returned"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getModelTableColumns( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            final @PathParam( "modelName" ) String modelName,
+        	                @ApiParam(value = "Id of the table to be fetched", required = true)
+                            final @PathParam( "tableName" ) String tableName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "getTables", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            Model model = findModel(uow, mediaTypes, modelName, vdb);
+            if (model == null) {
+                return commitNoModelFound(uow, mediaTypes, modelName, vdbName);
+            }
+
+            Table table = findTable(uow, mediaTypes, tableName, model);
+            if (table == null) {
+                return commitNoTableFound(uow, mediaTypes, tableName, modelName, vdbName);
+            }
+
+            Column[] columns = table.getColumns(uow);
+            if (columns == null)
+            	columns = new Column[0];
+
+            List<RestVdbModelTableColumn> restColumns = new ArrayList<>(columns.length);
+            for (Column column : columns) {
+                RestVdbModelTableColumn entity = entityFactory.create(column, uriInfo.getBaseUri(), uow);
+                restColumns.add(entity);
+                LOGGER.debug("getColumns:Column from Table '{0}' from Model '{1}' entity was constructed", tableName, modelName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restColumns );
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_COLUMNS_ERROR, vdbName, modelName, tableName);
         }
     }
 

@@ -213,14 +213,14 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR,
         
         /**
+         * The Dataservice service cannot parse the request body
+         */
+        DATASERVICE_SERVICE_REQUEST_PARSING_ERROR,
+
+        /**
          * An error indicating update attempt was missing a name
          */
         DATASERVICE_SERVICE_UPDATE_MISSING_NAME,
-        
-        /**
-         * An error indicating that the service does not exist
-         */
-        DATASERVICE_SERVICE_UPDATE_SERVICE_DNE,
         
         /**
          * An error indicating update attempt was missing json arg
@@ -232,6 +232,11 @@ public final class RelationalMessages {
          */
         DATASERVICE_SERVICE_JSON_MISSING_NAME,
 
+        /**
+         * An error indicating that the service does not exist
+         */
+        DATASERVICE_SERVICE_SERVICE_DNE,
+        
         /**
          * An error indicating the parameter and JSON dataservice name does not match for a dataservice being created.
          */
@@ -246,6 +251,41 @@ public final class RelationalMessages {
          * An error indicating clone attempt failed because same name already exists
          */
         DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS,
+        
+        /**
+         * An error indicating that a table does not exist
+         */
+        DATASERVICE_SERVICE_SOURCE_TABLE_DNE,
+        
+        /**
+         * An error indicating that a model source does not exist
+         */
+        DATASERVICE_SERVICE_MODEL_SOURCE_DNE,
+        
+        /**
+         * The dataservice service lacks at least one parameter
+         */
+        DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR,
+
+        /**
+         * An error indicating set attempt failed because the dataservice name was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_NAME,
+        
+        /**
+         * An error indicating set attempt failed because the tablePath was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_TABLEPATH,
+        
+        /**
+         * An error indicating set attempt failed because the modelSource path was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_MODELSOURCE_PATH,
+        
+        /**
+         * An error indicating set attempt failed
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_ERROR,
         
         /**
          * An error indicating a JSON document representing the Datasources in the workspace could not be retrieved.
@@ -456,6 +496,16 @@ public final class RelationalMessages {
          * An error indicating an error occurred trying to obain a VDB Model's source
          */
         VDB_SERVICE_GET_SOURCE_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a Models tables
+         */
+        VDB_SERVICE_GET_TABLES_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a Tables columns
+         */
+        VDB_SERVICE_GET_COLUMNS_ERROR,
 
         /**
          * An error indicating an error occurred trying to obain a VDB's translators
