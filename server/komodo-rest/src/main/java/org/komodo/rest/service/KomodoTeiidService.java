@@ -141,7 +141,7 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
-    private CachedTeiid importContent(Teiid teiid) throws KException {
+    private synchronized CachedTeiid importContent(Teiid teiid) throws KException {
         UnitOfWork uow = null;
         try {
             uow = systemTx("import-teiid-content", false);
@@ -1140,7 +1140,7 @@ public class KomodoTeiidService extends KomodoService {
             Teiid teiidNode = getDefaultTeiid();
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            // find translators
+            // find data sources
             uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
 
             Datasource[] dataSources = cachedTeiid.getDataSources(uow);

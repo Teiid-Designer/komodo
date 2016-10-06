@@ -1324,7 +1324,16 @@ public final class RelationalModelFactory {
         //
         // Remove the existing version since its most likely out-of-date
         //
-        if ( teiidCache.hasChild( transaction, id ) ) teiidCache.removeChild( transaction, id );
+        if ( teiidCache.hasChild( transaction, id ) ) {
+            KomodoObject[] children = teiidCache.getChildren(transaction, id);
+
+            //
+            // Ensure all children with the name starting with id are removed
+            //
+            for (KomodoObject child : children) {
+                child.remove(transaction);
+            }
+        }
 
         final KomodoObject kobject = teiidCache.addChild( transaction, id, KomodoLexicon.CachedTeiid.NODE_TYPE );
 

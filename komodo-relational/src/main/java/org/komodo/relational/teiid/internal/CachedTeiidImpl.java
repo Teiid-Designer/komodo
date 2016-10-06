@@ -168,7 +168,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         Long timestamp = getObjectProperty(uow, PropertyValueType.LONG, "getTimestamp", KomodoLexicon.CachedTeiid.TIMESTAMP); //$NON-NLS-1$
-        return timestamp != null ? timestamp : System.currentTimeMillis();
+        return timestamp == null ? 0L : timestamp;
     }
 
     protected void setTimestamp(UnitOfWork uow, long timestamp) throws KException {

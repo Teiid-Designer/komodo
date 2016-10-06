@@ -227,11 +227,11 @@ public final class KomodoDataserviceService extends KomodoService {
      */
     @GET
     @Path( V1Constants.DATA_SERVICE_PLACEHOLDER )
-    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Produces( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find dataservice by name", response = RestDataservice.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getDataservice( final @Context HttpHeaders headers,
@@ -255,7 +255,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
             KomodoProperties properties = new KomodoProperties();
             final RestDataservice restDataservice = entityFactory.create(dataservice, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("getVdb:VDB '{0}' entity was constructed", dataservice.getName(uow)); //$NON-NLS-1$
+            LOGGER.debug("getDataservice:Dataservice '{0}' entity was constructed", dataservice.getName(uow)); //$NON-NLS-1$
             return commit( uow, mediaTypes, restDataservice );
 
         } catch ( final Exception e ) {
