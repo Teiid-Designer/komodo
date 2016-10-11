@@ -82,6 +82,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.KLog;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+
 import io.swagger.converter.ModelConverters;
 import io.swagger.jaxrs.config.BeanConfig;
 
@@ -208,6 +210,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String CONNECTIONS_SEGMENT = "connections";
 
         /**
+         * The name of the URI path segment for a setting a dataservice's service vdb
+         */
+        String SERVICE_VDB_FOR_SINGLE_TABLE = "ServiceVdbForSingleTable"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
          */
         String DATA_SOURCES_SEGMENT = "datasources"; //$NON-NLS-1$
@@ -246,6 +253,21 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific source id
          */
         String SOURCE_PLACEHOLDER = "{sourceName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of tables of a model
+         */
+        String TABLES_SEGMENT = "Tables"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific table id
+         */
+        String TABLE_PLACEHOLDER = "{tableName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of columns of a table
+         */
+        String COLUMNS_SEGMENT = "Columns"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the collection of translators of a vdb
@@ -790,6 +812,54 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         return services;
     }
     
+    /**
+     * Create a Vdb in the komodo engine
+     *
+     * @param vdbName the vdb name
+     * @param user initiating call
+     * @throws Exception if error occurs
+     */
+    public void createVdb(String vdbName, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Create VDB", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+        wsMgr.createVdb(uow, null, vdbName, vdbName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Create a Model within a vdb in the komodo engine
+     *
+     * @param vdbName the vdb name
+     * @param modelName the vdb name
+     * @param user initiating call
+     * @throws Exception if error occurs
+     */
+    public void createVdbModel(String vdbName, String modelName, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Create Model", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+        if(!wsMgr.hasChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            wsMgr.createVdb(uow, null, vdbName, vdbName);
+        }
+        
+        KomodoObject kobj = wsMgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb vdb = Vdb.RESOLVER.resolve(uow, kobj);
+        
+        vdb.addModel(uow, modelName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
     /**
      * Create a datasource in the komodo engine
      *

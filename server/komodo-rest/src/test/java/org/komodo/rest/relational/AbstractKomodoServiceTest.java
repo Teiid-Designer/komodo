@@ -24,6 +24,7 @@ package org.komodo.rest.relational;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -44,9 +45,11 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+
 import org.apache.http.auth.BasicUserPrincipal;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -67,6 +70,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.repository.search.ComparisonOperator;
 import org.komodo.repository.search.ObjectSearcher;
@@ -254,6 +258,18 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         _restApp.createDriver(driverName);
 
         Assert.assertEquals(1, _restApp.getDrivers().length);
+    }
+
+    protected void createVdb( String vdbName ) throws Exception {
+        _restApp.createVdb(vdbName, USER_NAME);
+
+        Assert.assertEquals(1, _restApp.getVdbs(USER_NAME).length);
+    }
+
+    protected void createVdbModel( String vdbName, String modelName ) throws Exception {
+        _restApp.createVdbModel(vdbName, modelName, USER_NAME);
+
+        Assert.assertEquals(1, _restApp.getVdbs(USER_NAME).length);
     }
 
     protected List<String> loadSampleSearches() throws Exception {

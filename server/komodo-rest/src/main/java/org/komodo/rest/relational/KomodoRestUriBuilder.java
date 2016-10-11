@@ -94,6 +94,16 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         SOURCE_NAME,
 
         /**
+         * Name of the table
+         */
+        TABLE_NAME,
+
+        /**
+         * Name of the column
+         */
+        COLUMN_NAME,
+
+        /**
          * Name of the translator
          */
         TRANSLATOR_NAME,
@@ -244,6 +254,14 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
 
     private String sourceName(final Properties settings) {
         return setting(settings, SettingNames.SOURCE_NAME);
+    }
+
+    private String tableName(final Properties settings) {
+        return setting(settings, SettingNames.TABLE_NAME);
+    }
+
+    private String columnName(final Properties settings) {
+        return setting(settings, SettingNames.COLUMN_NAME);
     }
 
     private String dataRoleId(final Properties settings) {
@@ -531,6 +549,78 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             case REFERENCE:
                 String translatorName = setting(settings, SettingNames.TRANSLATOR_NAME);
                 result = vdbChildUri(vdbBaseUri, vdbName, LinkType.TRANSLATORS, translatorName);
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param settings
+     *        configuration settings for this uri
+     * @return the VDB model table URI for the specified VDB Model (never <code>null</code>)
+     */
+    public URI vdbModelTableUri(LinkType linkType, final Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+        URI vdbBaseUri = vdbParentUri(settings);
+        String vdbName = vdbName(settings);
+        URI modelUri = vdbChildUri(vdbBaseUri, vdbName, LinkType.MODELS, modelName(settings));
+
+        switch (linkType) {
+            case SELF:
+                String tableName = tableName(settings);
+                result = UriBuilder.fromUri(modelUri).path(LinkType.TABLES.uriName()).path(tableName).build();
+                break;
+            case PARENT:
+                result = modelUri;
+                break;
+            case REFERENCE:
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param settings
+     *        configuration settings for this uri
+     * @return the VDB model table URI for the specified VDB Model (never <code>null</code>)
+     */
+    public URI vdbModelTableColumnUri(LinkType linkType, final Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+        URI vdbBaseUri = vdbParentUri(settings);
+        String vdbName = vdbName(settings);
+        String tableName = tableName(settings);
+        URI modelUri = vdbChildUri(vdbBaseUri, vdbName, LinkType.MODELS, modelName(settings));
+        
+        switch (linkType) {
+            case SELF:
+                String columnName = columnName(settings);
+                result = UriBuilder.fromUri(modelUri)
+                		           .path(LinkType.TABLES.uriName()).path(tableName)
+                		           .path(LinkType.COLUMNS.uriName()).path(columnName).build();
+                break;
+            case PARENT:
+                result = UriBuilder.fromUri(modelUri)
+                		           .path(LinkType.TABLES.uriName()).path(tableName).build();
+                break;
+            case REFERENCE:
                 break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -165,6 +165,11 @@ public class TestUtilities implements StringConstants {
     public static final String US_STATES_DRIVER_NAME = "mysql-connector-java-5.1.39-bin.jar";
 
     /**
+     * Patients DDL
+     */
+    public static final String PATIENTS_DDL_FILE = "patientsDDL.ddl";
+
+    /**
      * Portfolio vdb
      */
     public static final String PORTFOLIO_VDB_FILE = "portfolio-vdb.xml";
@@ -1124,6 +1129,16 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    PORTFOLIO_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of patients ddl
+     * @throws Exception if error occurs
+     */
+    public static InputStream patientsDdl() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   PATIENTS_DDL_FILE);
     }
 
     /**

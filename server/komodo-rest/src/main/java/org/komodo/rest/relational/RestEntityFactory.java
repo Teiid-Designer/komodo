@@ -22,9 +22,12 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Table;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
@@ -47,6 +50,8 @@ import org.komodo.rest.relational.response.RestVdbImport;
 import org.komodo.rest.relational.response.RestVdbMask;
 import org.komodo.rest.relational.response.RestVdbModel;
 import org.komodo.rest.relational.response.RestVdbModelSource;
+import org.komodo.rest.relational.response.RestVdbModelTable;
+import org.komodo.rest.relational.response.RestVdbModelTableColumn;
 import org.komodo.rest.relational.response.RestVdbPermission;
 import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.KException;
@@ -99,6 +104,12 @@ public class RestEntityFactory implements V1Constants {
             case VDB_MODEL_SOURCE:
                 ModelSource source = wsMgr.resolve(uow, kObject, ModelSource.class);
                 return (T) new RestVdbModelSource(baseUri, source, uow);
+            case TABLE:
+                Table table = wsMgr.resolve(uow, kObject, Table.class);
+                return (T) new RestVdbModelTable(baseUri, table, uow);
+            case COLUMN:
+                Column column = wsMgr.resolve(uow, kObject, Column.class);
+                return (T) new RestVdbModelTableColumn(baseUri, column, uow);
             case VDB_PERMISSION:
                 Permission permission = wsMgr.resolve(uow, kObject, Permission.class);
                 return (T) new RestVdbPermission(baseUri, permission, uow);
