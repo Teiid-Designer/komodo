@@ -40,7 +40,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.teiid.modeshape.sequencer.dataservice.ConnectionReader;
+import org.teiid.modeshape.sequencer.dataservice.DataServiceManifest;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
@@ -51,7 +51,7 @@ public interface Datasource extends Exportable, RelationalObject {
     /**
      * The file extension of connections.
      */
-    DocumentType DOC_TYPE = new DocumentType( ConnectionReader.FILE_EXTENSION );
+    DocumentType DOC_TYPE = new DocumentType( DataServiceManifest.CONNECTION_ENTRY_SUFFIX );
 
     /**
      * The type identifier.
