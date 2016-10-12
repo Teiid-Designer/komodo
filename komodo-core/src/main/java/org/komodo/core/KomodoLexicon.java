@@ -22,8 +22,8 @@
 package org.komodo.core;
 
 import org.komodo.spi.constants.StringConstants;
-import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrNtLexicon;
+import org.modeshape.jcr.api.JcrConstants;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
 /**
@@ -46,84 +46,24 @@ public interface KomodoLexicon extends StringConstants {
     /**
      * The JCR names associated with a data service node type.
      */
-    public interface DataService extends LibraryComponent, WorkspaceItem {
-
-        /**
-         * The node type name of a data service. Value is {@value} .
-         */
-        String NODE_TYPE = Namespace.PREFIX + COLON + "dataService"; //$NON-NLS-1$
+    public interface DataService {
 
         /**
          * The name and node type name of the data services grouping node. Value is {@value} .
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "dataServices"; //$NON-NLS-1$
 
-        /**
-         * The property referencing the name of the service vdb. Value is {@value} .
-         */
-        String SERVICE_VDB = Namespace.PREFIX + COLON + "serviceVdb"; //$NON-NLS-1$
     }
 
     /**
      * The JCR names associated with a data source node type.
      */
-    public interface DataSource extends LibraryComponent, WorkspaceItem {
-
-        /**
-         * The node type name of a data source. Value is {@value} .
-         */
-        String NODE_TYPE = Namespace.PREFIX + COLON + "dataSource"; //$NON-NLS-1$
+    public interface DataSource {
 
         /**
          * The name and node type name of the data sources grouping node. Value is {@value} .
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "dataSources"; //$NON-NLS-1$
-
-        /**
-         * The name of the jdbc property. Value is {@value} .
-         */
-        String JDBC = Namespace.PREFIX + COLON + "jdbc"; //$NON-NLS-1$
-
-        /**
-         * The name of the preview property. Value is {@value} .
-         */
-        String PREVIEW = Namespace.PREFIX + COLON + "preview"; //$NON-NLS-1$
-
-        /**
-         * The name of the jndiName property. Value is {@value} .
-         */
-        String JNDI_NAME = Namespace.PREFIX + COLON + "jndiName"; //$NON-NLS-1$
-
-        /**
-         * The name of the driverName property. Value is {@value} .
-         */
-        String DRIVER_NAME = Namespace.PREFIX + COLON + "driverName"; //$NON-NLS-1$
-
-        /**
-         * The name of the className property. Value is {@value} .
-         */
-        String CLASS_NAME = Namespace.PREFIX + COLON + "className"; //$NON-NLS-1$
-
-        /**
-         * The name of the profileName property. Value is {@value} .
-         */
-        String PROFILE_NAME = Namespace.PREFIX + COLON + "profileName"; //$NON-NLS-1$
-    }
-
-    /**
-     * The JCR names associated with a driver node type.
-     */
-    public interface Driver extends LibraryComponent, WorkspaceItem {
-
-        /**
-         * The node type name of a driver. Value is {@value} .
-         */
-        String NODE_TYPE = Namespace.PREFIX + COLON + "driver"; //$NON-NLS-1$
-
-        /**
-         * The name of the Jcr content child node. Value is {@value} .
-         */
-        String CONTENT = JcrLexicon.Namespace.PREFIX + COLON + "content"; //$NON-NLS-1$
 
     }
 
@@ -195,6 +135,10 @@ public interface KomodoLexicon extends StringConstants {
          */
         String WORKSPACE = Namespace.PREFIX + COLON + "workspace"; //$NON-NLS-1$
 
+        /**
+         * The name and node type name of Komodo home nodes. Value is {@value} .
+         */
+        String HOME = Namespace.PREFIX + COLON + "home"; //$NON-NLS-1$
     }
 
     /**
@@ -400,7 +344,7 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the property used for the node type the rule pertains to. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "nodeType"; //$NON-NLS-1$
-        
+
         /**
          * The name of the property restrictions grouping node.  Value is {@value} .
          */
@@ -979,6 +923,22 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with the Komodo workspace node type.
+     */
+    public interface Home {
+
+        /**
+         * The name and node type name of the Komodo workspace node. Value is {@value} .
+         */
+        String NODE_TYPE = Komodo.HOME;
+
+        /**
+         * The unqualified name of the workspace area. Value is {@value}.
+         */
+        String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
+    }
+
+    /**
      * The JCR names associated with the workspace item mixin. Workspace item nodes are referenceable.
      */
     public interface WorkspaceItem {
@@ -996,7 +956,7 @@ public interface KomodoLexicon extends StringConstants {
         /**
          * The node type name of the file child node. Value is {@value} .
          */
-        String FILE_NODE_TYPE = JcrNtLexicon.FILE.getString();
+        String FILE_NODE_TYPE = JcrConstants.NT_FILE;
 
         /**
          * The node name of the child node that contains the original imported resource. Value is {@value} .

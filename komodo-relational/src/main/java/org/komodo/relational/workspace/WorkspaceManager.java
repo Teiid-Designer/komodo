@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.workspace;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,6 @@ import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
-import org.komodo.relational.driver.Driver;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.dsource.DatasourceImporter;
@@ -52,6 +53,11 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
+import org.komodo.relational.resource.DdlFile;
+import org.komodo.relational.resource.Driver;
+import org.komodo.relational.resource.ResourceFile;
+import org.komodo.relational.resource.UdfFile;
+import org.komodo.relational.resource.internal.DriverImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
@@ -65,7 +71,6 @@ import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryObserver;
@@ -77,6 +82,7 @@ import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.api.JcrConstants;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
@@ -88,7 +94,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      * The allowed child types.
      */
     private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER,
-                                                                       Schema.IDENTIFIER, Teiid.IDENTIFIER, 
+                                                                       Schema.IDENTIFIER, Teiid.IDENTIFIER,
                                                                        Dataservice.IDENTIFIER, Folder.IDENTIFIER };
 
     /**
@@ -107,41 +113,104 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                                                               + " ORDER BY [jcr:path] ASC"; //$NON-NLS-1$
     // @formatter:on
 
-    private static class WskpMgrAdapter implements KeyFromValueAdapter< Repository.Id, WorkspaceManager > {
+    private static class CacheKey {
+        private final Repository.Id repoId;
+
+        private final String user;
+
+        public CacheKey(Repository.Id repoId, String user) {
+            this.repoId = repoId;
+            this.user = user;
+        }
 
         @Override
-        public Id getKey( WorkspaceManager value ) {
-            Repository repository = value.getRepository();
-            return repository.getId();
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((repoId == null) ? 0 : repoId.hashCode());
+            result = prime * result + ((user == null) ? 0 : user.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            CacheKey other = (CacheKey)obj;
+            if (repoId == null) {
+                if (other.repoId != null)
+                    return false;
+            } else if (!repoId.equals(other.repoId))
+                return false;
+            if (user == null) {
+                if (other.user != null)
+                    return false;
+            } else if (!user.equals(other.user))
+                return false;
+            return true;
         }
     }
 
-    private static KeyFromValueAdapter< Repository.Id, WorkspaceManager > adapter = new WskpMgrAdapter();
+    private static class WskpMgrAdapter implements KeyFromValueAdapter< CacheKey, WorkspaceManager > {
 
-    private static KeyInValueHashMap< Repository.Id, WorkspaceManager > instances = new KeyInValueHashMap< Repository.Id, WorkspaceManager >(
-                                                                                                                                             adapter);
+        @Override
+        public CacheKey getKey( WorkspaceManager value ) {
+            Repository repository = value.getRepository();
+            String user = value.getOwner();
+
+            return new CacheKey(repository.getId(), user);
+        }
+    }
+
+    private static KeyFromValueAdapter< CacheKey, WorkspaceManager > adapter = new WskpMgrAdapter();
+
+    private static KeyInValueHashMap< CacheKey, WorkspaceManager > instances = 
+                                                                        new KeyInValueHashMap< CacheKey, WorkspaceManager >(adapter);
+
+    private final String owner;
 
     /**
      * @param repository
      *        the repository whose workspace manager is being requested (cannot be <code>null</code>)
+     * @param transaction
+     *        the transaction containing the user name of the owner of this workspace manager
+     *        (if <code>null</code> then this manager is owner by the system user and has the workspace root as its path)
+     *
      * @return the singleton instance for the given repository (never <code>null</code>)
      * @throws KException
      *         if there is an error obtaining the workspace manager
      */
-    public static WorkspaceManager getInstance( Repository repository ) throws KException {
+    public static WorkspaceManager getInstance( Repository repository, UnitOfWork transaction) throws KException {
+        boolean txNotProvided = transaction == null;
+
+        if (txNotProvided)
+            transaction = repository.createTransaction(Repository.SYSTEM_USER, "createWorkspaceManager", false, null ); //$NON-NLS-1$
+
         WorkspaceManager instance = instances.get(repository.getId());
 
         if ( instance == null ) {
             // We must create a transaction here so that it can be passed on to the constructor. Since the
             // node associated with the WorkspaceManager always exists we don't have to create it.
-            final UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", false, null ); //$NON-NLS-1$
-            instance = new WorkspaceManager( uow, repository );
-            uow.commit();
+            instance = new WorkspaceManager(repository, transaction);
+
+            if (txNotProvided)
+                transaction.commit();
 
             instances.add( instance );
         }
 
         return instance;
+    }
+
+    /**
+     * @return the owner of this workspace manager
+     */
+    public String getOwner() {
+        return this.owner;
     }
 
     /**
@@ -184,15 +253,16 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *
      * @param repository remove instance with given repository
      */
-    public static void uncacheInstance(final Repository repository) {
+    public static void uncacheInstance(final Repository repository, final String owner) {
         if (repository == null)
             return;
 
-        instances.remove(repository.getId());
+        instances.remove(new CacheKey(repository.getId(), owner));
     }
 
-    private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
-        super( repository, RepositoryImpl.WORKSPACE_ROOT, 0 );
+    private WorkspaceManager(Repository repository, UnitOfWork uow ) throws KException {
+        super( repository, RepositoryImpl.komodoWorkspacePath(uow), 0 );
+        this.owner = uow.getUserName();
 
         repository.addObserver(new RepositoryObserver() {
 
@@ -202,6 +272,11 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                 if (getRepository() == null || State.NOT_REACHABLE == getRepository().getState() || !(getRepository().ping())) {
                     instances.remove(WorkspaceManager.this);
                 }
+            }
+
+            @Override
+            public void errorOccurred(Throwable e) {
+                // Nothing to do
             }
         });
     }
@@ -266,20 +341,65 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
     /**
      * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the DDL file object being created (can be <code>null</code>)
+     * @param ddlFileName
+     *        the name of the DDL file to create (cannot be empty)
+     * @param content
+     *        the file content (cannot be <code>null</code>)
+     * @return the DDL file object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public DdlFile createDdlFile( final UnitOfWork uow,
+                                  final KomodoObject parent,
+                                  final String ddlFileName,
+                                  final byte[] content ) throws KException {
+        final KomodoObject kobjParent = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ) : parent );
+        return RelationalModelFactory.createDdlFile( uow, getRepository(), kobjParent, ddlFileName, content );
+    }
+
+    /**
+     * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
      *        the parent of the driver object being created (can be <code>null</code>)
-     * @param sourceName
+     * @param driverName
+     *        the name of the driver to create (cannot be empty)
+     * @param content
+     *        the file content (cannot be <code>null</code>)
+     * @return the Driver object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Driver createDriver( UnitOfWork uow,
+                                KomodoObject parent,
+                                String driverName,
+                                final byte[] content ) throws KException {
+        parent = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ) : parent );
+        return RelationalModelFactory.createDriver( uow, getRepository(), parent, driverName, content );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the driver object being created (can be <code>null</code>)
+     * @param driverName
      *        the name of the driver to create (cannot be empty)
      * @return the Driver object (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    public Driver createDriver(UnitOfWork uow, KomodoObject parent, String driverName) throws KException {
-        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
-            : parent.getAbsolutePath() );
-        return RelationalModelFactory.createDriver( uow, getRepository(), path, driverName );
+    public Driver createDriver( UnitOfWork uow,
+                                KomodoObject parent,
+                                String driverName) throws KException {
+        parent = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ) : parent );
+        return RelationalModelFactory.createDriver( uow, getRepository(), parent, driverName);
     }
 
     /**
@@ -300,6 +420,28 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
             : parent.getAbsolutePath() );
         return RelationalModelFactory.createFolder( uow, getRepository(), path, folderName );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the resource file object being created (can be <code>null</code>)
+     * @param resourceFileName
+     *        the name of the resource file to create (cannot be empty)
+     * @param content
+     *        the file content (cannot be <code>null</code>)
+     * @return the resource file object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public ResourceFile createResourceFile( final UnitOfWork uow,
+                                            final KomodoObject parent,
+                                            final String resourceFileName,
+                                            final byte[] content ) throws KException {
+        final KomodoObject kobjParent = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ) : parent );
+        return RelationalModelFactory.createResourceFile( uow, getRepository(), kobjParent, resourceFileName, content );
     }
 
     /**
@@ -340,6 +482,28 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                 : parent.getAbsolutePath() );
         return RelationalModelFactory.createTeiid( uow, getRepository(), path, id );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the UDF file object being created (can be <code>null</code>)
+     * @param udfFileName
+     *        the name of the UDF file to create (cannot be empty)
+     * @param content
+     *        the file content (cannot be <code>null</code>)
+     * @return the resource file object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public UdfFile createUdfFile( final UnitOfWork uow,
+                                  final KomodoObject parent,
+                                  final String udfFileName,
+                                  final byte[] content ) throws KException {
+        final KomodoObject kobjParent = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ) : parent );
+        return RelationalModelFactory.createUdfFile( uow, getRepository(), kobjParent, udfFileName, content );
     }
 
     /**
@@ -447,7 +611,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
      * @param namePattern
      *        the regex used to match object names (can be empty if all objects of the given type are being requested)
-     * @param includeSubTypes 
+     * @param includeSubTypes
      *        determines whether sub types are included in the return
      * @return the paths of all the objects under the specified parent path with the specified type (never <code>null</code> but
      *         can be empty)
@@ -465,7 +629,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
         if ( StringUtils.isBlank( parentPath ) ) {
-            parentPath = RepositoryImpl.WORKSPACE_ROOT;
+            parentPath = RepositoryImpl.komodoWorkspacePath(transaction);
         }
 
         try {
@@ -476,9 +640,9 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             } else {
                 queryText = String.format( FIND_MATCHING_QUERY_PATTERN, type, parentPath, namePattern );
             }
-            
+
             final List< KomodoObject > kObjs = getRepository().query( transaction, queryText );
-            List< KomodoObject > results = new ArrayList< KomodoObject > ();
+            List< KomodoObject > results = new ArrayList< > ();
             for( final KomodoObject kObj : kObjs ) {
                 if(includeSubTypes) {
                     results.add(kObj);
@@ -486,7 +650,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                     results.add(kObj);
                 }
             }
-            
+
             final int numPaths = results.size();
 
             if ( numPaths == 0 ) {
@@ -518,7 +682,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      */
     public String[] findByType( final UnitOfWork transaction,
                                 final String type) throws KException {
-        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null, false );
+        return findByType( transaction, type, RepositoryImpl.komodoWorkspacePath(transaction), null, false );
     }
 
     /**
@@ -527,7 +691,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param type
      *        the lexicon node type name of objects being found
-     * @param includeSubTypes 
+     * @param includeSubTypes
      *        determines whether sub types are included in the return
      * @return the paths of all the objects in the workspace with the specified type (never <code>null</code> but can be empty)
      * @throws KException
@@ -536,7 +700,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     public String[] findByType( final UnitOfWork transaction,
                                 final String type,
                                 boolean includeSubTypes) throws KException {
-        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null, includeSubTypes );
+        return findByType( transaction, type, RepositoryImpl.komodoWorkspacePath(transaction), null, includeSubTypes );
     }
 
     /**
@@ -612,7 +776,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final String[] paths = findByType(transaction, KomodoLexicon.DataService.NODE_TYPE);
+        final String[] paths = findByType(transaction, DataVirtLexicon.DataService.NODE_TYPE);
         Dataservice[] result = null;
 
         if (paths.length == 0) {
@@ -642,7 +806,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final String[] paths = findByType(transaction, KomodoLexicon.DataSource.NODE_TYPE);
+        final String[] paths = findByType(transaction, DataVirtLexicon.Connection.NODE_TYPE);
         Datasource[] result = null;
 
         if (paths.length == 0) {
@@ -653,6 +817,36 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
             for (final String path : paths) {
                 result[i++] = new DatasourceImpl(transaction, getRepository(), path);
+            }
+        }
+
+        return result;
+    }
+    
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return all {@link Driver}s in the workspace
+     * @throws KException
+     *         if an error occurs
+     */
+    public Driver[] findDrivers( UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final String[] paths = findByType(transaction, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
+        Driver[] result = null;
+
+        if (paths.length == 0) {
+            result = Driver.NO_DRIVERS;
+        } else {
+            result = new Driver[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new DriverImpl(transaction, getRepository(), path);
             }
         }
 
@@ -801,13 +995,13 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     }
 
     /**
-     * 
+     *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent the parent of the imported vdb
      * @param storageRef the reference to the destination within the storage
-     * @param parameters the parameters for the storage, appropriate to the storage type
+     * @return the import messages (never <code>null</code>)
      * @throws KException if error occurs
      */
     public ImportMessages importArtifact(final UnitOfWork transaction,
@@ -815,17 +1009,19 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotNull(parent, "parent");
-        ArgCheck.isNotNull(storageRef, "storageRef");
+        ArgCheck.isNotNull(parent, "parent"); //$NON-NLS-1$
+        ArgCheck.isNotNull(storageRef, "storageRef"); //$NON-NLS-1$
 
+        StorageConnector connector = null;
+        InputStream stream = null;
         try {
             StorageService storageService = PluginService.getInstance().getStorageService(storageRef.getStorageType());
             if (storageService == null)
                 throw new KException(Messages.getString(Relational.STORAGE_TYPE_INVALID,
                                                         storageRef.getStorageType()));
 
-            StorageConnector connector = storageService.getConnector(storageRef.getParameters());
-            InputStream stream = connector.read(storageRef.getParameters());
+            connector = storageService.getConnector(storageRef.getParameters());
+            stream = connector.read(storageRef.getParameters());
 
             ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
@@ -834,7 +1030,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                 VdbImporter importer = new VdbImporter(getRepository());
                 importer.importVdb(transaction, stream, parent, importOptions, importMessages);
             }
-            else if (DocumentType.TDS.equals(storageRef.getDocumentType())) {
+            else if (DocumentType.CONNECTION.equals(storageRef.getDocumentType())) {
                 DatasourceImporter importer = new DatasourceImporter(getRepository());
                 importer.importDS(transaction, stream, parent, importOptions, importMessages);
             }
@@ -843,18 +1039,48 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                 importer.importDdl(transaction, stream, parent, importOptions, importMessages);
             }
             else if (DocumentType.ZIP.equals(storageRef.getDocumentType())) {
-                    DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
-                    conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
+                DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
+                conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.JAR.equals(storageRef.getDocumentType())) {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                final byte[] buf = new byte[8192];
+                int length;
+
+                while ((length = stream.read(buf, 0, buf.length)) >= 0) {
+                    bos.write(buf, 0, length);
+                }
+
+                byte[] content = bos.toByteArray();
+                
+                String driverName = storageRef.getParameters().getProperty(StorageReference.DRIVER_NAME_KEY);
+                if(StringUtils.isBlank(driverName)) {
+                    driverName = StorageReference.DRIVER_NAME_DEFAULT;
+                }
+                Driver driver = RelationalModelFactory.createDriver(transaction, getRepository(), parent, driverName);
+                driver.setContent(transaction, content);
             }
             else {
-                    throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
-                                                            storageRef.getDocumentType()));
+                throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
+                                                        storageRef.getDocumentType()));
             }
 
             return importMessages;
 
         } catch (Exception e) {
             throw handleError(e);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // Nothing required
+                }
+            }
+
+            if (connector != null) {
+                connector.dispose();
+            }
         }
     }
 
@@ -875,7 +1101,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotNull(artifact, "artifact");
+        ArgCheck.isNotNull(artifact, "artifact"); //$NON-NLS-1$
 
         try {
             StorageService storageService = PluginService.getInstance().getStorageService(storageType);

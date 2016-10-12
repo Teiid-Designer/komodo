@@ -22,6 +22,7 @@
 package org.komodo.relational.commands.datasource;
 
 import java.util.List;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
@@ -75,12 +76,8 @@ public final class UnsetDatasourcePropertyCommand extends DatasourceShellCommand
                 datasource.setDriverName( transaction, null );
             } else if ( CLASS_NAME.equals( name ) ) {
                 datasource.setDriverName( transaction, null );
-            } else if ( PROFILE_NAME.equals( name ) ) {
-                datasource.setProfileName( transaction, null );
             } else if ( JDBC.equals( name ) ) {
                 datasource.setJdbc( transaction, Datasource.DEFAULT_JDBC );
-            } else if ( PREVIEW.equals( name ) ) {
-                datasource.setPreview( transaction, Datasource.DEFAULT_PREVIEW );
             } else {
                 errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
             }

@@ -80,6 +80,16 @@ public final class RestLink {
         MODELS(KomodoType.MODEL),
 
         /**
+         * A link to a vdb table resource
+         */
+        TABLES(KomodoType.TABLE),
+
+        /**
+         * A link to a table column resource
+         */
+        COLUMNS(KomodoType.COLUMN),
+
+        /**
          * A link to a vdb translators resource
          */
         TRANSLATORS(KomodoType.VDB_TRANSLATOR),
@@ -107,7 +117,12 @@ public final class RestLink {
         /**
          * A link to a mask resource
          */
-        MASKS(KomodoType.VDB_MASK);
+        MASKS(KomodoType.VDB_MASK),
+
+        /**
+         * A link to a data service's connections
+         */
+        CONNECTIONS;
 
         private KomodoType kType;
 

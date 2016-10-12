@@ -36,6 +36,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -43,8 +44,8 @@ import org.komodo.repository.DescriptorImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.rest.RestProperty;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -97,6 +98,7 @@ public final class RestVdbTranslatorTest implements V1Constants {
         repository = Mockito.mock(Repository.class);
         UnitOfWorkListener listener = Matchers.any();
         when(repository.createTransaction(Matchers.anyString(),
+                                                  Matchers.anyString(),
                                                   Matchers.anyBoolean(),
                                                   listener)).thenReturn(uow);
 
@@ -278,15 +280,20 @@ public final class RestVdbTranslatorTest implements V1Constants {
         KomodoType kType = KomodoType.VDB_TRANSLATOR;
         boolean hasChildren = false;
 
-        Descriptor teiidType = new DescriptorImpl(repository, KomodoLexicon.CachedTeiid.NODE_TYPE);
+        Descriptor cachedTeiidType = new DescriptorImpl(repository, KomodoLexicon.CachedTeiid.NODE_TYPE);
+        Descriptor folderType = new DescriptorImpl(repository, KomodoLexicon.Folder.NODE_TYPE);
         CachedTeiid cachedTeiid = mock(CachedTeiid.class);
+        Folder translatorFolder = mock(Folder.class);
         when(cachedTeiid.getName(transaction)).thenReturn(TEIID_SERVER);
-        when(cachedTeiid.getPrimaryType(transaction)).thenReturn(teiidType);
+        when(cachedTeiid.getPrimaryType(transaction)).thenReturn(cachedTeiidType);
+        when(translatorFolder.getName(transaction)).thenReturn(TEIID_SERVER + FORWARD_SLASH + CachedTeiid.TRANSLATORS_FOLDER);
+        when(translatorFolder.getPrimaryType(transaction)).thenReturn(folderType);
 
         Translator translator = mock(Translator.class);
         when(translator.getName(transaction)).thenReturn(name);
         when(translator.getAbsolutePath()).thenReturn(dataPath);
-        when(translator.getParent(transaction)).thenReturn(cachedTeiid);
+        when(translator.getParent(transaction)).thenReturn(translatorFolder);
+        when(translatorFolder.getParent(transaction)).thenReturn(cachedTeiid);
         when(translator.getTypeIdentifier(transaction)).thenReturn(kType);
         when(translator.hasChildren(transaction)).thenReturn(hasChildren);
         when(translator.getRepository()).thenReturn(repository);
@@ -307,13 +314,14 @@ public final class RestVdbTranslatorTest implements V1Constants {
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
                                          FORWARD_SLASH + TEIID_SERVER +
-                                         FORWARD_SLASH + TRANSLATORS_SEGMENT +
+                                         FORWARD_SLASH + CachedTeiid.TRANSLATORS_FOLDER +
                                          FORWARD_SLASH + name, href);
             } else if (LinkType.PARENT.equals(link.getRel())) {
                 linkCounter++;
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
-                                         FORWARD_SLASH + TEIID_SERVER, href);
+                                         FORWARD_SLASH + TEIID_SERVER +
+                                         FORWARD_SLASH + CachedTeiid.TRANSLATORS_FOLDER, href);
             } else if (LinkType.CHILDREN.equals(link.getRel())) {
                 linkCounter++;
             }

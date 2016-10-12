@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -29,16 +29,28 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.tika.io.IOUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
@@ -53,8 +65,89 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
+
+    private File myGitDir;
+
+    private Git myGit;
+
+    private File gitRepoDest;
+
+    private void initGitRepository() throws Exception {
+        String tmpDirPath = System.getProperty("java.io.tmpdir");
+        File tmpDir = new File(tmpDirPath);
+
+        long timestamp = System.currentTimeMillis();
+        myGitDir = new File(tmpDir, "mygit-" + timestamp);
+        assertTrue(myGitDir.mkdir());
+
+        myGit = Git.init()
+                            .setDirectory(myGitDir)
+                            .setBare(true)
+                            .call();
+        assertNotNull(myGit);
+
+        // Need to initialise the master branch
+        // as jgit does not automatically create on
+        File seedDir = new File(tmpDir, "seedDir-" + timestamp);
+        Git seedGit = Git.cloneRepository()
+                                    .setURI(myGitDir.getAbsolutePath())
+                                    .setDirectory(seedDir)
+                                    .call();
+
+        File tweetVdbFile = new File(seedDir, TestUtilities.TWEET_EXAMPLE_NAME + TestUtilities.TWEET_EXAMPLE_SUFFIX);
+        assertTrue(tweetVdbFile.createNewFile());
+        FileUtils.write(TestUtilities.tweetExample(), tweetVdbFile);
+        assertTrue(tweetVdbFile.length() > 0);
+
+        File usStatesZipFile = new File(tmpDir, TestUtilities.US_STATES_DATA_SERVICE_NAME + ZIP_SUFFIX);
+        FileUtils.write(TestUtilities.usStatesDataserviceExample(), usStatesZipFile);
+        try (FileInputStream fis = new FileInputStream(usStatesZipFile)) {
+            File usStatesDir = new File(seedDir, TestUtilities.US_STATES_DATA_SERVICE_NAME);
+            usStatesDir.mkdir();
+            FileUtils.zipExtract(fis, usStatesDir);
+            usStatesZipFile.delete();
+        }
+
+        seedGit.add()
+                    .addFilepattern(DOT)
+                    .call();
+        seedGit.commit().setMessage("First Commit").call();
+        seedGit.push().call();
+
+        FileUtils.removeDirectoryAndChildren(seedDir);
+
+        //
+        // Local git repository
+        //
+        String dirName = System.currentTimeMillis() + HYPHEN;
+        gitRepoDest = new File(FileUtils.tempDirectory(), dirName);
+        gitRepoDest.mkdir();
+    }
+
+    private void destroyGitRepository() throws Exception {
+        if (gitRepoDest != null)
+            FileUtils.removeDirectoryAndChildren(gitRepoDest);
+
+        if (myGit != null)
+            myGit.close();
+
+        if (myGitDir != null)
+            FileUtils.removeDirectoryAndChildren(myGitDir);
+    }
+
+    @Before
+    public void setup() throws Exception {
+        initGitRepository();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        destroyGitRepository();
+    }
 
     @Test
     public void shouldNotImportVdbBlankPayload() throws Exception {
@@ -76,7 +169,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
     @Test
     public void shouldImportVdb() throws Exception {
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "importVdb" + COLON + System.currentTimeMillis(),
                                                       false, null);
 
@@ -150,7 +243,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
         storageAttr.setStorageType("file");
-        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/myVDB");
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + USER_NAME + "/myVDB");
 
         String tmpDirPath = System.getProperty("java.io.tmpdir");
         storageAttr.setParameter("files-home-path-property", tmpDirPath);
@@ -196,7 +289,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
     @Test
     public void shouldImportDataservice() throws Exception {
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
                                                       false, null);
 
@@ -210,7 +303,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setStorageType("file");
         storageAttr.setDocumentType(DocumentType.ZIP);
 
-        String dsName = "myService";
+        String dsName = "MyDataService";
         InputStream sampleDsStream = TestUtilities.sampleDataserviceExample();
 
         byte[] sampleBytes = TestUtilities.streamToBytes(sampleDsStream);
@@ -237,22 +330,134 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         assertTrue(workspace.hasChild(uow, dsName));
         KomodoObject dataservice = workspace.getChild(uow, dsName);
-        assertTrue(dataservice.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
-
-        WorkspaceManager mgr = WorkspaceManager.getInstance(getRestApp().getDefaultRepository());
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
         Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
         assertNotNull(ds);
 
-        String vdbName = ds.getServiceVdbName(uow);
-        assertEquals(TestUtilities.TWEET_EXAMPLE_VDB_NAME, vdbName);
+        //
+        // Due to a hiccup, the portfolio vdb file entry in the dataservice zip is actually capitalized
+        //
+        Vdb[] vdbs = ds.getVdbs(uow, StringUtils.toCamelCase(TestUtilities.PORTFOLIO_VDB_FILE));
+        assertTrue(vdbs.length == 1);
+
+        String vdbName = ds.getServiceVdb(uow).getVdbName( uow );
+        assertEquals("DynamicProducts", vdbName);
     }
 
     @Test
-    public void shouldExportDataservice() throws Exception {
-        loadVdbs();
-        String dsName = "myDataService";
+    public void shouldImportUSDataservice() throws Exception {
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
+                                                      getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
+                                                      false, null);
 
-        getRestApp().createDataservice(dsName, true);
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.ZIP);
+
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        InputStream usDsStream = TestUtilities.usStatesDataserviceExample();
+
+        byte[] usBytes = TestUtilities.streamToBytes(usDsStream);
+        String content = Base64.getEncoder().encodeToString(usBytes);
+        storageAttr.setContent(content);
+
+        assertFalse(workspace.hasChild(uow, dsName));
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        assertTrue(workspace.hasChild(uow, dsName));
+        KomodoObject dataservice = workspace.getChild(uow, dsName);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
+        assertNotNull(ds);
+
+        Vdb vdb = ds.getServiceVdb(uow);
+        assertNotNull(vdb);
+
+        String vdbName = vdb.getVdbName( uow );
+        assertEquals("usstates", vdbName);
+    }
+
+    @Test
+    public void shouldImportUSDataserviceFromGit() throws Exception {
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
+                                                      getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("git");
+        storageAttr.setDocumentType(DocumentType.ZIP);
+        storageAttr.setParameter("repo-path-property", "file://" + myGitDir);
+        storageAttr.setParameter("file-path-property", dsName);
+        storageAttr.setParameter("author-name-property", "user");
+        storageAttr.setParameter("author-email-property", "user@user.com");
+
+        assertFalse(workspace.hasChild(uow, dsName));
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        assertTrue(workspace.hasChild(uow, dsName));
+        KomodoObject dataservice = workspace.getChild(uow, dsName);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
+        assertNotNull(ds);
+
+        Vdb vdb = ds.getServiceVdb(uow);
+        assertNotNull(vdb);
+
+        String vdbName = vdb.getVdbName( uow );
+        assertEquals("usstates", vdbName);
+    }
+
+    @Test
+    public void shouldExportDataserviceToFile() throws Exception {
+        loadVdbs();
+        String dsName = "MyDataService";
+
+        getRestApp().createDataservice(dsName, true, USER_NAME);
 
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                             .path(V1Constants.IMPORT_EXPORT_SEGMENT)
@@ -260,7 +465,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
         storageAttr.setStorageType("file");
-        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + dsName);
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + USER_NAME + FORWARD_SLASH + dsName);
 
         String tmpDirPath = System.getProperty("java.io.tmpdir");
         storageAttr.setParameter("files-home-path-property", tmpDirPath);
@@ -277,7 +482,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         //
         // Test that the file storage connector really did export the data service
         //
-        File tmpFile = new File(tmpDirPath, dsName + DOT + ZIP);
+        File tmpFile = new File(tmpDirPath, dsName + ZIP_SUFFIX);
         assertTrue(tmpFile.exists());
         tmpFile.deleteOnExit();
 
@@ -293,10 +498,76 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         byte[] decBytes = Base64.getDecoder().decode(content);
 
-        File dsZip = File.createTempFile("DSZip", DOT + ZIP);
+        File dsZip = File.createTempFile("DSZip", ZIP_SUFFIX);
         dsZip.deleteOnExit();
         FileUtils.write(decBytes, dsZip);
         TestUtilities.testZipFile(dsZip);
+    }
+
+    @Test
+    public void shouldExportDataserviceToGit() throws Exception {
+        loadDataServices();
+
+        String dsName = "UsStatesService";
+        List<String> zipEntries = TestUtilities.zipEntries(dsName, TestUtilities.usStatesDataserviceExample());
+        System.out.println(zipEntries);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                            .path(V1Constants.EXPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("git");
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + USER_NAME + FORWARD_SLASH + dsName);
+
+        storageAttr.setParameter("repo-path-property", "file://" + myGitDir);
+        storageAttr.setParameter("repo-dest-property", gitRepoDest.getAbsolutePath());
+        storageAttr.setParameter("author-name-property", "user");
+        storageAttr.setParameter("author-email-property", "user@user.com");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertNotNull(entity);
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        //
+        // Test that the git storage connector really did export the data service
+        //
+        org.eclipse.jgit.lib.Repository repository = myGit.getRepository();
+        ObjectId commitId = repository.resolve(Constants.HEAD);
+        try (RevWalk revWalk = new RevWalk(repository)) {
+            RevCommit commit = revWalk.parseCommit(commitId);
+            RevTree tree = commit.getTree();
+
+            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+                treeWalk.addTree(tree);
+                treeWalk.setRecursive(false);
+                while (treeWalk.next()) {
+                    zipEntries.remove(treeWalk.getPathString());
+
+                    if (treeWalk.isSubtree())
+                        treeWalk.enterSubtree();
+                }
+            }
+
+            //
+            // All entries in the original zip have been extracted
+            // and pushed to the git repository
+            //
+            assertTrue("Remaining entries: " + Arrays.toString(zipEntries.toArray(new String[0])), zipEntries.isEmpty());
+        }
     }
 
     @Test
@@ -325,4 +596,54 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
             assertTrue(name.equals("file") || name.equals("git"));
         }
     }
+    
+    @Test
+    public void shouldImportDdl() throws Exception {
+        String VDB_NAME = "testVDB";
+        String MODEL_NAME = "testModel";
+        createVdbModel(VDB_NAME, MODEL_NAME);
+        
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
+                                                      getClass().getSimpleName() + COLON + "importVdb" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        KomodoObject kObj = mgr.getChild(uow, VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb testVdb = Vdb.RESOLVER.resolve(uow, kObj);
+        Model[] models = testVdb.getModels(uow, MODEL_NAME);
+        Model testModel = models[0];
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.DDL);
+        String modelPath = testModel.getAbsolutePath();
+        storageAttr.setArtifactPath(modelPath);
+
+        String patientsDdlCnt = FileUtils.streamToString(TestUtilities.patientsDdl());
+        String content = Base64.getEncoder().encodeToString(patientsDdlCnt.getBytes());
+        storageAttr.setContent(content);
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, storageAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(DDL, status.getType());
+        
+        assertTrue(testModel.hasChild(uow, "vdbwebtest.ER_VISIT"));
+    }
+
 }

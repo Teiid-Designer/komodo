@@ -60,7 +60,7 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
         workspace = _repo.komodoWorkspace(getTransaction());
         this.schema = manager.createSchema(getTransaction(), workspace, NAME);
         commit();

@@ -26,19 +26,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
-import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.RestLink;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -48,7 +50,7 @@ import org.mockito.Mockito;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class RestVdbTest {
+public final class RestVdbTest implements StringConstants {
 
     private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/").build();
     private static final URI BASE_TEIID_URI = UriBuilder.fromUri("http://localhost:8081/v1/teiid").build();
@@ -136,7 +138,6 @@ public final class RestVdbTest {
         assertNull(empty.getBaseUri());
         assertNull(empty.getName());
         assertNull(empty.getDescription());
-        assertNull(empty.getOriginalFilePath());
         assertEquals(empty.getProperties().isEmpty(), true);
         assertEquals(empty.getLinks().size(), 0);
     }
@@ -198,39 +199,45 @@ public final class RestVdbTest {
 
         Descriptor teiidType = Mockito.mock(Descriptor.class);
         when(teiidType.getName()).thenReturn(KomodoLexicon.CachedTeiid.NODE_TYPE);
+        Descriptor folderType = Mockito.mock(Descriptor.class);
+        when(folderType.getName()).thenReturn(KomodoLexicon.Folder.NODE_TYPE);
 
         CachedTeiid cachedTeiid = Mockito.mock(CachedTeiid.class);
+        Folder vdbFolder = mock(Folder.class);
         Mockito.when(cachedTeiid.getName(transaction)).thenReturn("localhost");
         Mockito.when(cachedTeiid.getAbsolutePath()).thenReturn(parentDataPath);
         Mockito.when(cachedTeiid.getTypeIdentifier(transaction)).thenReturn(KomodoType.CACHED_TEIID);
         Mockito.when(cachedTeiid.getPrimaryType(transaction)).thenReturn(teiidType);
-
+        Mockito.when(vdbFolder.getName(transaction)).thenReturn("localhost/" + CachedTeiid.VDBS_FOLDER);
+        Mockito.when(vdbFolder.getPrimaryType(transaction)).thenReturn(folderType);
+        
         Vdb theVdb = Mockito.mock(Vdb.class);
         Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
-        Mockito.when(theVdb.getAbsolutePath()).thenReturn(parentDataPath + File.separator + VDB_NAME);
+        Mockito.when(theVdb.getAbsolutePath()).thenReturn(parentDataPath + FORWARD_SLASH + VDB_NAME);
         Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
         Mockito.when(theVdb.hasChildren(transaction)).thenReturn(true);
         Mockito.when(theVdb.getPropertyNames(transaction)).thenReturn(new String[0]);
         Mockito.when(theVdb.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
-        Mockito.when(theVdb.getParent(transaction)).thenReturn(cachedTeiid);
+        Mockito.when(theVdb.getParent(transaction)).thenReturn(vdbFolder);
+        Mockito.when(vdbFolder.getParent(transaction)).thenReturn(cachedTeiid);
 
         RestVdb restVdb = new RestVdb(BASE_URI, theVdb, false, transaction);
         assertEquals(BASE_URI, restVdb.getBaseUri());
-        assertEquals(parentDataPath + File.separator + VDB_NAME, restVdb.getDataPath());
+        assertEquals(parentDataPath + FORWARD_SLASH + VDB_NAME, restVdb.getDataPath());
         Collection<RestLink> links = restVdb.getLinks();
         assertNotNull(links);
         for (RestLink link :  links) {
             switch (link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_TEIID_URI + File.separator +
-                                             cachedTeiid.getName(transaction) + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_TEIID_URI + FORWARD_SLASH +
+                                             cachedTeiid.getName(transaction) + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              VDB_NAME,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_TEIID_URI + File.separator +
-                                             cachedTeiid.getName(transaction) + File.separator +
+                    assertEquals(BASE_TEIID_URI + FORWARD_SLASH +
+                                             cachedTeiid.getName(transaction) + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
                     break;

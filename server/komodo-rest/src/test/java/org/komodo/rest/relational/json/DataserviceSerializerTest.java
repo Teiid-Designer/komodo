@@ -26,6 +26,7 @@ import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -45,7 +46,9 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         "  \"keng__kType\": \"Dataservice\"," + NEW_LINE +
         "  \"keng__hasChildren\": true," + NEW_LINE +
         "  \"tko__description\": \"my description\"," + NEW_LINE +
-        "  \"serviceVdbVersion\": 0," + NEW_LINE +
+        "  \"serviceVdbVersion\": \"1\"," + NEW_LINE +
+        "  \"connections\": 0," + NEW_LINE +
+        "  \"drivers\": 0," + NEW_LINE +
         "  \"keng___links\": [" + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"self\"," + NEW_LINE +
@@ -62,6 +65,10 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"vdbs\"," + NEW_LINE +
         "      \"href\": \"" + BASE_URI_PREFIX + DATASERVICE_DATA_PATH + "/Vdbs\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"connections\"," + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + DATASERVICE_DATA_PATH + "/connections\"" + NEW_LINE +
         "    " + CLOSE_BRACE + NEW_LINE +
         "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
         CLOSE_BRACE;
@@ -74,10 +81,15 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         KomodoObject workspace = Mockito.mock(KomodoObject.class);
         Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
 
+        Vdb serviceVdb = Mockito.mock(Vdb.class);
+        Mockito.when(serviceVdb.getName(transaction)).thenReturn("ServiceVdb");
+        Mockito.when(serviceVdb.getVersion(transaction)).thenReturn(1);
+
         Dataservice theService = mockObject(Dataservice.class, DATASERVICE_NAME, DATASERVICE_DATA_PATH, kType, true);
         Mockito.when(theService.getPropertyNames(transaction)).thenReturn(new String[0]);
         Mockito.when(theService.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
         Mockito.when(theService.getParent(transaction)).thenReturn(workspace);
+        Mockito.when(theService.getServiceVdb(transaction)).thenReturn(serviceVdb);
 
         this.dataservice = new RestDataservice(MY_BASE_URI, theService, false, transaction);
         this.dataservice.setDescription(DESCRIPTION);
@@ -94,7 +106,7 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         final RestDataservice descriptor = KomodoJsonMarshaller.unmarshall( JSON, RestDataservice.class );
         assertEquals(DATASERVICE_NAME, descriptor.getId());
         assertEquals(DESCRIPTION, descriptor.getDescription());
-        assertEquals(4, descriptor.getLinks().size());
+        assertEquals(5, descriptor.getLinks().size());
         assertEquals(true, descriptor.getProperties().isEmpty());
     }
 

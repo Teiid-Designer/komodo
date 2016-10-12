@@ -4,13 +4,13 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -38,6 +37,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.mockito.Mockito;
@@ -162,15 +162,42 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         }
     }
 
+    protected static File getResourceFile(Class<?> theClass, String directory, String fileName) {
+        try {
+            InputStream stream = TestUtilities.getResourceAsStream(theClass, directory, fileName);
+            assertNotNull(stream);
+
+            String suffix = DOT + "tmp";
+            int dot = fileName.indexOf(DOT);
+            if (dot > -1) {
+                suffix = fileName.substring(dot);
+                fileName = fileName.substring(0, dot);
+            }
+
+            File tmpFile = File.createTempFile(fileName, suffix);
+            tmpFile.deleteOnExit();
+            FileUtils.write(stream, tmpFile);
+
+            return tmpFile;
+        } catch (Exception ex) {
+            fail(ex.getMessage());
+            return null;
+        }
+    }
+
+    protected static File getResourceFile(Class<?> theClass, String fileName) {
+        return getResourceFile(theClass, null, fileName);
+    }
+
     protected void setup( final String commandFilePath ) throws Exception {
     	String filePath = null;
     	if (new File( commandFilePath ).isAbsolute())
     		filePath = commandFilePath;
     	else {
-    		ClassLoader classLoader = getClass().getClassLoader();
-    		URL resource = classLoader.getResource(commandFilePath);
-    		assertNotNull(resource);
-    		filePath = resource.getFile();
+    	    File file = getResourceFile(getClass(), commandFilePath);
+    	    assertNotNull(file);
+    	    assertTrue(file.exists());
+    	    filePath = file.getAbsolutePath();
     	}
     	assertNotNull(filePath);
 
@@ -194,10 +221,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	 * @throws Exception
 	 */
 	protected void setup(String folderName, String commandFileName) throws Exception {
-		ClassLoader classLoader = getClass().getClassLoader();
-		URL resource = classLoader.getResource(folderName + File.separator + commandFileName);
-		assertNotNull(resource);
-		File file = new File(resource.getFile());
+	    File file = getResourceFile(getClass(), folderName, commandFileName);
 		if (!file.exists()) {
 			throw new IllegalArgumentException("Command file does not exist: " + file.getAbsolutePath());
 		}
@@ -254,6 +278,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             Assert.fail( "Failed - invalid command: " + e.getMessage() ); //$NON-NLS-1$
         } catch ( Exception e ) {
             Assert.fail( "Failed : " + e.getMessage() ); //$NON-NLS-1$
+            e.printStackTrace();
         }
         return result;
     }

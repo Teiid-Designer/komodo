@@ -21,9 +21,11 @@
  */
 package org.komodo.rest.relational.response;
 
+import javax.ws.rs.core.MediaType;
+import org.komodo.rest.KRestEntity;
 import org.komodo.spi.runtime.DataSourceDriver;
 
-public class RestDataSourceDriver {
+public class RestDataSourceDriver implements KRestEntity {
 
     public static final String NAME_LABEL = "name";
 
@@ -56,5 +58,15 @@ public class RestDataSourceDriver {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    @Override
+    public Object getXml() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean supports(MediaType mediaType) {
+        return MediaType.APPLICATION_JSON_TYPE.equals(mediaType);
     }
 }

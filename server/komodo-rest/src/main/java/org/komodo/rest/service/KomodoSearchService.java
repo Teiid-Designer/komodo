@@ -118,7 +118,7 @@ public final class KomodoSearchService extends KomodoService {
         final String ALIAS = "nt";  //$NON-NLS-1$
         ObjectSearcher os = new ObjectSearcher(this.repo);
 
-        os.addFromType(convertType(type), ALIAS);
+        os.setFromType(convertType(type), ALIAS);
 
         LogicalOperator operator = null;
         if (parent != null) {
@@ -174,20 +174,11 @@ public final class KomodoSearchService extends KomodoService {
         if (searchName == null && type == null && path == null &&
             parent == null && ancestor == null && contains == null && objectName == null) {
 
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
         }
 
         if (parent != null && ancestor != null) {
-
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR);
         }
 
         return Response.ok().build();
@@ -249,6 +240,10 @@ public final class KomodoSearchService extends KomodoService {
                                                 required = false)
                              @QueryParam(value = SEARCH_OBJECT_NAME_PARAMETER) String objectName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -260,7 +255,7 @@ public final class KomodoSearchService extends KomodoService {
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction("objectFromWorkspace", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "objectFromWorkspace", true); //$NON-NLS-1$
 
             ObjectSearcher os;
             if (searchName != null) {
@@ -292,7 +287,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
         }
     }
 
@@ -330,6 +325,10 @@ public final class KomodoSearchService extends KomodoService {
                              final @Context UriInfo uriInfo,
                              final String searchAttributes) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -343,17 +342,13 @@ public final class KomodoSearchService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.SEARCH_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.SEARCH_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction("objectFromWorkspace", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "objectFromWorkspace", true); //$NON-NLS-1$
 
             ObjectSearcher os;
             if (sa.getSearchName() != null) {
@@ -396,7 +391,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
         }
     }
 
@@ -422,13 +417,17 @@ public final class KomodoSearchService extends KomodoService {
     public Response getSavedSearches( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction("searchesFromWorkspace", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "searchesFromWorkspace", true); //$NON-NLS-1$
 
             String searchesGroupPath = repo.komodoSearches(uow).getAbsolutePath();
             KomodoObject searchesGroup = repo.getFromWorkspace(uow, searchesGroupPath);
@@ -466,7 +465,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_WKSP_SEARCHES_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, SEARCH_SERVICE_WKSP_SEARCHES_ERROR);
         }
     }
 
@@ -495,6 +494,10 @@ public final class KomodoSearchService extends KomodoService {
                              final @Context UriInfo uriInfo,
                              final String searchAttributes) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -511,7 +514,7 @@ public final class KomodoSearchService extends KomodoService {
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction("writeSearchToWorkspace", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "writeSearchToWorkspace", false); //$NON-NLS-1$
             os.write(uow, sa.getSearchName());
 
             return commit(uow, mediaTypes, sa);
@@ -524,7 +527,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_SAVE_SEARCH_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, SEARCH_SERVICE_SAVE_SEARCH_ERROR);
         }
     }
 
@@ -550,11 +553,16 @@ public final class KomodoSearchService extends KomodoService {
     public Response deleteSavedSearch( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
                              final @PathParam( "searchName" ) String searchName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction("removeSearchFromWorkspace", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "removeSearchFromWorkspace", false); //$NON-NLS-1$
 
             String searchesGroupPath = repo.komodoSearches(uow).getAbsolutePath();
             KomodoObject searchesGroup = repo.getFromWorkspace(uow, searchesGroupPath);
@@ -581,7 +589,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_DELETE_SEARCH_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, SEARCH_SERVICE_DELETE_SEARCH_ERROR);
         }
     }
 }

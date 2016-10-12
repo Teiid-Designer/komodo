@@ -60,7 +60,7 @@ public final class CreateSchemaCommand extends WorkspaceShellCommand {
         try {
             final String schemaName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingSchemaName ) );
 
-            final WorkspaceManager mgr = getWorkspaceManager();
+            final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
             
             // Do not allow create if object with this name already exists
             if(mgr.hasChild(getTransaction(), schemaName, KomodoLexicon.Schema.NODE_TYPE)) {

@@ -42,7 +42,7 @@ public final class UnsetDatasourcePropertyCommandTest extends AbstractCommandTes
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] datasources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, datasources.length);
@@ -60,7 +60,7 @@ public final class UnsetDatasourcePropertyCommandTest extends AbstractCommandTes
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Datasource[] sources = wkspMgr.findDatasources( getTransaction() );
 
         assertThat( sources.length, is( 1 ) );
@@ -76,7 +76,7 @@ public final class UnsetDatasourcePropertyCommandTest extends AbstractCommandTes
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Datasource[] sources = wkspMgr.findDatasources( getTransaction() );
 
         assertThat( sources.length, is( 1 ) );

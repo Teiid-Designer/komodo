@@ -21,14 +21,18 @@
  */
 package org.komodo.relational.dataservice;
 
-import org.komodo.core.KomodoLexicon;
+import java.util.Calendar;
+
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.driver.Driver;
+import org.komodo.relational.resource.DdlFile;
+import org.komodo.relational.resource.Driver;
+import org.komodo.relational.resource.ResourceFile;
+import org.komodo.relational.resource.UdfFile;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -40,11 +44,12 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A model of a dataservice instance
  */
-public interface Dataservice extends Exportable, RelationalObject {
+public interface Dataservice extends Exportable, RelationalObject, VdbEntryContainer {
 
     /**
      * The type identifier.
@@ -59,13 +64,13 @@ public interface Dataservice extends Exportable, RelationalObject {
     /**
      * An empty array of Dataservices.
      */
-    Dataservice[] NO_DATASERVICES = new Dataservice[0];
-    
+    Dataservice[] NO_DATASERVICES = new Dataservice[ 0 ];
+
     /**
      * The resolver of a {@link Dataservice}.
      */
     public static final TypeResolver< Dataservice > RESOLVER = new TypeResolver< Dataservice >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -79,10 +84,10 @@ public interface Dataservice extends Exportable, RelationalObject {
                                    final KomodoObject parent,
                                    final String id,
                                    final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createDataservice( transaction, parent, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -92,7 +97,7 @@ public interface Dataservice extends Exportable, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -102,7 +107,7 @@ public interface Dataservice extends Exportable, RelationalObject {
         public Class< DataserviceImpl > owningClass() {
             return DataserviceImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -112,9 +117,12 @@ public interface Dataservice extends Exportable, RelationalObject {
         @Override
         public boolean resolvable( final UnitOfWork transaction,
                                    final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.DataService.NODE_TYPE );
+            return ObjectImpl.validateType( transaction,
+                                            kobject.getRepository(),
+                                            kobject,
+                                            DataVirtLexicon.DataService.NODE_TYPE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -129,8 +137,389 @@ public interface Dataservice extends Exportable, RelationalObject {
             }
             return new DataserviceImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param vdb
+     *        the VDB being added (cannot be <code>null</code>)
+     * @return the VDB entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    VdbEntry addVdb( final UnitOfWork transaction,
+                     final Vdb vdb ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param vdbEntryName
+     *        the name of the VDB entry to create (cannot be empty)
+     * @return the VDB entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    VdbEntry addVdbEntry( final UnitOfWork transaction,
+                          final String vdbEntryName ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param serviceVdb
+     *        the service VDB being set (can be <code>null</code> when deleting current value)
+     * @return the service VDB being replaced or <code>null</code> if one is not being replaced
+     * @throws KException
+     *         if an error occurs
+     */
+    Vdb setServiceVdb( final UnitOfWork uow,
+                       final Vdb serviceVdb ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the service VDB (may be <code>null</code> if not defined)
+     * @throws KException
+     *         if an error occurs
+     */
+    Vdb getServiceVdb( final UnitOfWork uow ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the service VDB entry (may be <code>null</code> if not defined)
+     * @throws KException
+     *         if an error occurs
+     */
+    ServiceVdbEntry getServiceVdbEntry( final UnitOfWork uow ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the name of the dataservice view (may be <code>null</code> if not found)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getServiceViewName( UnitOfWork uow ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the name of the dataservice view model (may be <code>null</code> if not found)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getServiceViewModelName( UnitOfWork uow ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the driver entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    DriverEntry[] getDriverEntries( final UnitOfWork transaction,
+                                    final String... namePatterns ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the paths of the driver files (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getDriverPlan( UnitOfWork uow ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the driver files referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Driver[] getDrivers( final UnitOfWork transaction,
+                         final String... namePatterns ) throws KException;
+
+    /**
+     * This does not include the service VDB.
+     *
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the paths of the VDB resources referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getVdbPlan( UnitOfWork uow ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param teiid
+     *        the Teiid instance
+     * @return the deployment status of this data service to the given teiid
+     */
+    DeployStatus deploy( UnitOfWork uow,
+                         Teiid teiid );
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param connection
+     *        the connection being added to the data service (cannot be <code>null</code> or empty)
+     * @return the connection entry (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    ConnectionEntry addConnection( final UnitOfWork transaction,
+                                   final Datasource connection ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param connectionEntryName
+     *        the name of the connection entry to create (cannot be <code>null</code> or empty)
+     * @return the connection entry (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    ConnectionEntry addConnectionEntry( final UnitOfWork transaction,
+                                        final String connectionEntryName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param ddlEntryName
+     *        the name of the DDL entry to create (cannot be empty)
+     * @return the DDL entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    DdlEntry addDdlEntry( final UnitOfWork transaction,
+                          final String ddlEntryName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param ddlFile
+     *        the DDL file being added to the data service (cannot be <code>null</code>)
+     * @return the DDL entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    DdlEntry addDdlFile( final UnitOfWork transaction,
+                         final DdlFile ddlFile ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param driverFile
+     *        the driver file being added to the data service (cannot be <code>null</code>)
+     * @return the driver entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    DriverEntry addDriverFile( final UnitOfWork transaction,
+                               final Driver driverFile ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param driverEntryName
+     *        the name of the driver entry to create (cannot be empty)
+     * @return the driver entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    DriverEntry addDriverEntry( final UnitOfWork transaction,
+                                final String driverEntryName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param resourceFile
+     *        the resource file being added to the data service (cannot be <code>null</code>)
+     * @return the resource entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    ResourceEntry addResourceFile( final UnitOfWork transaction,
+                                   final ResourceFile resourceFile ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param resourceEntryName
+     *        the name of the resource entry to create (cannot be empty)
+     * @return the resource entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    ResourceEntry addResourceEntry( final UnitOfWork transaction,
+                                    final String resourceEntryName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param udfEntryName
+     *        the name of the UDF entry to create (cannot be empty)
+     * @return the UDF entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    UdfEntry addUdfEntry( final UnitOfWork transaction,
+                          final String udfEntryName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param udfFile
+     *        the UDF being added to the data service (cannot be empty)
+     * @return the UDF entry that was created (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    UdfEntry addUdfFile( final UnitOfWork transaction,
+                         final UdfFile udfFile ) throws KException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    DataServiceEntry< ? > getChild( final UnitOfWork transaction,
+                                    final String name ) throws KException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.String)
+     */
+    @Override
+    DataServiceEntry< ? > getChild( final UnitOfWork transaction,
+                                    final String name,
+                                    final String typeName ) throws KException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
+     */
+    @Override
+    DataServiceEntry< ? >[] getChildren( final UnitOfWork transaction,
+                                         final String... namePatterns ) throws KException;
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String[])
+     */
+    @Override
+    DataServiceEntry< ? >[] getChildrenOfType( final UnitOfWork transaction,
+                                               final String type,
+                                               final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the connection entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    ConnectionEntry[] getConnectionEntries( final UnitOfWork transaction,
+                                            final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the connections referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Datasource[] getConnections( final UnitOfWork transaction,
+                                 final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the paths of the connections referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getConnectionPlan( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the DDL entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    DdlEntry[] getDdlEntries( final UnitOfWork transaction,
+                              final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the DDL files referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    DdlFile[] getDdlFiles( final UnitOfWork transaction,
+                           final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the paths of the DDL file resources referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getDdlPlan( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -144,6 +533,124 @@ public interface Dataservice extends Exportable, RelationalObject {
 
     /**
      * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the last time the manifest was modified (can be <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    Calendar getLastModified( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the name of the user who last modified the data service (can be <code>null</code> or empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String getModifiedBy( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the paths of the miscellaneous resources referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getResourcePlan( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the resource entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    ResourceEntry[] getResourceEntries( final UnitOfWork transaction,
+                                        final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the resource files referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    ResourceFile[] getResourceFiles( final UnitOfWork transaction,
+                                     final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the paths of the UDF resources referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getUdfPlan( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the UDF entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    UdfEntry[] getUdfEntries( final UnitOfWork transaction,
+                              final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the UDF files referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    UdfFile[] getUdfFiles( final UnitOfWork transaction,
+                           final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the VDB entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    VdbEntry[] getVdbEntries( final UnitOfWork transaction,
+                              final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the VDBs referenced by the entries (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Vdb[] getVdbs( final UnitOfWork transaction,
+                   final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newDescription
      *        the new value of the <code>description</code> property
@@ -154,217 +661,25 @@ public interface Dataservice extends Exportable, RelationalObject {
                          final String newDescription ) throws KException;
 
     /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param namePatterns
-     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
-     * @return the VDBs (never <code>null</code> but can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    Vdb[] getVdbs( final UnitOfWork uow,
-                   final String... namePatterns ) throws KException;
-
-    /**
      * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param vdbName
-     *        the name of the VDB to create (cannot be empty)
-     * @param externalFilePath
-     *        the VDB file path on the local file system (cannot be empty)
-     * @param serviceVdb
-     *        indicator as to whether this is the service vdb or not.
-     * @return the VDB (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Vdb addVdb(final UnitOfWork transaction,
-               final String vdbName,
-               final String externalFilePath,
-               boolean serviceVdb) throws KException;
-
-    /**
-     * Convenience method for adding a Vdb and setting the service vdb name to
-     * the newly added Vdb's name
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param vdbName
-     *        the name of the VDB to create (cannot be empty)
-     * @param externalFilePath
-     *        the VDB file path on the local file system (cannot be empty)
-     * @return the VDB (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Vdb addServiceVdb(final UnitOfWork transaction,
-                      final String vdbName,
-                      final String externalFilePath) throws KException;
-
-    /**
-     * Convenience method for adding a Vdb that is NOT the service vdb
-     *
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param vdbName
-     *        the name of the VDB to create (cannot be empty)
-     * @param externalFilePath
-     *        the VDB file path on the local file system (cannot be empty)
-     * @return the VDB (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Vdb addVdb( final UnitOfWork uow,
-                final String vdbName,
-                final String externalFilePath ) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the name of the designated service VDB (should not be null)
-     *
-     * @throws KException if an error occurs
-     */
-    String getServiceVdbName(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the version of the dataservice vdb
-     * @throws KException if an error occurs
-     */
-    int getServiceVdbVersion(UnitOfWork uow) throws KException;
-    
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the service VDB (may be <code>null</code> if not defined)
-     * @throws KException
-     *         if an error occurs
-     */
-    Vdb getServiceVdb( final UnitOfWork uow ) throws KException;
-
-    /**
-     * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param vdbName
-     *        the new value of the <code>service vdb name</code> property
+     * @param newLastModified
+     *        the new value of the <code>last modified date</code> property
      * @throws KException
      *         if an error occurs
      */
-    void setServiceVdbName(UnitOfWork uow, String vdbName) throws KException;
+    void setLastModified( final UnitOfWork transaction,
+                          final Calendar newLastModified ) throws KException;
 
     /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the name of the dataservice view (may be <code>null</code> if not found)
-     * @throws KException if an error occurs
-     */
-    String getServiceViewName(UnitOfWork uow) throws KException;
-    
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the name of the dataservice view model (may be <code>null</code> if not found)
-     * @throws KException if an error occurs
-     */
-    String getServiceViewModelName(UnitOfWork uow) throws KException;
-    
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param namePatterns
-     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
-     * @return the Data sources (never <code>null</code> but can be empty)
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newModifiedBy
+     *        the new value of the <code>modified by</code> property
      * @throws KException
      *         if an error occurs
      */
-    Datasource[] getDataSources( final UnitOfWork uow, final String... namePatterns ) throws KException;
+    void setModifiedBy( final UnitOfWork transaction,
+                        final String newModifiedBy ) throws KException;
 
-    /**
-     * 
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param sourceName
-     *        the name of the data source to create (cannot be empty)
-     * @return the Datasource (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Datasource addDatasource( final UnitOfWork uow, final String sourceName)  throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param namePatterns
-     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
-     * @return the Drivers (never <code>null</code> but can be empty)
-     * @throws KException
-     *         if an error occurs
-     */
-    Driver[] getDrivers( final UnitOfWork uow, final String... namePatterns) throws KException;
-
-    /**
-     *
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param driverName
-     *        the name of the driver being created (cannot be empty)
-     * @param content 
-     *        the driver content
-     * @return the Driver (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Driver addDriver( final UnitOfWork uow, final String driverName, final byte[] content) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the deployment plan for the drivers
-     * @throws KException if an error occurs
-     */
-    String[] getDriverPlan(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the deployment plan for the data sources
-     * @throws KException if an error occurs
-     */
-    String[] getDataSourcePlan(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return the deployment plan for the vdbs
-     * @throws KException if an error occurs
-     */
-    String[] getVdbPlan(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param teiid 
-     *        the Teiid instance
-     * @return the deployment status of this data service to the given teiid
-     */
-    DeployStatus deploy(UnitOfWork uow, Teiid teiid);
 }

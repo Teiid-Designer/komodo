@@ -95,18 +95,18 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
             final Repository.UnitOfWork uow = getTransaction();
 
             // make sure we can overwrite
-            boolean hasVdb = getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            boolean hasVdb = getWorkspaceManager(getTransaction()).hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             if ( hasVdb && !overwrite ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbOverwriteDisabled, fileName, vdbName ), null );
             }
 
             // If overwriting, delete existing vdb first
             if(hasVdb) {
-                final KomodoObject vdbToDelete = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-                getWorkspaceManager().delete(getTransaction(), vdbToDelete);
+                final KomodoObject vdbToDelete = getWorkspaceManager(getTransaction()).getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), vdbToDelete);
             }
             // create VDB
-            final Vdb vdb = getWorkspaceManager().createVdb( uow, null, vdbName, fileName );
+            final Vdb vdb = getWorkspaceManager(getTransaction()).createVdb( uow, null, vdbName, fileName );
             final KomodoObject fileNode = vdb.addChild( uow, JcrLexicon.CONTENT.getString(), null );
             fileNode.setProperty( uow, JcrLexicon.DATA.getString(), content );
 
@@ -167,7 +167,7 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] vdbs = mgr.findVdbs(uow);
         List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
         for(KomodoObject vdb : vdbs) {

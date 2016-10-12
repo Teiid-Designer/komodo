@@ -36,7 +36,7 @@ public final class CreateVdbCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -49,7 +49,7 @@ public final class CreateVdbCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -63,7 +63,7 @@ public final class CreateVdbCommandTest extends AbstractCommandTest {
 
         assertCommandResultOk( result );
 
-        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager mgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Vdb[] vdbs = mgr.findVdbs( getTransaction() );
         assertThat( vdbs[ 0 ].getName( getTransaction() ), is( "PartsVDB" ) );
 

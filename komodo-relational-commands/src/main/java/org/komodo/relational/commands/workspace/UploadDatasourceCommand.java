@@ -21,23 +21,27 @@
  */
 package org.komodo.relational.commands.workspace;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceParser;
-import org.komodo.relational.datasource.internal.DatasourceParser.ParserOption;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.utils.KLog;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.modeshape.jcr.api.JcrConstants;
+import org.teiid.modeshape.sequencer.dataservice.Connection;
+import org.teiid.modeshape.sequencer.dataservice.ConnectionReader;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * Loads a {@link Datasource DS} from a local file.
@@ -81,59 +85,36 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
                 }
             }
 
-            // read file
-            final String content = new String( Files.readAllBytes( Paths.get( fileName ) ) );
+            // Reader validates the XML file and gets the connection name which we need to check for overwriting
+            final Repository.UnitOfWork uow = getTransaction();
+            final File connectionFile = new File(fileName);
+            final ConnectionReader reader = new ConnectionReader();
+            final Connection connection = reader.read( new FileInputStream( connectionFile ) );
+            final boolean hasConnection = getWorkspaceManager(uow).hasChild( uow,
+                                                                          connection.getName(),
+                                                                          DataVirtLexicon.Connection.NODE_TYPE );
 
-            if ( StringUtils.isEmpty( content ) ) {
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceInputFileIsEmpty, fileName ), null );
+            if ( hasConnection && !overwrite ) {
+                return new CommandResultImpl( false,
+                                              I18n.bind( WorkspaceCommandsI18n.datasourceOverwriteDisabled,
+                                                         fileName,
+                                                         connection.getName() ),
+                                              null );
             }
 
-            // Parser validates xml file and obtains dsNames
-            DatasourceParser datasourceParser = new DatasourceParser();
-            
-            File dsXmlFile = new File(fileName);
-            // Validate the data source XML file and get names
-            String[] dsNames = datasourceParser.validate(dsXmlFile);
-            // Collect fatalErrors and Errors
-            List<String> parseErrors = datasourceParser.getFatalErrors();
-            if(parseErrors.isEmpty()) {
-                parseErrors.addAll(datasourceParser.getErrors());
-            }
-            // If any error encountered, log first one and return.
-            if( !parseErrors.isEmpty() ) {
-                KLog.getLogger().error( "Datasource file parsing error encountered : ", parseErrors.get(0) ); //$NON-NLS-1$
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
+            // delete current if necessary
+            if ( hasConnection && overwrite ) {
+                getWorkspaceManager(uow).removeChild( uow, connection.getName() );
             }
 
-            // If any data sources already exist, overwrite must be specified.
-            for( String dsName : dsNames ) {
-                boolean hasSource = getWorkspaceManager().hasChild(getTransaction(), dsName, KomodoLexicon.DataSource.NODE_TYPE);
-                if ( hasSource && !overwrite ) {
-                    return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceOverwriteDisabled, fileName, dsName ), null );
-                }
-            }
+            // upload data source file so that it will be sequenced
+            final Datasource ds = getWorkspaceManager(uow).createDatasource( uow, null, connection.getName() );
+            final KomodoObject fileNode = ds.addChild( uow, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE );
+            final byte[] content = Files.readAllBytes( Paths.get( fileName ) );
+            final ByteArrayInputStream stream = new ByteArrayInputStream( content );
+            fileNode.setProperty( uow, JcrConstants.JCR_DATA, stream );
 
-            EnumSet<ParserOption> options = EnumSet.of(ParserOption.CREATE_REPO_SOURCES);
-            if (overwrite)
-                options.add(ParserOption.REPLACE_REPO_SOURCE);
-
-            // Parse creates the sources in the repo.
-            datasourceParser.parse(getTransaction(),
-                                                       getRepository().komodoWorkspace(getTransaction()),
-                                                       dsXmlFile, options);
-
-            // Check again for parse errors
-            parseErrors = datasourceParser.getFatalErrors();
-            if(parseErrors.isEmpty()) {
-                parseErrors.addAll(datasourceParser.getErrors());
-            }
-            // If any error encountered, log first one and return.
-            if( !parseErrors.isEmpty() ) {
-                KLog.getLogger().error( "Datasource file parsing error encountered : ", parseErrors.get(0) ); //$NON-NLS-1$
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
-            }
-
-            return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourcesUploaded ) );
+            return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceUploaded, connection.getName() ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }

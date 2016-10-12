@@ -21,11 +21,10 @@
  */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.relational.response.RestVdbModelSource;
 
 /**
- * A GSON serializer/deserializer for {@link RestVdb}s.
+ * A GSON serializer/deserializer for {@link RestVdbModelSource}s.
  */
 public final class VdbModelSourceSerializer extends BasicEntitySerializer<RestVdbModelSource> {
 

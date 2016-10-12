@@ -28,15 +28,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.ws.rs.core.UriBuilder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.repository.DescriptorImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
@@ -86,6 +90,7 @@ public final class RestDataSourceTest implements V1Constants {
         repository = Mockito.mock(Repository.class);
         UnitOfWorkListener listener = Matchers.any();
         when(repository.createTransaction(Matchers.anyString(),
+                                                  Matchers.anyString(),
                                                   Matchers.anyBoolean(),
                                                   listener)).thenReturn(uow);
 
@@ -93,7 +98,6 @@ public final class RestDataSourceTest implements V1Constants {
         this.dataSource.setId(NAME);
         this.dataSource.setDriverName(DRIVER_NAME);
         this.dataSource.setJdbc(true);
-        this.dataSource.setPreview(true);
         this.dataSource.setJndiName(JNDI_NAME);
     }
 
@@ -104,7 +108,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
         assertThat( this.dataSource, is( thatDataSource ) );
@@ -124,7 +127,6 @@ public final class RestDataSourceTest implements V1Constants {
         assertThat( empty.getDriverName(), is( nullValue() ) );
         assertThat( empty.getJndiName(), is( nullValue() ) );
         assertThat( empty.isJdbc(), is( false ) );
-        assertThat( empty.isPreview(), is( false ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
         assertThat( empty.getLinks().size(), is( 0 ) );
     }
@@ -136,7 +138,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setProperties( this.dataSource.getProperties() );
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
@@ -150,7 +151,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setProperties( this.dataSource.getProperties() );
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
@@ -165,7 +165,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName());
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
         List<RestProperty> props = new ArrayList<>();
@@ -184,7 +183,6 @@ public final class RestDataSourceTest implements V1Constants {
         thatDataSource.setDriverName(this.dataSource.getDriverName());
         thatDataSource.setJndiName(this.dataSource.getJndiName() + "blah");
         thatDataSource.setJdbc(this.dataSource.isJdbc());
-        thatDataSource.setPreview(this.dataSource.isPreview());
         thatDataSource.setProperties( this.dataSource.getProperties() );
         thatDataSource.setLinks( this.dataSource.getLinks() );
 
@@ -199,15 +197,20 @@ public final class RestDataSourceTest implements V1Constants {
         KomodoType kType = KomodoType.DATASOURCE;
         boolean hasChildren = false;
 
-        Descriptor teiidType = new DescriptorImpl(repository, KomodoLexicon.CachedTeiid.NODE_TYPE);
+        Descriptor cachedTeiidType = new DescriptorImpl(repository, KomodoLexicon.CachedTeiid.NODE_TYPE);
+        Descriptor folderType = new DescriptorImpl(repository, KomodoLexicon.Folder.NODE_TYPE);
         CachedTeiid cachedTeiid = mock(CachedTeiid.class);
+        Folder dataSourceFolder = mock(Folder.class);
         when(cachedTeiid.getName(transaction)).thenReturn(TEIID_SERVER);
-        when(cachedTeiid.getPrimaryType(transaction)).thenReturn(teiidType);
-
+        when(cachedTeiid.getPrimaryType(transaction)).thenReturn(cachedTeiidType);
+        when(dataSourceFolder.getName(transaction)).thenReturn(TEIID_SERVER + FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER);
+        when(dataSourceFolder.getPrimaryType(transaction)).thenReturn(folderType);
+        
         Datasource dataSource = mock(Datasource.class);
         when(dataSource.getName(transaction)).thenReturn(name);
         when(dataSource.getAbsolutePath()).thenReturn(dataPath);
-        when(dataSource.getParent(transaction)).thenReturn(cachedTeiid);
+        when(dataSource.getParent(transaction)).thenReturn(dataSourceFolder);
+        when(dataSourceFolder.getParent(transaction)).thenReturn(cachedTeiid);
         when(dataSource.getTypeIdentifier(transaction)).thenReturn(kType);
         when(dataSource.hasChildren(transaction)).thenReturn(hasChildren);
         when(dataSource.getRepository()).thenReturn(repository);
@@ -228,13 +231,14 @@ public final class RestDataSourceTest implements V1Constants {
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
                                          FORWARD_SLASH + TEIID_SERVER +
-                                         FORWARD_SLASH + DATA_SOURCES_SEGMENT +
+                                         FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER +
                                          FORWARD_SLASH + name, href);
             } else if (LinkType.PARENT.equals(link.getRel())) {
                 linkCounter++;
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
-                                         FORWARD_SLASH + TEIID_SERVER, href);
+                                         FORWARD_SLASH + TEIID_SERVER +
+                                         FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER, href);
             } else if (LinkType.CHILDREN.equals(link.getRel())) {
                 linkCounter++;
             }

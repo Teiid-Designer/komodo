@@ -55,6 +55,9 @@ public class WkspStatusServerManager implements StringConstants {
      * @throws KException if error occurs
      */
     public static void reset() throws KException {
+        if (instance == null)
+            return;
+
         Repository repository = instance.wsStatus.getCurrentContext().getRepository();
         ServerManager.uncacheInstance(repository);
         instance = null;

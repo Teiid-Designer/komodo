@@ -30,6 +30,9 @@ import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.resource.Driver;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
@@ -37,7 +40,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.mockito.Mockito;
-import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class RestDataserviceTest {
@@ -49,7 +52,7 @@ public final class RestDataserviceTest {
     private static final KomodoType kType = KomodoType.DATASERVICE;
     private static final String DESCRIPTION = "my description";
     private static final String SERVICE_VDB_NAME = "serviceVdbName";
-    private static final int SERVICE_VDB_VERSION = 1;
+    private static final String SERVICE_VDB_VERSION = "1";
     private static final String SERVICE_VIEW_MODEL = "serviceViewModel";
     private static final String SERVICE_VIEW = "serviceView";
 
@@ -70,6 +73,8 @@ public final class RestDataserviceTest {
         copy.setServiceVdbVersion(this.dataservice.getServiceVdbVersion());
         copy.setServiceViewModel(this.dataservice.getServiceViewModel());
         copy.setServiceViewName(this.dataservice.getServiceViewName());
+        copy.setDriverTotal(this.dataservice.getDriverTotal());
+        copy.setConnectionTotal(this.dataservice.getConnectionTotal());
 
         return copy;
     }
@@ -82,7 +87,11 @@ public final class RestDataserviceTest {
         Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
 
         Descriptor dataserviceType = Mockito.mock(Descriptor.class);
-        when(dataserviceType.getName()).thenReturn(VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        when(dataserviceType.getName()).thenReturn(DataVirtLexicon.DataService.NODE_TYPE);
+
+        Vdb serviceVdb = Mockito.mock(Vdb.class);
+        Mockito.when(serviceVdb.getName(transaction)).thenReturn("ServiceVdb");
+        Mockito.when(serviceVdb.getVersion(transaction)).thenReturn(1);
 
         Dataservice theDataservice = Mockito.mock(Dataservice.class);
         Mockito.when(theDataservice.getPrimaryType(transaction)).thenReturn(dataserviceType);
@@ -93,6 +102,9 @@ public final class RestDataserviceTest {
         Mockito.when(theDataservice.getPropertyNames(transaction)).thenReturn(new String[0]);
         Mockito.when(theDataservice.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
         Mockito.when(theDataservice.getParent(transaction)).thenReturn(workspace);
+        Mockito.when(theDataservice.getServiceVdb(transaction)).thenReturn(serviceVdb);
+        Mockito.when(theDataservice.getDrivers(transaction)).thenReturn(new Driver[0]);
+        Mockito.when(theDataservice.getConnections(transaction)).thenReturn(new Datasource[0]);
 
         this.dataservice = new RestDataservice(BASE_URI, theDataservice, false, transaction);
         this.dataservice.setId(DATASERVICE_NAME);
@@ -150,35 +162,35 @@ public final class RestDataserviceTest {
         this.dataservice.setId(newName);
         assertEquals(this.dataservice.getId(), newName);
     }
-    
+
     @Test
     public void shouldSetDescription() {
         final String newDescription = "blah";
         this.dataservice.setDescription(newDescription);
         assertEquals(this.dataservice.getDescription(), newDescription);
     }
-    
+
     @Test
     public void shouldSetServiceVdbName() {
         final String newServiceVdb = "blah";
         this.dataservice.setServiceVdbName(newServiceVdb);
         assertEquals(this.dataservice.getServiceVdbName(), newServiceVdb);
     }
-    
+
     @Test
     public void shouldSetServiceVdbVersion() {
-        final int newServiceVdbVersion = 2;
+        final String newServiceVdbVersion = "2";
         this.dataservice.setServiceVdbVersion(newServiceVdbVersion);
         assertEquals(this.dataservice.getServiceVdbVersion(), newServiceVdbVersion);
     }
-    
+
     @Test
     public void shouldSetServiceViewModel() {
         final String newServiceViewModel = "blah";
         this.dataservice.setServiceViewModel(newServiceViewModel);
         assertEquals(this.dataservice.getServiceViewModel(), newServiceViewModel);
     }
-    
+
     @Test
     public void shouldSetServiceView() {
         final String newServiceView = "blah";

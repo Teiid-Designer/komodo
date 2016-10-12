@@ -117,6 +117,9 @@
 		<!-- PLUGIN BUG: Test dependencies not correctly checked -->
 		<managed-deps.checkProfiles>false</managed-deps.checkProfiles>
 
+		<!-- The version of jgit -->
+		<version.jgit>[4.3.0,4.4.0)</version.jgit>
+
 		<!-- The default version of teiid targetted for development -->
 		<version.teiid.default>8.12.4</version.teiid.default>
 		<!--  The version of jboss.as to use with testing -->

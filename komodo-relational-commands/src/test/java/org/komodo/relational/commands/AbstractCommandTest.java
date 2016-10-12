@@ -105,7 +105,7 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
         final String[] commands = { "workspace" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
+        assertContextIs( RepositoryImpl.komodoWorkspacePath(getTransaction()));
     }
     
     @After

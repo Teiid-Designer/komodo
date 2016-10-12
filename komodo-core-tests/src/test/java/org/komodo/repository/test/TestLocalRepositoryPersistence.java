@@ -28,13 +28,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +60,7 @@ import org.komodo.utils.FileUtils;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestLocalRepositoryPersistence extends AbstractLoggingTest implements Sequencing {
@@ -96,8 +100,15 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
             FileUtils.removeDirectoryAndChildren(testDb);
     }
 
-    private void initLocalRepository(Class<?> loaderClass, String configFile) throws Exception {
+    private void checkRepoObserverErrors() throws Exception {
+        Throwable startupError = _repoObserver.getError();
+        if (startupError != null) {
+            startupError.printStackTrace();
+            fail("Repository error occurred on startup: " + startupError.getMessage());
+        }
+    }
 
+    private void initLocalRepository(Class<?> loaderClass, String configFile) throws Exception {
         URL configUrl = loaderClass.getResource(configFile);
         assertNotNull(configUrl);
 
@@ -115,10 +126,13 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         final RepositoryClientEvent event = RepositoryClientEvent.createStartedEvent(client);
         _repo.notify(event);
 
-        // Wait for the starting of the repository or timeout of 5 minutes
-        if (!_repoObserver.getLatch().await(5, TimeUnit.MINUTES)) {
-            throw new RuntimeException("Local repository did not start");
+        // Wait for the starting of the repository or timeout of 1 minute
+        if (!_repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
+            checkRepoObserverErrors();
+            fail("Test timed-out waiting for local repository to start");
         }
+
+        checkRepoObserverErrors();
     }
 
     private void initLocalRepository(String configFile) throws Exception {
@@ -134,21 +148,20 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
         assertNotNull(_repoObserver);
 
-        if (State.REACHABLE.equals(_repo.getState())) {
-            _repoObserver.resetLatch();
+        _repoObserver.resetLatch();
 
-            RepositoryClient client = mock(RepositoryClient.class);
-            RepositoryClientEvent event = RepositoryClientEvent.createShuttingDownEvent(client);
-            _repo.notify(event);
+        RepositoryClient client = mock(RepositoryClient.class);
+        RepositoryClientEvent event = RepositoryClientEvent.createShuttingDownEvent(client);
+        _repo.notify(event);
+
+        try {
+            if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
+                fail("Local repository was not stopped");
+        } finally {
+            _repo.removeObserver(_repoObserver);
+            _repoObserver = null;
+            _repo = null;
         }
-
-        if (! _repoObserver.getLatch().await(1, TimeUnit.MINUTES))
-            throw new RuntimeException("Local repository was not stopped");
-
-        _repo.removeObserver(_repoObserver);
-
-        _repoObserver = null;
-        _repo = null;
     }
 
     @Before
@@ -178,7 +191,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = _repo.createTransaction("test-persistence-workspace", false, callback);
+        UnitOfWork uow = _repo.createTransaction(TEST_USER, "test-persistence-workspace", false, callback);
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
@@ -196,10 +209,10 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertFalse(callback.hasError());
 
         // Find the workspace to confirm what we expect to happen
-        uow = _repo.createTransaction("test-search-type", true, null);
+        uow = _repo.createTransaction(RepositoryImpl.SYSTEM_USER, "test-search-type", true, null);
         List<KomodoObject> results = _repo.searchByType(uow, KomodoLexicon.Workspace.NODE_TYPE);
         assertEquals(1, results.size());
-        assertEquals(RepositoryImpl.WORKSPACE_ROOT, results.iterator().next().getAbsolutePath());
+        assertEquals(RepositoryImpl.komodoWorkspacePath(uow), results.iterator().next().getAbsolutePath());
         uow.commit();
 
         // Shutdown the repository
@@ -210,13 +223,13 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         // Find the root and workspace to confirm repo was persisted
-        uow = _repo.createTransaction("test-search-type", true, null);
+        uow = _repo.createTransaction(RepositoryImpl.SYSTEM_USER, "test-search-type", true, null);
         results = _repo.searchByType(uow, KomodoLexicon.Komodo.NODE_TYPE);
         assertEquals(1, results.size());
 
         results = _repo.searchByType(uow, KomodoLexicon.Workspace.NODE_TYPE);
         assertEquals(1, results.size());
-        assertEquals(RepositoryImpl.WORKSPACE_ROOT, results.iterator().next().getAbsolutePath());
+        assertEquals(RepositoryImpl.komodoWorkspacePath(uow), results.iterator().next().getAbsolutePath());
         uow.commit();
     }
 
@@ -242,7 +255,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = _repo.createTransaction("test-persistence-objects", false, callback);
+        UnitOfWork uow = _repo.createTransaction(TEST_USER, "test-persistence-objects", false, callback);
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
@@ -265,7 +278,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertFalse(callback.hasError());
 
         // Find the objects to confirm what we expect to happen
-        uow = _repo.createTransaction("test-search-type", true, null);
+        uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
         List<KomodoObject> results = _repo.searchByType(uow, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(testObjectCount, results.size());
         uow.commit();
@@ -278,7 +291,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         // Find the test nodes to confirm repo was persisted
-        uow = _repo.createTransaction("test-search-type", true, null);
+        uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
         results = _repo.searchByType(uow, KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(testObjectCount, results.size());
 
@@ -315,7 +328,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         initLocalRepository(LocalRepository.class, PRODUCTION_REPOSITORY_CONFIG);
         assertNotNull(_repo);
 
-        UnitOfWork uow = _repo.createTransaction("test-search-type", true, null);
+        UnitOfWork uow = _repo.createTransaction(RepositoryImpl.SYSTEM_USER, "test-search-type", true, null);
         List<KomodoObject> results = _repo.searchByType(uow, JcrConstants.NT_UNSTRUCTURED);
         assertTrue(results.size() > 0);
 
@@ -330,7 +343,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         		foundRoot = true;
         	else if (RepositoryImpl.LIBRARY_ROOT.equals(path))
         		foundLibrary = true;
-        	else if(RepositoryImpl.WORKSPACE_ROOT.equals(path))
+        	else if(RepositoryImpl.komodoWorkspacePath(null).equals(path))
         		foundWksp = true;
         }
 
@@ -340,7 +353,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
     }
 
     private KomodoObject createMySqlDriver(UnitOfWork uow, KomodoObject parent, String name) throws Exception {
-        KomodoObject driver = parent.addChild(uow, name, KomodoLexicon.Driver.NODE_TYPE);
+        KomodoObject driver = parent.addChild(uow, name, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         InputStream contentStream = TestUtilities.mySqlDriver();
         assertNotNull(contentStream);
         byte[] content = FileUtils.write(contentStream);
@@ -375,7 +388,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = _repo.createTransaction("test-persistence-binary-values", false, callback);
+        UnitOfWork uow = _repo.createTransaction(TEST_USER, "test-persistence-binary-values", false, callback);
 
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(uow);
@@ -400,8 +413,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertFalse(callback.hasError());
 
         // Find the objects to confirm what we expect to happen
-        uow = _repo.createTransaction("test-search-type", true, null);
-        List<KomodoObject> results = _repo.searchByType(uow, KomodoLexicon.Driver.NODE_TYPE);
+        uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
+        List<KomodoObject> results = _repo.searchByType(uow, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         assertEquals(testObjectCount, results.size());
         uow.commit();
 
@@ -413,8 +426,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         // Find the test nodes to confirm repo was persisted
-        uow = _repo.createTransaction("test-search-type", true, null);
-        results = _repo.searchByType(uow, KomodoLexicon.Driver.NODE_TYPE);
+        uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
+        results = _repo.searchByType(uow, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         assertEquals(testObjectCount, results.size());
 
         //

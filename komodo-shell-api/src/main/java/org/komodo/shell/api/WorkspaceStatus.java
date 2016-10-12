@@ -460,4 +460,9 @@ public interface WorkspaceStatus extends StringConstants {
      */
     boolean isAutoCommit();
 
+    /**
+     * @return the label provider for this workspace status
+     */
+    KomodoObjectLabelProvider getLabelProvider();
+
 }

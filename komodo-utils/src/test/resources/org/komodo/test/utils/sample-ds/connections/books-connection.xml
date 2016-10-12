@@ -1,0 +1,8 @@
+ <jdbc-connection name="booksConnection">
+     <jndi-name>java:/jdbcSource</jndi-name>
+     <driver-name>books-driver-1.jar</driver-name>
+     <property name="prop1">one</property>
+     <property name="prop2">two</property>
+     <property name="prop3">three</property>
+     <property name="prop4">four</property>
+ </jdbc-connection>

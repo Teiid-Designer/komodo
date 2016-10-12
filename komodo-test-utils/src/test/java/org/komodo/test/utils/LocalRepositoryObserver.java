@@ -33,6 +33,8 @@ public class LocalRepositoryObserver implements RepositoryObserver {
 
     private CountDownLatch latch;
 
+    private Throwable error;
+
     /**
      * Constructor
      */
@@ -54,8 +56,18 @@ public class LocalRepositoryObserver implements RepositoryObserver {
         return this.latch;
     }
 
+    public Throwable getError() {
+        return error;
+    }
+
     @Override
     public void eventOccurred() {
+        latch.countDown();
+    }
+
+    @Override
+    public void errorOccurred(Throwable e) {
+        error = e;
         latch.countDown();
     }
 }

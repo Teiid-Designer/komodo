@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertEquals;
+import java.io.File;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.datasource.Datasource;
@@ -28,16 +29,15 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class UploadDatasourceCommandTest extends AbstractCommandTest {
 
-    private static final String UPLOAD_SOURCE = UploadDatasourceCommandTest.class.getClassLoader()
-    																						.getResource("dashboardDS.xml").getFile();
+    private static final File UPLOAD_SOURCE = getResourceFile(UploadDatasourceCommandTest.class, "dashboardDS.xml");
 
     @Test
     public void shouldUploadDatasource() throws Exception {
-        final String[] commands = { "upload-datasource " + UPLOAD_SOURCE };
+        final String[] commands = { "upload-datasource " + UPLOAD_SOURCE.getAbsolutePath() };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] sources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, sources.length);
@@ -47,18 +47,18 @@ public final class UploadDatasourceCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldNotUploadDatasourceIfExists() throws Exception {
         final String[] commands = { "create-datasource DashboardDS ",
-                                    "upload-datasource " + UPLOAD_SOURCE };
+                                    "upload-datasource " + UPLOAD_SOURCE.getAbsolutePath() };
         execute( commands );
     }
     
     @Test
     public void shouldUploadDatasourceIfExistsWithOverwrite() throws Exception {
         final String[] commands = { "create-datasource DashboardDS ",
-                                    "upload-datasource " + UPLOAD_SOURCE + " -o" };
+                                    "upload-datasource " + UPLOAD_SOURCE.getAbsolutePath() + " -o" };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] sources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, sources.length);

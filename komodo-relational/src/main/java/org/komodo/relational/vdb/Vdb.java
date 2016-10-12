@@ -22,10 +22,12 @@
 package org.komodo.relational.vdb;
 
 import java.util.Properties;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
@@ -103,7 +105,7 @@ public interface Vdb extends Exportable, RelationalObject {
                            final RelationalProperties properties ) throws KException {
             final Object origFilePathValue = properties.getValue( VdbLexicon.Vdb.ORIGINAL_FILE );
             final String origFilePath = origFilePathValue == null ? null : origFilePathValue.toString();
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createVdb( transaction, parent, id, origFilePath );
         }
 
@@ -594,5 +596,15 @@ public interface Vdb extends Exportable, RelationalObject {
      */
     void setVersion( final UnitOfWork transaction,
                      final int newVersion ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param teiid 
+     *        the Teiid instance
+     * @return the deployment status of this vdb to the given teiid
+     */
+    DeployStatus deploy(UnitOfWork uow, Teiid teiid);
 
 }

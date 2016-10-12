@@ -159,7 +159,7 @@ public class ServerUtils {
         Collection< String > vdbNames = teiidInstance.getVdbNames();
         if(vdbNames.isEmpty()) return Collections.emptyList();
         
-        return new ArrayList(vdbNames);
+        return new ArrayList<>(vdbNames);
     }
 
     /**

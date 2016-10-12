@@ -54,7 +54,7 @@ public abstract class DataTypeResultSetCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );
         assertThat( vdbs.length, is( 1 ) );
 

@@ -31,4 +31,10 @@ public interface RepositoryObserver {
      */
     void eventOccurred();
 
+    /**
+     * Repository error has occurred
+     *
+     * @param e the error
+     */
+    void errorOccurred(Throwable e);
 }

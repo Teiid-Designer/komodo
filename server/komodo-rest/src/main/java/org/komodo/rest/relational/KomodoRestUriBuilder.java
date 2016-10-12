@@ -94,9 +94,24 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         SOURCE_NAME,
 
         /**
+         * Name of the table
+         */
+        TABLE_NAME,
+
+        /**
+         * Name of the column
+         */
+        COLUMN_NAME,
+
+        /**
          * Name of the translator
          */
         TRANSLATOR_NAME,
+
+        /**
+         * Indicates if adding Translators segment for VDB translators
+         */
+        ADD_TRANSLATORS_SEGMENT,
 
         /**
          * Name of the data source
@@ -140,12 +155,22 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         this.baseUri = baseUri;
     }
 
-    private boolean isCachedTeiid(UnitOfWork uow, KomodoObject kObject) throws KException {
+    private boolean isCachedTeiidFolder(UnitOfWork uow, KomodoObject kObject) throws KException {
         if (kObject == null)
             return false;
 
         Descriptor type = kObject.getPrimaryType(uow);
-        return type != null && KomodoLexicon.CachedTeiid.NODE_TYPE.equals(type.getName());
+        if (type == null) return false;
+
+        // Check this type is a folder, then check parent is CachedTeiid
+        if(KomodoLexicon.Folder.NODE_TYPE.equals(type.getName())) {
+            KomodoObject parentObj = kObject.getParent(uow);
+            if(parentObj != null) {
+                Descriptor parentType = parentObj.getPrimaryType(uow);
+                return parentType!=null && KomodoLexicon.CachedTeiid.NODE_TYPE.equals(parentType.getName());
+            }
+        }
+        return false;
     }
 
     private boolean isVdb(UnitOfWork uow, KomodoObject kObject) throws KException {
@@ -231,6 +256,14 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         return setting(settings, SettingNames.SOURCE_NAME);
     }
 
+    private String tableName(final Properties settings) {
+        return setting(settings, SettingNames.TABLE_NAME);
+    }
+
+    private String columnName(final Properties settings) {
+        return setting(settings, SettingNames.COLUMN_NAME);
+    }
+
     private String dataRoleId(final Properties settings) {
         return setting(settings, SettingNames.DATA_ROLE_ID);
     }
@@ -275,6 +308,15 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         return UriBuilder.fromUri(this.baseUri)
                                    .path(WORKSPACE_SEGMENT)
                                    .path(DATA_SOURCES_SEGMENT).build();
+    }
+
+    /**
+     * @return the URI to use when requesting a collection of Drivers in the workspace (never <code>null</code>)
+     */
+    public URI workspaceDriversUri() {
+        return UriBuilder.fromUri(this.baseUri)
+                                   .path(WORKSPACE_SEGMENT)
+                                   .path(DRIVERS_SEGMENT).build();
     }
 
     /**
@@ -324,7 +366,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
-     * @return the URI to use when requesting a collection of VDBs in the workspace (never <code>null</code>)
+     * @return the URI to use when requesting a collection of VDBs in a teiid cache (never <code>null</code>)
      */
     public URI cacheTeiidVdbsUri(String teiidId) {
         return UriBuilder.fromUri(cachedTeiidUri(teiidId))
@@ -384,13 +426,12 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI vdbParentUri(Vdb vdb, UnitOfWork uow) throws KException {
         KomodoObject parent = vdb.getParent(uow);
-        URI parentUri;
-        if (isCachedTeiid(uow, parent))
-            parentUri = cacheTeiidVdbsUri(parent.getName(uow));
-        else
-            parentUri = workspaceVdbsUri();
+        if (isCachedTeiidFolder(uow, parent)) {
+            KomodoObject cachedTeiid = parent.getParent(uow);
+            return cacheTeiidVdbsUri(cachedTeiid.getName(uow));
+        }
 
-        return parentUri;
+        return workspaceVdbsUri();
     }
 
     /**
@@ -518,6 +559,78 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param settings
+     *        configuration settings for this uri
+     * @return the VDB model table URI for the specified VDB Model (never <code>null</code>)
+     */
+    public URI vdbModelTableUri(LinkType linkType, final Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+        URI vdbBaseUri = vdbParentUri(settings);
+        String vdbName = vdbName(settings);
+        URI modelUri = vdbChildUri(vdbBaseUri, vdbName, LinkType.MODELS, modelName(settings));
+
+        switch (linkType) {
+            case SELF:
+                String tableName = tableName(settings);
+                result = UriBuilder.fromUri(modelUri).path(LinkType.TABLES.uriName()).path(tableName).build();
+                break;
+            case PARENT:
+                result = modelUri;
+                break;
+            case REFERENCE:
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param settings
+     *        configuration settings for this uri
+     * @return the VDB model table URI for the specified VDB Model (never <code>null</code>)
+     */
+    public URI vdbModelTableColumnUri(LinkType linkType, final Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+        URI vdbBaseUri = vdbParentUri(settings);
+        String vdbName = vdbName(settings);
+        String tableName = tableName(settings);
+        URI modelUri = vdbChildUri(vdbBaseUri, vdbName, LinkType.MODELS, modelName(settings));
+        
+        switch (linkType) {
+            case SELF:
+                String columnName = columnName(settings);
+                result = UriBuilder.fromUri(modelUri)
+                		           .path(LinkType.TABLES.uriName()).path(tableName)
+                		           .path(LinkType.COLUMNS.uriName()).path(columnName).build();
+                break;
+            case PARENT:
+                result = UriBuilder.fromUri(modelUri)
+                		           .path(LinkType.TABLES.uriName()).path(tableName).build();
+                break;
+            case REFERENCE:
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
      * @param translator
      * @param uow
      * @return the uri of the parent of the given translator
@@ -525,7 +638,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI vdbTranslatorParentUri(Translator translator, UnitOfWork uow) throws KException {
         KomodoObject parent = translator.getParent(uow);
-        if (isCachedTeiid(uow, parent)) {
+        if (isCachedTeiidFolder(uow, parent)) {
             return cachedTeiidUri(parent.getName(uow));
         }
         else if (isVdb(uow, parent)) {
@@ -553,9 +666,15 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         switch (linkType) {
             case SELF:
                 String name = setting(settings, SettingNames.TRANSLATOR_NAME);
-                result = UriBuilder.fromUri(parentUri)
-                                                .path(TRANSLATORS_SEGMENT)
-                                                .path(name).build();
+                // Adds translators segment if supplied.
+                if(settings.containsKey(SettingNames.ADD_TRANSLATORS_SEGMENT.name())) {
+                    result = UriBuilder.fromUri(parentUri)
+                    .path(TRANSLATORS_SEGMENT)
+                    .path(name).build();
+                } else {
+                    result = UriBuilder.fromUri(parentUri)
+                    .path(name).build();
+                }
                 break;
             case PARENT:
                 result = parentUri;
@@ -753,10 +872,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 result = parentUri;
                 break;
             }
-            case IMPORTS:
-            case MODELS:
-            case TRANSLATORS:
-            case DATA_ROLES:
+            case CONNECTIONS:
             case VDBS:
             {
                 String dataserviceName = dataserviceName(settings);
@@ -779,7 +895,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI dataSourceParentUri(Datasource dataSource, UnitOfWork uow) throws KException {
         KomodoObject parent = dataSource.getParent(uow);
-        if (isCachedTeiid(uow, parent)) {
+        if (isCachedTeiidFolder(uow, parent)) {
             return cachedTeiidUri(parent.getName(uow));
         }
 
@@ -802,8 +918,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             case SELF:
                 String name = setting(settings, SettingNames.DATA_SOURCE_NAME);
                 result = UriBuilder.fromUri(parentUri)
-                                                .path(DATA_SOURCES_SEGMENT)
-                                                .path(name).build();
+                                   .path(name).build();
                 break;
             case PARENT:
                 result = parentUri;

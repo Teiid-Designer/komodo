@@ -59,7 +59,7 @@ public final class CreateVdbCommand extends WorkspaceShellCommand {
             final String vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
             final String extPath = optionalArgument( 1, DEFAULT_PATH );
 
-            final WorkspaceManager mgr = getWorkspaceManager();
+            final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
             
             // Do not allow create if object with this name already exists
             if(mgr.hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {

@@ -30,11 +30,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +50,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidConnectionInfo;
@@ -72,6 +75,8 @@ public final class TeiidImplTest extends RelationalModelTest {
     private TeiidVersion version;
 
     private TeiidService unmockedTeiidService;
+
+    private CachedTeiid cachedTeiid;
 
     private PluginService setPluginServiceTeiidService(TeiidService teiidService) throws Exception, NoSuchFieldException, IllegalAccessException {
         PluginService service = PluginService.getInstance();
@@ -106,11 +111,11 @@ public final class TeiidImplTest extends RelationalModelTest {
     }
 
     private void setTeiidCacheExpireThreshold(long expireThreshold) throws KException, Exception {
-        KomodoObject teiidCache = _repo.komodoTeiidCache(getTransaction());
+        KomodoObject teiidCache = _repo.komodoTeiidCache(sysTx());
         assertNotNull(teiidCache);
 
-        teiidCache.setProperty(getTransaction(), KomodoLexicon.TeiidCache.EXPIRATION_THRESHOLD, expireThreshold);
-        commit();
+        teiidCache.setProperty(sysTx(), KomodoLexicon.TeiidCache.EXPIRATION_THRESHOLD, expireThreshold);
+        sysCommit();
     }
 
     @Before
@@ -125,6 +130,11 @@ public final class TeiidImplTest extends RelationalModelTest {
     @After
     public void teardown() throws Exception {
         setPluginServiceTeiidService(unmockedTeiidService);
+
+        if (this.cachedTeiid != null) {
+            this.cachedTeiid.remove(sysTx());
+            this.cachedTeiid = null;
+        }
     }
 
     @Test
@@ -132,68 +142,68 @@ public final class TeiidImplTest extends RelationalModelTest {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.getHost(), is( HostProvider.DEFAULT_HOST ) );
     }
-    
+
     @Test
     public void shouldSetHost() throws Exception {
         String newValue = "NewHost";
         this.teiid.setHost( getTransaction(), newValue );
         assertThat( this.teiid.getHost( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldHaveDefaultTeiidInstanceUrl() throws Exception {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.getUrl(), is( TeiidConnectionInfo.UrlConstructor.createDefaultTeiidConnectionUrl()) );
     }
-    
+
     @Test
     public void shouldCheckDefaultIsConnected() throws Exception {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.isConnected(), is( false ) );
     }
-    
+
     @Test
     public void shouldSetAdminSecure() throws Exception {
         boolean newValue = false;
         this.teiid.setAdminSecure( getTransaction(), newValue );
         assertThat( this.teiid.isAdminSecure( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetAdminUser() throws Exception {
         String newValue = "MyUser";
         this.teiid.setAdminUser( getTransaction(), newValue );
         assertThat( this.teiid.getAdminUser( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetAdminPassword() throws Exception {
         String newValue = "pword";
         this.teiid.setAdminPassword( getTransaction(), newValue );
         assertThat( this.teiid.getAdminPassword( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetAdminPort() throws Exception {
         int newValue = 8888;
         this.teiid.setAdminPort( getTransaction(), newValue );
         assertThat( this.teiid.getAdminPort( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetJdbcPassword() throws Exception {
         String newValue = "pword";
         this.teiid.setJdbcPassword( getTransaction(), newValue );
         assertThat( this.teiid.getJdbcPassword( getTransaction() ), is( newValue ) );
     }
-    
+
     @Test
     public void shouldSetJdbcSecure() throws Exception {
         boolean newValue = true;
         this.teiid.setJdbcSecure( getTransaction(), newValue );
         assertThat( this.teiid.isJdbcSecure( getTransaction() ), is( newValue ) );
     }
-        
+
     @Test
     public void shouldHaveId() throws Exception {
         assertThat( this.teiid.getName( getTransaction() ), is( TEIID_NAME ) );
@@ -233,7 +243,7 @@ public final class TeiidImplTest extends RelationalModelTest {
     public void shouldHaveDefaultJdbcPasswordAfterConstruction() throws Exception {
         assertThat( this.teiid.getJdbcPassword( getTransaction() ), is( TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD ) );
     }
-    
+
     @Test
     public void shouldHaveDefaultJdbcSecureAfterConstruction() throws Exception {
         assertThat( this.teiid.isJdbcSecure( getTransaction() ), is( TeiidJdbcInfo.DEFAULT_SECURE ) );
@@ -242,11 +252,7 @@ public final class TeiidImplTest extends RelationalModelTest {
     @Test
     public void shouldImportBareTeiidInstance() throws Exception {
         mockTeiidInstance();
-        CachedTeiid cachedTeiid = this.teiid.importContent(getTransaction());
-
-        // Ensure the cached teiid has been removed to end the test
-        cachedTeiid.remove(getTransaction());
-        commit();
+        cachedTeiid = this.teiid.importContent(sysTx());
     }
 
     @Test
@@ -296,22 +302,28 @@ public final class TeiidImplTest extends RelationalModelTest {
         translators.add(translator);
         when(teiidInstance.getTranslators()).thenReturn(translators);
 
-        CachedTeiid cachedTeiid = this.teiid.importContent(getTransaction());
+        //
+        // Have to import the cached teiid as sys
+        //
+        cachedTeiid = this.teiid.importContent(sysTx());
         assertNotNull(cachedTeiid);
+        sysCommit();
 
-        commit();
-
+        //
+        // Can read the contents of the cached teiid as user
+        //
         assertEquals(this.teiid.getName(getTransaction()), cachedTeiid.getName(getTransaction()));
         assertEquals(this.teiid.getAdminUser(getTransaction()), cachedTeiid.getAdminUser(getTransaction()));
         assertEquals(this.teiid.getJdbcUsername(getTransaction()), cachedTeiid.getJdbcUsername(getTransaction()));
         assertEquals(this.teiid.getVersion(getTransaction()), cachedTeiid.getVersion(getTransaction()));
 
-        KomodoObject[] cDataSrcs = cachedTeiid.getChildrenOfType(getTransaction(), KomodoLexicon.DataSource.NODE_TYPE);
+        KomodoObject[] cDataSrcs = cachedTeiid.getDataSources(getTransaction());
+        
         assertNotNull(cDataSrcs);
         assertEquals(1, cDataSrcs.length);
         assertEquals(dsName, cDataSrcs[0].getName(getTransaction()));
 
-        KomodoObject[] cVdbs = cachedTeiid.getChildrenOfType(getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject[] cVdbs = cachedTeiid.getVdbs(getTransaction());
         assertNotNull(cVdbs);
         assertEquals(2, cVdbs.length);
 
@@ -324,32 +336,27 @@ public final class TeiidImplTest extends RelationalModelTest {
                 fail();
         }
 
-        KomodoObject[] cTranslators = cachedTeiid.getChildrenOfType(getTransaction(), VdbLexicon.Translator.TRANSLATOR);
+        KomodoObject[] cTranslators = cachedTeiid.getTranslators(getTransaction());
         assertNotNull(cTranslators);
         assertEquals(1, cTranslators.length);
         assertEquals(trName, cTranslators[0].getName(getTransaction()));
 
         traverse(getTransaction(), cachedTeiid.getAbsolutePath());
-
-        // Ensure the cached teiid has been removed to end the test
-        cachedTeiid.remove(getTransaction());
     }
 
     @Test
     public void shouldNotReimportUnlessCacheTeiidHasExpired() throws Exception {
         mockTeiidInstance();
-        CachedTeiid cachedTeiid = this.teiid.importContent(getTransaction());
-        Long origTimestamp = cachedTeiid.getTimestamp(getTransaction());
+        UnitOfWork sysTx = sysTx();
+        cachedTeiid = this.teiid.importContent(sysTx);
+        Long origTimestamp = cachedTeiid.getTimestamp(sysTx);
         assertNotNull(origTimestamp);
 
         // Default expiration is 10 minutes so should return the same cachedTeiid
-        cachedTeiid = this.teiid.importContent(getTransaction());
-        Long newTimestamp = cachedTeiid.getTimestamp(getTransaction());
+        cachedTeiid = this.teiid.importContent(sysTx);
+        Long newTimestamp = cachedTeiid.getTimestamp(sysTx);
 
         assertEquals(origTimestamp, newTimestamp);
-
-        // Ensure the cached teiid has been removed to end the test
-        cachedTeiid.remove(getTransaction());
     }
 
     @Test
@@ -357,17 +364,15 @@ public final class TeiidImplTest extends RelationalModelTest {
         setTeiidCacheExpireThreshold(0); // Ensure the cache teiids are always overwritten
 
         mockTeiidInstance();
-        CachedTeiid cachedTeiid = this.teiid.importContent(getTransaction());
-        Long origTimestamp = cachedTeiid.getTimestamp(getTransaction());
+        UnitOfWork sysTx = sysTx();
+        cachedTeiid = this.teiid.importContent(sysTx);
+        Long origTimestamp = cachedTeiid.getTimestamp(sysTx);
         assertNotNull(origTimestamp);
 
-        // Expiration time is 0 so should create a new one with a different timestamp
-        cachedTeiid = this.teiid.importContent(getTransaction());
-        Long newTimestamp = cachedTeiid.getTimestamp(getTransaction());
+        // Expiration time is 0 so should create a new one with a different timestamp;
+        cachedTeiid = this.teiid.importContent(sysTx);
+        Long newTimestamp = cachedTeiid.getTimestamp(sysTx);
 
         assertNotEquals(origTimestamp, newTimestamp);
-
-        // Ensure the cached teiid has been removed to end the test
-        cachedTeiid.remove(getTransaction());
     }
 }

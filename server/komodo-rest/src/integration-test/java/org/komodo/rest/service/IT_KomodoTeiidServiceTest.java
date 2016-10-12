@@ -50,12 +50,16 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -70,12 +74,14 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.cors.CorsHeaders;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.RelationalMessages;
@@ -117,6 +123,10 @@ import org.komodo.utils.FileUtils;
 @RunWith(Arquillian.class)
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class IT_KomodoTeiidServiceTest implements StringConstants {
+
+    private static final String USER_NAME = "user";
+
+    private static final String PASSWORD = "user";
 
     private static final String TEST_PORT = "8443";
 
@@ -163,6 +173,10 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         }
     }
 
+    private void addHeader(ClientRequest request, String name, Object value) {
+        request.getHeadersAsObjects().add(name, value);
+    }
+
     /**
      * Builds an {@link ApacheHttpClient4Executor} which does NOT verify ssl certificates so allows for the
      * self-signed certificates used in the integration testing.
@@ -194,6 +208,11 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         clientBuilder.setConnectionManager(mgr);
+
+        Credentials credentials = new UsernamePasswordCredentials(USER_NAME, PASSWORD);
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, credentials);
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
         return new ApacheHttpClient4Executor(clientBuilder.build());
     }
@@ -270,19 +289,24 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     private void waitForVdb(String vdbName) throws Exception {
         TeiidVdb vdb = null;
-        //
-        // Timeout after 30 seconds
-        //
-        for (int i = 0; vdb == null && i < 10; ++i) {
-            vdb = helperInstance.getVdb(vdbName);
-            if (vdb != null && vdb.isActive())
-                break; // Found it and its active
+        int TIMEOUT = 40;
 
-            if (i >= 10)
-                fail("Timed out waiting for vdb " + vdbName + " to become active");
+        //
+        // Timeout after 120 seconds
+        //
+        for (int i = 0; vdb == null || i < TIMEOUT; ++i) {
+            vdb = helperInstance.getVdb(vdbName);
+
+            System.out.println("Waiting on status of vdb " + vdbName + " active: " + vdb.isActive() + " loading: " + vdb.isLoading() + " ....");
+
+            if (vdb != null && vdb.isActive())
+                return; // Found it and its active
 
             wait(3);
+            helperInstance.reconnect();
         }
+
+        fail("Timed out waiting for vdb " + vdbName + " to become active");
     }
 
     private void wait(int seconds) {
@@ -468,13 +492,13 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(200, response.getStatus());
 
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
-        assertTrue(vdbs.length == 1);
+        assertFalse(vdbs.length == 0);
 
         RestVdb vdb = vdbs[0];
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;
         assertNotNull(vdbName, vdb.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
-        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
+        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + V1Constants.VDBS_SEGMENT + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
         assertTrue(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
@@ -482,17 +506,17 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         for(RestLink link : vdb.getLinks()) {
             switch(link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              vdbName,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }
@@ -521,7 +545,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;
         assertNotNull(vdbName, vdb.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
-        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
+        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + V1Constants.VDBS_SEGMENT + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
         assertTrue(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
@@ -529,17 +553,17 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         for(RestLink link : vdb.getLinks()) {
             switch(link.getRel()) {
                 case SELF:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
-                                             V1Constants.VDBS_SEGMENT + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
                                              vdbName,
                                              link.getHref().toString());
                     break;
                 case PARENT:
-                    assertEquals(BASE_URI + File.separator +
-                                             V1Constants.TEIID_SEGMENT + File.separator +
-                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
+                    assertEquals(BASE_URI + FORWARD_SLASH +
+                                             V1Constants.TEIID_SEGMENT + FORWARD_SLASH +
+                                             ServerManager.DEFAULT_SERVER_NAME + FORWARD_SLASH +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }
@@ -768,7 +792,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     private void deployDataService() throws Exception {
         KomodoPathAttribute pathAttr = new KomodoPathAttribute();
-        String path = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
+        String path = RepositoryImpl.komodoWorkspacePath(null) + FORWARD_SLASH +
+                                        USER_NAME + FORWARD_SLASH + "UsStatesService";
         pathAttr.setPath(path);
 
         //
@@ -914,7 +939,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             waitForVdb("usstates");
 
-            String dsPath = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
+            String dsPath = RepositoryImpl.komodoWorkspacePath(null) + FORWARD_SLASH +
+                                        USER_NAME + FORWARD_SLASH + "UsStatesService";
 
             KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
             queryAttr.setQuery("SELECT * FROM state");
@@ -985,6 +1011,35 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             assertTrue(attributes.get("Exception").contains("The username \"IamTheWrongJdbcUserName\" and/or password and/or payload token could not be authenticated by security domain teiid-security"));
         } finally {
             setJdbcName(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
+        }
+    }
+
+    @Ignore
+    @Test
+    public void shouldAbout() throws Exception {
+        String[] EXPECTED = {
+                "\"Information\": " +  OPEN_BRACE + NEW_LINE,
+                "\"Repository Workspace\": \"komodoLocalWorkspace\"," + NEW_LINE,
+                "\"Repository Configuration\"", // Configuration Url contains local file names so impossible to test
+                "\"Repository Vdb Total\":",
+            };
+
+        // get
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                                    .path(V1Constants.SERVICE_SEGMENT)
+                                                    .path(V1Constants.ABOUT).build();
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addHeader(request, CorsHeaders.ORIGIN, "http://localhost:2772");
+
+        ClientResponse<String> response = request.get(String.class);
+        assertNotNull(response.getEntity());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        final String entity = response.getEntity();
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+        for (String expected : EXPECTED) {
+            assertTrue(expected + " is not contained in " + entity, entity.contains(expected));
         }
     }
 }

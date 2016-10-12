@@ -38,6 +38,7 @@ import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
@@ -163,8 +164,9 @@ public final class FindCommand extends RelationalShellCommand {
                                   final String parentPath,
                                   final String pattern ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
-        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( wsStatus.getCurrentContext().getRepository() );
-        final String[] searchResults = wsMgr.findByType( wsStatus.getTransaction(), lexiconType, parentPath, pattern, false );
+        final UnitOfWork transaction = wsStatus.getTransaction();
+        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( wsStatus.getCurrentContext().getRepository(), transaction );
+        final String[] searchResults = wsMgr.findByType( transaction, lexiconType, parentPath, pattern, false );
 
         if ( searchResults.length == 0 ) {
             return searchResults;
@@ -181,7 +183,7 @@ public final class FindCommand extends RelationalShellCommand {
         final String[] result = new String[ searchResults.length ];
         int i = 0;
         for ( final String absolutePath : searchResults ) {
-            result[i] = labelProvider.getDisplayPath( wsStatus.getTransaction(), absolutePath, null );
+            result[i] = labelProvider.getDisplayPath( transaction, absolutePath, null );
             ++i;
         }
 

@@ -21,21 +21,19 @@
  */
 package org.komodo.modeshape.lib.sequencer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+
 import javax.jcr.Binary;
-import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
-import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
 import org.modeshape.common.text.ParsingException;
 import org.modeshape.common.util.IoUtil;
-import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 import org.teiid.modeshape.sequencer.ddl.DdlParser;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlParser;
@@ -44,19 +42,11 @@ import org.teiid.modeshape.sequencer.ddl.node.AstNode;
 import org.teiid.modeshape.sequencer.ddl.node.AstNodeFactory;
 
 /**
- * Subclass of {@link DdlSequencer} that only allows the
- * Teiid DDL dialect, avoiding confusion with other ddl
- * parsers.
+ * Subclass that only allows the Teiid DDL dialect, avoiding confusion with other DDL parsers.
  */
 public class KDdlSequencer extends TeiidDdlSequencer {
 
     private final DdlParser teiidParser = new TeiidDdlParser();
-
-    @Override
-    public void initialize( NamespaceRegistry registry, NodeTypeManager nodeTypeManager ) throws RepositoryException, IOException {
-        registerNodeTypes(TeiidDdlSequencer.class.getResourceAsStream("StandardDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
-        registerNodeTypes(TeiidDdlSequencer.class.getResourceAsStream("TeiidDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
-    }
 
     @Override
     protected List<DdlParser> getParserList() {
@@ -103,11 +93,13 @@ public class KDdlSequencer extends TeiidDdlSequencer {
 
         while (children.hasNext()) {
             Node child = children.nextNode();
-            session.move(child.getPath(), outputNode.getPath() + File.separator + child.getName());
+            session.move(child.getPath(), outputNode.getPath() + "/" + child.getName());
+            if (! outputNode.hasNode(child.getName()))
+                throw new Exception("Failed to move DDL sequence node to output node");
         }
 
         session.removeItem(ddlStmtsNode.getPath());
-        return true;
+        return outputNode.hasNodes();
     }
 
 }

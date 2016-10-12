@@ -80,24 +80,16 @@ public class KomodoImportExportService extends KomodoService {
     }
 
     private Response checkStorageAttributes(KomodoStorageAttributes sta,
-                                                                                List<MediaType> mediaTypes) throws Exception {
+                                            List<MediaType> mediaTypes) throws Exception {
         Map<String, String> parameters = sta.getParameters();
         if (sta == null ||
             (sta.getStorageType() == null && sta.getArtifactPath() == null && parameters == null)) {
-            String errorMessage = RelationalMessages.getString(
-                                                           RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR);
         }
 
         Set<String> supportedTypes = PluginService.getInstance().getSupportedStorageTypes();
         if (! supportedTypes.contains(sta.getStorageType())) {
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_UNSUPPORTED_TYPE_ERROR);
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_UNSUPPORTED_TYPE_ERROR);
         }
 
         StorageService storageService = PluginService.getInstance().getStorageService(sta.getStorageType());
@@ -113,12 +105,8 @@ public class KomodoImportExportService extends KomodoService {
                 continue; // This is handled separately in import/export and can be populated if missing
 
             if (! parameters.containsKey(descriptor.getName())) {
-                String errorMessage = RelationalMessages.getString(
-                                                                   RelationalMessages.Error.IMPORT_EXPORT_SERVICE_MISSING_PARAMETER_ERROR,
-                                                                   descriptor.getName());
-
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_MISSING_PARAMETER_ERROR,
+                                                        descriptor.getName());
             }
         }
 
@@ -170,6 +158,10 @@ public class KomodoImportExportService extends KomodoService {
     public Response exportArtifact( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
                              final String storageAttributes) throws KomodoRestException {
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -183,34 +175,23 @@ public class KomodoImportExportService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR,
-                                                               StringUtils.exceptionToString(ex));
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         ImportExportStatus status = new ImportExportStatus();
         UnitOfWork uow = null;
         try {
-            uow = createTransaction("exportFromWorkspace", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "exportFromWorkspace", true); //$NON-NLS-1$
 
             String artifactPath = sta.getArtifactPath();
             KomodoObject kObject = repo.getFromWorkspace(uow, artifactPath);
             if (kObject == null) {
-                String errorMessage = RelationalMessages.getString(
-                                                                   RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR, artifactPath);
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR, artifactPath);
             }
 
-            Exportable artifact = wsMgr.resolve(uow, kObject, Exportable.class);
+            Exportable artifact = getWorkspaceManager(uow).resolve(uow, kObject, Exportable.class);
             if (artifact == null) {
-                String errorMessage = RelationalMessages.getString(
-                                                                   RelationalMessages.Error.IMPORT_EXPORT_SERVICE_ARTIFACT_NOT_EXPORTABLE_ERROR, artifactPath);
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_ARTIFACT_NOT_EXPORTABLE_ERROR, artifactPath);
             }
 
             DocumentType documentType = artifact.getDocumentType(uow);
@@ -223,7 +204,7 @@ public class KomodoImportExportService extends KomodoService {
             status.setName(artifact.getName(uow));
             status.setType(documentType.toString());
 
-            String downloadable = wsMgr.exportArtifact(uow, artifact, sta.getStorageType(), parameters);
+            String downloadable = getWorkspaceManager(uow).exportArtifact(uow, artifact, sta.getStorageType(), parameters);
 
             //
             // 2 Return possibilities:
@@ -243,7 +224,7 @@ public class KomodoImportExportService extends KomodoService {
                 uow.rollback();
             }
 
-            return createErrorResponse(mediaTypes, e,
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e,
                                        RelationalMessages.Error.IMPORT_EXPORT_SERVICE_EXPORT_ERROR,
                                        sta.getArtifactPath(), sta.getStorageType());
         }
@@ -265,7 +246,7 @@ public class KomodoImportExportService extends KomodoService {
             String encContent = encode(content);
             status.setContent(encContent);
 
-            KLog.getLogger().info("Encrypted content of " + downloadableFile.getAbsolutePath() + ": " + encContent + " SIZE: "
+            KLog.getLogger().debug("Encrypted content of " + downloadableFile.getAbsolutePath() + ": " + encContent + " SIZE: "
                                   + downloadableFile.length());
 
         } finally {
@@ -304,6 +285,10 @@ public class KomodoImportExportService extends KomodoService {
     public Response importArtifact( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
                              final String storageAttributes) throws KomodoRestException {
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -316,12 +301,7 @@ public class KomodoImportExportService extends KomodoService {
                 return response;
 
         } catch (Exception ex) {
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR,
-                                                               StringUtils.exceptionToString(ex));
-
-            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         File cttFile = null;
@@ -347,25 +327,40 @@ public class KomodoImportExportService extends KomodoService {
 
             Properties parameters = sta.convertParameters();
             if (! parameters.containsKey(StorageConnector.FILE_PATH_PROPERTY)) {
-                String errorMessage = RelationalMessages.getString(
-                                                                   RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_FILE_PATH_ERROR);
-                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
-                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+                return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_FILE_PATH_ERROR);
             }
 
-            uow = createTransaction("importToWorkspace", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "importToWorkspace", false); //$NON-NLS-1$
+            KomodoObject importTarget = repo.komodoWorkspace(uow);
+            
+            // If artifact path is supplied, it is the target.  Otherwise default to workspace
+            String artifactPath = sta.getArtifactPath();
+            if(!StringUtils.isEmpty(artifactPath)) {
+            	importTarget = repo.getFromWorkspace(uow, artifactPath);
+                if (importTarget == null) {
+                    return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR, artifactPath);
+                }
+            }
 
-            KomodoObject workspace = repo.komodoWorkspace(uow);
             StorageReference storageRef = new StorageReference(sta.getStorageType(),
                                                                                    parameters,
                                                                                    new DocumentType(sta.getDocumentType()));
 
-            ImportMessages messages = wsMgr.importArtifact(uow, workspace, storageRef);
+            ImportMessages messages = getWorkspaceManager(uow).importArtifact(uow, importTarget, storageRef);
             if (messages.hasError())
                 throw new Exception(messages.errorMessagesToString());
 
             status.setSuccess(true);
             status.setName(storageRef.getRelativeRef());
+            
+            if(sta.getDocumentType().equals(DocumentType.JAR.toString())) {
+                String driverName = storageRef.getParameters().getProperty(StorageReference.DRIVER_NAME_KEY);
+                if(StringUtils.isBlank(driverName)) {
+                    driverName = StorageReference.DRIVER_NAME_DEFAULT;
+                }
+                status.setName(driverName);
+            }
+            
             status.setType(sta.getDocumentType().toString());
 
             return commit( uow, mediaTypes, status );
@@ -375,7 +370,7 @@ public class KomodoImportExportService extends KomodoService {
                 uow.rollback();
             }
 
-            return createErrorResponse(mediaTypes, e,
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e,
                                        RelationalMessages.Error.IMPORT_EXPORT_SERVICE_IMPORT_ERROR,
                                        sta.getStorageType());
         } finally {
@@ -409,6 +404,11 @@ public class KomodoImportExportService extends KomodoService {
     })
     public Response storageTypes( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -430,11 +430,11 @@ public class KomodoImportExportService extends KomodoService {
                 restStorageTypes.add(type);
             }
 
-            UnitOfWork uow = createTransaction("getStorageTypes", true); //$NON-NLS-1$
+            UnitOfWork uow = createTransaction(principal, "getStorageTypes", true); //$NON-NLS-1$
             return commit(uow, mediaTypes, restStorageTypes);
 
         } catch (Exception e) {
-            return createErrorResponse(mediaTypes, e,
+            return createErrorResponseWithForbidden(mediaTypes, e,
                                        RelationalMessages.Error.IMPORT_EXPORT_SERVICE_STORAGE_TYPES_ERROR);
         }
     }

@@ -102,7 +102,7 @@ public class ShowDescriptorsCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return ( !KomodoObjectUtils.isRoot(getContext()) && !KomodoObjectUtils.isRootChild(getContext()) );
+        return ( !KomodoObjectUtils.isRoot(getContext()) && !KomodoObjectUtils.isRootChild(getTransaction(), getContext()) );
     }
 
     /**

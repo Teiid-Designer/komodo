@@ -115,7 +115,12 @@ public final class KomodoUtilService extends KomodoService {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response about(final @Context HttpHeaders headers,
-                                          final @Context UriInfo uriInfo) throws KomodoRestException {
+                                               final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         KomodoStatusObject repoStatus = new KomodoStatusObject();
 
         Id id = this.repo.getId();
@@ -126,8 +131,8 @@ public final class KomodoUtilService extends KomodoService {
         UnitOfWork uow = null;
         try {
             // find VDBs
-            uow = createTransaction("getVdbs", true); //$NON-NLS-1$
-            Vdb[] vdbs = this.wsMgr.findVdbs(uow);
+            uow = systemTx("getVdbs", true); //$NON-NLS-1$
+            Vdb[] vdbs = getWorkspaceManager(uow).findVdbs(uow);
 
             repoStatus.addAttribute(REPO_VDB_TOTAL, Integer.toString(vdbs.length));
 
@@ -149,7 +154,7 @@ public final class KomodoUtilService extends KomodoService {
         try {
             return commit(uow, mediaTypes, repoStatus);
         } catch (Exception ex) {
-            return createErrorResponse(mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
         }
     }
 
@@ -185,7 +190,12 @@ public final class KomodoUtilService extends KomodoService {
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response importSampleData() {
+    public Response importSampleData(final @Context HttpHeaders headers,
+                                                                       final @Context UriInfo uriInfo) {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
 
         KomodoStatusObject status = new KomodoStatusObject("Sample Vdb Import");
 
@@ -200,7 +210,7 @@ public final class KomodoUtilService extends KomodoService {
             UnitOfWork uow = null;
             try {
                 SynchronousCallback callback = new SynchronousCallback();
-                uow = createTransaction("Import vdb " + sampleName, false, callback); //$NON-NLS-1$
+                uow = createTransaction(principal, "Import vdb " + sampleName, false, callback); //$NON-NLS-1$
 
                 String msg = null;
 
@@ -288,6 +298,10 @@ public final class KomodoUtilService extends KomodoService {
                                                 allowMultiple = false)
                              @QueryParam(value = "ktype") String ktype) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -305,17 +319,11 @@ public final class KomodoUtilService extends KomodoService {
 
             KomodoType komodoType = KomodoType.getKomodoType(ktype);
             if (komodoType == null) {
-                String msg = RelationalMessages.getString(
-                                                          RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype );
-                Object response = createErrorResponseEntity(mediaTypes, msg);
-                return Response.status(Status.NOT_FOUND).entity(response).build();
+                return createErrorResponse(Status.NOT_FOUND, mediaTypes, RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype);
             } else {
                 schema = KomodoJsonMarshaller.teiidElementSchema(komodoType);
                 if (EMPTY_STRING.equals(schema)) {
-                    String msg = RelationalMessages.getString(
-                                                          RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype );
-                    Object response = createErrorResponseEntity(mediaTypes, msg);
-                    return Response.status(Status.NOT_FOUND).entity(response).build();
+                    return createErrorResponse(Status.NOT_FOUND, mediaTypes, RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype);
                 }
             }
 
@@ -326,7 +334,7 @@ public final class KomodoUtilService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
         }
     }
 }

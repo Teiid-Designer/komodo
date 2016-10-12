@@ -24,6 +24,7 @@ package org.komodo.relational.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;

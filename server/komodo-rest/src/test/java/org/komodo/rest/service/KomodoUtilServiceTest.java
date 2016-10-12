@@ -44,12 +44,12 @@ import org.komodo.test.utils.TestUtilities;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
-    private void loadSamples() throws Exception {
+    private void loadSamples(String user) throws Exception {
         for (String sample : KomodoUtilService.SAMPLES) {
-            getRestApp().importVdb(KomodoUtilService.getVdbSample(sample));
+            getRestApp().importVdb(KomodoUtilService.getVdbSample(sample), user);
         }
 
-        Assert.assertEquals(KomodoUtilService.SAMPLES.length, getRestApp().getVdbs().length);
+        Assert.assertEquals(KomodoUtilService.SAMPLES.length, getRestApp().getVdbs(user).length);
     }
 
     @Test
@@ -62,7 +62,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
             "    \"Repository Vdb Total\": \"" + KomodoUtilService.SAMPLES.length + "\"" + NEW_LINE,
             "  " + CLOSE_BRACE + NEW_LINE };
 
-        loadSamples();
+        loadSamples(USER_NAME);
 
         // get
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
@@ -140,7 +140,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
     @Test
     public void shouldLoadSamplesDataAlreadyExists() throws Exception {
-        loadSamples();
+        loadSamples(USER_NAME);
 
         // get
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())

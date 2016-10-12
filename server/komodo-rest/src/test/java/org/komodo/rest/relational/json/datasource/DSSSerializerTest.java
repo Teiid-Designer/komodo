@@ -51,12 +51,12 @@ public class DSSSerializerTest extends AbstractSerializerTest {
             tab(1) + q("keng__kType") + colon() +  q("Datasource") + COMMA + NEW_LINE +
             tab(1) + q("keng__description") + colon() +  q("Describes the configuration for a datasource") + COMMA + NEW_LINE +
             tab(1) + q("keng__properties") + colon() +  OPEN_BRACE + NEW_LINE +
-                tab(2) + q("tko__jndiName") + colon() +  OPEN_BRACE + NEW_LINE +
+                tab(2) + q("dv__jndiName") + colon() +  OPEN_BRACE + NEW_LINE +
                     tab(3) + q("keng__type") + colon() +  q("string") + COMMA + NEW_LINE +
                     tab(3) + q("keng__required") + colon() +  true + COMMA + NEW_LINE +
                     tab(3) + q("keng__repeatable") + colon() +  false + NEW_LINE +
                 tab(2) + CLOSE_BRACE + COMMA + NEW_LINE +
-                tab(2) + q("tko__driverName") + colon() +  OPEN_BRACE + NEW_LINE +
+                tab(2) + q("dv__driverName") + colon() +  OPEN_BRACE + NEW_LINE +
                     tab(3) + q("keng__type") + colon() +  q("string") + COMMA + NEW_LINE +
                     tab(3) + q("keng__required") + colon() +  true + COMMA + NEW_LINE +
                     tab(3) + q("keng__repeatable") + colon() +  false + NEW_LINE +

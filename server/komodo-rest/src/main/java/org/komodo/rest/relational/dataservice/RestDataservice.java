@@ -23,8 +23,12 @@ package org.komodo.rest.relational.dataservice;
 
 import java.net.URI;
 import java.util.Properties;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.resource.Driver;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
@@ -63,6 +67,15 @@ public final class RestDataservice extends RestBasicEntity {
      */
     public static final String DATASERVICE_VDB_VERSION_LABEL = "serviceVdbVersion"; //$NON-NLS-1$
 
+    /**
+     * Label used to describe dataservice driver total
+     */
+    public static final String DATASERVICE_DRIVER_TOTAL_LABEL = "drivers"; //$NON-NLS-1$
+
+    /**
+     * Label used to describe dataservice connection total
+     */
+    public static final String DATASERVICE_CONNECTION_TOTAL_LABEL = "connections"; //$NON-NLS-1$
 
     /**
      * Constructor for use when deserializing
@@ -90,18 +103,28 @@ public final class RestDataservice extends RestBasicEntity {
         Properties settings = getUriBuilder().createSettings(SettingNames.DATA_SERVICE_NAME, getId());
         URI parentUri = getUriBuilder().dataserviceParentUri(dataService, uow);
         getUriBuilder().addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, parentUri);
-        
-        setServiceVdbName(dataService.getServiceVdbName(uow));
-        setServiceVdbVersion(dataService.getServiceVdbVersion(uow));
-        setServiceViewModel(dataService.getServiceViewModelName(uow));
-        setServiceViewName(dataService.getServiceViewName(uow));
-        
+
+        Vdb serviceVdb = dataService.getServiceVdb(uow);
+        if (serviceVdb != null) {
+            setServiceVdbName(serviceVdb.getVdbName( uow ));
+            setServiceVdbVersion(Integer.toString(serviceVdb.getVersion( uow )));
+            setServiceViewModel(dataService.getServiceViewModelName(uow));
+            setServiceViewName(dataService.getServiceViewName(uow));
+        }
+
+        Datasource[] connections = dataService.getConnections(uow);
+        setConnectionTotal(connections != null ? connections.length : 0);
+
+        Driver[] drivers = dataService.getDrivers(uow);
+        setDriverTotal(drivers != null ? drivers.length : 0);
+
         addLink(new RestLink(LinkType.SELF, getUriBuilder().dataserviceUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().dataserviceUri(LinkType.PARENT, settings)));
         createChildLink();
         addLink(new RestLink(LinkType.VDBS, getUriBuilder().dataserviceUri(LinkType.VDBS, settings)));
+        addLink(new RestLink(LinkType.CONNECTIONS, getUriBuilder().dataserviceUri(LinkType.CONNECTIONS, settings)));
     }
-    
+
     /**
      * @return the VDB description (can be empty)
      */
@@ -156,25 +179,54 @@ public final class RestDataservice extends RestBasicEntity {
     }
 
     /**
-     * @param serviceVdbName the service vdb name to set 
+     * @param serviceVdbName the service vdb name to set
      */
     public void setServiceVdbName(String serviceVdbName) {
         tuples.put(DATASERVICE_VDB_NAME_LABEL, serviceVdbName);
     }
 
     /**
-     * @return the VDB description (can be empty)
+     * @return the service vdb version (can be empty)
      */
-    public int getServiceVdbVersion() {
+    public String getServiceVdbVersion() {
         Object version = tuples.get(DATASERVICE_VDB_VERSION_LABEL);
-        return version != null ? (int)version : 1;
+        return version != null ? version.toString() : "1"; //$NON-NLS-1$
     }
 
     /**
      * @param version the version to set
      */
-    public void setServiceVdbVersion(int version) {
+    public void setServiceVdbVersion( final String version) {
         tuples.put(DATASERVICE_VDB_VERSION_LABEL, version);
     }
 
+    /**
+     * @return the number of connections (can be empty)
+     */
+    public int getConnectionTotal() {
+        Object total = tuples.get(DATASERVICE_CONNECTION_TOTAL_LABEL);
+        return total != null ? Integer.parseInt(total.toString()) : 0;
+    }
+
+    /**
+     * @param set the number of connections
+     */
+    public void setConnectionTotal(int total) {
+        tuples.put(DATASERVICE_CONNECTION_TOTAL_LABEL, total);
+    }
+
+    /**
+     * @return the number of drivers (can be empty)
+     */
+    public int getDriverTotal() {
+        Object total = tuples.get(DATASERVICE_DRIVER_TOTAL_LABEL);
+        return total != null ? Integer.parseInt(total.toString()) : 0;
+    }
+
+    /**
+     * @param set the number of drivers
+     */
+    public void setDriverTotal(int total) {
+        tuples.put(DATASERVICE_DRIVER_TOTAL_LABEL, total);
+    }
 }

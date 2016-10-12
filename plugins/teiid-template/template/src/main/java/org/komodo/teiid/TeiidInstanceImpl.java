@@ -113,6 +113,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
                                                                         getTeiidAdminInfo().getUsername(),
                                                                         passwordArray);
 
+                    if (admin == null)
+                        throw new Exception("Failed to create a teiid admin connection. Maybe incorrect password?");
+
                 } catch (Exception ex) {
                     throw ex;
                 } finally {

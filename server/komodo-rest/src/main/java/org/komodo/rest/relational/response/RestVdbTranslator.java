@@ -30,6 +30,7 @@ import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -93,6 +94,12 @@ public final class RestVdbTranslator extends RestBasicEntity {
         Properties settings = getUriBuilder().createSettings(SettingNames.TRANSLATOR_NAME, getId());
         URI parentUri = getUriBuilder().vdbTranslatorParentUri(translator, uow);
         getUriBuilder().addSetting(settings, SettingNames.PARENT_PATH, parentUri);
+        
+        // VdbTranslators segment is added for Translators in a VDB
+        KomodoObject parentObject = translator.getParent(uow);
+        if(parentObject!=null && VdbLexicon.Vdb.VIRTUAL_DATABASE.equals(parentObject.getPrimaryType(uow).getName())) {
+            getUriBuilder().addSetting(settings, SettingNames.ADD_TRANSLATORS_SEGMENT, "true"); //$NON-NLS-1$
+        }
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder().vdbTranslatorUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().vdbTranslatorUri(LinkType.PARENT, settings)));

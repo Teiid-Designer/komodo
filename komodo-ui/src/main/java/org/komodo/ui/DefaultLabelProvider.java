@@ -34,6 +34,7 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -92,16 +93,6 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     public static final String LIB_SLASH_PATH = ( LIB_PATH + FORWARD_SLASH );
 
     /**
-     * The Komodo workspace area absolute path. Value is {@value}.
-     */
-    public static final String WORKSPACE_PATH = RepositoryImpl.WORKSPACE_ROOT;
-
-    /**
-     * The Komodo workspace area absolute path with a slash suffix. Value is {@value}.
-     */
-    public static final String WORKSPACE_SLASH_PATH = ( WORKSPACE_PATH + FORWARD_SLASH );
-
-    /**
      * The Komodo environment area display name. Value is {@value}.
      */
     public static final String ENV_DISPLAY_NAME = KomodoLexicon.Environment.UNQUALIFIED_NAME;
@@ -121,35 +112,75 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
      */
     public static final String LIB_DISPLAY_PATH = ( ROOT_DISPLAY_PATH + LIB_DISPLAY_NAME );
 
-    /**
-     * The Komodo workspace area display name. Value is {@value}.
-     */
-    public static final String WORKSPACE_DISPLAY_NAME = KomodoLexicon.Workspace.UNQUALIFIED_NAME;
-
-    /**
-     * The Komodo workspace area display path. Value is {@value}.
-     */
-    public static final String WORKSPACE_DISPLAY_PATH = ( ROOT_DISPLAY_PATH + WORKSPACE_DISPLAY_NAME );
+//    /**
+//     * The Komodo workspace area display name. Value is {@value}.
+//     */
+//    public static final String WORKSPACE_DISPLAY_NAME = KomodoLexicon.Workspace.UNQUALIFIED_NAME;
+//
+//    /**
+//     * The Komodo workspace area display path. Value is {@value}.
+//     */
+//    public static final String WORKSPACE_DISPLAY_PATH = ( ROOT_DISPLAY_PATH + WORKSPACE_DISPLAY_NAME );
 
 	private static List<String> GROUPING_NODES=new ArrayList<String>(); //default label provider has currently no grouping nodes
     protected static final String TKO_PREFIX = "tko:"; //$NON-NLS-1$
 
-	/**
+    /**
      * @param kobject
      *        the object being tested (cannot be <code>null</code>)
      * @return <code>true</code> if the type should be shown to the user
      */
-    public static boolean shouldShowType( final KomodoObject kobject ) {
+    public static boolean shouldShowType( final UnitOfWork transaction, final KomodoObject kobject ) throws KException {
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
         final String path = kobject.getAbsolutePath();
-        return ( !ROOT_PATH.equals( path )
-                 && !ENV_PATH.equals( path )
-                 && !LIB_PATH.equals( path )
-                 && !WORKSPACE_PATH.equals( path ) );
+        if (ROOT_PATH.equals( path ) || ENV_PATH.equals( path ) || LIB_PATH.equals( path ))
+            return false;
+
+        Descriptor type = kobject.getPrimaryType(transaction);
+        return ! KomodoLexicon.Workspace.NODE_TYPE.equals(type.getName())
+                        && ! KomodoLexicon.Home.NODE_TYPE.equals(type.getName());
     }
 
     protected PropertyProvider propertyProvider;
     protected Repository repository;
+
+    private String workspacePath;
+
+    /**
+     * The Komodo workspace area display name. Value is {@value}.
+     */
+    public static String workspaceDisplayName(UnitOfWork transaction) {
+        if (transaction == null || RepositoryImpl.isSystemTx(transaction))
+            return KomodoLexicon.Workspace.UNQUALIFIED_NAME;
+
+        return KomodoLexicon.Workspace.UNQUALIFIED_NAME + FORWARD_SLASH + transaction.getUserName();
+    }
+
+    /**
+     * The Komodo workspace area display path. Value is {@value}.
+     */
+    public static String workspaceDisplayPath(UnitOfWork transaction) {
+        return ROOT_DISPLAY_PATH + workspaceDisplayName(transaction);
+    }
+
+    @Override
+    public String getWorkspacePath() {
+        return workspacePath;
+    }
+
+    @Override
+    public void setWorkspacePath(UnitOfWork transaction) {
+        this.workspacePath = RepositoryImpl.komodoWorkspacePath(transaction);
+    }
+
+    public String getWorkspaceSlashPath() {
+        return workspacePath + FORWARD_SLASH;
+    }
+
+    @Override
+    public boolean isWorkspacePath(String path) {
+        return getWorkspacePath().equals(path) || getWorkspaceSlashPath().equals(path);
+    }
 
     /**
      * {@inheritDoc}
@@ -168,7 +199,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         final String path = kobject.getAbsolutePath();
 
         // Check whether it is workspace, library or environment
-        String areaObjectName=getNameForAreaObject(path);
+        String areaObjectName=getNameForAreaObject(path, transaction);
 
         if(areaObjectName != null){
         	return areaObjectName;
@@ -239,9 +270,9 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
             return ROOT_DISPLAY_PATH;
         }
 
-        // /tko:komodo/workspace
-        if ( WORKSPACE_PATH.equals( repositoryAbsolutePath ) || WORKSPACE_SLASH_PATH.equals( repositoryAbsolutePath ) ) {
-            return WORKSPACE_DISPLAY_PATH;
+        // /tko:komodo/workspace/${USER}
+        if ( getWorkspacePath().equals( repositoryAbsolutePath ) || getWorkspaceSlashPath().equals( repositoryAbsolutePath ) ) {
+            return workspaceDisplayPath(transaction);
         }
 
         // /tko:komodo/library
@@ -297,6 +328,27 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         return DefaultLabelProvider.class.getName();
     }
 
+    private String checkWorkspacePath(final UnitOfWork transaction, String displayPath) {
+        String wkspPragma = workspaceDisplayName(null) + FORWARD_SLASH;
+        String userName = transaction.getUserName();
+
+        if (RepositoryImpl.isSystemTx(transaction))
+            return displayPath; // no user name so nothing to do
+
+        int wkspIndex = displayPath.indexOf(wkspPragma);
+        if (wkspIndex == -1)
+            return displayPath; // no workspace so nothing to do
+            
+        int userIndex = displayPath.indexOf(wkspPragma + userName);
+        if (userIndex != -1)
+            return displayPath; // already contains workspace/user so nothing to do
+
+        //
+        // So displayPath contains workspace/ but does not yet contain workspace/$USER
+        //
+        return displayPath.replace(wkspPragma, wkspPragma + userName + FORWARD_SLASH);
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -304,8 +356,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
      *      java.lang.String)
      */
     @Override
-    public String getPath( final UnitOfWork transaction,
-                           final String displayPath ) {
+    public String getPath( final UnitOfWork transaction, String displayPath ) {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( displayPath, "displayPath" ); //$NON-NLS-1$
@@ -317,6 +368,8 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         if ( ROOT_DISPLAY_PATH.equals( displayPath ) ) {
             return ROOT_PATH;
         }
+
+        displayPath = checkWorkspacePath(transaction, displayPath);
 
         KomodoObject kobject = null;
 
@@ -417,9 +470,14 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
      * @see org.komodo.spi.ui.KomodoObjectLabelProvider#setRepository(org.komodo.spi.repository.Repository)
      */
     @Override
-    public void setRepository( final Repository repository ) {
+    public void setRepository( final Repository repository, UnitOfWork transaction ) throws KException {
         assert( repository != null );
         this.repository = repository;
+
+        //
+        // Ensures that the user workspace is created
+        //
+        this.repository.komodoWorkspace(transaction);
     }
 
     /**
@@ -446,7 +504,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
-        String areaObjectName=getNameForAreaObject(kobject.getAbsolutePath());
+        String areaObjectName=getNameForAreaObject(kobject.getAbsolutePath(), transaction);
 
 		if(areaObjectName != null){
 			return areaObjectName;
@@ -461,17 +519,18 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
 	/**
 	 *
 	 * @param path Absolute path to object
+	 * @param transaction the transaction
 	 * @return Name of the area object (Workspace, Library,..) or null if the path doesn't lead to area object
 	 */
-	protected String getNameForAreaObject(String path){
+	protected String getNameForAreaObject(String path, UnitOfWork transaction){
         // /tko:komodo
         if ( ROOT_PATH.equals( path ) || ROOT_SLASH_PATH.equals( path ) ) {
             return ROOT_DISPLAY_NAME;
         }
 
-        // /tko:komodo/workspace
-        if ( WORKSPACE_PATH.equals( path ) || WORKSPACE_SLASH_PATH.equals( path ) ) {
-            return WORKSPACE_DISPLAY_NAME;
+        // /tko:komodo/workspace/${USER}
+        if ( getWorkspacePath().equals( path ) || getWorkspaceSlashPath().equals( path ) ) {
+            return workspaceDisplayName(transaction);
         }
 
         // /tko:komodo/library

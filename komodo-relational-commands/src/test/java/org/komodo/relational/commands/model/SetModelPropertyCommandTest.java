@@ -45,7 +45,7 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -82,7 +82,7 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );
         assertThat( vdbs.length, is( 1 ) );
 
@@ -102,7 +102,7 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );
         assertThat( vdbs.length, is( 1 ) );
 

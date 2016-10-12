@@ -23,6 +23,7 @@ package org.komodo.relational.folder.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.dataservice.Dataservice;
@@ -33,7 +34,11 @@ import org.komodo.relational.folder.Folder;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.SchemaImpl;
+import org.komodo.relational.resource.Driver;
+import org.komodo.relational.resource.internal.DriverImpl;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -45,6 +50,7 @@ import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.utils.ArgCheck;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
@@ -55,8 +61,9 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER,
-                                                                       Schema.IDENTIFIER, Dataservice.IDENTIFIER, Folder.IDENTIFIER };
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, 
+                                                                       Dataservice.IDENTIFIER, Translator.IDENTIFIER, Driver.IDENTIFIER, 
+                                                                       Folder.IDENTIFIER };
     
     /**
      * @param uow
@@ -126,9 +133,9 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Dataservice > result = new ArrayList< Dataservice >();
+        final List< Dataservice > result = new ArrayList< >();
 
-        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, KomodoLexicon.DataService.NODE_TYPE, namePatterns ) ) {
+        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.DataService.NODE_TYPE, namePatterns ) ) {
             final Dataservice service = new DataserviceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
             result.add( service );
         }
@@ -146,9 +153,9 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Datasource > result = new ArrayList< Datasource >();
+        final List< Datasource > result = new ArrayList< >();
 
-        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, KomodoLexicon.DataSource.NODE_TYPE, namePatterns ) ) {
+        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns ) ) {
             final Datasource ds = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
             result.add( ds );
         }
@@ -166,7 +173,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Vdb > result = new ArrayList< Vdb >();
+        final List< Vdb > result = new ArrayList< >();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns ) ) {
             final Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -186,7 +193,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Schema > result = new ArrayList< Schema >();
+        final List< Schema > result = new ArrayList< >();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, KomodoLexicon.Schema.NODE_TYPE, namePatterns ) ) {
             final Schema schema = new SchemaImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -199,6 +206,46 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
 
         return result.toArray( new Schema[ result.size() ] );
     }
+    
+    @Override
+    public Translator[] getTranslators( final UnitOfWork transaction,
+                                        final String... namePatterns ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< Translator > result = new ArrayList< Translator >();
+
+        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, VdbLexicon.Translator.TRANSLATOR, namePatterns ) ) {
+            final Translator translator = new TranslatorImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            result.add( translator );
+        }
+
+        if ( result.isEmpty() ) {
+            return Translator.NO_TRANSLATORS;
+        }
+
+        return result.toArray( new Translator[ result.size() ] );
+    }
+
+    @Override
+    public Driver[] getDrivers( final UnitOfWork transaction,
+                                final String... namePatterns ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< Driver > result = new ArrayList< Driver >();
+
+        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE, namePatterns ) ) {
+            final DriverImpl driver = new DriverImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            result.add( driver );
+        }
+
+        if ( result.isEmpty() ) {
+            return Driver.NO_DRIVERS;
+        }
+
+        return result.toArray( new Driver[ result.size() ] );
+    }
 
     @Override
     public Folder[] getFolders( final UnitOfWork transaction,
@@ -206,7 +253,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Folder > result = new ArrayList< Folder >();
+        final List< Folder > result = new ArrayList< >();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, KomodoLexicon.Folder.NODE_TYPE, namePatterns ) ) {
             final Folder folder = new FolderImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -239,12 +286,16 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
             result = getFolders( transaction, namePatterns );
         } else if ( KomodoLexicon.Schema.NODE_TYPE.equals( type ) ) {
             result = getSchemas( transaction, namePatterns );
-        } else if ( KomodoLexicon.DataSource.NODE_TYPE.equals( type ) ) {
+        } else if ( DataVirtLexicon.Connection.NODE_TYPE.equals( type ) ) {
             result = getDatasources( transaction, namePatterns );
-        } else if ( KomodoLexicon.DataService.NODE_TYPE.equals( type ) ) {
+        } else if ( DataVirtLexicon.DataService.NODE_TYPE.equals( type ) ) {
             result = getDataservices( transaction, namePatterns );
         } else if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( type ) ) {
             result = getVdbs( transaction, namePatterns );
+        } else if ( VdbLexicon.Translator.TRANSLATOR.equals( type ) ) {
+            result = getTranslators( transaction, namePatterns );
+        } else if ( DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE.equals( type ) ) {
+            result = getDrivers( transaction, namePatterns );
         } else {
             result = KomodoObject.EMPTY_ARRAY;
         }

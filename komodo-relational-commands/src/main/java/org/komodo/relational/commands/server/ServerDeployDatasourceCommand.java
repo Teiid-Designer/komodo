@@ -22,12 +22,13 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -38,6 +39,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A shell command to deploy a workspace Datasource to the connected server.
@@ -76,7 +78,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             // Make sure datasource object exists in repo
-            if(!getWorkspaceManager().hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
+            if(!getWorkspaceManager(getTransaction()).hasChild(getTransaction(), sourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceDatasourceNotFound, sourceName ), null );
             }
 
@@ -87,7 +89,10 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             final TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            final KomodoObject datasourceObj = getWorkspaceManager(getTransaction()).getChild( getTransaction(),
+                                                                               sourceName,
+                                                                               DataVirtLexicon.Connection.NODE_TYPE );
+
             final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
 
             // Make sure that the sourceType is OK for the connected server.
@@ -98,7 +103,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                                                          sourceType ),
                                               null );
             }
-            
+
             // Determine if the server already has a deployed Datasource with this name
             try {
                 boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceName);
@@ -108,7 +113,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                                                              sourceName ),
                                                   null );
                 }
-                
+
                 // Get the properties necessary for deployment to server
                 Properties sourceProps = null;
                 try {
@@ -117,7 +122,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                     result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.datasourcePropertiesError, ex.getLocalizedMessage() ), null );
                     return result;
                 }
-                
+
                 try {
                     // If overwriting, delete the existing source first
                     if(serverHasDatasource) {
@@ -143,7 +148,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
 
         return result;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -204,8 +209,8 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        final KomodoObject[] datasources = getWorkspaceManager().findDatasources(getTransaction());
-        List<String> existingDatasourceNames = new ArrayList<String>(datasources.length);
+        final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findDatasources(getTransaction());
+        List<String> existingDatasourceNames = new ArrayList<>(datasources.length);
         for(KomodoObject datasource : datasources) {
             existingDatasourceNames.add(datasource.getName(getTransaction()));
         }

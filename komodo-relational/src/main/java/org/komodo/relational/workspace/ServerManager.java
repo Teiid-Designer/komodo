@@ -104,7 +104,7 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
         if ( instance == null ) {
             // We must create a transaction here so that it can be passed on to the constructor. Since the
             // node associated with the ServerManager always exists we don't have to create it.
-            final UnitOfWork uow = repository.createTransaction( "createServerManager", false, null ); //$NON-NLS-1$
+            final UnitOfWork uow = repository.createTransaction(Repository.SYSTEM_USER, "createServerManager", false, null ); //$NON-NLS-1$
             instance = new ServerManager( uow, repository );
             uow.commit();
 
@@ -137,6 +137,11 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
                 if (getRepository() == null || State.NOT_REACHABLE == getRepository().getState() || !(getRepository().ping())) {
                     instances.remove(ServerManager.this);
                 }
+            }
+
+            @Override
+            public void errorOccurred(Throwable e) {
+                // Nothing to do
             }
         });
     }
@@ -298,6 +303,7 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     *        AND should be owned by {@link Repository#SYSTEM_USER}
      * @param srcTeiid the source teiid model
      * @return the teiid object (never <code>null</code>)
      * @throws KException

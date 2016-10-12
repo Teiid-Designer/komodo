@@ -27,17 +27,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
-import org.komodo.core.Messages;
 import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.core.Messages;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -49,7 +48,6 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.ModeShapeLexicon;
 import org.modeshape.jcr.api.JcrConstants;
-import org.komodo.spi.lexicon.TeiidSqlConstants;
 
 /**
  * Finder class for searching a repository
@@ -60,7 +58,7 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
 
     private final Repository repository;
 
-    private Set<FromType> fromTypes;
+    private FromType fromType;
 
     private List<Clause> whereClauses;
 
@@ -126,15 +124,11 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
      * @param alias the alias of the type
      * @return this search object
      */
-    public ObjectSearcher addFromType(String type, String alias) {
+    public ObjectSearcher setFromType(String type, String alias) {
         ArgCheck.isNotEmpty(type);
 
-        if (fromTypes == null)
-            fromTypes = new LinkedHashSet<FromType>();
-
+        fromType = new FromType(type, alias);
         scanForParameters(type);
-
-        fromTypes.add(new FromType(type, alias));
         return this;
     }
 
@@ -144,20 +138,16 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
      * @param type the type to be added
      * @return this search object
      */
-    public ObjectSearcher addFromType(String type) {
-        addFromType(type, null);
+    public ObjectSearcher setFromType(String type) {
+        setFromType(type, null);
         return this;
     }
 
     /**
      * @return set of node types for the From clause
      */
-    Set<FromType> getFromTypes() {
-        if (fromTypes == null) {
-            return Collections.emptySet();
-        }
-
-        return fromTypes;
+    FromType getFromType() {
+        return fromType;
     }
 
     @SuppressWarnings( "unchecked" )
@@ -439,39 +429,36 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
     }
 
     private void createFrom(StringBuffer buffer) {
-        ArgCheck.isTrue(getFromTypes().size() > 0, "At least 1 from clause is required"); //$NON-NLS-1$
-
-        //
-        // If there are where clauses and there are multiple from types
-        // then each from type should have an alias
-        //
-        if (hasWhere() && getFromTypes().size() > 1) {
-            for (FromType fromType : getFromTypes()) {
-                ArgCheck.isNotEmpty(fromType.getAlias());
-            }
-        }
+        ArgCheck.isNotNull(getFromType(), "At least 1 from clause is required"); //$NON-NLS-1$
 
         buffer.append(SPACE);
         buffer.append(FROM);
         buffer.append(SPACE);
 
-        Iterator<FromType> iterator = getFromTypes().iterator();
-        while (iterator.hasNext()) {
-            FromType fromType = iterator.next();
-            buffer.append(OPEN_SQUARE_BRACKET);
-            buffer.append(fromType.getType());
-            buffer.append(CLOSE_SQUARE_BRACKET);
+        FromType fromType = getFromType();
+        buffer.append(OPEN_SQUARE_BRACKET);
+        buffer.append(fromType.getType());
+        buffer.append(CLOSE_SQUARE_BRACKET);
 
-            if (! fromType.getAlias().isEmpty()) {
-                buffer.append(SPACE);
-                buffer.append(AS);
-                buffer.append(SPACE);
-                buffer.append(fromType.getAlias());
-            }
+        if (! fromType.getAlias().isEmpty()) {
+            buffer.append(SPACE);
+            buffer.append(AS);
+            buffer.append(SPACE);
+            buffer.append(fromType.getAlias());
+        }
+    }
 
-            if (iterator.hasNext()) {
-                buffer.append(COMMA);
-                buffer.append(SPACE);
+    private void appendWhereClause(StringBuffer buffer) {
+        if (customWhereClause != null)
+            buffer.append(customWhereClause);
+        else {
+            List<Clause> whereClauses = getWhereClauses();
+            for (int i = 0; i < whereClauses.size(); i++) {
+                Clause clause = whereClauses.get(i);
+                buffer.append(clause.clauseString(i));
+
+                if (i < whereClauses.size() - 1)
+                    buffer.append(SPACE);
             }
         }
     }
@@ -480,42 +467,82 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
      * Create the Where clause
      *
      * @param buffer
+     * @param uow 
      */
-    private void createWhere(StringBuffer buffer) {
-        ArgCheck.isTrue(getFromTypes().size() > 0, "At least 1 from clause is required"); //$NON-NLS-1$
+    private void createWhere(StringBuffer buffer, UnitOfWork uow) {
+        ArgCheck.isNotNull(getFromType(), "At least 1 from clause is required"); //$NON-NLS-1$
 
-        if (isEmpty(whereClauses) && customWhereClause == null)
+        //
+        // If the uow is null then no need to add the user workspace
+        // where class so free to return
+        //
+        if ((uow == null || RepositoryImpl.isSystemTx(uow)) && isEmpty(whereClauses) && customWhereClause == null)
             return;
 
-        buffer.append(SPACE);
-        buffer.append(WHERE);
-        buffer.append(SPACE);
+        //
+        // If uow not a system transaction then find the user's workspace and limit
+        // the search to its descendents by including a parent clause
+        //
+        boolean isUserTx = uow != null && ! RepositoryImpl.isSystemTx(uow);
+        String wkspPath = RepositoryImpl.komodoWorkspacePath(uow);
 
-        if (whereClauses != null && ! whereClauses.isEmpty()) {
-            for (int i = 0; i < whereClauses.size(); i++) {
-                Clause clause = whereClauses.get(i);
-                buffer.append(clause.clauseString(i));
+        buffer.append(SPACE)
+                    .append(WHERE)
+                    .append(SPACE);
 
-                if (i < whereClauses.size() - 1)
-                    buffer.append(SPACE);
+        if (isUserTx) {
+            // ISDESCENDANTNODE('wkspPath')
+            buffer.append("ISDESCENDANTNODE")
+                        .append(OPEN_BRACKET);
+
+            if (getFromType().getAlias() != null && ! EMPTY_STRING.equals(getFromType().getAlias())) {
+                buffer.append(QUOTE_MARK)
+                            .append(getFromType().getAlias())
+                            .append(QUOTE_MARK)
+                            .append(COMMA)
+                            .append(SPACE);
             }
-        } else
-            buffer.append(customWhereClause);
+
+            buffer.append(QUOTE_MARK)
+                        .append(wkspPath)
+                        .append(QUOTE_MARK)
+                        .append(CLOSE_BRACKET);
+
+            // AND (
+            if (hasWhere()) {
+                buffer.append(SPACE)
+                            .append(AND)
+                            .append(SPACE)
+                            .append(OPEN_BRACKET)
+                            .append(SPACE);
+            }
+        }
+
+        appendWhereClause(buffer);
+
+        if (isUserTx && hasWhere()) {
+            buffer.append(SPACE)
+                        .append(CLOSE_BRACKET);
+        }
     }
 
-    private String createStatement() {
+    private String createStatement(UnitOfWork uow) {
         StringBuffer buffer = new StringBuffer();
 
         createSelect(buffer);
         createFrom(buffer);
-        createWhere(buffer);
+        createWhere(buffer, uow);
 
         return buffer.toString();
     }
 
+    public String toString(UnitOfWork uow) {
+        return createStatement(uow);
+    }
+
     @Override
     public String toString() {
-        return createStatement();
+        return toString(null);
     }
 
     @Override
@@ -523,7 +550,7 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
         final int prime = 31;
         int result = 1;
         result = prime * result + ((this.customWhereClause == null) ? 0 : this.customWhereClause.hashCode());
-        result = prime * result + ((this.fromTypes == null) ? 0 : this.fromTypes.hashCode());
+        result = prime * result + ((this.fromType == null) ? 0 : this.fromType.hashCode());
         result = prime * result + ((this.repository == null) ? 0 : this.repository.hashCode());
         result = prime * result + ((this.whereClauses == null) ? 0 : this.whereClauses.hashCode());
         return result;
@@ -544,11 +571,11 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
         } else
             if (!this.customWhereClause.equals(other.customWhereClause))
                 return false;
-        if (this.fromTypes == null) {
-            if (other.fromTypes != null)
+        if (this.fromType == null) {
+            if (other.fromType != null)
                 return false;
         } else
-            if (!this.fromTypes.equals(other.fromTypes))
+            if (!this.fromType.equals(other.fromType))
                 return false;
         if (this.repository == null) {
             if (other.repository != null)
@@ -604,7 +631,7 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
      * @throws KException if error occurs
      */
     public List<KomodoObject> searchObjects(final UnitOfWork uow) throws KException {
-        String statement = createStatement();
+        String statement = createStatement(uow);
         List<KomodoObject> objects = searchObjects(uow, statement);
         return objects;
     }
@@ -640,8 +667,8 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
         // The date/time this search was created
         String date = DATE_FORMAT.format(new Date());
         searchObject.setProperty(uow, Search.SEARCH_DATE, date);
-        for (FromType fromType : getFromTypes()) {
-            fromType.write(uow, searchObject);
+        if (getFromType() != null) {
+            getFromType().write(uow, searchObject);
         }
 
         if (getCustomWhereClause() != null) {
@@ -677,8 +704,8 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
         // Clear any existing data from this object searcher
         customWhereClause = null;
 
-        if (fromTypes != null)
-            fromTypes.clear();
+        if (fromType != null)
+            fromType = null;
 
         if (whereClauses != null)
             whereClauses.clear();
@@ -700,7 +727,7 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
                 if (fromType.hasProperty(uow, Search.FromType.TYPE))
                     type = fromType.getProperty(uow, Search.FromType.TYPE).getStringValue(uow);
 
-                addFromType(type, alias);
+                setFromType(type, alias);
             }
         }
 

@@ -32,6 +32,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -84,13 +86,25 @@ public class TestObjectOperations implements StringConstants {
     }
 
     @AfterClass
-    public static void oneTimeTeardown() {
+    public static void oneTimeTeardown() throws InterruptedException, ExecutionException {
+        System.out.println("Tearing down engine");
+        if (engine == null)
+            return;
+
+        System.out.println("State reachable so shutting down");
+        Future<Boolean> shutdown = engine.shutdown();
+        // Await the shutdown
+        shutdown.get();
+
+        repository = null;
+        engine = null;
+
         FileUtils.removeDirectoryAndChildren( _dataDirectory.toFile() );
     }
 
-    private ModeShapeEngine engine;
+    private static ModeShapeEngine engine;
 
-    private JcrRepository repository;
+    private static JcrRepository repository;
 
     private InputStream getResource(String resource) {
         return MultiUseAbstractTest.class.getResourceAsStream(resource);

@@ -431,12 +431,12 @@
       "keng__kType": "Datasource",
       "keng__description": "Describes the configuration for a datasource",
       "keng__properties": {
-        "tko__jndiName": {
+        "dv__jndiName": {
           "keng__type": "string",
           "keng__required": true,
           "keng__repeatable": false
         },
-        "tko__driverName": {
+        "dv__driverName": {
           "keng__type": "string",
           "keng__required": true,
           "keng__repeatable": false

@@ -36,7 +36,7 @@ public final class CreateDatasourceCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] datasources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, datasources.length);
@@ -50,7 +50,7 @@ public final class CreateDatasourceCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] datasources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, datasources.length);

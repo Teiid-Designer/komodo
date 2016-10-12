@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataservice name="MyDataService">
+
+    <description>This is my data service description</description>
+    <lastModified>2002-05-30T09:30:10</lastModified>
+    <modifiedBy>elvis</modifiedBy>
+
+    <property name="propA">Value A</property>
+
+    <service-vdb-file
+        path="product-view-vdb.xml"
+        publish="ifMissing"
+        vdbName="ServiceVdb"
+        vdbVersion="1"
+    >
+        <dependencies>
+            <vdb-file
+                path="vdbs/twitter-vdb.xml"
+                publish="ifMissing"
+                vdbName="twitter"
+                vdbVersion="1" />
+        </dependencies>
+    </service-vdb-file>
+
+    <metadata>
+        <ddl-file
+            path="metadata/firstDdl.ddl"
+            publish="always" />
+        <ddl-file
+            path="metadata/secondDdl.ddl"
+            publish="always" />
+    </metadata>
+
+    <connections>
+        <connection-file
+            path="connections/books-connection.xml"
+            publish="ifMissing"
+            jndiName="java:/jdbcSource" />
+        <connection-file
+            path="connections/portfolio-connection.xml"
+            jndiName="java:/jndiName" />
+    </connections>
+
+    <drivers>
+        <driver-file path="drivers/books-driver-1.jar" />
+        <driver-file path="drivers/books-driver-2.jar" />
+        <driver-file path="drivers/portfolio-driver.jar" />
+    </drivers>
+
+    <udfs>
+        <udf-file
+            path="udfs/firstUdf.jar"
+            publish="never" />
+        <udf-file path="udfs/secondUdf.jar" />
+    </udfs>
+
+    <vdbs>
+        <vdb-file
+            path="vdbs/books-vdb.xml"
+            publish="ifMissing"
+            vdbName="BooksExample"
+            vdbVersion="1" />
+        <vdb-file
+            path="vdbs/Portfolio-vdb.xml"
+            vdbName="Portfolio"
+            vdbVersion="1" />
+    </vdbs>
+
+    <resources>
+        <resource-file path="resources/firstResource.xml" />
+        <resource-file
+            path="resources/secondResource.xml"
+            publish="always" />
+    </resources>
+
+</dataservice>

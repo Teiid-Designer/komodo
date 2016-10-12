@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertEquals;
+import java.io.File;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Vdb;
@@ -28,16 +29,15 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class UploadVdbCommandTest extends AbstractCommandTest {
 
-    private static final String UPLOAD_VDB = UploadVdbCommandTest.class.getClassLoader()
-    																						.getResource("AzureService-vdb.xml").getFile();
+    private static final File UPLOAD_VDB = getResourceFile(UploadVdbCommandTest.class, "AzureService-vdb.xml");
 
     @Test
     public void shouldUploadVdb() throws Exception {
-        final String[] commands = { "upload-vdb myVdb " + UPLOAD_VDB };
+        final String[] commands = { "upload-vdb myVdb " + UPLOAD_VDB.getAbsolutePath() };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -47,18 +47,18 @@ public final class UploadVdbCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldNotUploadVdbIfExists() throws Exception {
         final String[] commands = { "create-vdb myVdb vdbPath ",
-                                    "upload-vdb myVdb " + UPLOAD_VDB };
+                                    "upload-vdb myVdb " + UPLOAD_VDB.getAbsolutePath() };
         execute( commands );
     }
     
     @Test
     public void shouldUploadVdbIfExistsWithOverwrite() throws Exception {
         final String[] commands = { "create-vdb myVdb vdbPath ",
-                                    "upload-vdb myVdb " + UPLOAD_VDB + " -o" };
+                                    "upload-vdb myVdb " + UPLOAD_VDB.getAbsolutePath() + " -o" };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);

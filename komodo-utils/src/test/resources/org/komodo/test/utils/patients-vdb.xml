@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<vdb name="patients" version="1">
+
+    <description>Sample Dataservice for patient records</description>
+    <connection-type>BY_VERSION</connection-type>
+
+    <model name="Patients" type="VIRTUAL">
+        <description>Example Patient Service</description>
+        <metadata type="DDL">
+            <![CDATA[CREATE VIEW TheServiceView (
+                    id long,
+                    firstName clob,
+                    lastName clob,
+                    gender clob,
+                    age long,
+                    currentSmoker boolean,
+                    lastPrimaryCareVisit timestamp,
+                    PRIMARY KEY(id)
+                )
+                AS
+                SELECT id, firstName, lastName, gender, age, currentSmoker, lastPrimaryCareVisit FROM vdbwebtest.PATIENT;
+            ]]>
+
+        </metadata>
+    </model>
+    <model name="PatientSource" type="PHYSICAL">
+        <source name="PatientSource" translator-name="mysql5" connection-jndi-name="java:/MySqlPatients"/>
+    </model>
+
+</vdb>

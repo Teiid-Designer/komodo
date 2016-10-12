@@ -38,7 +38,6 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -98,7 +97,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
 
             // Determine if the VDB exists
             if ( workspaceContext
-                 && !getWorkspaceManager().hasChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+                 && !getWorkspaceManager(getTransaction()).hasChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
             }
 
@@ -153,7 +152,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
         KomodoObject kobject = null;
 
         if ( workspaceContext ) {
-            kobject = getWorkspaceManager().getChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            kobject = getWorkspaceManager(getTransaction()).getChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
         } else {
             kobject = getContext();
         }
@@ -182,7 +181,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
 
     private boolean isWorkspaceContext() {
         final String path = getContext().getAbsolutePath();
-        return ( DefaultLabelProvider.WORKSPACE_PATH.equals( path ) || DefaultLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
+        return getWorkspaceStatus().getLabelProvider().isWorkspacePath(path);
     }
 
     /**
@@ -227,7 +226,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
 
         if ( isWorkspaceContext() ) {
             // arg 0 = vdb name, arg 1 = output file name, arg 2 = overwrite
-            final KomodoObject[] vdbs = getWorkspaceManager().findVdbs( getTransaction() );
+            final KomodoObject[] vdbs = getWorkspaceManager(getTransaction()).findVdbs( getTransaction() );
 
             if ( args.isEmpty() && ( vdbs.length != 0 ) ) {
                 for ( final KomodoObject vdb : vdbs ) {

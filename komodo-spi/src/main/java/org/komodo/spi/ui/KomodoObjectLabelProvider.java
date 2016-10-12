@@ -8,7 +8,7 @@
 package org.komodo.spi.ui;
 
 import java.util.List;
-
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -33,6 +33,24 @@ public interface KomodoObjectLabelProvider {
         String SHOW_PROP_NAME_PREFIX = "showPropNamePrefix"; //$NON-NLS-1$
 
     }
+
+    /**
+     * @return the path to the workspace
+     */
+    String getWorkspacePath();
+
+    /**
+     * Set the path to the workspace using the username available from the transaction
+     *
+     * @param transaction
+     */
+    void setWorkspacePath(UnitOfWork transaction);
+
+    /**
+     * @param path
+     * @return if the given path is the workspace
+     */
+    boolean isWorkspacePath(String path);
 
     /**
      * If necessary, removes the namespace prefix from the name.
@@ -116,8 +134,11 @@ public interface KomodoObjectLabelProvider {
      *
      * @param repository
      *        the repository whose paths and display paths will be provided (never <code>null</code>)
+     * @param transaction
+     *        the transaction holding the prospective user
+     * @throws KException if error occurs 
      */
-    void setRepository( final Repository repository );
+    void setRepository( final Repository repository, UnitOfWork transaction ) throws KException;
 
     /**
      * @return Returns a node names which should be omitted from display path (Never <code>null</code>. Returns empty list if not

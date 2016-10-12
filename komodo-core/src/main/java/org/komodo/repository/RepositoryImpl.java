@@ -22,6 +22,7 @@
 package org.komodo.repository;
 
 import static org.komodo.repository.Messages.Komodo.ERROR_REPO_HAS_CHANGES;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
@@ -41,6 +43,7 @@ import javax.jcr.ValueFactory;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Environment;
@@ -197,12 +200,15 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         protected final UnitOfWorkListener callback;
         protected KException error;
+        protected final String userName;
         protected final String name;
         protected final boolean rollbackOnly;
         protected Session session;
         protected State state = State.NOT_STARTED;
 
         /**
+         * @param userName
+         *        the user who initiated the transaction
          * @param uowName
          *        the transaction name (cannot be empty)
          * @param uowSession
@@ -212,13 +218,16 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          * @param listener
          *        the callback (can be <code>null</code>)
          */
-        public UnitOfWorkImpl( final String uowName,
+        public UnitOfWorkImpl(final String userName,
+                               final String uowName,
                                final Session uowSession,
                                final boolean uowRollbackOnly,
                                final UnitOfWorkListener listener) {
+            ArgCheck.isNotEmpty(userName, "userName"); //$NON-NLS-1$
             ArgCheck.isNotEmpty(uowName, "uowName"); //$NON-NLS-1$
             ArgCheck.isNotNull(uowSession, "uowSession"); //$NON-NLS-1$
 
+            this.userName = userName;
             this.name = uowName;
             this.session = uowSession;
             this.rollbackOnly = uowRollbackOnly;
@@ -296,6 +305,16 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         @Override
         public KException getError() {
             return this.error;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getUserName()
+         */
+        @Override
+        public String getUserName() {
+            return userName;
         }
 
         /**
@@ -433,16 +452,6 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     public static final String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
 
     /**
-     * The root path of the Komodo repository workspace area.
-     */
-    public static final String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
-
-    /**
-     * The root path of the Komodo repository workspace searches area
-     */
-    public static final String SEARCHES_ROOT = WORKSPACE_ROOT + FORWARD_SLASH + Search.GROUP_NODE;
-
-    /**
      * The root path of the Komodo repository environment validation rules area
      */
     public static final String VALIDATION_ROOT = ENV_ROOT + FORWARD_SLASH + Environment.VALIDATION;
@@ -459,9 +468,108 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
     protected static final KLog LOGGER = KLog.getLogger();
 
-    private final Set< RepositoryClient > clients = new HashSet< RepositoryClient >();
+    /**
+     * The root path of the Komodo repository workspace area.
+     * This should remain private as clients should use
+     * {@link #komodoWorkspacePath(org.komodo.spi.repository.Repository.UnitOfWork)}
+     * in preference, allowing for the creation of the user home directory
+     */
+    private static final String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
+
+    /**
+     * The root path of the Komodo repository workspace searches area.
+     * This remains a sibling of the user home directories so that searches can be shared by users.
+     */
+    public static final String SEARCHES_ROOT = WORKSPACE_ROOT + FORWARD_SLASH + Search.GROUP_NODE;
+
+    /**
+     * @param transaction
+     *       the transaction (cannot be <code>null</code> or have a state that is not
+    *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+    *
+     * @return true if the given transaction is a system transaction
+     */
+    public static boolean isSystemTx(UnitOfWork transaction) {
+        ArgCheck.isNotNull(transaction, "Transaction cannot be null");
+        ArgCheck.isNotNull(transaction.getUserName(), "Transaction must contain a user name");
+
+        //
+        // Transactions should always have a user name but just in case one sneaked through
+        //
+        return SYSTEM_USER.equals(transaction.getUserName());
+    }
+
+    /**
+     * The komodo user's workspace in the repository, ie. /tko:komodo/tko:workspace/${user}
+     * where ${user} is the user owning the given transaction
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     *
+     * @return the workspace path for the user who owns the transaction
+     */
+    public static String komodoWorkspacePath(final UnitOfWork uow) {
+        if(uow == null)
+            return WORKSPACE_ROOT;
+
+        String userName = uow.getUserName();
+        if (userName == null || isSystemTx(uow))
+            return WORKSPACE_ROOT;
+
+        return WORKSPACE_ROOT + FORWARD_SLASH + userName;
+    }
+
+    /**
+     * @param path the path to test
+     *
+     * @return true if the path is a reserved path
+     */
+    public static boolean isReservedPath(String path) {
+        if (path == null)
+            return false;
+
+        //
+        // Ensure path has no trailing slash
+        //
+        if (path.endsWith(FORWARD_SLASH))
+            path = path.substring(0, path.length() - 1);
+
+        if (KOMODO_ROOT.equals(path) || LIBRARY_ROOT.equals(path) || ENV_ROOT.equals(path)
+                || SEARCHES_ROOT.equals(path) || VALIDATION_ROOT.equals(path) || SERVERS_ROOT.equals(path)
+                || TEIID_CACHE_ROOT.equals(path) || WORKSPACE_ROOT.equals(path))
+            return true;
+
+        path = path.replace(WORKSPACE_ROOT + FORWARD_SLASH, EMPTY_STRING);
+        if (! path.contains(FORWARD_SLASH))
+            // If no slash then this is a home directory
+            return true;
+
+        return false;
+    }
+
+    /**
+     * @param transaction
+     * @return the group of reserved paths including the home directory for the owner of the transaction
+     */
+    public static String[] getReservedPaths(UnitOfWork transaction) {
+        List<String> paths = new ArrayList<>();
+
+        paths.add(KOMODO_ROOT);
+        paths.add(LIBRARY_ROOT);
+        paths.add(ENV_ROOT);
+        paths.add(SEARCHES_ROOT);
+        paths.add(VALIDATION_ROOT);
+        paths.add(SERVERS_ROOT);
+        paths.add(WORKSPACE_ROOT);
+        paths.add(komodoWorkspacePath(transaction));
+
+        return paths.toArray(new String[0]);
+    }
+
+    private final Set< RepositoryClient > clients = new HashSet< >();
     private final Id id;
-    private final Set< RepositoryObserver > observers = new HashSet< RepositoryObserver >();
+    private final Set< RepositoryObserver > observers = new HashSet< >();
     private final Type type;
     private ValidationManager validationMgr;
 
@@ -478,6 +586,133 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         this.type = type;
         this.id = id;
+    }
+
+    /**
+     * Called prior to each external API method. Prepares the object at the given nodePath
+     * to be acted upon by the transaction, including testing if such operation violates any
+     * security constraints and ensuring that a user-space is available in the workspace.
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code>)
+     * @param nodePath the path to a repository node
+     * @param operationType the type of the operation to be performed
+     * @throws KException if an error occurs
+     */
+    protected void provision(UnitOfWork transaction, String nodePath, OperationType operationType) throws KException {
+        String userWksp = komodoWorkspacePath(transaction);
+
+        if (isSystemTx(transaction))
+            return; // System can do what it wishes
+
+        /*
+         * Ensures that a user workspace is always available so truly dynamic
+         * and guarantees that the user space is available to the current tx.
+         */
+        komodoWorkspace(transaction);
+
+        switch (operationType) {
+            case READ_OPERATION:
+                if (isReservedPath(nodePath)) {
+                  /*
+                   * Reserved paths can be read but not written to
+                   * allowing for absolute paths to be broken down into segments
+                   * and each segment read, eg. DefaultLabelProvider.getPath();
+                   *
+                   * However, this does not mean that these paths will return anything
+                   * useful, eg. property descriptors, as individual API methods may stop
+                   * their reading.
+                   */
+                  return;
+                }
+
+                if (nodePath.startsWith(SERVERS_ROOT))
+                    return; // Read the group of servers
+
+                if (nodePath.startsWith(TEIID_CACHE_ROOT))
+                    return; // Read the group of cache teiids
+
+                if (nodePath.startsWith(VALIDATION_ROOT))
+                    return; // Read the group of validation rules
+
+                if (nodePath.startsWith(LIBRARY_ROOT))
+                    return; // Read the contents of the library
+
+                if(nodePath.startsWith(userWksp))
+                    return; // Read the contents of the user's workspace
+
+                if (nodePath.startsWith(SEARCHES_ROOT))
+                    return; // Read the contents of the searches
+
+                throw new KException(Messages.getString(
+                                                        Messages.Komodo.READ_NOT_ALLOWED,
+                                                        nodePath, transaction.getUserName() ));
+
+            case CHILD_OPERATION:
+                if (SERVERS_ROOT.equals(nodePath))
+                    return; // Add/Remove servers
+
+                // Only system can add/remove cached teiids
+
+                if (nodePath.startsWith(VALIDATION_ROOT))
+                    return; // Add/Remove validation rules from both the validation root and its children
+
+                // Only system can add/remove library objects through the check-in/out framework
+
+                if (nodePath.startsWith(userWksp))
+                    return; // Add/Remove children in the user's workspace
+
+                if (nodePath.startsWith(SEARCHES_ROOT))
+                    return; // Add/Remove searches from the searches location
+
+                throw new KException(Messages.getString(
+                                                        Messages.Komodo.ADD_REMOVE_CHILD_NOT_ALLOWED,
+                                                        nodePath, transaction.getUserName() ));
+
+            case MODIFY_OPERATION:
+                if (nodePath.startsWith(SERVERS_ROOT) && ! SERVERS_ROOT.equals(nodePath))
+                    return; // Can modify servers
+
+                if (nodePath.startsWith(VALIDATION_ROOT) && ! VALIDATION_ROOT.equals(nodePath))
+                    return; // Can modify validation rules
+
+                if(nodePath.startsWith(userWksp) && ! userWksp.equals(nodePath))
+                    return; // Can modify contents of workspace
+
+                if (nodePath.startsWith(SEARCHES_ROOT))
+                    return; // Can modify searches in the search location
+
+                throw new KException(Messages.getString(
+                                                             Messages.Komodo.SET_PROPERTY_NOT_ALLOWED,
+                                                             nodePath, transaction.getUserName() ));
+
+            case REMOVE_OPERATION:
+                if (nodePath.startsWith(SERVERS_ROOT) && ! SERVERS_ROOT.equals(nodePath))
+                    return; // Can remove servers
+
+                if (nodePath.startsWith(VALIDATION_ROOT) && ! VALIDATION_ROOT.equals(nodePath))
+                    return; // Can remove validation rules
+
+                if(nodePath.startsWith(userWksp) && ! userWksp.equals(nodePath))
+                    return; // Can remove contents of workspace
+
+                if (nodePath.startsWith(SEARCHES_ROOT))
+                    return; // Can remove searches in the search location
+
+                throw new KException(Messages.getString(
+                                                        Messages.Komodo.REMOVE_NOT_ALLOWED,
+                                                        nodePath, transaction.getUserName() ));
+        }
+    }
+
+    @Override
+    public void provision(UnitOfWork transaction, KomodoObject object, OperationType operationType) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(object, "object not found");
+
+        String nodePath = object.getAbsolutePath();
+        provision(transaction, nodePath, operationType);
     }
 
     /**
@@ -502,11 +737,12 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                          name);
         }
 
-        final String workspacePath = getAbsoluteWorkspacePath(parentPath);
+        final String workspacePath = getAbsoluteWorkspacePath(transaction, parentPath, OperationType.CHILD_OPERATION);
         final Session session = getSession(transaction);
 
         try {
-            if (WORKSPACE_ROOT.equals(workspacePath) && !session.nodeExists(WORKSPACE_ROOT)) {
+            String komodoWorkspacePath = komodoWorkspacePath(transaction);
+            if (komodoWorkspacePath.equals(workspacePath) && !session.nodeExists(komodoWorkspacePath)) {
                 komodoWorkspace(transaction);
             }
 
@@ -625,7 +861,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         }
 
         final Session session = getSession(transaction);
-        List<KomodoObject> results = new ArrayList<KomodoObject>();
+        List<KomodoObject> results = new ArrayList<>();
 
         try {
             QueryManager queryMgr = session.getWorkspace().getQueryManager();
@@ -675,7 +911,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
-        searcher.addFromType(type, typeAlias);
+        searcher.setFromType(type, typeAlias);
         searcher.addWhereContainsClause(null, typeAlias, property, keywordCriteria, keywords);
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
 
@@ -703,7 +939,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         for (String type : types) {
-            searcher.addFromType(type);
+            searcher.setFromType(type);
         }
 
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
@@ -731,7 +967,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
-        searcher.addFromType(JcrConstants.NT_UNSTRUCTURED, typeAlias);
+        searcher.setFromType(JcrConstants.NT_UNSTRUCTURED, typeAlias);
         searcher.addWherePathClause(null, typeAlias, path);
 
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
@@ -761,13 +997,13 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         final Session session = getSession(transaction);
         KomodoObject result = null;
-        final String workspacePath = getAbsoluteWorkspacePath(path);
+        final String workspacePath = getAbsoluteWorkspacePath(transaction, path, OperationType.READ_OPERATION);
 
         try {
             if (session.nodeExists(workspacePath)) {
                 final Node node = session.getNode(workspacePath);
                 result = new ObjectImpl(this, workspacePath, node.getIndex());
-            } else if (WORKSPACE_ROOT.equals(workspacePath)) {
+            } else if (komodoWorkspacePath(transaction).equals(workspacePath)) {
                 result = komodoWorkspace(transaction);
             }
 
@@ -794,7 +1030,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                 return LIBRARY_ROOT;
             }
 
-            if (nodePath.charAt(0) == File.separatorChar) {
+            if (nodePath.charAt(0) == FORWARD_SLASH.charAt(0)) {
                 nodePath = LIBRARY_ROOT + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {
                 nodePath = LIBRARY_ROOT + FORWARD_SLASH + nodePath;
@@ -804,34 +1040,37 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         return nodePath;
     }
 
-    private String getAbsoluteWorkspacePath( final String path ) {
+    private String getAbsoluteWorkspacePath(final UnitOfWork transaction, final String path,
+                                                                                    OperationType operationType ) throws KException {
         // return root if empty
+        String userWksp = komodoWorkspacePath(transaction);
         if ((path == null) || path.trim().isEmpty()) {
-            return WORKSPACE_ROOT;
+            return userWksp;
         }
 
         String nodePath = path.trim();
 
         // return workspace root if path is forward slash
         if (REPO_ROOT.equals(nodePath)) {
-            return WORKSPACE_ROOT;
+            return userWksp;
         }
 
         // if path does not start with workspace root assume a relative path so insert workspace root
         if (!nodePath.startsWith(WORKSPACE_ROOT)) {
-            if (nodePath.charAt(0) == File.separatorChar) {
-                nodePath = WORKSPACE_ROOT + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
+            if (nodePath.charAt(0) == FORWARD_SLASH.charAt(0)) {
+                nodePath = userWksp + FORWARD_SLASH + nodePath.substring(1); // remove leading slash
             } else {
-                nodePath = WORKSPACE_ROOT + FORWARD_SLASH + nodePath;
+                nodePath = userWksp + FORWARD_SLASH + nodePath;
             }
         }
+
+        provision(transaction, nodePath, operationType);
 
         return nodePath;
     }
 
-    private String getAbsoluteWorkspacePath( String path,
-                                             final String name ) {
-        path = getAbsoluteWorkspacePath(path);
+    private String getAbsoluteWorkspacePath(UnitOfWork uow, String path, final String name, OperationType operationType ) throws KException {
+        path = getAbsoluteWorkspacePath(uow, path, operationType);
         return (path.endsWith("/") ? (path + name) : (path + FORWARD_SLASH + name)); //$NON-NLS-1$
     }
 
@@ -877,7 +1116,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                          jcrUuid);
         }
 
-        final String sql = "SELECT * FROM [nt:unstructured] WHERE [jcr:uuid] = '" + jcrUuid + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+        final String sql = "SELECT * FROM [nt:base] WHERE [jcr:uuid] = '" + jcrUuid + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 
         try {
             assert (transaction instanceof UnitOfWorkImpl);
@@ -914,7 +1153,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         if ( this.validationMgr == null ) {
             // the ValidationManager loads validation rules when it is constructed so we need a transaction to save those rules
             final SynchronousCallback callback = new SynchronousCallback();
-            final UnitOfWork transaction = createTransaction( "getValidationManager", false, callback ); //$NON-NLS-1$
+            final UnitOfWork transaction = createTransaction(SYSTEM_USER, "getValidationManager", false, callback ); //$NON-NLS-1$
             this.validationMgr = new ValidationManagerImpl( transaction, this );
             transaction.commit();
 
@@ -984,10 +1223,13 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         }
 
         try {
-            final Node parent = new JcrTools().findOrCreateNode(getSession(transaction), getAbsoluteWorkspacePath(parentPath));
+            final Node parent = new JcrTools().findOrCreateNode(getSession(transaction),
+                                                                getAbsoluteWorkspacePath(transaction, parentPath, OperationType.CHILD_OPERATION));
             final Node newNode = parent.addNode(name);
             new JcrTools().uploadFile(getSession(transaction),
-                                      getAbsoluteWorkspacePath(newNode.getPath(), WorkspaceItem.ORIGINAL_FILE),
+                                      getAbsoluteWorkspacePath(
+                                                               transaction, newNode.getPath(), 
+                                                               WorkspaceItem.ORIGINAL_FILE, OperationType.CHILD_OPERATION),
                                       url.openStream());
             newNode.addMixin(WorkspaceItem.MIXIN_TYPE);
             final KomodoObject result = new ObjectImpl(this, newNode.getPath(), 0);
@@ -1019,6 +1261,19 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             try {
                 // Ensure all observers are informed even if one throws an exception
                 observer.eventOccurred();
+            } catch (final Exception ex) {
+                KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
+            }
+        }
+    }
+
+    protected void errorObservers(Throwable e) {
+        final Set<RepositoryObserver> copy = new HashSet<>(this.observers);
+
+        for (final RepositoryObserver observer : copy) {
+            try {
+                // Ensure all observers are informed even if one throws an exception
+                observer.errorOccurred(e);
             } catch (final Exception ex) {
                 KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), ex);
             }
@@ -1126,7 +1381,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
             try {
                 ArgCheck.isNotNull( path, "path" ); //$NON-NLS-1$
-                absPath = getAbsoluteWorkspacePath( path );
+                absPath = getAbsoluteWorkspacePath(transaction, path, OperationType.READ_OPERATION);
 
                 if ( !session.itemExists( absPath ) ) {
                     throw new KException( Messages.getString( Messages.Komodo.UNABLE_TO_REMOVE_NON_EXISTENT_WORKSPACE_ITEM,
@@ -1143,7 +1398,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         // all exist so now do the deletes
         for ( final String path : paths ) {
-            final String absPath = getAbsoluteWorkspacePath( path );
+            final String absPath = getAbsoluteWorkspacePath(transaction, path, OperationType.REMOVE_OPERATION);
 
             try {
                 session.removeItem( absPath );
@@ -1309,7 +1564,8 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     @Override
     public KomodoObject komodoWorkspace(final UnitOfWork uow) throws KException {
         komodoRoot(uow);
-        return create(uow, WORKSPACE_ROOT, KomodoLexicon.Workspace.NODE_TYPE);
+        create(uow, WORKSPACE_ROOT, KomodoLexicon.Workspace.NODE_TYPE);
+        return create(uow, komodoWorkspacePath(uow), KomodoLexicon.Home.NODE_TYPE);
     }
 
     @Override

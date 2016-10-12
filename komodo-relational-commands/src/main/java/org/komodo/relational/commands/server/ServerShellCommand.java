@@ -23,7 +23,6 @@ package org.komodo.relational.commands.server;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
@@ -31,7 +30,6 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.KLog;
 import org.komodo.utils.i18n.I18n;
 
@@ -68,7 +66,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     }
 
     protected boolean isWorkspaceContext() {
-        return DefaultLabelProvider.WORKSPACE_PATH.equals( getContext().getAbsolutePath() );
+        return getWorkspaceStatus().getLabelProvider().isWorkspacePath(getContext().getAbsolutePath());
     }
 
     /**

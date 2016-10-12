@@ -22,11 +22,12 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
@@ -39,6 +40,7 @@ import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A shell command to get a server Datasource and copy into the workspace
@@ -75,13 +77,13 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
             if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.overwriteArgInvalid, overwriteArg ), null );
             }
-            
+
             // If datasource with same name is in workspace, make sure we can overwrite
-            boolean hasDS = getWorkspaceManager().hasChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            boolean hasDS = getWorkspaceManager(getTransaction()).hasChild(getTransaction(), datasourceName, DataVirtLexicon.Connection.NODE_TYPE);
             if( hasDS && !overwrite ) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.datasourceOverwriteNotEnabled, datasourceName), null );
             }
-            
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -109,13 +111,15 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
 
             // If overwriting, delete existing first
             if(hasDS) {
-                final KomodoObject datasourceToDelete = getWorkspaceManager().getChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
-                getWorkspaceManager().delete(getTransaction(), datasourceToDelete);
+                final KomodoObject datasourceToDelete = getWorkspaceManager(getTransaction()).getChild( getTransaction(),
+                                                                                        datasourceName,
+                                                                                        DataVirtLexicon.Connection.NODE_TYPE );
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), datasourceToDelete);
             }
             // Create the Data Source and set properties
-            Datasource newDatasource = getWorkspaceManager().createDatasource( getTransaction(), null, datasourceName );
+            Datasource newDatasource = getWorkspaceManager(getTransaction()).createDatasource( getTransaction(), null, datasourceName );
             setRepoDatasourceProperties(newDatasource, serverDS.getProperties());
-            
+
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceCopyToRepoFinished) );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
@@ -209,18 +213,18 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
 
         return TabCompletionModifier.AUTO;
     }
-    
+
     /*
      * Transfer the server Datasource properties to the repo object
      */
     private void setRepoDatasourceProperties(Datasource repoSource, Properties serverDsProperties) throws Exception {
         for(String key : serverDsProperties.stringPropertyNames()) {
             String value = serverDsProperties.getProperty(key);
-            if(key.equals(TeiidInstance.DATASOURCE_JNDINAME)) { 
+            if(key.equals(TeiidInstance.DATASOURCE_JNDINAME)) {
                 repoSource.setJndiName(getTransaction(), value);
-            } else if(key.equals(TeiidInstance.DATASOURCE_DRIVERNAME)) { 
+            } else if(key.equals(TeiidInstance.DATASOURCE_DRIVERNAME)) {
                 repoSource.setDriverName(getTransaction(), value);
-            } else if(key.equals(TeiidInstance.DATASOURCE_CLASSNAME)) { 
+            } else if(key.equals(TeiidInstance.DATASOURCE_CLASSNAME)) {
                 repoSource.setClassName(getTransaction(), value);
                 repoSource.setJdbc(getTransaction(), false);
             } else {

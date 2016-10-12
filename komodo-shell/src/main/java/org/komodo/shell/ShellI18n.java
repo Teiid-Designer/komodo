@@ -155,6 +155,7 @@ public final class ShellI18n extends I18n {
     public static String disabledCommandMethodNotSupported;
     public static String enable_flag_missing;
     public static String engineStarting;
+    public static String engineStartingError;
     public static String errorGettingChild;
     public static String errorLoadingProperties;
     public static String exitCanceled;

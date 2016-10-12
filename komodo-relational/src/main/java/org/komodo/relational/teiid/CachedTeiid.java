@@ -26,6 +26,7 @@ import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.internal.CachedTeiidImpl;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -36,6 +37,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * A model of a cached live teiid server instance
@@ -46,6 +48,23 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * The default expiration time of all cached teiid objects in the teiid cache
      */
     int DEFAULT_TEIID_CACHE_THRESHOLD = 10 * 60 * 1000;
+    
+    /**
+     * The folder under which all cached vdbs will be placed
+     */
+    String VDBS_FOLDER = "vdbs";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached dataSources will be placed
+     */
+    String DATA_SOURCES_FOLDER = "dataSources";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached translators will be placed
+     */
+    String TRANSLATORS_FOLDER = "translators";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached drivers will be placed
+     */
+    String DRIVERS_FOLDER = "drivers";  //$NON-NLS-1$
 
     /**
      * The type identifier.
@@ -158,7 +177,7 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * @throws KException
      *         if an error occurs
      */
-    Translator[] getTranslators(UnitOfWork uow, final String... namePatterns ) throws KException;
+    Translator[] getTranslators(UnitOfWork transaction, final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -169,7 +188,82 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * @throws KException
      *         if an error occurs
      */
-    Datasource[] getDataSources(UnitOfWork uow, final String... namePatterns ) throws KException;
+    Datasource[] getDataSources(UnitOfWork transaction, final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name the datasource name
+     * @return the named datasource found on this teiid server or null
+     * @throws KException
+     *         if an error occurs
+     */
+    Datasource getDataSource(final UnitOfWork transaction, String name) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the drivers found on this teiid server (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Driver[] getDrivers(UnitOfWork transaction, final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name the driver name
+     * @return the named driver found on this teiid server or null
+     * @throws KException
+     *         if an error occurs
+     */
+    Driver getDriver(final UnitOfWork transaction, String name) throws KException;
+
+    /**
+     * Refresh VDBs with the supplied names
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance
+     * @param vdbNames the Vdb names
+     * @throws KException
+     *         if an error occurs
+     */
+    void refreshVdbs(final UnitOfWork transaction, TeiidInstance teiidInstance, final String... vdbNames) throws KException;
+
+    /**
+     * Refresh DataSources with the supplied names
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance
+     * @param dataSourceNames the dataSource names
+     * @throws KException
+     *         if an error occurs
+     */
+    void refreshDataSources(final UnitOfWork transaction, TeiidInstance teiidInstance, String... dataSourceNames) throws KException;
+
+    /**
+     * Refresh Translators with the supplied names
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance
+     * @param translatorNames the translator names
+     * @throws KException
+     *         if an error occurs
+     */
+    void refreshTranslators(final UnitOfWork transaction, TeiidInstance teiidInstance, String... translatorNames) throws KException;
+
+    /**
+     * Refresh Drivers with the supplied names
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance
+     * @param driverNames the driver names
+     * @throws KException
+     *         if an error occurs
+     */
+    void refreshDrivers(final UnitOfWork transaction, TeiidInstance teiidInstance, String... driverNames) throws KException;
 
     /**
      * @param uow

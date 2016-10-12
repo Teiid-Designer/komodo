@@ -185,7 +185,7 @@ public class RestBasicEntity implements KRestEntity {
      * @return the ancestor of the object with the given class
      */
     protected <T extends KomodoObject> T ancestor(KomodoObject kObject, Class<T> parentClass, UnitOfWork uow) throws KException {
-        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository(), uow);
         KomodoObject parent = kObject.getParent(uow);
         while (parent != null) {
             T resolvedParent = wsMgr.resolve(uow, parent, parentClass);

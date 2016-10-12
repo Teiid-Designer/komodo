@@ -23,7 +23,7 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -33,6 +33,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A shell command to delete a Datasource object.
@@ -59,12 +60,14 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
         try {
             final String sourceName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingDatasourceName ) );
 
-            final KomodoObject datasourceToDelete = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            final KomodoObject datasourceToDelete = getWorkspaceManager(getTransaction()).getChild( getTransaction(),
+                                                                                    sourceName,
+                                                                                    DataVirtLexicon.Connection.NODE_TYPE );
 
             if(datasourceToDelete==null) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, sourceName ), null );
             } else {
-                getWorkspaceManager().delete(getTransaction(), datasourceToDelete);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), datasourceToDelete);
                 return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceDeleted, sourceName ) );
             }
         } catch ( final Exception e ) {
@@ -123,9 +126,9 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] datasources = mgr.findDatasources(getTransaction());
-        List<String> existingDsNames = new ArrayList<String>(datasources.length);
+        List<String> existingDsNames = new ArrayList<>(datasources.length);
         for(KomodoObject datasource : datasources) {
             existingDsNames.add(datasource.getName(uow));
         }
