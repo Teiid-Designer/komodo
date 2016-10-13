@@ -51,6 +51,7 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
@@ -71,6 +72,7 @@ import org.komodo.rest.relational.request.KomodoFileAttributes;
 import org.komodo.rest.relational.request.KomodoPathAttribute;
 import org.komodo.rest.relational.request.KomodoQueryAttribute;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
+import org.komodo.rest.relational.request.KomodoVdbUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
 import org.komodo.rest.relational.response.RestQueryResult;
@@ -94,6 +96,8 @@ import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -757,7 +761,7 @@ public class KomodoTeiidService extends KomodoService {
      *         if there is an error creating the DataSource
      */
     @POST
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.COPY_TO_REPO )
+    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VDBS_FROM_TEIID )
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Copy VDBs from the server into the workspace")
     @ApiResponses(value = {
@@ -782,7 +786,7 @@ public class KomodoTeiidService extends KomodoService {
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find VDB
-            uow = createTransaction(principal, "copyVdbsIntoRepo", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "vdbsFromTeiid", false); //$NON-NLS-1$
             Vdb[] serverVdbs = cachedTeiid.getVdbs(uow);
             
             boolean importError = false;
@@ -835,6 +839,141 @@ public class KomodoTeiidService extends KomodoService {
 
             return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.VDB_TO_REPO_IMPORT_ERROR);
         }
+    }
+    
+    /**
+     * Creates or updates a workspace VDB model using DDL from the teiid VDB model.
+     * If the target VDB does not exist, it is created.  If the specified model already exists, it is replaced - otherwise a new model is created.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbUpdateAttributes
+     *        the attributes for the update (cannot be empty)
+     * @return a JSON representation of the updated dataservice (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error updating the VDB
+     */
+    @POST
+    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.MODEL_FROM_TEIID_DDL )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Creates or updates a workspace vdb model using teiid model ddl",
+                  notes = "Syntax of the json request body is of the form " +
+                          "{ vdbName='workspace Vdb', modelName='workspace Model', teiidVdb='teiid VDB', teiidModel='teiid Model' }")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response updateModelFromDdl( final @Context HttpHeaders headers,
+            final @Context UriInfo uriInfo,
+            final String vdbUpdateAttributes) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Get the attributes for doing the vdb update
+        KomodoVdbUpdateAttributes attr;
+        try {
+            attr = KomodoJsonMarshaller.unmarshall(vdbUpdateAttributes, KomodoVdbUpdateAttributes.class);
+            Response response = checkVdbUpdateAttributes(attr, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_UPDATE_REQUEST_PARSING_ERROR);
+        }
+
+        // Inputs for updating.  The update info is obtained from the Attributes passed in.
+        String vdbName = attr.getVdbName();
+        // Error if the Vdb name is missing
+        if (StringUtils.isBlank( vdbName )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_MISSING_VDBNAME);
+        }
+
+        String modelName = attr.getModelName();
+        // Error if the Model name is missing
+        if (StringUtils.isBlank( modelName )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_MISSING_MODELNAME);
+        }
+
+        String teiidVdbName = attr.getTeiidVdbName();
+        // Error if the Teiid Vdb name is missing
+        if (StringUtils.isBlank( teiidVdbName )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_MISSING_TEIID_VDBNAME);
+        }
+
+        String teiidModelName = attr.getTeiidModelName();
+        // Error if the Teiid Model name is missing
+        if (StringUtils.isBlank( teiidModelName )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_MISSING_TEIID_MODELNAME);
+        }
+
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "updateVdb", false ); //$NON-NLS-1$
+
+            // Get the DDL from the Teiid Model
+            String modelDdl;
+            try {
+                modelDdl = getSchema(uow, teiidVdbName, teiidModelName);
+            } catch (Exception ex) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_DDL_FETCH_ERROR, teiidVdbName, teiidModelName);
+            }
+            // Error if the Model DDL is missing
+            if (StringUtils.isBlank( modelDdl )) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_DDL_DNE);
+            }
+            
+            // Check for existence of Dataservice, Table and ModelSource before continuing...
+            WorkspaceManager wkspMgr = getWorkspaceManager(uow);
+
+            // Check for existence of VDB.  If VDB does not exist, create it.
+            Vdb vdb = null;
+            if ( !wkspMgr.hasChild( uow, vdbName ) ) {
+                vdb = wkspMgr.createVdb(uow, null, vdbName, vdbName);
+            } else {
+                KomodoObject kobject = wkspMgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                vdb = wkspMgr.resolve( uow, kobject, Vdb.class );
+            }
+
+            // Check for existence of Model and replace if found
+            Model[] models = vdb.getModels(uow, modelName);
+            for(Model model : models) {
+                model.remove(uow);
+            }
+            Model newModel = vdb.addModel(uow, modelName);
+            newModel.setModelDefinition(uow, modelDdl);
+
+            KomodoStatusObject kso = new KomodoStatusObject("Update Vdb Status"); //$NON-NLS-1$
+            kso.addAttribute(vdbName, "Successfully updated"); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UPDATE_ERROR);
+        }
+    }
+
+    private Response checkVdbUpdateAttributes(KomodoVdbUpdateAttributes attr,
+                                              List<MediaType> mediaTypes) throws Exception {
+
+        if (attr == null || attr.getVdbName() == null || attr.getModelName() == null || attr.getVdbName() == null || attr.getModelName() == null) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_UPDATE_MISSING_PARAMETER_ERROR);
+        }
+
+        return Response.ok().build();
     }
         
     /**

@@ -42,13 +42,11 @@ import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GE
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_TRANSLATOR_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDBS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDB_ERROR;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -62,7 +60,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -110,7 +107,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -1760,7 +1756,7 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCES_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Find all sources of the model belonging to the vdb", response = RestVdbModelSource[].class)
+    @ApiOperation(value = "Find all ModelSources belonging to the Vdb Model", response = RestVdbModelSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No sources could be found but an empty list is returned"),
@@ -1841,7 +1837,7 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiOperation(value = "Find the ModelSource belonging to the Vdb Model", response = RestVdbModelSource.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No model could be found with name"),
@@ -1949,7 +1945,7 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiOperation(value = "Create a ModelSource within a Vdb Model", response = RestVdbModelSource.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No model could be found with name"),
@@ -2099,7 +2095,7 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiOperation(value = "Update the ModelSource belonging to the Vdb Model", response = RestVdbModelSource.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No model could be found with name"),
@@ -2194,6 +2190,7 @@ public final class KomodoVdbService extends KomodoService {
     }
     
     /**
+     * Delete the ModelSource in the specified Vdb Model
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
@@ -2215,7 +2212,7 @@ public final class KomodoVdbService extends KomodoService {
            V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
            V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiOperation(value = "Delete the ModelSource in the specified Vdb Model", response = RestVdbModelSource.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No model could be found with name"),

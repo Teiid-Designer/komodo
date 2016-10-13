@@ -83,7 +83,6 @@ import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.KLog;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
-
 import io.swagger.converter.ModelConverters;
 import io.swagger.jaxrs.config.BeanConfig;
 
@@ -180,9 +179,9 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String CLONE_SEGMENT = "clone"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for copy to repo.
+         * The name of the URI path segment for creating workspace VDBs from teiid
          */
-        String COPY_TO_REPO = "copyToRepo"; //$NON-NLS-1$
+        String VDBS_FROM_TEIID = "VdbsFromTeiid"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for undeploy.
@@ -388,6 +387,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The vdb export xml property
          */
         String VDB_EXPORT_XML_PROPERTY = "vdb-export-xml"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for creating a workspace vdb model using teiid ddl
+         */
+        String MODEL_FROM_TEIID_DDL = "ModelFromTeiidDdl"; //$NON-NLS-1$
 
         /**
          * The teiid credentials property for modifying the usernames and passwords

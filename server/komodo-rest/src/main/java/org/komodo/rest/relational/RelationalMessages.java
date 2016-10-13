@@ -908,6 +908,51 @@ public final class RelationalMessages {
         TEIID_SERVICE_PING_MISSING_TYPE,
 
         /**
+         * The Teiid service update is missing a parameter
+         */
+        TEIID_SERVICE_UPDATE_MISSING_PARAMETER_ERROR,
+
+        /**
+         * The service lacks at least one parameter
+         */
+        TEIID_SERVICE_UPDATE_REQUEST_PARSING_ERROR,
+
+        /**
+         * An error indicating update attempt failed because the VDB name was missing
+         */
+        TEIID_SERVICE_UPDATE_MISSING_VDBNAME,
+
+        /**
+         * An error indicating update attempt failed because the Model name was missing
+         */
+        TEIID_SERVICE_UPDATE_MISSING_MODELNAME,
+
+        /**
+         * An error indicating update attempt failed because the Teiid VDB name was missing
+         */
+        TEIID_SERVICE_UPDATE_MISSING_TEIID_VDBNAME,
+
+        /**
+         * An error indicating update attempt failed because the Teiid Model name was missing
+         */
+        TEIID_SERVICE_UPDATE_MISSING_TEIID_MODELNAME,
+
+        /**
+         * An error indicating update attempt failed because retrieval of the teiid DDL failed.
+         */
+        TEIID_SERVICE_UPDATE_DDL_FETCH_ERROR,
+        
+        /**
+         * An error indicating update attempt failed because the Teiid Model DDL was empty
+         */
+        TEIID_SERVICE_UPDATE_DDL_DNE,
+        
+        /**
+         * An error indicating update attempt failed
+         */
+        TEIID_SERVICE_UPDATE_ERROR,
+        
+        /**
          * The importexport service lacks at least one storage attribute
          */
         IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR,
