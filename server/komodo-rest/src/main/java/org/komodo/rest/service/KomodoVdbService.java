@@ -67,6 +67,7 @@ import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
@@ -107,6 +108,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+import com.google.common.base.Objects;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -223,7 +225,7 @@ public final class KomodoVdbService extends KomodoService {
 
         final String vdbName = restVdb.getId();
         try {
-            final Vdb vdb = getWorkspaceManager(uow).createVdb( uow, null, vdbName, "path");  //$NON-NLS-1$
+            final Vdb vdb = getWorkspaceManager(uow).createVdb( uow, null, vdbName, restVdb.getOriginalFilePath() );
 
             // Transfers the properties from the rest object to the created komodo service.
             setProperties(uow, vdb, restVdb);
@@ -504,6 +506,27 @@ public final class KomodoVdbService extends KomodoService {
         // IsVisible
         if ( newIsVisible != oldIsVisible ) {
             model.setVisible(uow, newIsVisible);
+        }
+        
+        // model type
+        final Type newModelType = restVdbModel.getModelType();
+        
+        if ( !Objects.equal( newModelType, model.getModelType( uow ) ) ) {
+            model.setModelType( uow, newModelType );
+        }
+        
+        // metadata type
+        final String newMetadataType = restVdbModel.getMetadataType();
+        
+        if ( !Objects.equal( newMetadataType, model.getMetadataType( uow ) ) ) {
+            model.setMetadataType( uow, newMetadataType );
+        }
+        
+        // model definition
+        final String newDdl = restVdbModel.getDdl();
+        
+        if ( !Objects.equal( newDdl, model.getModelDefinition( uow ) ) ) {
+            model.setModelDefinition( uow, newDdl );
         }
         
         // Set new properties
