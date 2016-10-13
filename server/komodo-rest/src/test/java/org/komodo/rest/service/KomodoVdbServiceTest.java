@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
@@ -135,6 +136,299 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
     //        response = request( _uriBuilder.buildVdbUri( LinkType.DELETE, restVdb.getName() ) ).delete();
     //        assertThat( response.getStatus(), is( Status.NO_CONTENT.getStatusCode() ) );
     //    }
+
+    @Test
+	public void shouldCreateModel() throws Exception {
+        final String vdbName = "blah";
+
+        { // create VDB first
+            final Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, vdbName);
+            _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+            final URI uri = _uriBuilder.vdbUri(LinkType.SELF, settings);
+
+            final RestVdb vdb = new RestVdb();
+            vdb.setName(vdbName);
+            vdb.setDescription("blah VDB description");
+            vdb.setOriginalFilePath("/Users/elvis/vdbs/blah.vdb");
+            vdb.setPreview(false);
+            vdb.setConnectionType("connType");
+            vdb.setVersion(1);
+            vdb.setId(vdbName);
+            vdb.setkType(KomodoType.VDB);
+            vdb.setDataPath("/tko:komodo/tko:workspace/user/blah");
+
+            final String json = KomodoJsonMarshaller.marshall(vdb);
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            addBody(request, json);
+
+            final ClientResponse<String> response = request.post(String.class);
+            assertThat(response, is(notNullValue()));
+            assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        }
+
+        final String modelName = "elvis";
+        final String dataPath = "/tko:komodo/tko:workspace/user/blah/elvis";
+        final String ddl = "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
+        final String description = "model description goes here";
+        final String id = modelName;
+        final KomodoType kType = KomodoType.MODEL;
+        final String metadataType = "DDL";
+        final Type modelType = Type.VIRTUAL;
+        final boolean visible = true;
+
+        final Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, vdbName);
+        _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+        _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, modelName);
+        final URI uri = _uriBuilder.vdbModelUri(LinkType.SELF, settings);
+
+        { // create model
+            final RestVdbModel inModel = new RestVdbModel();
+            inModel.setDataPath(dataPath);
+            inModel.setDdl(ddl);
+            inModel.setDescription(description);
+            inModel.setId(id);
+            inModel.setkType(kType);
+            inModel.setMetadataType(metadataType);
+            inModel.setModelType(modelType);
+            inModel.setVisible(visible);
+
+            final String json = KomodoJsonMarshaller.marshall(inModel);
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            addBody(request, json);
+
+            final ClientResponse<String> response = request.post(String.class);
+            assertThat(response, is(notNullValue()));
+            assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final String entity = response.getEntity();
+            assertThat(entity, is(notNullValue()));
+
+            final RestVdbModel outModel = KomodoJsonMarshaller.unmarshall(entity, RestVdbModel.class);
+            assertNotNull(outModel);
+            assertThat(outModel.getDataPath(), is(dataPath));
+            assertThat(outModel.getDescription(), is(description));
+            // can't check DDL because sequencer has not run yet
+            assertThat(outModel.getId(), is(id));
+            assertThat(outModel.getkType(), is(kType));
+            assertThat(outModel.getMetadataType(), is(metadataType));
+            assertThat(outModel.getModelType(), is(modelType));
+            assertThat(outModel.isVisible(), is(visible));
+        }
+
+        { // get new model
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            final ClientResponse<String> response = request.get(String.class);
+            assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+            final String entity = response.getEntity();
+            assertThat(entity, is(notNullValue()));
+
+            final RestVdbModel newModel = KomodoJsonMarshaller.unmarshall(entity, RestVdbModel.class);
+            assertNotNull(newModel);
+            assertThat(newModel.getDataPath(), is(dataPath));
+            assertThat(newModel.getDescription(), is(description));
+            assertThat(newModel.getId(), is(id));
+            assertThat(newModel.getkType(), is(kType));
+            assertThat(newModel.getMetadataType(), is(metadataType));
+            assertThat(newModel.getModelType(), is(modelType));
+            assertThat(newModel.isVisible(), is(visible));
+
+            // remove any formatting before comparing
+            final String actual = newModel.getDdl().toLowerCase().replace('\n', ' ').trim();
+            final String expected = ddl.toLowerCase().replace('\n', ' ').trim();
+            assertThat(actual, is(expected));
+        }
+    }
+
+    @Test
+    public void shouldCreateModelSource() throws Exception {
+        final String vdbName = "blah";
+
+        { // create VDB
+            final Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, vdbName);
+            _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+            final URI uri = _uriBuilder.vdbUri(LinkType.SELF, settings);
+
+            final RestVdb vdb = new RestVdb();
+            vdb.setName(vdbName);
+            vdb.setDescription("blah VDB description");
+            vdb.setOriginalFilePath("/Users/elvis/vdbs/blah.vdb");
+            vdb.setPreview(false);
+            vdb.setConnectionType("connType");
+            vdb.setVersion(1);
+            vdb.setId(vdbName);
+            vdb.setkType(KomodoType.VDB);
+            vdb.setDataPath("/tko:komodo/tko:workspace/user/blah");
+
+            final String json = KomodoJsonMarshaller.marshall(vdb);
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            addBody(request, json);
+
+            final ClientResponse<String> response = request.post(String.class);
+            assertThat(response, is(notNullValue()));
+            assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        }
+
+        final String modelName = "elvis";
+
+        { // create model
+            final RestVdbModel model = new RestVdbModel();
+            model.setDataPath("/tko:komodo/tko:workspace/user/blah/elvis");
+            model.setDdl("CREATE VIEW Tweet AS select * FROM twitterview.getTweets;");
+            model.setDescription("model description goes here");
+            model.setId(modelName);
+            model.setkType(KomodoType.MODEL);
+            model.setMetadataType("DDL");
+            model.setModelType(Type.VIRTUAL);
+            model.setVisible(true);
+
+            final Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, vdbName);
+            _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+            _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, modelName);
+            final URI uri = _uriBuilder.vdbModelUri(LinkType.SELF, settings);
+
+            final String json = KomodoJsonMarshaller.marshall(model);
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            addBody(request, json);
+
+            final ClientResponse<String> response = request.post(String.class);
+            assertThat(response, is(notNullValue()));
+            assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+        }
+
+        final String modelSourceName = "sledge";
+        final String id = modelSourceName;
+        final String dataPath = "/tko:komodo/tko:workspace/user/blah/elvis/vdb:sources/sledge";
+        final KomodoType kType = KomodoType.VDB_MODEL_SOURCE;
+        final String jndiName = "myJndiName";
+        final String translator = "myTranslator";
+
+        final Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, vdbName);
+        _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+        _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, modelName);
+        _uriBuilder.addSetting(settings, SettingNames.SOURCE_NAME, modelSourceName);
+        final URI uri = _uriBuilder.vdbModelSourceUri(LinkType.SELF, settings);
+
+        { // create model source
+            final RestVdbModelSource inModelSource = new RestVdbModelSource();
+            inModelSource.setDataPath(dataPath);
+            inModelSource.setId(id);
+            inModelSource.setkType(kType);
+            inModelSource.setJndiName(jndiName);
+            inModelSource.setTranslator(translator);
+
+            final String json = KomodoJsonMarshaller.marshall(inModelSource);
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            addBody(request, json);
+
+            final ClientResponse<String> response = request.post(String.class);
+            assertThat(response, is(notNullValue()));
+            assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final String entity = response.getEntity();
+            assertThat(entity, is(notNullValue()));
+
+            final RestVdbModelSource outModelSource = KomodoJsonMarshaller.unmarshall(entity, RestVdbModelSource.class);
+            assertNotNull(outModelSource);
+            assertThat(outModelSource.getDataPath(), is(dataPath));
+            assertThat(outModelSource.getId(), is(id));
+            assertThat(outModelSource.getkType(), is(kType));
+            assertThat(outModelSource.getJndiName(), is(jndiName));
+            assertThat(outModelSource.getTranslator(), is(translator));
+        }
+
+        { // get new model source
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            final ClientResponse<String> response = request.get(String.class);
+            assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+            final String entity = response.getEntity();
+            assertThat(entity, is(notNullValue()));
+
+            final RestVdbModelSource newModelSource = KomodoJsonMarshaller.unmarshall(entity, RestVdbModelSource.class);
+            assertNotNull(newModelSource);
+            assertThat(newModelSource.getDataPath(), is(dataPath));
+            assertThat(newModelSource.getId(), is(id));
+            assertThat(newModelSource.getkType(), is(kType));
+            assertThat(newModelSource.getJndiName(), is(jndiName));
+            assertThat(newModelSource.getTranslator(), is(translator));
+        }
+    }
+
+    @Test
+    public void shouldCreateVdb() throws Exception {
+        final String vdbName = "blah";
+        final String description = "blah VDB description";
+        final String originalFilePath = "/Users/elvis/vdbs/blah.vdb";
+        final boolean preview = false;
+        final String connectionType = "connType";
+        final int version = 5;
+        final String id = vdbName;
+        final KomodoType kType = KomodoType.VDB;
+        final String dataPath = "/tko:komodo/tko:workspace/user/blah";
+
+        final Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, vdbName);
+        _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
+        final URI uri = _uriBuilder.vdbUri(LinkType.SELF, settings);
+
+        { // create
+            final RestVdb inVdb = new RestVdb();
+            inVdb.setName(vdbName);
+            inVdb.setDescription(description);
+            inVdb.setOriginalFilePath(originalFilePath);
+            inVdb.setPreview(preview);
+            inVdb.setConnectionType(connectionType);
+            inVdb.setVersion(version);
+            inVdb.setId(id);
+            inVdb.setkType(kType);
+            inVdb.setDataPath(dataPath);
+
+            final String json = KomodoJsonMarshaller.marshall(inVdb);
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            addBody(request, json);
+
+            final ClientResponse<String> response = request.post(String.class);
+            assertThat(response, is(notNullValue()));
+            assertThat(response.getStatus(), is(Response.Status.OK.getStatusCode()));
+
+            final String entity = response.getEntity();
+            assertThat(entity, is(notNullValue()));
+
+            // verify response is new VDB
+            final RestVdb outVdb = KomodoJsonMarshaller.unmarshall(entity, RestVdb.class);
+            assertNotNull(outVdb);
+            assertThat(outVdb.getName(), is(vdbName));
+            assertThat(outVdb.getDescription(), is(description));
+            assertThat(outVdb.getOriginalFilePath(), is(originalFilePath));
+            assertThat(outVdb.isPreview(), is(preview));
+            assertThat(outVdb.getConnectionType(), is(connectionType));
+            assertThat(outVdb.getVersion(), is(version));
+            assertThat(outVdb.getId(), is(id));
+            assertThat(outVdb.getkType(), is(kType));
+            assertThat(outVdb.getDataPath(), is(dataPath));
+        }
+
+        { // get new VDB
+            final ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+            final ClientResponse<String> response = request.get(String.class);
+            assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+            final String entity = response.getEntity();
+            assertThat(entity, is(notNullValue()));
+
+            final RestVdb newVdb = KomodoJsonMarshaller.unmarshall(entity, RestVdb.class);
+            assertNotNull(newVdb);
+            assertThat(newVdb.getName(), is(vdbName));
+            assertThat(newVdb.getDescription(), is(description));
+            assertThat(newVdb.getOriginalFilePath(), is(originalFilePath));
+            assertThat(newVdb.isPreview(), is(preview));
+            assertThat(newVdb.getConnectionType(), is(connectionType));
+            assertThat(newVdb.getVersion(), is(version));
+            assertThat(newVdb.getId(), is(id));
+            assertThat(newVdb.getkType(), is(kType));
+            assertThat(newVdb.getDataPath(), is(dataPath));
+        }
+    }
 
     @Test
     public void shouldGetVdb() throws Exception {
