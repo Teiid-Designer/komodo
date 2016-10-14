@@ -2055,7 +2055,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR, e.getLocalizedMessage());
         }
     }
 
