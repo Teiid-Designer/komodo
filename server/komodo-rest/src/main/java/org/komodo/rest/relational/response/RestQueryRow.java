@@ -21,6 +21,8 @@
  */
 package org.komodo.rest.relational.response;
 
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +52,27 @@ public class RestQueryRow implements KRestEntity {
         else {
             this.values = new ArrayList<>();
             for (Object value : qsRow.getValues()) {
-                this.values.add(value.toString());
+                String valueStr = EMPTY_STRING;
+                if(value!=null) {
+                    // Handle Clob values
+                    if(value instanceof Clob) {
+                        Clob valueClob = (Clob)value;
+                        try {
+                            long clobLength = valueClob.length();
+                            if(clobLength>0) {
+                                valueStr = valueClob.getSubString(1, (int)clobLength);
+                            } else {
+                                valueStr = EMPTY_STRING;
+                            }
+                        } catch (SQLException ex) {
+                            valueStr = EMPTY_STRING;
+                        }
+                    // All other values
+                    } else {
+                        valueStr = value.toString();
+                    }
+                }
+                this.values.add(valueStr);
             }
         }
     }
