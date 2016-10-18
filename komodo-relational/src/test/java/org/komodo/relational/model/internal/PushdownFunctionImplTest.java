@@ -27,6 +27,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -149,31 +150,6 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     public void shouldSetTabularResultSet() throws Exception {
         assertThat( this.function.setResultSet( getTransaction(), TabularResultSet.class ), is( notNullValue() ) );
         assertThat( this.function.getResultSet( getTransaction() ), is( instanceOf( TabularResultSet.class ) ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = PushdownFunction.RESOLVER.create( getTransaction(),
-                                                                           _repo,
-                                                                           this.function.getParent( getTransaction() ),
-                                                                           name,
-                                                                           null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( PushdownFunction.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        PushdownFunction.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

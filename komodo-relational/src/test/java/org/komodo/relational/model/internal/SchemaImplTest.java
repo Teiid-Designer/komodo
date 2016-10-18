@@ -22,7 +22,6 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -171,21 +170,6 @@ public class SchemaImplTest extends RelationalModelTest {
                 assertThat( filter.rejectProperty( name ), is( false ) );
             }
         }
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Schema.RESOLVER.create( getTransaction(), _repo, null, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Schema.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
 }

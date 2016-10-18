@@ -25,7 +25,6 @@ import java.util.Calendar;
 
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
@@ -35,13 +34,11 @@ import org.komodo.relational.resource.ResourceFile;
 import org.komodo.relational.resource.UdfFile;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
@@ -70,23 +67,6 @@ public interface Dataservice extends Exportable, RelationalObject, VdbEntryConta
      * The resolver of a {@link Dataservice}.
      */
     public static final TypeResolver< Dataservice > RESOLVER = new TypeResolver< Dataservice >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Dataservice create( final UnitOfWork transaction,
-                                   final Repository repository,
-                                   final KomodoObject parent,
-                                   final String id,
-                                   final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
-            return mgr.createDataservice( transaction, parent, id );
-        }
 
         /**
          * {@inheritDoc}

@@ -22,18 +22,16 @@
 package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -161,35 +159,6 @@ public final class TranslatorImplTest extends RelationalModelTest {
         final String newValue = "newType";
         this.translator.setType( getTransaction(), newValue );
         assertThat( this.translator.getType( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-
-        final RelationalProperties props = new RelationalProperties();
-        props.add( new RelationalProperty( VdbLexicon.Translator.TYPE, "oracle" ) );
-
-        final KomodoObject kobject = Translator.RESOLVER.create( getTransaction(),
-                                                                     _repo,
-                                                                     this.translator.getParent( getTransaction() ),
-                                                                     name,
-                                                                     props );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Translator.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Translator.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

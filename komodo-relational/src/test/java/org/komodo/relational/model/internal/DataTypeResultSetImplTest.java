@@ -22,11 +22,10 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
@@ -40,7 +39,6 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
@@ -253,26 +251,6 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
         this.resultSet.setNameInSource( getTransaction(), "newNameInSource" );
         this.resultSet.setNameInSource( getTransaction(), StringConstants.EMPTY_STRING );
         assertThat( this.resultSet.getNameInSource( getTransaction() ), is( nullValue() ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final KomodoObject kobject = DataTypeResultSet.RESOLVER.create( getTransaction(), _repo, this.procedure, "blah", null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( DataTypeResultSet.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( CreateProcedure.RESULT_SET ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        DataTypeResultSet.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

@@ -27,7 +27,9 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -40,7 +42,6 @@ import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -312,31 +313,6 @@ public final class PermissionImplTest extends RelationalModelTest {
         final boolean newValue = !Permission.DEFAULT_ALLOW_UPDATE;
         this.permission.setAllowUpdate( getTransaction(), newValue );
         assertThat( this.permission.isAllowUpdate( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Permission.RESOLVER.create( getTransaction(),
-                                                                     _repo,
-                                                                     this.permission.getParent( getTransaction() ),
-                                                                     name,
-                                                                     null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Permission.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Permission.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

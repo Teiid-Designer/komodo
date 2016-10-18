@@ -24,7 +24,6 @@ package org.komodo.relational;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
@@ -35,29 +34,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
  *        the {@link RelationalObject} subclass
  */
 public interface TypeResolver< T extends RelationalObject > {
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param repository
-     *        the repository where the model object will be created (cannot be <code>null</code>)
-     * @param parent
-     *        the parent of the new object (can be <code>null</code>)
-     * @param id
-     *        the identifier/name of the object (cannot be <code>null</code>)
-     * @param type
-     *        the type of the object (cannot be <code>null</code>)
-     * @param properties
-     *        any additional properties required for construction (can be empty)
-     * @return new instance of the resolved object (never <code>null</code>)
-     * @throws KException
-     *         if error occurs
-     */
-    KomodoObject create( final UnitOfWork transaction,
-                         final Repository repository,
-                         final KomodoObject parent,
-                         final String id,
-                         final RelationalProperties properties ) throws KException;
 
     /**
      * @return the identifier associated with this resolver (never <code>null</code>)

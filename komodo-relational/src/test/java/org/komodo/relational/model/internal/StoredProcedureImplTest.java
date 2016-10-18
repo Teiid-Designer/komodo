@@ -28,10 +28,12 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -398,31 +400,6 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
         final StatementOption statementOption = this.procedure.getStatementOptions( getTransaction() )[0];
         assertThat( statementOption.getName( getTransaction() ), is( option ) );
         assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = StoredProcedure.RESOLVER.create( getTransaction(),
-                                                                          _repo,
-                                                                          this.procedure.getParent( getTransaction() ),
-                                                                          name,
-                                                                          null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( StoredProcedure.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        StoredProcedure.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

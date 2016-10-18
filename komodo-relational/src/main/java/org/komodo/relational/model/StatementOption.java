@@ -21,19 +21,14 @@
  */
 package org.komodo.relational.model;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.StatementOptionImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -62,33 +57,6 @@ public interface StatementOption extends Property, RelationalObject {
      * The resolver of a {@link StatementOption}.
      */
     public static final TypeResolver< StatementOption > RESOLVER = new TypeResolver< StatementOption >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public StatementOption create( final UnitOfWork transaction,
-                                       final Repository repository,
-                                       final KomodoObject parent,
-                                       final String id,
-                                       final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( );
-            final Object optionValueValue = properties.getValue( StandardDdlLexicon.VALUE );
-            final String optionValue = optionValueValue == null ? null : optionValueValue.toString();
-            final OptionContainer parentContainer = adapter.adapt( transaction, parent, OptionContainer.class );
-
-            if ( parentContainer == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          StatementOption.class.getSimpleName() ) );
-            }
-
-            return parentContainer.setStatementOption( transaction, id, optionValue );
-        }
 
         /**
          * {@inheritDoc}

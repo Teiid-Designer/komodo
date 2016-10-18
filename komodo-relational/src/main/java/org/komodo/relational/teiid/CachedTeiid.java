@@ -23,7 +23,6 @@ package org.komodo.relational.teiid;
 
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.resource.Driver;
@@ -34,7 +33,6 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.TeiidInstance;
@@ -80,22 +78,6 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * The resolver of a {@link CachedTeiid}.
      */
     public static final TypeResolver< CachedTeiid > RESOLVER = new TypeResolver< CachedTeiid >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public CachedTeiid create( final UnitOfWork transaction,
-                             final Repository repository,
-                             final KomodoObject parent,
-                             final String id,
-                             final RelationalProperties properties ) throws KException {
-            return new CachedTeiidImpl(transaction, repository, id);
-        }
 
         /**
          * {@inheritDoc}

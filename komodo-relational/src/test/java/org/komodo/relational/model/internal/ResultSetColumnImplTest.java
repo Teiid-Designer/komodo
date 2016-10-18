@@ -28,8 +28,10 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
@@ -490,27 +492,6 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         final StatementOption statementOption = this.column.getStatementOptions( getTransaction() )[0];
         assertThat( statementOption.getName( getTransaction() ), is( option ) );
         assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = ResultSetColumn.RESOLVER.create( getTransaction(), _repo, this.resultSet, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( ResultSetColumn.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        ResultSetColumn.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

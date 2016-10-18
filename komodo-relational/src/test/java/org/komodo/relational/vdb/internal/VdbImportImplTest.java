@@ -23,9 +23,9 @@ package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -34,7 +34,6 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -135,31 +134,6 @@ public final class VdbImportImplTest extends RelationalModelTest {
         final int newValue = ( Vdb.DEFAULT_VERSION + 10 );
         this.vdbImport.setVersion( getTransaction(), newValue );
         assertThat( this.vdbImport.getVersion( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = VdbImport.RESOLVER.create( getTransaction(),
-                                                                    _repo,
-                                                                    this.vdbImport.getParent( getTransaction() ),
-                                                                    name,
-                                                                    null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( VdbImport.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        VdbImport.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

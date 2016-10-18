@@ -22,11 +22,10 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -37,7 +36,6 @@ import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
@@ -136,31 +134,6 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
         assertThat( this.procedure.getAsClauseStatement( getTransaction() ), is( value ) );
         assertThat( this.procedure.getProperty( getTransaction(), TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( getTransaction() ),
                     is( value ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = VirtualProcedure.RESOLVER.create( getTransaction(),
-                                                                           _repo,
-                                                                           this.procedure.getParent( getTransaction() ),
-                                                                           name,
-                                                                           null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( VirtualProcedure.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        VirtualProcedure.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

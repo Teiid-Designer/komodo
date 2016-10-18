@@ -22,20 +22,18 @@
 package org.komodo.relational.vdb;
 
 import java.util.Properties;
+
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.internal.VdbImpl;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -89,25 +87,6 @@ public interface Vdb extends Exportable, RelationalObject {
      * The resolver of a {@link Vdb}.
      */
     public static final TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Vdb create( final UnitOfWork transaction,
-                           final Repository repository,
-                           final KomodoObject parent,
-                           final String id,
-                           final RelationalProperties properties ) throws KException {
-            final Object origFilePathValue = properties.getValue( VdbLexicon.Vdb.ORIGINAL_FILE );
-            final String origFilePath = origFilePathValue == null ? null : origFilePathValue.toString();
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
-            return mgr.createVdb( transaction, parent, id, origFilePath );
-        }
 
         /**
          * {@inheritDoc}

@@ -21,17 +21,12 @@
  */
 package org.komodo.relational.model;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.ViewImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
 
@@ -67,31 +62,6 @@ public interface View extends Table {
      * The resolver of a {@link View}.
      */
     public static final TypeResolver< View > RESOLVER = new TypeResolver< View >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public View create( final UnitOfWork transaction,
-                            final Repository repository,
-                            final KomodoObject parent,
-                            final String id,
-                            final RelationalProperties properties ) throws KException {
-            AdapterFactory adapter = new AdapterFactory( );
-            Model parentModel = adapter.adapt( transaction, parent, Model.class );
-
-            if ( parentModel == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          View.class.getSimpleName() ) );
-            }
-
-            return parentModel.addView( transaction, id );
-        }
 
         /**
          * {@inheritDoc}
