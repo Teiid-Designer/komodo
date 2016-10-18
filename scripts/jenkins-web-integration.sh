@@ -18,7 +18,7 @@ TEIID="teiid-8.12.4-jboss-dist.zip"
 
 VDBBUILDER_NAME="vdb-builder.war"
 VDBBUILDER="$WORKSPACE/vdb-builder-sources/server/komodo-rest/target/$VDBBUILDER_NAME"
-VDBBENCH_NAME="vdb-bench.war"
+VDBBENCH_NAME="ds-builder.war"
 VDBBENCH="$WORKSPACE/vdb-bench-sources/vdb-bench-war/target/$VDBBENCH_NAME"
 
 VDBBUILDER_DIST="vdb-builder-jboss"
