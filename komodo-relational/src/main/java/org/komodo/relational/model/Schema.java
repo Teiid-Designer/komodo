@@ -56,7 +56,7 @@ public interface Schema extends RelationalObject, Exportable {
     /**
      * The resolver of a {@link Schema}.
      */
-    public static final TypeResolver< Schema > RESOLVER = new TypeResolver< Schema >() {
+    TypeResolver< Schema > RESOLVER = new TypeResolver< Schema >() {
 
         /**
          * {@inheritDoc}

@@ -68,7 +68,7 @@ public interface VdbImport extends RelationalObject {
     /**
      * The resolver of a {@link VdbImport}.
      */
-    public static final TypeResolver< VdbImport > RESOLVER = new TypeResolver< VdbImport >() {
+    TypeResolver< VdbImport > RESOLVER = new TypeResolver< VdbImport >() {
 
         /**
          * {@inheritDoc}

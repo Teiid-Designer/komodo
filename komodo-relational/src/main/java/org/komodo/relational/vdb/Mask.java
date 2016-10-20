@@ -63,7 +63,7 @@ public interface Mask extends RelationalObject {
     /**
      * The resolver of a {@link Mask}.
      */
-    public static final TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
+    TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
 
         /**
          * {@inheritDoc}

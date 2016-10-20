@@ -60,7 +60,7 @@ public interface UdfFile extends DataServiceResource {
     /**
      * The resolver of a {@link UdfFile}.
      */
-    public static final TypeResolver< UdfFile > RESOLVER = new TypeResolver< UdfFile >() {
+    TypeResolver< UdfFile > RESOLVER = new TypeResolver< UdfFile >() {
 
         /**
          * {@inheritDoc}

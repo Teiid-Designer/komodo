@@ -62,7 +62,7 @@ public interface PrimaryKey extends TableConstraint {
     /**
      * The resolver of a {@link PrimaryKey}.
      */
-    public static final TypeResolver< PrimaryKey > RESOLVER = new TypeResolver< PrimaryKey >() {
+    TypeResolver< PrimaryKey > RESOLVER = new TypeResolver< PrimaryKey >() {
 
         /**
          * {@inheritDoc}

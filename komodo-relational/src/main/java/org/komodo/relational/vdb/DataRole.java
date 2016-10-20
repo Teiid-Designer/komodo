@@ -78,7 +78,7 @@ public interface DataRole extends RelationalObject {
     /**
      * The resolver of a {@link DataRole}.
      */
-    public static final TypeResolver< DataRole > RESOLVER = new TypeResolver< DataRole >() {
+    TypeResolver< DataRole > RESOLVER = new TypeResolver< DataRole >() {
 
         /**
          * {@inheritDoc}

@@ -60,7 +60,7 @@ public interface Driver extends DataServiceResource {
     /**
      * The resolver of a {@link Driver}.
      */
-    public static final TypeResolver< Driver > RESOLVER = new TypeResolver< Driver >() {
+    TypeResolver< Driver > RESOLVER = new TypeResolver< Driver >() {
 
         /**
          * {@inheritDoc}
@@ -122,5 +122,4 @@ public interface Driver extends DataServiceResource {
     default DocumentType getDocumentType( final UnitOfWork transaction ) {
         return DocumentType.JAR;
     }
-
 }

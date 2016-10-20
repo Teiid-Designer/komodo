@@ -57,7 +57,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
     /**
      * The resolver of a {@link ResultSetColumn}.
      */
-    public static final TypeResolver< ResultSetColumn > RESOLVER = new TypeResolver< ResultSetColumn >() {
+    TypeResolver< ResultSetColumn > RESOLVER = new TypeResolver< ResultSetColumn >() {
 
         /**
          * {@inheritDoc}

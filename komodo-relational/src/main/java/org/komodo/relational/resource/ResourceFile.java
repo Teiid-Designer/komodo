@@ -54,7 +54,7 @@ public interface ResourceFile extends DataServiceResource {
     /**
      * The resolver of a {@link ResourceFile}.
      */
-    public static final TypeResolver< ResourceFile > RESOLVER = new TypeResolver< ResourceFile >() {
+    TypeResolver< ResourceFile > RESOLVER = new TypeResolver< ResourceFile >() {
 
         /**
          * {@inheritDoc}

@@ -77,7 +77,7 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
     /**
      * The resolver of a {@link CachedTeiid}.
      */
-    public static final TypeResolver< CachedTeiid > RESOLVER = new TypeResolver< CachedTeiid >() {
+    TypeResolver< CachedTeiid > RESOLVER = new TypeResolver< CachedTeiid >() {
 
         /**
          * {@inheritDoc}

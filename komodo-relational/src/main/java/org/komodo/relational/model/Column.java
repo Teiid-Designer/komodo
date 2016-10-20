@@ -152,7 +152,7 @@ public interface Column extends OptionContainer, RelationalObject {
     /**
      * The resolver of a {@link Column}.
      */
-    public static final TypeResolver< Column > RESOLVER = new TypeResolver< Column >() {
+    TypeResolver< Column > RESOLVER = new TypeResolver< Column >() {
 
         /**
          * {@inheritDoc}

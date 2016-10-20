@@ -68,7 +68,7 @@ public interface AccessPattern extends TableConstraint {
     /**
      * The resolver of a {@link AccessPattern}.
      */
-    public static final TypeResolver< AccessPattern > RESOLVER = new TypeResolver< AccessPattern >() {
+    TypeResolver< AccessPattern > RESOLVER = new TypeResolver< AccessPattern >() {
 
         /**
          * {@inheritDoc}
@@ -125,5 +125,4 @@ public interface AccessPattern extends TableConstraint {
             return new AccessPatternImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
     };
-
 }

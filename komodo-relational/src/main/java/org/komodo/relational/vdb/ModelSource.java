@@ -64,7 +64,7 @@ public interface ModelSource extends RelationalObject {
     /**
      * The resolver of a {@link ModelSource}.
      */
-    public static final TypeResolver< ModelSource > RESOLVER = new TypeResolver< ModelSource >() {
+    TypeResolver< ModelSource > RESOLVER = new TypeResolver< ModelSource >() {
 
         /**
          * {@inheritDoc}

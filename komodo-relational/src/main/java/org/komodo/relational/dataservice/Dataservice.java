@@ -22,7 +22,6 @@
 package org.komodo.relational.dataservice;
 
 import java.util.Calendar;
-
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
@@ -66,7 +65,7 @@ public interface Dataservice extends Exportable, RelationalObject, VdbEntryConta
     /**
      * The resolver of a {@link Dataservice}.
      */
-    public static final TypeResolver< Dataservice > RESOLVER = new TypeResolver< Dataservice >() {
+    TypeResolver< Dataservice > RESOLVER = new TypeResolver< Dataservice >() {
 
         /**
          * {@inheritDoc}

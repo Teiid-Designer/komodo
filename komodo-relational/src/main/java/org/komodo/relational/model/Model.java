@@ -99,7 +99,7 @@ public interface Model extends Exportable, RelationalObject {
     /**
      * The resolver of a {@link Model}.
      */
-    public static final TypeResolver< Model > RESOLVER = new TypeResolver< Model >() {
+    TypeResolver< Model > RESOLVER = new TypeResolver< Model >() {
 
         /**
          * {@inheritDoc}

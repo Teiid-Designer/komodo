@@ -86,7 +86,7 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * The resolver of a {@link Vdb}.
      */
-    public static final TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
+    TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
 
         /**
          * {@inheritDoc}
