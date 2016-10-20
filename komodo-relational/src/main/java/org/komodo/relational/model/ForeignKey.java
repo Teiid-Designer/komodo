@@ -67,7 +67,7 @@ public interface ForeignKey extends TableConstraint {
     /**
      * The resolver of a {@link ForeignKey}.
      */
-    public static final TypeResolver< ForeignKey > RESOLVER = new TypeResolver< ForeignKey >() {
+    TypeResolver< ForeignKey > RESOLVER = new TypeResolver< ForeignKey >() {
 
         /**
          * {@inheritDoc}

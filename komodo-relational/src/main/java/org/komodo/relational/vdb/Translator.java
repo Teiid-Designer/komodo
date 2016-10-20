@@ -60,7 +60,7 @@ public interface Translator extends RelationalObject {
     /**
      * The resolver of a {@link Translator}.
      */
-    public static final TypeResolver< Translator > RESOLVER = new TypeResolver< Translator >() {
+    TypeResolver< Translator > RESOLVER = new TypeResolver< Translator >() {
 
         /**
          * {@inheritDoc}

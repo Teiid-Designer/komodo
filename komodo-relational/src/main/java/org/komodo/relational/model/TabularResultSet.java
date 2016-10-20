@@ -57,7 +57,7 @@ public interface TabularResultSet extends ProcedureResultSet {
     /**
      * The resolver of a {@link TabularResultSet}.
      */
-    public static final TypeResolver< TabularResultSet > RESOLVER = new TypeResolver< TabularResultSet >() {
+    TypeResolver< TabularResultSet > RESOLVER = new TypeResolver< TabularResultSet >() {
 
         /**
          * {@inheritDoc}

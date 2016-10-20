@@ -159,7 +159,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * The resolver of a {@link Table}.
      */
-    public static final TypeResolver< Table > RESOLVER = new TypeResolver< Table >() {
+    TypeResolver< Table > RESOLVER = new TypeResolver< Table >() {
 
         /**
          * {@inheritDoc}

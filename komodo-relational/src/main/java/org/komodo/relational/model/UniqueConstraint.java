@@ -66,7 +66,7 @@ public interface UniqueConstraint extends TableConstraint {
     /**
      * The resolver of a {@link UniqueConstraint}.
      */
-    public static final TypeResolver< UniqueConstraint > RESOLVER = new TypeResolver< UniqueConstraint >() {
+    TypeResolver< UniqueConstraint > RESOLVER = new TypeResolver< UniqueConstraint >() {
 
         /**
          * {@inheritDoc}

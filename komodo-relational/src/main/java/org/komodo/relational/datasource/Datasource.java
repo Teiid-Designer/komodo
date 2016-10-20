@@ -22,7 +22,6 @@
 package org.komodo.relational.datasource;
 
 import java.util.Properties;
-
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
@@ -78,7 +77,7 @@ public interface Datasource extends Exportable, RelationalObject {
     /**
      * The resolver of a {@link Datasource}.
      */
-    public static final TypeResolver< Datasource > RESOLVER = new TypeResolver< Datasource >() {
+    TypeResolver< Datasource > RESOLVER = new TypeResolver< Datasource >() {
 
         /**
          * {@inheritDoc}

@@ -62,7 +62,7 @@ public interface VirtualProcedure extends Procedure {
     /**
      * The resolver of a {@link VirtualProcedure}.
      */
-    public static final TypeResolver< VirtualProcedure > RESOLVER = new TypeResolver< VirtualProcedure >() {
+    TypeResolver< VirtualProcedure > RESOLVER = new TypeResolver< VirtualProcedure >() {
 
         /**
          * {@inheritDoc}

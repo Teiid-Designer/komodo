@@ -59,7 +59,7 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
     /**
      * The resolver of a {@link Teiid}.
      */
-    public static final TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
+    TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
 
         /**
          * {@inheritDoc}

@@ -132,7 +132,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
     /**
      * The resolver of a {@link Parameter}.
      */
-    public static final TypeResolver< Parameter > RESOLVER = new TypeResolver< Parameter >() {
+    TypeResolver< Parameter > RESOLVER = new TypeResolver< Parameter >() {
 
         /**
          * {@inheritDoc}

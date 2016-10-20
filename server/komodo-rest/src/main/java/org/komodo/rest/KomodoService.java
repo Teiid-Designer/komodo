@@ -501,7 +501,7 @@ public abstract class KomodoService implements V1Constants {
         }
 
         final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-        final Vdb vdb = Vdb.RESOLVER.resolve( uow, kobject );
+        final Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
 
         LOGGER.debug( "VDB '{0}' was found", vdbName ); //$NON-NLS-1$
         return vdb;
@@ -535,7 +535,7 @@ public abstract class KomodoService implements V1Constants {
         }
 
         final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
-        final Dataservice dataservice = Dataservice.RESOLVER.resolve( uow, kobject );
+        final Dataservice dataservice = getWorkspaceManager(uow).resolve( uow, kobject, Dataservice.class );
 
         LOGGER.debug( "Dataservice '{0}' was found", dataserviceName ); //$NON-NLS-1$
         return dataservice;
@@ -547,7 +547,7 @@ public abstract class KomodoService implements V1Constants {
         }
 
         final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
-        final Datasource datasource = Datasource.RESOLVER.resolve( uow, kobject );
+        final Datasource datasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
 
         LOGGER.debug( "Datasource '{0}' was found", datasourceName ); //$NON-NLS-1$
         return datasource;

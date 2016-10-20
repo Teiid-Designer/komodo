@@ -28,9 +28,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-
 import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelFactory;

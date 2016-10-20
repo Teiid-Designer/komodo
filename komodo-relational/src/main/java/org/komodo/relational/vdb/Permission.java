@@ -98,7 +98,7 @@ public interface Permission extends RelationalObject {
     /**
      * The resolver of a {@link Permission}.
      */
-    public static final TypeResolver< Permission > RESOLVER = new TypeResolver< Permission >() {
+    TypeResolver< Permission > RESOLVER = new TypeResolver< Permission >() {
 
         /**
          * {@inheritDoc}

@@ -63,7 +63,7 @@ public interface Entry extends RelationalObject {
     /**
      * The resolver of a {@link Entry}.
      */
-    static final TypeResolver< Entry > RESOLVER = new TypeResolver< Entry >() {
+    TypeResolver< Entry > RESOLVER = new TypeResolver< Entry >() {
 
         /**
          * {@inheritDoc}

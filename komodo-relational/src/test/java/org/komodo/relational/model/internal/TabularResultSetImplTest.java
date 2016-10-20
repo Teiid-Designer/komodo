@@ -26,9 +26,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
 import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;

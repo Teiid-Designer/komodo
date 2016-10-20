@@ -22,7 +22,6 @@
 package org.komodo.relational.vdb;
 
 import java.util.Properties;
-
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
@@ -86,7 +85,7 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * The resolver of a {@link Vdb}.
      */
-    public static final TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
+    TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
 
         /**
          * {@inheritDoc}

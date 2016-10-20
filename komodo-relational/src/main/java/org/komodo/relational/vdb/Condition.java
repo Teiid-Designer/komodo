@@ -68,7 +68,7 @@ public interface Condition extends RelationalObject {
     /**
      * The resolver of a {@link Condition}.
      */
-    public static final TypeResolver< Condition > RESOLVER = new TypeResolver< Condition >() {
+    TypeResolver< Condition > RESOLVER = new TypeResolver< Condition >() {
 
         /**
          * {@inheritDoc}

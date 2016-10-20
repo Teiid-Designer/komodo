@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;

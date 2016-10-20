@@ -56,7 +56,7 @@ public interface StatementOption extends Property, RelationalObject {
     /**
      * The resolver of a {@link StatementOption}.
      */
-    public static final TypeResolver< StatementOption > RESOLVER = new TypeResolver< StatementOption >() {
+    TypeResolver< StatementOption > RESOLVER = new TypeResolver< StatementOption >() {
 
         /**
          * {@inheritDoc}

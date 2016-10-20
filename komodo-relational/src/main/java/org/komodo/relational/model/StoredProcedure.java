@@ -67,7 +67,7 @@ public interface StoredProcedure extends Procedure {
     /**
      * The resolver of a {@link StoredProcedure}.
      */
-    public static final TypeResolver< StoredProcedure > RESOLVER = new TypeResolver< StoredProcedure >() {
+    TypeResolver< StoredProcedure > RESOLVER = new TypeResolver< StoredProcedure >() {
 
         /**
          * {@inheritDoc}

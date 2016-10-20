@@ -67,7 +67,7 @@ public interface Index extends TableConstraint {
     /**
      * The resolver of a {@link Index}.
      */
-    public static final TypeResolver< Index > RESOLVER = new TypeResolver< Index >() {
+    TypeResolver< Index > RESOLVER = new TypeResolver< Index >() {
 
         /**
          * {@inheritDoc}

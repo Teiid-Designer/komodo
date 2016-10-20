@@ -61,7 +61,7 @@ public interface View extends Table {
     /**
      * The resolver of a {@link View}.
      */
-    public static final TypeResolver< View > RESOLVER = new TypeResolver< View >() {
+    TypeResolver< View > RESOLVER = new TypeResolver< View >() {
 
         /**
          * {@inheritDoc}

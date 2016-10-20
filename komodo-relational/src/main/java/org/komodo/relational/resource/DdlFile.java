@@ -60,7 +60,7 @@ public interface DdlFile extends DataServiceResource {
     /**
      * The resolver of a {@link DdlFile}.
      */
-    public static final TypeResolver< DdlFile > RESOLVER = new TypeResolver< DdlFile >() {
+    TypeResolver< DdlFile > RESOLVER = new TypeResolver< DdlFile >() {
 
         /**
          * {@inheritDoc}
@@ -123,5 +123,4 @@ public interface DdlFile extends DataServiceResource {
     default DocumentType getDocumentType( final UnitOfWork transaction ) {
         return DOC_TYPE;
     }
-
 }

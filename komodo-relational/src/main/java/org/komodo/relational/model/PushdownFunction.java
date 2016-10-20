@@ -62,7 +62,7 @@ public interface PushdownFunction extends Function {
     /**
      * The resolver of a {@link PushdownFunction}.
      */
-    public static final TypeResolver< PushdownFunction > RESOLVER = new TypeResolver< PushdownFunction >() {
+    TypeResolver< PushdownFunction > RESOLVER = new TypeResolver< PushdownFunction >() {
 
         /**
          * {@inheritDoc}

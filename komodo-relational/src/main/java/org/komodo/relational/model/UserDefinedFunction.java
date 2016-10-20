@@ -62,7 +62,7 @@ public interface UserDefinedFunction extends Function {
     /**
      * The resolver of a {@link UserDefinedFunction}.
      */
-    public static final TypeResolver< UserDefinedFunction > RESOLVER = new TypeResolver< UserDefinedFunction >() {
+    TypeResolver< UserDefinedFunction > RESOLVER = new TypeResolver< UserDefinedFunction >() {
 
         /**
          * {@inheritDoc}

@@ -95,7 +95,7 @@ public interface DataTypeResultSet extends ProcedureResultSet, ResultSetColumn {
     /**
      * The resolver of a {@link DataTypeResultSet}.
      */
-    public static final TypeResolver< DataTypeResultSet > RESOLVER = new TypeResolver< DataTypeResultSet >() {
+    TypeResolver< DataTypeResultSet > RESOLVER = new TypeResolver< DataTypeResultSet >() {
 
         /**
          * {@inheritDoc}

@@ -60,7 +60,7 @@ public interface Folder extends RelationalObject {
     /**
      * The resolver of a {@link Folder}.
      */
-    public static final TypeResolver< Folder > RESOLVER = new TypeResolver< Folder >() {
+    TypeResolver< Folder > RESOLVER = new TypeResolver< Folder >() {
     
         /**
          * {@inheritDoc}
@@ -264,5 +264,4 @@ public interface Folder extends RelationalObject {
      */
     Folder[] getFolders( final UnitOfWork uow,
                          final String... namePatterns ) throws KException;
-
 }
