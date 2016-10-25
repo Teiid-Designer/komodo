@@ -31,14 +31,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -149,31 +146,6 @@ public final class EntryImplTest extends RelationalModelTest {
         final String newValue = "newPath";
         this.entry.setPath( getTransaction(), newValue );
         assertThat( this.entry.getPath( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-
-        final RelationalProperties props = new RelationalProperties();
-        props.add( new RelationalProperty( VdbLexicon.Entry.PATH, "entryPath" ) );
-
-        final KomodoObject kobject = Entry.RESOLVER.create( getTransaction(), _repo, this.entry.getParent( getTransaction() ), name, props );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Entry.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Entry.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

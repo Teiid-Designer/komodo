@@ -41,7 +41,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
-import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.folder.Folder;
@@ -56,7 +55,6 @@ import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Procedure;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.PushdownFunction;
-import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.Table;
@@ -82,15 +80,12 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageReference;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
-import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -673,213 +668,6 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         ObjectImpl tableObj = new ObjectImpl(_repo, table.getAbsolutePath(), 0);
         Table table2 = wsMgr.resolve(getTransaction(), tableObj, Table.class);
         assertNotNull(table2);
-    }
-
-    @Test
-    public void shouldCreateDataTypeResultSet() throws Exception {
-        final Model model = createModel();
-        final StoredProcedure procedure = model.addStoredProcedure(getTransaction(), "procedure");
-        final KomodoObject result = wsMgr.create(getTransaction(), procedure, "resultSet", KomodoType.DATA_TYPE_RESULT_SET);
-        assertNotNull(result);
-        assertThat(result, is(instanceOf(DataTypeResultSet.class)));
-    }
-
-    @Test
-    public void shouldCreateResultSetColumn() throws Exception {
-        final Model model = createModel();
-        final PushdownFunction function = model.addPushdownFunction( getTransaction(), "function");
-        final TabularResultSet resultSet = function.setResultSet( getTransaction(), TabularResultSet.class );
-        final KomodoObject result = wsMgr.create(getTransaction(), resultSet, "resultSetColumn", KomodoType.RESULT_SET_COLUMN);
-        assertThat(result, is(instanceOf(ResultSetColumn.class)));
-    }
-
-    @Test
-    public void shouldCreateAllRelationalObjects() throws Exception {
-        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
-        Vdb vdb = createVdb();
-        Model model = vdb.addModel(getTransaction(), "testControlModel");
-        Table table = model.addTable(getTransaction(), "testControlTable");
-        StoredProcedure procedure = model.addStoredProcedure(getTransaction(), "testControlProcedure");
-        DataRole dataRole = vdb.addDataRole(getTransaction(), "testControlDataRole");
-        Permission permission = dataRole.addPermission(getTransaction(), "testControlPermission");
-
-        for (KomodoType type : KomodoType.values()) {
-            String id = "test" + type.getType();
-            switch (type) {
-                case FOREIGN_KEY: {
-                    Table refTable = model.addTable(getTransaction(), "testRefTable");
-                    KomodoObject result = wsMgr.create(getTransaction(), table, id, type, new RelationalProperty(TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT, refTable));
-                    assertNotNull(result);
-                    break;
-                }
-                case STATEMENT_OPTION: {
-                    String optionValue = "testOptionValue";
-                    KomodoObject result = wsMgr.create(getTransaction(), table, id, type, new RelationalProperty(StandardDdlLexicon.VALUE, optionValue));
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_ENTRY: {
-                    String entryPath = "testEntryPath";
-                    KomodoObject result = wsMgr.create(getTransaction(), vdb, id, type, new RelationalProperty(VdbLexicon.Entry.PATH, entryPath));
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_TRANSLATOR: {
-                    String transType = "testTranslatorType";
-                    KomodoObject result = wsMgr.create(getTransaction(), vdb, id, type, new RelationalProperty(VdbLexicon.Translator.TYPE, transType));
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB: {
-                    String filePath = "/test2";
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type, new RelationalProperty(VdbLexicon.Vdb.ORIGINAL_FILE, filePath));
-                    assertNotNull(result);
-                    break;
-                }
-                case ACCESS_PATTERN: {
-                    KomodoObject result = wsMgr.create(getTransaction(), table, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case COLUMN: {
-                    KomodoObject result = wsMgr.create(getTransaction(), table, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case PUSHDOWN_FUNCTION: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case USER_DEFINED_FUNCTION: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case INDEX: {
-                    KomodoObject result = wsMgr.create(getTransaction(), table, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case MODEL: {
-                    KomodoObject result = wsMgr.create(getTransaction(), vdb, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case PARAMETER: {
-                    KomodoObject result = wsMgr.create(getTransaction(), procedure, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case PRIMARY_KEY: {
-                    KomodoObject result = wsMgr.create(getTransaction(), table, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case STORED_PROCEDURE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    assertThat(result, is(instanceOf(StoredProcedure.class)));
-                    break;
-                }
-                case VIRTUAL_PROCEDURE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    assertThat(result, is(instanceOf(VirtualProcedure.class)));
-                    break;
-                }
-                case DATA_TYPE_RESULT_SET: {
-                    // since this and tabular result set expect the same name must run in different test
-                    break;
-                }
-                case TABULAR_RESULT_SET: {
-                    KomodoObject result = wsMgr.create(getTransaction(), procedure, "test" + id, type);
-                    assertNotNull(result);
-                    assertThat(result, is(instanceOf(TabularResultSet.class)));
-                    break;
-                }
-                case RESULT_SET_COLUMN: {
-                    // see separate test
-                    break;
-                }
-                case FOLDER: {
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case DATASOURCE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case DATASERVICE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case SCHEMA: {
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case TABLE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case TEIID: {
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case UNIQUE_CONSTRAINT: {
-                    KomodoObject result = wsMgr.create(getTransaction(), table, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_CONDITION: {
-                    KomodoObject result = wsMgr.create(getTransaction(), permission, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_DATA_ROLE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), vdb, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_IMPORT: {
-                    KomodoObject result = wsMgr.create(getTransaction(), vdb, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_MASK: {
-                    KomodoObject result = wsMgr.create(getTransaction(), permission, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_MODEL_SOURCE: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VDB_PERMISSION: {
-                    KomodoObject result = wsMgr.create(getTransaction(), dataRole, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case VIEW: {
-                    KomodoObject result = wsMgr.create(getTransaction(), model, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-                case UNKNOWN:
-                default: {
-                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
-                    assertNotNull(result);
-                    break;
-                }
-            }
-        }
     }
 
     @Test

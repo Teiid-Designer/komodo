@@ -21,18 +21,13 @@
  */
 package org.komodo.relational.model;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.DataTypeResultSetImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
@@ -100,41 +95,7 @@ public interface DataTypeResultSet extends ProcedureResultSet, ResultSetColumn {
     /**
      * The resolver of a {@link DataTypeResultSet}.
      */
-    public static final TypeResolver< DataTypeResultSet > RESOLVER = new TypeResolver< DataTypeResultSet >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public DataTypeResultSet create( final UnitOfWork transaction,
-                                         final Repository repository,
-                                         final KomodoObject parent,
-                                         final String id,
-                                         final RelationalProperties properties ) throws KException {
-            final Class< ? extends AbstractProcedure > clazz = AbstractProcedure.Utils.getProcedureType( transaction, parent );
-            final AdapterFactory adapter = new AdapterFactory( );
-            final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-
-            if ( parentProc == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          DataTypeResultSet.class.getSimpleName() ) );
-            }
-
-            if ( parentProc instanceof StoredProcedure ) {
-                return ( ( StoredProcedure )parentProc ).setResultSet( transaction, DataTypeResultSet.class );
-            }
-
-            if ( parentProc instanceof PushdownFunction ) {
-                return ( ( PushdownFunction )parentProc ).setResultSet( transaction, DataTypeResultSet.class );
-            }
-
-            throw new KException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, clazz.getName() ) );
-        }
+    TypeResolver< DataTypeResultSet > RESOLVER = new TypeResolver< DataTypeResultSet >() {
 
         /**
          * {@inheritDoc}

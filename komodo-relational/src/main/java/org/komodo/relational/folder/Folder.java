@@ -23,7 +23,6 @@ package org.komodo.relational.folder;
 
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
@@ -32,12 +31,10 @@ import org.komodo.relational.model.Schema;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -63,24 +60,7 @@ public interface Folder extends RelationalObject {
     /**
      * The resolver of a {@link Folder}.
      */
-    public static final TypeResolver< Folder > RESOLVER = new TypeResolver< Folder >() {
-    
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Folder create( final UnitOfWork transaction,
-                              final Repository repository,
-                              final KomodoObject parent,
-                              final String id,
-                              final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
-            return mgr.createFolder( transaction, parent, id );
-        }
+    TypeResolver< Folder > RESOLVER = new TypeResolver< Folder >() {
     
         /**
          * {@inheritDoc}
@@ -284,5 +264,4 @@ public interface Folder extends RelationalObject {
      */
     Folder[] getFolders( final UnitOfWork uow,
                          final String... namePatterns ) throws KException;
-
 }

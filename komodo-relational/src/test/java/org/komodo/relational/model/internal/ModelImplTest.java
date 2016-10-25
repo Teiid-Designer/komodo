@@ -644,25 +644,4 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.isVisible( getTransaction() ), is( value ) );
     }
 
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Model.RESOLVER.create( getTransaction(), _repo, this.model.getParent( getTransaction() ), name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Model.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Model.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
-    }
-
 }

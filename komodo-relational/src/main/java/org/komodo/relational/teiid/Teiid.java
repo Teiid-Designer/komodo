@@ -23,10 +23,8 @@ package org.komodo.relational.teiid;
 
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.teiid.internal.TeiidImpl;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.QueryService;
@@ -61,24 +59,7 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
     /**
      * The resolver of a {@link Teiid}.
      */
-    public static final TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Teiid create( final UnitOfWork transaction,
-                             final Repository repository,
-                             final KomodoObject parent,
-                             final String id,
-                             final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
-            return mgr.createTeiid( transaction, parent, id );
-        }
+    TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
 
         /**
          * {@inheritDoc}

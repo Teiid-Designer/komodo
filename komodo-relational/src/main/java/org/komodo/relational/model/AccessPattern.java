@@ -21,11 +21,7 @@
  */
 package org.komodo.relational.model;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.AccessPatternImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
@@ -72,32 +68,7 @@ public interface AccessPattern extends TableConstraint {
     /**
      * The resolver of a {@link AccessPattern}.
      */
-    public static final TypeResolver< AccessPattern > RESOLVER = new TypeResolver< AccessPattern >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public AccessPattern create( final UnitOfWork transaction,
-                                     final Repository repository,
-                                     final KomodoObject parent,
-                                     final String id,
-                                     final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( );
-            final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-
-            if ( parentTable == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          AccessPattern.class.getSimpleName() ) );
-            }
-
-            return parentTable.addAccessPattern( transaction, id );
-        }
+    TypeResolver< AccessPattern > RESOLVER = new TypeResolver< AccessPattern >() {
 
         /**
          * {@inheritDoc}
@@ -154,5 +125,4 @@ public interface AccessPattern extends TableConstraint {
             return new AccessPatternImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
     };
-
 }

@@ -753,25 +753,4 @@ public final class ColumnImplTest extends RelationalModelTest {
         assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Column.RESOLVER.create( getTransaction(), _repo, this.table, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Column.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Column.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
-    }
-
 }

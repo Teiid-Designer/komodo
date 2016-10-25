@@ -21,18 +21,13 @@
  */
 package org.komodo.relational.vdb;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.vdb.internal.MaskImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -68,32 +63,7 @@ public interface Mask extends RelationalObject {
     /**
      * The resolver of a {@link Mask}.
      */
-    public static final TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Mask create( final UnitOfWork transaction,
-                            final Repository repository,
-                            final KomodoObject parent,
-                            final String id,
-                            final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( );
-            final Permission parentPerm = adapter.adapt( transaction, parent, Permission.class );
-
-            if ( parentPerm == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          Mask.class.getSimpleName() ) );
-            }
-
-            return parentPerm.addMask( transaction, id );
-        }
+    TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
 
         /**
          * {@inheritDoc}

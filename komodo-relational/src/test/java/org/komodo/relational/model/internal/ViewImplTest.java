@@ -23,7 +23,6 @@ package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -124,27 +123,6 @@ public final class ViewImplTest extends RelationalModelTest {
         final String newName = "blah";
         this.view.rename( getTransaction(), newName );
         assertThat( this.view.getName( getTransaction() ), is( newName ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = View.RESOLVER.create( getTransaction(), _repo, this.model, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( View.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        View.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

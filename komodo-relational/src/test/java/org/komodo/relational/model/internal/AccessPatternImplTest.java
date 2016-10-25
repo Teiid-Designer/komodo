@@ -23,7 +23,6 @@ package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -35,7 +34,6 @@ import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
@@ -125,27 +123,6 @@ public final class AccessPatternImplTest extends RelationalModelTest {
                 assertThat( filter.rejectProperty( name ), is( false ) );
             }
         }
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = AccessPattern.RESOLVER.create( getTransaction(), _repo, this.table, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( AccessPattern.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        AccessPattern.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

@@ -21,17 +21,14 @@
  */
 package org.komodo.relational.resource;
 
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.DataServiceResource;
 import org.komodo.relational.resource.internal.DriverImpl;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
@@ -63,23 +60,7 @@ public interface Driver extends DataServiceResource {
     /**
      * The resolver of a {@link Driver}.
      */
-    public static final TypeResolver< Driver > RESOLVER = new TypeResolver< Driver >() {
-
-        /**
-         * Throws an {@link UnsupportedOperationException} if called.
-         * <p>
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Driver create(final UnitOfWork transaction, final Repository repository, final KomodoObject parent,
-                             final String id, final RelationalProperties properties) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance(repository, transaction);
-            return mgr.createDriver(transaction, parent, id);
-        }
+    TypeResolver< Driver > RESOLVER = new TypeResolver< Driver >() {
 
         /**
          * {@inheritDoc}
@@ -141,5 +122,4 @@ public interface Driver extends DataServiceResource {
     default DocumentType getDocumentType( final UnitOfWork transaction ) {
         return DocumentType.JAR;
     }
-
 }

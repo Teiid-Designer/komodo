@@ -400,29 +400,4 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
         assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = StoredProcedure.RESOLVER.create( getTransaction(),
-                                                                          _repo,
-                                                                          this.procedure.getParent( getTransaction() ),
-                                                                          name,
-                                                                          null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( StoredProcedure.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        StoredProcedure.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
-    }
-
 }

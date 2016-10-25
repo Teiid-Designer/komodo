@@ -43,7 +43,6 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.utils.StringUtils;
@@ -429,31 +428,6 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
         final StatementOption statementOption = this.function.getStatementOptions( getTransaction() )[0];
         assertThat( statementOption.getName( getTransaction() ), is( option ) );
         assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = UserDefinedFunction.RESOLVER.create( getTransaction(),
-                                                                              _repo,
-                                                                              this.function.getParent( getTransaction() ),
-                                                                              name,
-                                                                              null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( UserDefinedFunction.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        UserDefinedFunction.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

@@ -35,9 +35,6 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.RelationalProperty;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
@@ -48,7 +45,6 @@ import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.ModelImpl;
@@ -81,7 +77,6 @@ import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.jcr.api.JcrConstants;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -528,54 +523,6 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                 : parent.getAbsolutePath() );
         return RelationalModelFactory.createVdb( uow, getRepository(), path, vdbName, externalFilePath );
-    }
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not
-     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param parent
-     *        the parent of the new object (cannot be <code>null</code>)
-     * @param id
-     *        the identifier of the object (cannot be <code>null</code>)
-     * @param type
-     *        the type of the object (cannot be <code>null</code>)
-     * @param properties
-     *        any additional properties required for construction
-     *
-     * @return new object
-     * @throws KException if an error occurs
-     */
-    public KomodoObject create( UnitOfWork transaction,
-                                KomodoObject parent,
-                                String id,
-                                KomodoType type,
-                                RelationalProperty... properties ) throws KException {
-
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( id, "id" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( type );
-
-        RelationalProperties relProperties = new RelationalProperties();
-        if ( ( properties != null ) && ( properties.length != 0 ) ) {
-            for ( RelationalProperty property : properties ) {
-                relProperties.add( property );
-            }
-        }
-
-        TypeResolverRegistry registry = TypeResolverRegistry.getInstance();
-        TypeResolver< ? > resolver = registry.getResolver( type );
-        if ( resolver == null ) {
-            if ( parent == null ) {
-                return getRepository().komodoWorkspace( transaction ).addChild( transaction, id, JcrConstants.NT_UNSTRUCTURED );
-            }
-
-            return parent.addChild( transaction, id, JcrConstants.NT_UNSTRUCTURED );
-        }
-
-        return resolver.create( transaction, getRepository(), parent, id, relProperties );
     }
 
     /**

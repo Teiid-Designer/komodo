@@ -44,7 +44,6 @@ import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -458,27 +457,6 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldNotHaveStandardOptionNames() throws Exception {
         assertThat( this.parameter.getStandardOptions().isEmpty(), is( true ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Parameter.RESOLVER.create( getTransaction(), _repo, this.procedure, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Parameter.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Parameter.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

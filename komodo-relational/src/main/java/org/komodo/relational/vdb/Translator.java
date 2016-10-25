@@ -22,15 +22,12 @@
 package org.komodo.relational.vdb;
 
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -63,30 +60,7 @@ public interface Translator extends RelationalObject {
     /**
      * The resolver of a {@link Translator}.
      */
-    public static final TypeResolver< Translator > RESOLVER = new TypeResolver< Translator >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Translator create( final UnitOfWork transaction,
-                                  final Repository repository,
-                                  final KomodoObject parent,
-                                  final String id,
-                                  final RelationalProperties properties ) throws KException {
-            final Object transTypeValue = properties.getValue( VdbLexicon.Translator.TYPE );
-            final String transType = transTypeValue == null ? null : transTypeValue.toString();
-            final AdapterFactory adapter = new AdapterFactory( );
-            final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-            if (parentVdb != null)
-                return parentVdb.addTranslator( transaction, id, transType );
-            else
-                return new TranslatorImpl(transaction, repository, id);
-        }
+    TypeResolver< Translator > RESOLVER = new TypeResolver< Translator >() {
 
         /**
          * {@inheritDoc}

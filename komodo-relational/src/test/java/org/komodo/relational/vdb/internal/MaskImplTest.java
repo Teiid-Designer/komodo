@@ -23,7 +23,6 @@ package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -37,7 +36,6 @@ import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -128,27 +126,6 @@ public final class MaskImplTest extends RelationalModelTest {
         final String newValue = "newOrder";
         this.mask.setOrder( getTransaction(), newValue );
         assertThat( this.mask.getOrder( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Mask.RESOLVER.create( getTransaction(), _repo, this.mask.getParent( getTransaction() ), name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Mask.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Mask.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

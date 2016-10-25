@@ -41,8 +41,6 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
@@ -834,25 +832,6 @@ public final class VdbImplTest extends RelationalModelTest {
         final int newValue = ( Vdb.DEFAULT_VERSION + 10 );
         this.vdb.setVersion( getTransaction(), newValue );
         assertThat( this.vdb.getVersion( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-
-        final RelationalProperties props = new RelationalProperties();
-        props.add( new RelationalProperty( VdbLexicon.Vdb.ORIGINAL_FILE, "/my/path/vdb.vdb" ) );
-
-        final KomodoObject kobject = Vdb.RESOLVER.create( getTransaction(), _repo, null, name, props );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Vdb.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
 }

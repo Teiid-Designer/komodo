@@ -925,25 +925,4 @@ public final class TableImplTest extends RelationalModelTest {
         assertThat( this.table.getUuid( getTransaction() ), is( value ) );
     }
 
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Table.RESOLVER.create( getTransaction(), _repo, this.model, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Table.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Table.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
-    }
-
 }

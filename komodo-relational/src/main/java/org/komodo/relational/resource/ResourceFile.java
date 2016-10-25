@@ -21,7 +21,6 @@
  */
 package org.komodo.relational.resource;
 
-import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.DataServiceResource;
 import org.komodo.relational.resource.internal.ResourceFileImpl;
@@ -29,7 +28,6 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
@@ -56,25 +54,7 @@ public interface ResourceFile extends DataServiceResource {
     /**
      * The resolver of a {@link ResourceFile}.
      */
-    public static final TypeResolver< ResourceFile > RESOLVER = new TypeResolver< ResourceFile >() {
-
-        /**
-         * Throws an {@link UnsupportedOperationException} if called.
-         * <p>
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public ResourceFile create( final UnitOfWork transaction,
-                                    final Repository repository,
-                                    final KomodoObject parent,
-                                    final String id,
-                                    final RelationalProperties properties ) {
-            throw new UnsupportedOperationException();
-        }
+    TypeResolver< ResourceFile > RESOLVER = new TypeResolver< ResourceFile >() {
 
         /**
          * {@inheritDoc}
