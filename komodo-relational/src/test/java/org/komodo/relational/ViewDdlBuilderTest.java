@@ -23,29 +23,90 @@ package org.komodo.relational;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
+import org.komodo.relational.model.Column;
+import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.Table;
+import org.komodo.relational.model.UniqueConstraint;
 
 @SuppressWarnings({ "javadoc", "nls" })
-public class ViewDdlBuilderTest {
+public class ViewDdlBuilderTest extends RelationalModelTest {
 
     @Test
-    public void shouldGeneratedODataViewDDL() throws Exception {
-        String EXPECTED_DDL = "CREATE VIEW MyView (RowId integer PRIMARY KEY, Column1 ColumnType1, Column2 ColumnType2) AS \n"
-        + "SELECT ROW_NUMBER() OVER (ORDER BY Column1), Column1, Column2 \n"
-        + "FROM MySrc;";
+    public void shouldGeneratedODataViewDDLFromTableWithNoPK() throws Exception {
+        String EXPECTED_DDL = "CREATE VIEW MyView (RowId integer PRIMARY KEY, Col1 string, Col2 string) AS \n"
+        + "SELECT ROW_NUMBER() OVER (ORDER BY Col1), Col1, Col2 \n"
+        + "FROM MyTable;";
 
-        String VIEW_NAME = "MyView";
-        String SOURCE_NAME = "MySrc";
-        List<String> COL_NAMES = new ArrayList<String>();
-        COL_NAMES.add("Column1");
-        COL_NAMES.add("Column2");
-        List<String> COL_TYPES = new ArrayList<String>();
-        COL_TYPES.add("ColumnType1");
-        COL_TYPES.add("ColumnType2");
+        Table aTable = createTable("MyVDB", VDB_PATH, "MyModel", "MyTable");
+        Column col1 = aTable.addColumn(getTransaction(), "Col1");
+        col1.setDatatypeName(getTransaction(), "string");
+        Column col2 = aTable.addColumn(getTransaction(), "Col2");
+        col2.setDatatypeName(getTransaction(), "string");
+        
+        String viewDdl = ViewDdlBuilder.getODataViewDdl(getTransaction(), "MyView", aTable);
+        assertThat(viewDdl, is(EXPECTED_DDL));
+    }
 
-        String viewDdl = ViewDdlBuilder.getODataViewDdl(VIEW_NAME, SOURCE_NAME, COL_NAMES, COL_TYPES);
+    @Test
+    public void shouldGeneratedODataViewDDLFromTableWithPK() throws Exception {
+        String EXPECTED_DDL = "CREATE VIEW MyView ( Col1 string, Col2 string, CONSTRAINT pk PRIMARY KEY (Col1)) AS \n"
+        + "SELECT  Col1, Col2 \n"
+        + "FROM MyTable;";
+
+        Table aTable = createTable("MyVDB", VDB_PATH, "MyModel", "MyTable");
+        Column col1 = aTable.addColumn(getTransaction(), "Col1");
+        col1.setDatatypeName(getTransaction(), "string");
+        Column col2 = aTable.addColumn(getTransaction(), "Col2");
+        col2.setDatatypeName(getTransaction(), "string");
+        PrimaryKey pk = aTable.setPrimaryKey(getTransaction(), "pk");
+        pk.addColumn(getTransaction(), col1);
+        commit();
+        
+        String viewDdl = ViewDdlBuilder.getODataViewDdl(getTransaction(), "MyView", aTable);
+        assertThat(viewDdl, is(EXPECTED_DDL));
+    }
+
+    @Test
+    public void shouldGeneratedODataViewDDLFromTableWithUC() throws Exception {
+        String EXPECTED_DDL = "CREATE VIEW MyView ( Col1 string, Col2 string, CONSTRAINT uc UNIQUE (Col1)) AS \n"
+        + "SELECT  Col1, Col2 \n"
+        + "FROM MyTable;";
+
+        Table aTable = createTable("MyVDB", VDB_PATH, "MyModel", "MyTable");
+        Column col1 = aTable.addColumn(getTransaction(), "Col1");
+        col1.setDatatypeName(getTransaction(), "string");
+        Column col2 = aTable.addColumn(getTransaction(), "Col2");
+        col2.setDatatypeName(getTransaction(), "string");
+        UniqueConstraint uc = aTable.addUniqueConstraint(getTransaction(), "uc");
+        uc.addColumn(getTransaction(), col1);
+        commit();
+        
+        String viewDdl = ViewDdlBuilder.getODataViewDdl(getTransaction(), "MyView", aTable);
+        assertThat(viewDdl, is(EXPECTED_DDL));
+    }
+
+    @Test
+    public void shouldGeneratedODataViewDDLFromTableWithMultipleUC() throws Exception {
+        String EXPECTED_DDL = "CREATE VIEW MyView ( Col1 string, Col2 string, Col3 long, CONSTRAINT uc1 UNIQUE (Col1),CONSTRAINT uc2 UNIQUE (Col2, Col3)) AS \n"
+        + "SELECT  Col1, Col2, Col3 \n"
+        + "FROM MyTable;";
+
+        Table aTable = createTable("MyVDB", VDB_PATH, "MyModel", "MyTable");
+        Column col1 = aTable.addColumn(getTransaction(), "Col1");
+        col1.setDatatypeName(getTransaction(), "string");
+        Column col2 = aTable.addColumn(getTransaction(), "Col2");
+        col2.setDatatypeName(getTransaction(), "string");
+        Column col3 = aTable.addColumn(getTransaction(), "Col3");
+        col3.setDatatypeName(getTransaction(), "long");
+        UniqueConstraint uc1 = aTable.addUniqueConstraint(getTransaction(), "uc1");
+        uc1.addColumn(getTransaction(), col1);
+        UniqueConstraint uc2 = aTable.addUniqueConstraint(getTransaction(), "uc2");
+        uc2.addColumn(getTransaction(), col2);
+        uc2.addColumn(getTransaction(), col3);
+        commit();
+        
+        String viewDdl = ViewDdlBuilder.getODataViewDdl(getTransaction(), "MyView", aTable);
         assertThat(viewDdl, is(EXPECTED_DDL));
     }
 

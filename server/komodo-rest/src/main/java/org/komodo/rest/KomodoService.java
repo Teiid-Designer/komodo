@@ -569,6 +569,11 @@ public abstract class KomodoService implements V1Constants {
         return commit( uow, mediaTypes, new ResourceNotFound( vdbName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
+    protected Response commitNoSourceVdbFound(UnitOfWork uow, List<MediaType> mediaTypes) throws Exception {
+        LOGGER.debug( "sourceVDB was not found" ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( "sourceVdb", Messages.getString( GET_OPERATION_NAME ) ) );
+    }
+
     protected Response commitNoDataserviceFound(UnitOfWork uow, List<MediaType> mediaTypes, String dataserviceName) throws Exception {
         LOGGER.debug( "Dataservice '{0}' was not found", dataserviceName ); //$NON-NLS-1$
         return commit( uow, mediaTypes, new ResourceNotFound( dataserviceName, Messages.getString( GET_OPERATION_NAME ) ) );

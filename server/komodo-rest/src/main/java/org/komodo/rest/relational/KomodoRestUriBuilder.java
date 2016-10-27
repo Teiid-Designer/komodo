@@ -872,7 +872,10 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 result = parentUri;
                 break;
             }
+            case SOURCE_VDB_MATCHES:
+            case SERVICE_VIEW_TABLES:
             case CONNECTIONS:
+            case DRIVERS:
             case VDBS:
             {
                 String dataserviceName = dataserviceName(settings);

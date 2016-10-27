@@ -120,9 +120,24 @@ public final class RestLink {
         MASKS(KomodoType.VDB_MASK),
 
         /**
+         * Source VDBs matching service source model jndi
+         */
+        SOURCE_VDB_MATCHES,
+        
+        /**
+         * Service vdb view table names
+         */
+        SERVICE_VIEW_TABLES,
+
+        /**
          * A link to a data service's connections
          */
-        CONNECTIONS;
+        CONNECTIONS,
+
+        /**
+         * A link to a data service's connections
+         */
+        DRIVERS;
 
         private KomodoType kType;
 

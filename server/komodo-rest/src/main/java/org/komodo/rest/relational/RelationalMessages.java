@@ -173,6 +173,11 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR,
 
         /**
+         * An error indicating an error occurred trying to obtain a dataservice's drivers
+         */
+        DATASERVICE_SERVICE_GET_DRIVERS_ERROR,
+
+        /**
          * An error indicating a request to create a dataservice failed
          */
         DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR,
@@ -212,6 +217,16 @@ public final class RelationalMessages {
          */
         DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR,
         
+        /**
+         * An error indicating an error occurred trying to find a service source table
+         */
+        DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to find a matching source VDB
+         */
+        DATASERVICE_SERVICE_FIND_SOURCE_VDB_ERROR,
+
         /**
          * The Dataservice service cannot parse the request body
          */

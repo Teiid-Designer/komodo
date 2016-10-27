@@ -204,9 +204,19 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for finding source vdb matches for a DataService
+         */
+        String SOURCE_VDB_MATCHES = "sourceVdbMatches"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for finding the service view table names for a DataService
+         */
+        String SERVICE_VIEW_TABLES = "serviceViewTables"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for a Dataservice's connections in the Komodo workspace.
          */
-        String CONNECTIONS_SEGMENT = "connections";
+        String CONNECTIONS_SEGMENT = "connections"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for a setting a dataservice's service vdb

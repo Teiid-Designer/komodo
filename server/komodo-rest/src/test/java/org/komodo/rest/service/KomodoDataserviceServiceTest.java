@@ -27,29 +27,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
 import java.net.URI;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.komodo.rest.RestLink;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
-import org.komodo.test.utils.TestUtilities;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
+import org.komodo.rest.relational.response.KomodoStatusObject;
+import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.test.utils.TestUtilities;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTest {
@@ -121,7 +122,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
     @Test
     public void shouldGetDataserviceConnections() throws Exception {
-        loadDataServices();
+        loadStatesDataService();
 
         // get
         String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
@@ -161,6 +162,105 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         }
     }
     
+    @Test
+    public void shouldGetDataserviceDrivers() throws Exception {
+        loadStatesDataService();
+
+        // get
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.DRIVERS, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        System.out.println("Response:\n" + entity);
+
+        RestDataSourceDriver[] drivers = KomodoJsonMarshaller.unmarshallArray(entity, RestDataSourceDriver[].class);
+        assertNotNull(drivers);
+        assertEquals(1, drivers.length);
+
+        RestDataSourceDriver dataSourceDriver = drivers[0];
+        assertEquals("mysql-connector-java-5.1.39-bin.jar", dataSourceDriver.getName());
+    }
+
+    @Test
+    public void shouldGetViewTablesForDataService() throws Exception {
+        loadStatesDataService();
+
+        // get
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SERVICE_VIEW_TABLES, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        KomodoStatusObject kso = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+        assertNotNull(kso);
+
+        Map<String,String> attrs = kso.getAttributes();
+        assertEquals(1,attrs.size());
+        
+        // Should find one viewTable - 'state'
+        assertTrue(attrs.containsKey("SourceTable1"));
+        assertEquals("state",attrs.get("SourceTable1"));
+    }
+    
+    @Test
+    public void shouldGetWorkspaceSourceVdbForDataService() throws Exception {
+        loadServiceSourceVdb();
+        loadStatesDataService();
+        
+        // get
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SOURCE_VDB_MATCHES, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
+        assertNotNull(vdbs);
+        assertEquals(1, vdbs.length);
+
+        RestVdb vdb = vdbs[0];
+        assertEquals("ServiceSource", vdb.getId());
+    }
+    
+    @Test
+    public void shouldNotGetWorkspaceSourceVdbForDataService() throws Exception {
+        loadStatesDataService();
+        
+        // get
+        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SOURCE_VDB_MATCHES, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
+        assertNotNull(vdbs);
+        assertEquals(0, vdbs.length);
+    }
+
     @Test
     public void shouldNotSetServiceVdbMissingParameter() throws Exception {
         createDataservice(DATASERVICE_NAME);
