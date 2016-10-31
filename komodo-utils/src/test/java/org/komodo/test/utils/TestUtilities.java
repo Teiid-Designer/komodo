@@ -185,6 +185,11 @@ public class TestUtilities implements StringConstants {
     public static final String PARTS_VDB_FILE = "parts_dynamic-vdb.xml";
 
     /**
+     * Service Source vdb for usstates
+     */
+    public static final String USSTATES_SOURCE_VDB_FILE = "USStates-source-vdb.xml";
+
+    /**
      * Parts vdb name
      */
     public static final String PARTS_VDB_NAME = "MyPartsVDB_Dynamic";
@@ -1149,6 +1154,16 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    PARTS_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of usstates service source xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream usStatesSourceExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   USSTATES_SOURCE_VDB_FILE);
     }
 
     /**

@@ -506,7 +506,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
     @Test
     public void shouldExportDataserviceToGit() throws Exception {
-        loadDataServices();
+        loadStatesDataService();
 
         String dsName = "UsStatesService";
         List<String> zipEntries = TestUtilities.zipEntries(dsName, TestUtilities.usStatesDataserviceExample());

@@ -23,17 +23,18 @@ package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_FIND_SOURCE_VDB_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DRIVERS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -48,7 +49,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-
 import org.komodo.core.KEngine;
 import org.komodo.relational.ViewDdlBuilder;
 import org.komodo.relational.dataservice.Dataservice;
@@ -56,6 +56,8 @@ import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.View;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -70,15 +72,17 @@ import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
+import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -866,4 +870,264 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR, dataserviceName);
         }
     }
+    
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the id of the Dataservice (cannot be empty)
+     * @return the JSON representation of the Drivers (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace Dataservice drivers
+     *         or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER +
+                   StringConstants.FORWARD_SLASH + V1Constants.DRIVERS_SEGMENT)
+    @Produces( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find a dataservice's drivers ", response = RestDataSourceDriver.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDrivers( final @Context HttpHeaders headers,
+                                    final @Context UriInfo uriInfo,
+                                    @ApiParam(value = "Id of the dataservice drivers to be fetched", required = true)
+                                    final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "getDataservice", true ); //$NON-NLS-1$
+
+            Dataservice dataservice = findDataservice(uow, dataserviceName);
+            if (dataservice == null)
+                return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
+
+            Driver[] drivers = dataservice.getDrivers(uow);
+            List<RestDataSourceDriver> restDrivers = new ArrayList<>(drivers.length);
+            for (Driver driver : drivers) {
+                DataSourceDriver aDriver = new DataSourceDriver(driver.getName(uow),null);
+                RestDataSourceDriver entity = new RestDataSourceDriver(aDriver);
+                restDrivers.add(entity);
+                LOGGER.debug("getDrivers:Drivers from Dataservice '{0}' entity was constructed", dataserviceName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restDrivers);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_GET_DRIVERS_ERROR, dataserviceName);
+        }
+    }
+    
+    /**
+     * Find source VDBs in the workspace whose jndi matches the dataservice source model jndi
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the id of the Dataservice (cannot be empty)
+     * @return the JSON representation of the VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER + StringConstants.FORWARD_SLASH + V1Constants.SOURCE_VDB_MATCHES)
+    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find workspace source VDB matches for a Dataservice", response = RestVdb[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No dataservice could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getSourceVdbsForDataService( final @Context HttpHeaders headers,
+                                                 final @Context UriInfo uriInfo,
+                                                 @ApiParam(value = "Id of the dataservice", required = true)
+                                                 final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "getSourceVdbsForDataservice", true ); //$NON-NLS-1$
+
+            Dataservice dataservice = findDataservice(uow, dataserviceName);
+            if (dataservice == null)
+                return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
+
+            // Get JNDIs for the service physical sources
+            Vdb serviceVdb = dataservice.getServiceVdb(uow);
+            List<String> serviceJndis = new ArrayList<String>();
+            Model[] models = serviceVdb.getModels(uow);
+            for(Model model : models) {
+                if(model.getModelType(uow) == Model.Type.PHYSICAL) {
+                    ModelSource[] modelSources = model.getSources(uow);
+                    if(modelSources.length>0) {
+                        serviceJndis.add(modelSources[0].getJndiName(uow));
+                    }
+                }
+            }
+            
+            // Get list of source VDBs that have matching jndis
+            List<Vdb> sourceVdbs = new ArrayList<Vdb>();
+            for(String serviceJndi : serviceJndis) {
+                Vdb sourceVdb = getSourceVdbWithJndi(uow, serviceJndi);
+                if(sourceVdb!=null) sourceVdbs.add(sourceVdb);
+            }
+            
+            final List< RestVdb > entities = new ArrayList< >();
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
+            for ( final Vdb vdb : sourceVdbs ) {
+                RestVdb entity = entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties);
+                entities.add(entity);
+            }
+
+            // create response
+            return commit( uow, mediaTypes, entities );
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_FIND_SOURCE_VDB_ERROR, dataserviceName);
+        }
+    }
+    
+    /*
+     * Returns first service source vdb that has source jndi matching the supplied jndi
+     */
+    private Vdb getSourceVdbWithJndi(final UnitOfWork uow, final String jndiName) throws KException {
+        // Look for source vdb that has physical source with matching jndi
+        WorkspaceManager wsMgr = getWorkspaceManager(uow);
+        Vdb[] wsVdbs = wsMgr.findVdbs(uow);
+        for(Vdb wsVdb : wsVdbs) {
+            if(!isServiceSourceVdb(uow, wsVdb)) continue;
+            Model[] models = wsVdb.getModels(uow);
+            for(Model model : models) {
+                if(model.getModelType(uow) == Model.Type.PHYSICAL) {
+                    ModelSource[] modelSources = model.getSources(uow);
+                    for(ModelSource modelSource : modelSources) {
+                        String sourceJndi = modelSource.getJndiName(uow);
+                        if(sourceJndi.equals(jndiName)) {
+                            return wsVdb;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    private boolean isServiceSourceVdb(final UnitOfWork uow, final Vdb vdb) throws KException {
+        return (vdb.hasProperty(uow, "serviceSource")) ? true : false; //$NON-NLS-1$
+    }
+    
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the id of the Dataservice (cannot be empty)
+     * @return the JSON representation of the VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER + StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VIEW_TABLES)
+    @Produces( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "retrieve the service view tableNames for a dataservice")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No dataservice could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getServiceViewTablesForDataService( final @Context HttpHeaders headers,
+                                                        final @Context UriInfo uriInfo,
+                                                        @ApiParam(value = "Id of the dataservice", required = true)
+                                                        final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction(principal, "getServiceViewTablesForDataService", true ); //$NON-NLS-1$
+
+            Dataservice dataservice = findDataservice(uow, dataserviceName);
+            if (dataservice == null)
+                return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
+
+            // Get the View Query Expression and extract the table names
+            String[] viewTables = null;
+            Vdb serviceVdb = dataservice.getServiceVdb(uow);
+            Model[] models = serviceVdb.getModels(uow);
+            for(Model model : models) {
+                if(model.getModelType(uow) == Model.Type.VIRTUAL) {
+                    View[] views = model.getViews(uow);
+                    String viewDdl = views[0].getQueryExpression(uow);
+                    if(!StringUtils.isEmpty(viewDdl)) {
+                        // View source table name is after the FROM, to the end of the query.
+                        int startIndex = viewDdl.indexOf("FROM ")+("FROM ").length(); //$NON-NLS-1$ //$NON-NLS-2$
+                        String viewTableStr = viewDdl.substring(startIndex);
+                        viewTables = viewTableStr.split(COMMA);
+                    }
+                    break;
+                }
+            }
+                        
+            // Return a status object with the sourceTable
+            KomodoStatusObject kso = new KomodoStatusObject();
+            if(viewTables!=null) {
+                for (int i = 0; i < viewTables.length; ++i) {
+                    kso.addAttribute("SourceTable" + (i + 1), viewTables[i]); //$NON-NLS-1$
+                }
+            }
+
+            return commit(uow, mediaTypes, kso);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR, dataserviceName);
+        }
+    }
+    
 }
