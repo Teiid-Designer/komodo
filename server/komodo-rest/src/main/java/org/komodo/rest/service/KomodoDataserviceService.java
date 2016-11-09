@@ -1047,7 +1047,7 @@ public final class KomodoDataserviceService extends KomodoService {
     }
     
     private boolean isServiceSourceVdb(final UnitOfWork uow, final Vdb vdb) throws KException {
-        return (vdb.hasProperty(uow, "serviceSource")) ? true : false; //$NON-NLS-1$
+        return (vdb.hasProperty(uow, DSB_PROP_SERVICE_SOURCE)) ? true : false;
     }
     
     /**

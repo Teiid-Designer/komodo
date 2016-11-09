@@ -279,6 +279,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String COLUMNS_SEGMENT = "Columns"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for default translator
+         */
+        String TRANSLATOR_DEFAULT_SEGMENT = "TranslatorDefault"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of translators of a vdb
          */
         String TRANSLATORS_SEGMENT = "VdbTranslators"; //$NON-NLS-1$

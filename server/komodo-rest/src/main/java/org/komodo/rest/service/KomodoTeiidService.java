@@ -27,11 +27,14 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -52,9 +55,11 @@ import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.ServerManager;
@@ -98,6 +103,10 @@ import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -112,9 +121,30 @@ import io.swagger.annotations.ApiResponses;
 public class KomodoTeiidService extends KomodoService {
 
     /**
+     * Default translator mappings for different drivers
+     */
+    private final static String DEFAULT_TRANSLATOR_MAPPING_FILE = "defaultTranslatorMappings.xml"; //$NON-NLS-1$
+
+    /**
+     * Translator mapping file elements and attributes
+     */
+    private final static String ELEM_TRANSLATOR = "translator"; //$NON-NLS-1$
+    private final static String ATTR_DRIVER = "driver"; //$NON-NLS-1$
+
+    /**
+     * Unknown translator
+     */
+    private final static String UNKNOWN_TRANSLATOR = "unknown"; //$NON-NLS-1$
+
+    /**
      * Time to wait after deploying/undeploying an artifact from the teiid instance
      */
     private final static int DEPLOYMENT_WAIT_TIME = 2000;
+
+    /**
+     * Mapping of driverName to default translator
+     */
+    private Map<String, String> driverTranslatorMap = new HashMap<String,String>();
 
     /**
      * @param engine
@@ -124,6 +154,8 @@ public class KomodoTeiidService extends KomodoService {
      */
     public KomodoTeiidService(final KEngine engine) throws WebApplicationException {
         super(engine);
+        // Loads default translator mappings
+        loadDefaultTranslatorMap();
     }
 
     private synchronized Teiid getDefaultTeiid() throws KException {
@@ -842,6 +874,131 @@ public class KomodoTeiidService extends KomodoService {
     }
     
     /**
+     * Update workspace VDBs with latest Teiid status.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON representation of the new datasource (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the DataSource
+     */
+    @PUT
+    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VDBS_FROM_TEIID )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Update workspace VDBs with teiid status")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response updateWorkspaceVdbsFromTeiid( final @Context HttpHeaders headers,
+                                                  final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+
+            // Goes directly to the server to get vdb status
+            uow = createTransaction(principal, "vdbUpdateFromTeiid", false); //$NON-NLS-1$
+            
+            // Get list of Teiid VDBs directly from the server
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            Collection<TeiidVdb> teiidVdbs = teiidInstance.getVdbs();
+            
+            // Get list of workspace VDBs
+            WorkspaceManager wsMgr = getWorkspaceManager(uow);
+            Vdb[] workspaceVdbs = wsMgr.findVdbs( uow );
+            
+            // Set status properties on the workspace VDBs, based on the matching Teiid VDB.
+            for( Vdb wkspVdb : workspaceVdbs) {
+                updateVdbProperties(uow, wkspVdb, teiidVdbs);
+            }
+            
+            String title = RelationalMessages.getString(RelationalMessages.Info.VDB_TO_REPO_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+            status.addAttribute("success", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.VDB_TO_REPO_IMPORT_ERROR);
+        }
+    }
+    
+    /*
+     * Updates workspace vdb properties based on the corresponding teiid VDB state
+     */
+    private void updateVdbProperties(final UnitOfWork uow, Vdb workspaceVdb, Collection<TeiidVdb> teiidVdbs) throws KException {
+        // Find server VDB which corresponds to the workspace VDB
+        TeiidVdb serverVdbMatch = null;
+        String wkspVdbName = workspaceVdb.getName(uow);
+        for( TeiidVdb teiidVdb : teiidVdbs) {
+            if(teiidVdb.getName().equals(wkspVdbName)) {
+                serverVdbMatch = teiidVdb;
+                break;
+            }
+        }
+        
+        // Update workspace VDB properties based on server status
+        String status = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_NEW);
+        String statusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_MSG_NEW);
+        if(serverVdbMatch!=null) {
+            List<String> errors = serverVdbMatch.getValidityErrors();
+            if(errors!=null && errors.size() > 0) {
+                status = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_ERROR);
+                statusMessage = errors.get(0);
+            } else if(serverVdbMatch.hasFailed()) {
+                status = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_ERROR);
+                statusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_MSG_UNKNOWN);   
+            } else if(serverVdbMatch.isActive()) {
+                status = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_ACTIVE);
+                statusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_MSG_ACTIVE);
+            } else if(serverVdbMatch.isLoading()) {
+                status = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_LOADING);
+                statusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_MSG_LOADING);   
+            } else {
+                status = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_UNKNOWN);
+                statusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_STATUS_MSG_UNKNOWN);
+            }
+        }
+
+        // Sets sourceConnection property for serviceSource VDBs
+        if(workspaceVdb.hasProperty(uow, DSB_PROP_SERVICE_SOURCE)) {
+            Model[] models = workspaceVdb.getModels(uow);
+            for(Model model : models) {
+                if(model.getModelType(uow).equals(Type.PHYSICAL)) {
+                    ModelSource[] modelSources = model.getSources(uow);
+                    for(ModelSource modelSource : modelSources) {
+                        workspaceVdb.setProperty(uow, DSB_PROP_SOURCE_CONNECTION, modelSource.getName(uow));
+                        workspaceVdb.setProperty(uow, DSB_PROP_SOURCE_TRANSLATOR, modelSource.getTranslatorName(uow));
+                        break;
+                    }
+                }
+            }
+        }
+        
+        workspaceVdb.setProperty(uow, DSB_PROP_TEIID_STATUS, status);
+        workspaceVdb.setProperty(uow, DSB_PROP_TEIID_STATUS_MSG, statusMessage);
+    }
+    
+    /**
      * Creates or updates a workspace VDB model using DDL from the teiid VDB model.
      * If the target VDB does not exist, it is created.  If the specified model already exists, it is replaced - otherwise a new model is created.
      * @param headers
@@ -1370,6 +1527,77 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_ERROR, datasourceName);
+        }
+    }
+    
+    /**
+     * Return the default translator to be used for a Datasource
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param datasourceName
+     *        the id of the Datasource being retrieved (cannot be empty)
+     * @return the translator for the datasource (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace Datasource 
+     */
+    @GET
+    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER 
+           + StringConstants.FORWARD_SLASH + V1Constants.TRANSLATOR_DEFAULT_SEGMENT)
+    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Get the default translator recommended for a data source")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No Datasource could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDatasourceDefaultTranslator( final @Context HttpHeaders headers,
+                                                    final @Context UriInfo uriInfo,
+                                                    @ApiParam(value = "Id of the datasource", required = true)
+                                                    final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find DataSource
+            uow = createTransaction(principal, "getDataSourceDefaultTranslator-" + datasourceName, true); //$NON-NLS-1$
+            Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
+            if (dataSource == null)
+                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+
+            // Get the driver name for the source
+            String driverName = dataSource.getDriverName(uow);
+            
+            // Get the corresponding translator name from the mappings
+            String translatorName = driverTranslatorMap.get(driverName);
+            
+            // Translator not found in mappings
+            if(translatorName==null) translatorName = UNKNOWN_TRANSLATOR;
+            
+            // Return a status object with the translator
+            KomodoStatusObject kso = new KomodoStatusObject();
+            kso.addAttribute("Translator", translatorName); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_TRANSLATOR_ERROR, datasourceName);
         }
     }
 
@@ -2140,6 +2368,45 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR);
+        }
+    }
+    
+    /*
+     * Loads default translator mappings from resource file
+     */
+    private void loadDefaultTranslatorMap() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( DEFAULT_TRANSLATOR_MAPPING_FILE );
+        
+        if(inputStream==null) {
+            LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_DEFAULT_TRANSLATOR_MAPPINGS_NOT_FOUND_ERROR));
+            return;
+        }
+        
+        driverTranslatorMap.clear();
+        
+        // Load the mappings file
+        Document doc;
+        try {
+            String mappingXml = FileUtils.streamToString(inputStream);
+            doc = FileUtils.createDocument(mappingXml);
+        } catch (Exception ex) {
+            LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_LOAD_DEFAULT_TRANSLATOR_MAPPINGS_ERROR, ex.getLocalizedMessage()));
+            return;
+        }
+        
+        // Single child node contains the mappings
+        final Node mappingsNode = doc.getChildNodes().item(0);
+        if ( mappingsNode.getNodeType() != Node.ELEMENT_NODE ) {
+            return;
+        }
+
+        // Iterate the doc nodes and populate the default translator map
+        final NodeList translatorNodes = ((Element)mappingsNode).getElementsByTagName( ELEM_TRANSLATOR );
+        for(int i=0; i<translatorNodes.getLength(); i++) {
+            final Node translatorNode = translatorNodes.item(i);
+            String driver = translatorNode.getAttributes().getNamedItem( ATTR_DRIVER ).getTextContent();
+            String translator = translatorNode.getTextContent();
+            driverTranslatorMap.put(driver, translator);
         }
     }
 }

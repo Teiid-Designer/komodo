@@ -37,6 +37,56 @@ public final class RelationalMessages {
 
     public enum Info {
         /**
+         * Tag for VDB Active Status
+         */
+        VDB_STATUS_ACTIVE,
+
+        /**
+         * Tag for VDB Error Status
+         */
+        VDB_STATUS_ERROR,
+
+        /**
+         * Tag for VDB Loading Status
+         */
+        VDB_STATUS_LOADING,
+
+        /**
+         * Tag for VDB New Status
+         */
+        VDB_STATUS_NEW,
+
+        /**
+         * Tag for VDB Unknown Status
+         */
+        VDB_STATUS_UNKNOWN,
+
+        /**
+         * Message for VDB Active Status
+         */
+        VDB_STATUS_MSG_ACTIVE,
+
+        /**
+         * Message for VDB Error Status
+         */
+        VDB_STATUS_MSG_ERROR,
+
+        /**
+         * Message for VDB Loading Status
+         */
+        VDB_STATUS_MSG_LOADING,
+
+        /**
+         * Message for VDB New Status
+         */
+        VDB_STATUS_MSG_NEW,
+
+        /**
+         * Message for VDB Unknown Status
+         */
+        VDB_STATUS_MSG_UNKNOWN,
+
+        /**
          * Title for the driver deployment status
          */
         DRIVER_DEPLOYMENT_STATUS_TITLE,
@@ -798,6 +848,11 @@ public final class RelationalMessages {
         TEIID_SERVICE_GET_DATA_SOURCE_ERROR,
 
         /**
+         * An error when getting a Datasource translator.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_TRANSLATOR_ERROR,
+
+        /**
          * An error indicating a teiid vdb status error
          */
         TEIID_SERVICE_VDBS_STATUS_ERROR,
@@ -816,6 +871,16 @@ public final class RelationalMessages {
          * An error indicating an error occurred whilst fetching the teiid translators
          */
         TEIID_SERVICE_GET_TRANSLATORS_ERROR,
+
+        /**
+         * An error occurred locating the default translator mappings
+         */
+        TEIID_SERVICE_DEFAULT_TRANSLATOR_MAPPINGS_NOT_FOUND_ERROR,
+
+        /**
+         * An error occurred attempting to load the default translator mappings
+         */
+        TEIID_SERVICE_LOAD_DEFAULT_TRANSLATOR_MAPPINGS_ERROR,
 
         /**
          * An error indicating a teiid file attributes object has no parameters

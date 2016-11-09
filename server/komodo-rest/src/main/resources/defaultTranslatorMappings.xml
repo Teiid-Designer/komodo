@@ -1,0 +1,76 @@
+<mappings>
+    <!--  -->
+    <!-- Default Translator Mappings for a driver name -->
+    <!--  -->
+    <translator driver="file">file</translator>
+    <translator driver="google">google-spreadsheet</translator>
+    <translator driver="ldap">ldap</translator>
+    <translator driver="salesforce">salesforce</translator>
+    <translator driver="salesforce-34">salesforce-34</translator>
+    <translator driver="webservice">ws</translator>
+    <translator driver="mongodb">mongodb</translator>
+    <translator driver="cassandra">cassandra</translator>
+    <translator driver="simpledb">simpledb</translator>
+    <translator driver="accumulo">accumulo</translator>
+    <translator driver="solr">solr</translator>
+    <translator driver="hive">hive</translator>
+    <translator driver="impala">impala</translator>
+    <translator driver="odbc">odbc</translator>
+    <translator driver="olap">olap</translator>
+    <translator driver="mondrian">olap</translator>
+    <translator driver="phoenix">phoenix</translator>
+    <translator driver="prestodb">prestodb</translator>
+    <!-- JDBC -->
+    <translator driver="h2">h2</translator>
+    <translator driver="mysql-connector-java-5.1.5.jar">mysql5</translator>
+    <translator driver="mysql-connector-java-5.1.39.jar">mysql5</translator>
+    <translator driver="ojdbc6.jar">oracle</translator>
+    <translator driver="postgresql-8.3-603.jdbc3.jar">postgresql</translator>
+    <translator driver="jtds-1.2.5.jar">sqlserver</translator>
+    <translator driver="sqljdbc4.jar">sqlserver</translator>
+    <translator driver="iijdbc.jar">ingres</translator>
+    <translator driver="CacheDB.jar">intersystems-cache</translator>
+    <translator driver="ucanaccess">ucanaccess</translator>
+    <translator driver="vertica">vertica</translator>
+    <translator driver="vector">actian-vector</translator>
+    <translator driver="osisoft-pi">osisoft-pi</translator>
+    <translator driver="mysql">mysql</translator>
+    <translator driver="mysql5">mysql5</translator>
+    
+    <!-- TODO RA-->
+    <!--
+        <translator name="loopback" module="org.jboss.teiid.translator.loopback"/>
+        <translator name="jpa2" module="org.jboss.teiid.translator.jpa"/>
+        <translator name="map-cache" module="org.jboss.teiid.translator.object"/>
+        <translator name="odata" module="org.jboss.teiid.translator.odata"/>
+        <translator name="sap-gateway" module="org.jboss.teiid.translator.odata"/>
+        <translator name="sap-nw-gateway" module="org.jboss.teiid.translator.odata"/>
+        <translator name="excel" module="org.jboss.teiid.translator.excel"/>
+        <translator name="hbase" module="org.jboss.teiid.translator.hbase"/>
+        <translator name="odata4" module="org.jboss.teiid.translator.odata4"/>
+    -->
+
+    <!-- TODO JDBC -->
+    <!--
+        aMap.put("driverName", "jdbc-simple");
+        aMap.put("driverName", "jdbc-ansi");
+        aMap.put("driverName", "access");
+        aMap.put("driverName", "db2");
+        aMap.put("driverName", "derby");
+        aMap.put("driverName", "h2");
+        aMap.put("driverName", "hsql");
+        aMap.put("driverName", "hana");
+        aMap.put("driverName", "informix");
+        aMap.put("driverName", "metamatrix");
+        aMap.put("driverName", "mysql5");
+        aMap.put("driverName", "greenplum");
+        aMap.put("driverName", "sybase");
+        aMap.put("driverName", "sybaseiq");
+        aMap.put("driverName", "teiid");
+        aMap.put("driverName", "teradata");
+        aMap.put("driverName", "modeshape");
+        aMap.put("driverName", "ingres93");
+        aMap.put("driverName", "netezza");
+        aMap.put("driverName", "redshift");
+     -->
+</mappings>
