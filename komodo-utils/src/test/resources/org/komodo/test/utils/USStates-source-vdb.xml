@@ -2,7 +2,7 @@
 <vdb name="ServiceSource" version="1">
 
 <description>xx</description>
-<property name="serviceSource" value="true"/>
+<property name="dsbServiceSource" value="true"/>
 
 <model name="MySqlStates" type="PHYSICAL">
 <property name="importer.UseFullSchemaName" value="false"/>
