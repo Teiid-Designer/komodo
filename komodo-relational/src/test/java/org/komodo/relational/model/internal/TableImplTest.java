@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -923,6 +924,26 @@ public final class TableImplTest extends RelationalModelTest {
         final String value = "uuid";
         this.table.setUuid( getTransaction(), value );
         assertThat( this.table.getUuid( getTransaction() ), is( value ) );
+    }
+    
+    @Test
+    public void shouldExportDdl() throws Exception {
+        final Column column1 = this.table.addColumn( getTransaction(), "column1" );
+        column1.setDescription( getTransaction(), "Col1 Description" );
+        column1.setDatatypeName( getTransaction(), "string" );
+        column1.setNameInSource( getTransaction(), "Col1_NIS" );
+        final Column column2 = this.table.addColumn( getTransaction(), "column2" );
+        column2.setDescription( getTransaction(), "Col2 Description" );
+        column2.setDatatypeName( getTransaction(), "string" );
+        column2.setNameInSource( getTransaction(), "Col2_NIS" );
+        
+        byte[] bytes = this.table.export(getTransaction(), new Properties());
+        String exportedDdl = new String(bytes);
+        
+        assertThat( exportedDdl.contains("CREATE FOREIGN TABLE"), is( true ) );
+        assertThat( exportedDdl.contains("myTable"), is( true ) );
+        assertThat( exportedDdl.contains("column1"), is( true ) );
+        assertThat( exportedDdl.contains("column2"), is( true ) );
     }
 
 }

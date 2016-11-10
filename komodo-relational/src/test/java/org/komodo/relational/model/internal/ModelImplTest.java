@@ -29,6 +29,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
+import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -642,6 +643,20 @@ public final class ModelImplTest extends RelationalModelTest {
         final boolean value = !Model.DEFAULT_VISIBLE;
         this.model.setVisible( getTransaction(), value );
         assertThat( this.model.isVisible( getTransaction() ), is( value ) );
+    }
+
+    @Test
+    public void shouldExportDdl() throws Exception {
+        final int numTables = 5;
+
+        for ( int i = 0; i < numTables; ++i ) {
+            this.model.addTable( getTransaction(), "table" + i );
+        }
+        
+        byte[] bytes = this.model.export(getTransaction(), new Properties());
+        String exportedDdl = new String(bytes);
+        
+        assertThat( exportedDdl.contains("CREATE FOREIGN TABLE table1"), is( true ) );
     }
 
 }
