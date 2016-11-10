@@ -184,7 +184,7 @@ public class DatasourceImpl extends RelationalObjectImpl implements Datasource, 
             return Datasource.DEFAULT_JDBC;
         }
 
-        return ( connectionType == Connection.Type.JDBC.name() );
+        return ( Connection.Type.JDBC.name().equals(connectionType) );
     }
 
     /**
