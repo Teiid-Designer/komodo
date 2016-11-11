@@ -577,6 +577,11 @@ public final class KomodoDataserviceService extends KomodoService {
         	Model sourceModel = serviceVdb.addModel(uow, svcModelSourceName);
         	sourceModel.setModelType(uow, Type.PHYSICAL);
 
+            // The source model DDL contains the table DDL only.  This limits the source metadata which is loaded on deployment.
+        	byte[] bytes = sourceTable.export(uow, null);
+        	String tableString = new String(bytes);
+            sourceModel.setModelDefinition(uow, tableString);
+            
         	// Add a ModelSource of same name to the physical model and set its Jndi and translator
         	ModelSource modelSource = sourceModel.addSource(uow, svcModelSourceName);
         	modelSource.setJndiName(uow, svcModelSource.getJndiName(uow));

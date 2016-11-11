@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -41,6 +43,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -49,6 +52,7 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -1037,4 +1041,45 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         setStatementOption( transaction, StandardOption.UUID.name(), newUuid );
     }
 
+    private String exportDdl(UnitOfWork transaction, Properties exportProperties) throws Exception {
+        DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false);
+        visitor.visit(node(transaction));
+
+        String result = visitor.getDdl();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
+     */
+    @Override
+    public byte[] export( final UnitOfWork transaction , Properties exportProperties) throws KException {
+        ArgCheck.isNotNull(transaction);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("tableimpl-export: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            String result = exportDdl(transaction, exportProperties);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("TableImpl: transaction = {0}, xml = {1}", //$NON-NLS-1$
+                             transaction.getName(),
+                             result);
+            }
+
+            return result.getBytes();
+
+        } catch (final Exception e) {
+            throw handleError(e);
+        }
+    }
+
+    @Override
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
+        return DocumentType.DDL;
+    }
 }
