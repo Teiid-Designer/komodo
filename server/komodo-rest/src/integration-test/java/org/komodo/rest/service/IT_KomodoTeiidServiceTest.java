@@ -470,7 +470,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         
         assertEquals("sample", vdb.getName());
         assertEquals("sample-vdb.xml", vdb.getDeployedName());
-        assertEquals(1, vdb.getVersion());
+        assertEquals("1", vdb.getVersion());
         assertTrue(vdb.isActive());
         assertFalse(vdb.isLoading());
         assertFalse(vdb.isFailed());

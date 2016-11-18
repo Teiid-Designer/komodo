@@ -58,7 +58,7 @@ public interface TeiidVdb {
     /**
      * @return the version
      */
-    int getVersion();
+    String getVersion();
 
     /**
      * @return <code>true</code> if this is a preview VDB

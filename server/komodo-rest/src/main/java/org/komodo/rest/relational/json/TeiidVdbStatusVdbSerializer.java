@@ -57,7 +57,7 @@ public final class TeiidVdbStatusVdbSerializer extends TypeAdapter< RestTeiidVdb
                     vdb.setDeployedName(in.nextString());
                     break;
                 case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_VERSION:
-                    vdb.setVersion(in.nextInt());
+                    vdb.setVersion(in.nextString());
                     break;
                 case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_ACTIVE:
                     vdb.setActive(in.nextBoolean());
