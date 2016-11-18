@@ -226,7 +226,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     @Override
     public int getAdminPort( UnitOfWork uow ) throws KException {
         Long port = getObjectProperty(uow, PropertyValueType.LONG, "getAdminPort", TeiidArchetype.ADMIN_PORT); //$NON-NLS-1$
-        return port != null ? port.intValue() : TeiidAdminInfo.DEFAULT_PORT;
+        return port != null ? port.intValue() : TeiidAdminInfo.Util.defaultPort(getVersion(uow));
     }
 
     /**

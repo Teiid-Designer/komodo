@@ -61,6 +61,7 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -236,7 +237,8 @@ public final class TeiidImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultAdminPortAfterConstruction() throws Exception {
-        assertThat( this.teiid.getAdminPort( getTransaction() ), is( TeiidAdminInfo.DEFAULT_PORT ) );
+        TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+        assertThat( this.teiid.getAdminPort( getTransaction() ), is( TeiidAdminInfo.Util.defaultPort(teiidVersion) ) );
     }
 
     @Test

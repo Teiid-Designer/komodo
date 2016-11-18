@@ -18,6 +18,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -73,7 +75,8 @@ public final class ServerUnsetPropertyCommand extends ServerShellCommand {
             } else if ( HOST.equals( name ) ) {
                 teiid.setHost( transaction, null );
             } else if ( ADMIN_PORT.equals( name ) ) {
-                teiid.setAdminPort( transaction, TeiidAdminInfo.DEFAULT_PORT );
+                TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+                teiid.setAdminPort( transaction, TeiidAdminInfo.Util.defaultPort(teiidVersion) );
             } else if ( JDBC_PORT.equals( name ) ) {
                 teiid.setJdbcPort( transaction, TeiidJdbcInfo.DEFAULT_PORT );
             } else {

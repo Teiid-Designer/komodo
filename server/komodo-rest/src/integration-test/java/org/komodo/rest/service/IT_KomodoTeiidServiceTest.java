@@ -115,6 +115,8 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.test.utils.DummyEventManager;
 import org.komodo.test.utils.TestUtilities;
@@ -136,6 +138,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     private static final String MYSQL_DRIVER = "mysql-connector";
 
+    private static TeiidVersion teiidVersion;
+
     private static Path _kengineDataDir;
 
     private static KomodoRestUriBuilder _uriBuilder;
@@ -156,6 +160,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     @BeforeClass
     public static void beforeAll() throws Exception {
+        teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+
         _kengineDataDir = Files.createTempDirectory(null, new FileAttribute[0]);
         System.setProperty(SystemConstants.ENGINE_DATA_DIR, _kengineDataDir.toString());
 
@@ -258,7 +264,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         when(parent.getHost()).thenReturn(HostProvider.DEFAULT_HOST);
         when(parent.getUsername()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_USERNAME);
         when(parent.getPassword()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD);
-        when(parent.getPort()).thenReturn(TeiidAdminInfo.DEFAULT_PORT);
+        when(parent.getPort()).thenReturn(TeiidAdminInfo.Util.defaultPort(teiidVersion));
         when(parent.getEventManager()).thenReturn(eventMgr);
 
         TeiidJdbcInfo jdbcInfo = mock(TeiidJdbcInfo.class);
@@ -405,11 +411,11 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertFalse(rt.hasChildren());
 
         assertEquals(TeiidInstance.DEFAULT_HOST, rt.getHost());
-        assertEquals(TeiidVersionProvider.getInstance().getTeiidVersion().toString(), rt.getVersion());
+        assertEquals(teiidVersion.toString(), rt.getVersion());
 
         assertEquals(TeiidAdminInfo.DEFAULT_ADMIN_USERNAME, rt.getAdminUser());
         assertEquals(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD, rt.getAdminPasswd());
-        assertEquals(TeiidAdminInfo.DEFAULT_PORT, rt.getAdminPort());
+        assertEquals(TeiidAdminInfo.Util.defaultPort(teiidVersion), rt.getAdminPort());
 
         assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME, rt.getJdbcUser());
         assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD, rt.getJdbcPasswd());

@@ -567,7 +567,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         Long port = getObjectProperty(uow, PropertyValueType.LONG, "getAdminPort", TeiidArchetype.ADMIN_PORT); //$NON-NLS-1$
-        return port != null ? port.intValue() : TeiidAdminInfo.DEFAULT_PORT;
+        return port != null ? port.intValue() : TeiidAdminInfo.Util.defaultPort(getVersion(uow));
     }
 
     /**

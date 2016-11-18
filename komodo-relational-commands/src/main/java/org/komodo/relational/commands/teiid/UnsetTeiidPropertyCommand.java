@@ -33,6 +33,8 @@ import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -69,7 +71,8 @@ public final class UnsetTeiidPropertyCommand extends TeiidShellCommand {
 
             switch ( name ) {
                 case ADMIN_PORT:
-                    teiid.setAdminPort( transaction, TeiidAdminInfo.DEFAULT_PORT );
+                    TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+                    teiid.setAdminPort( transaction, TeiidAdminInfo.Util.defaultPort(teiidVersion) );
                     break;
                 case ADMIN_PASSWORD:
                     teiid.setAdminPassword( transaction, null );

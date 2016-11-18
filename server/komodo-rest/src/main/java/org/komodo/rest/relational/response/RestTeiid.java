@@ -144,7 +144,8 @@ public class RestTeiid extends RestBasicEntity {
 
     public int getAdminPort() {
         Object adminPort = tuples.get(ADMIN_PORT_LABEL);
-        return adminPort != null ? Integer.parseInt(adminPort.toString()) : TeiidAdminInfo.DEFAULT_PORT;
+        return adminPort != null ?
+                Integer.parseInt(adminPort.toString()) : TeiidAdminInfo.Util.defaultPort(getVersion());
     }
 
     public void setAdminPort(int adminPort) {

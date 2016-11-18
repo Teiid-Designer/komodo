@@ -42,6 +42,7 @@ import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.test.utils.DummyEventManager;
 import org.komodo.test.utils.TestUtilities;
 
@@ -54,15 +55,19 @@ public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
 
     private TeiidJdbcInfo jdbcInfo;
 
+    private TeiidVersion teiidVersion;
+
     @Before
     public void setup() throws Exception {
         super.setup();
+
+        teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
 
         parent = mock(TeiidParent.class);
         when(parent.getHost()).thenReturn(HostProvider.DEFAULT_HOST);
         when(parent.getUsername()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_USERNAME);
         when(parent.getPassword()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD);
-        when(parent.getPort()).thenReturn(TeiidAdminInfo.DEFAULT_PORT);
+        when(parent.getPort()).thenReturn(TeiidAdminInfo.Util.defaultPort(teiidVersion));
         when(parent.getEventManager()).thenReturn(eventMgr);
         when(parent.isSound()).thenReturn(true);
 

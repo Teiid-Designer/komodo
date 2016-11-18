@@ -45,12 +45,12 @@ import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.test.utils.TestUtilities;
 import org.komodo.test.utils.DummyEventManager;
+import org.komodo.test.utils.TestUtilities;
 
 public abstract class AbstractTestTeiidInstance {
 
-    private TeiidInstance teiidInstance;
+    protected TeiidInstance teiidInstance;
 
     protected abstract TeiidInstance createTeiidInstance(TeiidParent parent,
                                                                                                      TeiidVersion teiidVersion,
@@ -70,7 +70,7 @@ public abstract class AbstractTestTeiidInstance {
         when(parent.getHost()).thenReturn(HostProvider.DEFAULT_HOST);
         when(parent.getUsername()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_USERNAME);
         when(parent.getPassword()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD);
-        when(parent.getPort()).thenReturn(TeiidAdminInfo.DEFAULT_PORT);
+        when(parent.getPort()).thenReturn(TeiidAdminInfo.Util.defaultPort(getVersion()));
         when(parent.getEventManager()).thenReturn(eventMgr);
 
         TeiidJdbcInfo jdbcInfo = mock(TeiidJdbcInfo.class);
