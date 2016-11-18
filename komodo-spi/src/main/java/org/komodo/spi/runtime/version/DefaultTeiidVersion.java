@@ -21,6 +21,9 @@
  ************************************************************************************/
 package org.komodo.spi.runtime.version;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import org.komodo.spi.Messages;
 
 
@@ -31,6 +34,22 @@ import org.komodo.spi.Messages;
  */
 public class DefaultTeiidVersion implements TeiidVersion {
 
+    private static TeiidVersion extractDefaultVersion() {
+        InputStream fileStream = DefaultTeiidVersion.class.getClassLoader().getResourceAsStream("default-teiid-version.txt");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
+
+        try {
+            String line = reader.readLine();
+            if (line == null)
+                throw new RuntimeException("Programming error: The default version id cannot be null");
+
+            DefaultTeiidVersion version = new DefaultTeiidVersion(line);
+            return version;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     /**
      * Version enumerator
      */
@@ -39,7 +58,7 @@ public class DefaultTeiidVersion implements TeiidVersion {
         /**
          * The default preferred teiid instance
          */
-        DEFAULT_TEIID_VERSION(VersionID.TEIID_8_12_4),
+        DEFAULT_TEIID_VERSION(extractDefaultVersion()),
 
         /**
          * Teiid 7.7
@@ -128,6 +147,10 @@ public class DefaultTeiidVersion implements TeiidVersion {
 
         private final TeiidVersion version;
 
+        Version(TeiidVersion version) {
+            this.version = version;
+        }
+
         Version(VersionID id) {
             version = new DefaultTeiidVersion(id.toString());
         }
@@ -200,6 +223,7 @@ public class DefaultTeiidVersion implements TeiidVersion {
         else {
             majorVersion = tokens[0];
         }
+
         this.versionString = majorVersion + DOT + minorVersion + DOT + microVersion;
     }
 

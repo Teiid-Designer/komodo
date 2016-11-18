@@ -6,13 +6,24 @@
 		<!-- Depend on parent to avoid dragging in modeshape dependencies -->
 		<artifactId>komodo-parent</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
-    <relativePath>../komodo-parent</relativePath>
+		<relativePath>../komodo-parent</relativePath>
 	</parent>
 	<artifactId>komodo-spi</artifactId>
 	<name>Komodo SPI</name>
 	<description>System Interfaces for Komodo modules</description>
 
 	<build>
+		<!-- Write out the default teiid version to file -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/default-teiid-version.txt</include>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
