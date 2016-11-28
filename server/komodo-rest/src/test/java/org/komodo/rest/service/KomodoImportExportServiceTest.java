@@ -68,6 +68,7 @@ import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
+@SuppressWarnings({"deprecation"})
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
     private File myGitDir;

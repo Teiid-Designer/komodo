@@ -313,7 +313,7 @@ public interface ExecutionAdmin extends StringConstants {
       * @return the Schema DDL for the model
       * @throws Exception if deployment fails
       */
-     String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception;
+     String getSchema(String vdbName, String vdbVersion, String modelName) throws Exception;
 
      /**
       * Get Properties for a DataSource

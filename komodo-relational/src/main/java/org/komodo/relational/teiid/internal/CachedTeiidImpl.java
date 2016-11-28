@@ -720,7 +720,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             try {
                 teiidDataSource = teiidInstance.getDataSource(dataSourceName);
             } catch (Exception ex) {
-                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCES_ERROR,dataSourceName));
+                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCE_ERROR,dataSourceName, ex.getLocalizedMessage()));
             }
             // No server datasource found, remove the cached datasource
             if(teiidDataSource==null) {
@@ -840,6 +840,9 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             }
 
             for(String dsTypeName : dsTypeNames) {
+                if (dsTypeName == null)
+                    continue; // Seems to be a null driver installed in wildfly 10.0.1 by default
+
                 updateDriver(transaction, folderNode, dsTypeName);
             }
         }

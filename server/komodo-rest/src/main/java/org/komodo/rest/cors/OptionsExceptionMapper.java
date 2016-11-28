@@ -41,8 +41,8 @@ public class OptionsExceptionMapper implements ExceptionMapper<DefaultOptionsMet
         MultivaluedMap<String, Object> headers = response.getMetadata();
         headers.add(CorsHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, STAR);
         headers.add(CorsHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-        headers.add(CorsHeaders.ACCESS_CONTROL_ALLOW_METHODS, CorsInterceptor.ALLOW_METHODS);
-        headers.add(CorsHeaders.ACCESS_CONTROL_ALLOW_HEADERS, CorsInterceptor.ALLOW_HEADERS);
+        headers.add(CorsHeaders.ACCESS_CONTROL_ALLOW_METHODS, KCorsHandler.ALLOW_METHODS);
+        headers.add(CorsHeaders.ACCESS_CONTROL_ALLOW_HEADERS, KCorsHandler.ALLOW_HEADERS);
         headers.add(CorsHeaders.ACCESS_CONTROL_MAX_AGE, 1209600);
 
         return response;

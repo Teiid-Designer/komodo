@@ -80,6 +80,8 @@ import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.test.utils.TestUtilities;
 import org.modeshape.jcr.ModeShapeLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
@@ -88,7 +90,7 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 /**
  *
  */
-@SuppressWarnings( {"nls", "javadoc"} )
+@SuppressWarnings( {"nls", "javadoc", "deprecation"} )
 public abstract class AbstractKomodoServiceTest implements V1Constants {
 
     private static final int TEST_PORT = 8443;
@@ -106,6 +108,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
     /*
      * Mocks the real jboss basic authentication security domain
      */
+    @SuppressWarnings( "unused" )
     private static class BasicAthenticationSecurityDomain implements SecurityDomain {
 
         @Override
@@ -116,8 +119,18 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
             return new BasicUserPrincipal(user);
         }
 
-        @Override
+        /**
+         * Rest 2 version of method (no @Override to ensure compilation)
+         */
         public boolean isUserInRoll(Principal aUsername, String aRole) {
+            // No role based checks so return true
+            return true;
+        }
+
+        /**
+         * Rest 3 version of method (no @Override to ensure compilation)
+         */
+        public boolean isUserInRole(Principal username, String role) {
             // No role based checks so return true
             return true;
         }
@@ -205,11 +218,18 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         _uriBuilder = new KomodoRestUriBuilder(_appUri);
     }
 
+    private TeiidVersion teiidVersion;
+
     /**
      *
      */
     public AbstractKomodoServiceTest() {
         super();
+        this.teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+    }
+
+    public TeiidVersion getTeiidVersion() {
+        return teiidVersion;
     }
 
     @After

@@ -3,7 +3,8 @@
     xmlns="urn:infinispan:config:7.2">
 
     <cache-container default-cache="Komodo Cache">
-        <local-cache name="Komodo Cache">
+        <local-cache name="Komodo Cache" statistics="false">
+
             <transaction
                 transaction-manager-lookup="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
                 mode="NON_XA"

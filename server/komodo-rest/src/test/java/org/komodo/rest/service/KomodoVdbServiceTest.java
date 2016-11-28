@@ -69,7 +69,7 @@ import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
 public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
     @Rule

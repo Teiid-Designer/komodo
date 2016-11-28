@@ -23,25 +23,17 @@ package org.komodo.osgi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import javax.jcr.Node;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageConnector.Descriptor;
 import org.komodo.spi.storage.StorageService;
-import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 
 public class TestPluginService extends AbstractTestPluginService implements StringConstants {
@@ -99,137 +91,6 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
 
         service.stopBundle(bundleName);
         assertEquals(Bundle.RESOLVED, service.bundleState(bundleName));
-    }
-
-    @Test
-    public void testTeiidBundleStartingStopping() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = TeiidVersionProvider.getInstance().getTeiidVersion();
-        String bundleName = TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor();
-        service.startBundle(bundleName);
-        assertEquals(Bundle.ACTIVE, service.bundleState(bundleName));
-
-        service.stopBundle(bundleName);
-        assertEquals(Bundle.RESOLVED, service.bundleState(bundleName));
-    }
-
-    @Test
-    public void testBundleIndex() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        Set<TeiidVersion> versions = service.getSupportedTeiidVersions();
-        TeiidVersion providerVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
-        versions.contains(providerVersion);
-
-        DefaultTeiidVersion wildcardVersion = new DefaultTeiidVersion(
-                                                                                       providerVersion.getMajor(), 
-                                                                                       providerVersion.getMinor(),
-                                                                                       TeiidVersion.WILDCARD);
-        versions.contains(wildcardVersion);
-
-        TeiidService teiidService1 = service.getTeiidService(providerVersion);
-        assertNotNull(teiidService1);
-        String teiidService1Bundle = teiidService1.getParentBundle();
-        String teiidService1Version = teiidService1.getVersion().toString();
-
-        TeiidService teiidService2 = service.getTeiidService(wildcardVersion);
-        assertNotNull(teiidService2);
-        String teiidService2Bundle = teiidService2.getParentBundle();
-        String teiidService2Version = teiidService2.getVersion().toString();
-
-        // Same bundle referred to by both versions unless providerversion has a micro
-        if (providerVersion.getMicro() == null) {
-            assertEquals(teiidService1Bundle, teiidService2Bundle);
-            assertEquals(teiidService1Version, teiidService2Version);
-        }
-    }
-
-    @Test
-    public void testFindTeiidBundleAndStart() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = TeiidVersionProvider.getInstance().getTeiidVersion();
-        TeiidService teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        String pluginName = TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor();
-        assertTrue(teiidService.getParentBundle().startsWith(pluginName));
-
-        assertEquals(version, teiidService.getVersion());
-
-        // Should NOT throw an exception but complete correctly
-        teiidService.getVersion();
-    }
-
-    @Test
-    public void testFindTeiidBundlesAndStartStopStartDifferentOne() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = TeiidVersionProvider.getInstance().getTeiidVersion();
-        TeiidService teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        String pluginName = TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor();
-        assertTrue(teiidService.getParentBundle().startsWith(pluginName));
-        TeiidVersion actualVersion = version;
-        assertEquals(actualVersion, teiidService.getVersion());
-
-        // Should NOT throw an exception but complete correctly
-        teiidService.getVersion();
-
-        //
-        // Fetch teiid 8.11 version
-        // * Stops teiid 8.12
-        // * Starts teiid 8.11
-        // * Returns teiid service
-        //
-
-        if (actualVersion.isGreaterThan(Version.TEIID_9_0)) {
-            version = Version.TEIID_9_1.get();
-            actualVersion = Version.TEIID_9_1.get();
-        } else {
-            version = Version.TEIID_8_11.get();
-            actualVersion = Version.TEIID_8_11_5.get();
-        }
-
-        teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        String bundleId = TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor();
-        assertEquals(bundleId, teiidService.getParentBundle());
-        assertEquals(actualVersion, teiidService.getVersion());
-
-        // Should NOT throw an exception but complete correctly
-        teiidService.getVersion();
-
-        service.stopBundle(bundleId);
-        assertNull(service.getCurrentTeiidService());
-    }
-
-    @Test
-    public void testJcrPassesAcrossBundleClassLoadingFence() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = TeiidVersionProvider.getInstance().getTeiidVersion();
-        TeiidService teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        // Call convert() to check that javax.jcr.Node is export by the PluginService and correctly
-        // imported by the bundle
-        // Calling convert with a null sql parameter should return the method without an exception
-        Node node = Mockito.mock(Node.class);
-        teiidService.nodeConvert(null, node);
-    }
-
-    @Test
-    public void testGetDefaultTeiidInstance() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = Version.DEFAULT_TEIID_VERSION.get();
-        TeiidService teiidService = service.getDefaultTeiidService();
-        assertNotNull(teiidService);
-        assertEquals(version, teiidService.getVersion());
     }
 
     @Test

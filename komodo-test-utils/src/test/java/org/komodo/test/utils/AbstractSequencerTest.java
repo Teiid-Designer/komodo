@@ -56,11 +56,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.komodo.osgi.PluginService;
 import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.teiid.TeiidServiceProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
@@ -123,10 +123,10 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     private void checkSupportedPlugins() throws Exception {
         //
-        // Only run these tests if the correct teiid plugin is installed
+        // Only run these tests if the correct teiid version is available
         //
-        Set<TeiidVersion> supportedTeiids = PluginService.getInstance().getSupportedTeiidVersions();
-        Assume.assumeTrue(supportedTeiids.contains(getTeiidVersion()));
+        boolean supported = TeiidServiceProvider.getInstance().isSupportedTeiidVersion(getTeiidVersion());
+        Assume.assumeTrue(supported);
     }
 
     @Override

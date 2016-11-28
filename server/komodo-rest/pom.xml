@@ -29,6 +29,153 @@
 		<rest-version>v1</rest-version>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>dv63</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+
+			<properties>
+				<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
+				<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
+				<version.arquillian>1.1.9.Final</version.arquillian>
+				<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
+				<arquillian.container.name>jbossas-managed</arquillian.container.name>
+			</properties>
+
+			<dependencies>
+				<!-- No more releases after 3.0.9.Final -->
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>jaxrs-api</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.spec</groupId>
+					<artifactId>jboss-javaee-6.0</artifactId>
+					<type>pom</type>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.arquillian.junit</groupId>
+					<artifactId>arquillian-junit-container</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-cli</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>1.8</source>
+							<target>1.8</target>
+							<excludes>
+								<!-- Exclude the cors classes for rest 3 as this is for rest 2 -->
+								<exclude>**/org/komodo/rest/cors/rest3/*.java</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>wildfly</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+
+			<properties>
+				<version.resteasy>3.0.19.Final</version.resteasy>
+				<version.jboss.logging>3.3.0.Final</version.jboss.logging>
+				<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.logging, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
+			</properties>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.jboss.logging</groupId>
+						<artifactId>jboss-logging</artifactId>
+						<version>${version.jboss.logging}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>resteasy-jaxrs</artifactId>
+						<version>${version.resteasy}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>jaxrs-api</artifactId>
+						<version>${version.resteasy}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>resteasy-jackson-provider</artifactId>
+						<version>${version.resteasy}</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.xnio</groupId>
+					<artifactId>xnio-api</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.xnio</groupId>
+					<artifactId>xnio-nio</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.spec</groupId>
+					<artifactId>jboss-javaee-7.0</artifactId>
+					<type>pom</type>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.arquillian.junit</groupId>
+					<artifactId>arquillian-junit-container</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.wildfly.arquillian</groupId>
+					<artifactId>wildfly-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>1.8</source>
+							<target>1.8</target>
+							<excludes>
+								<!-- Exclude the cors classes for rest 2 as this is for rest 3 -->
+								<exclude>**/org/komodo/rest/cors/rest2/*.java</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -85,32 +232,93 @@
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-spi</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-core</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-importer</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-relational</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-plugin-service</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-teiid-client</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.wildfly.core</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.marshalling</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.wildfly.marshalling</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-common-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-engine</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-jboss-admin</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-admin</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.teiid</groupId>
+			<artifactId>teiid-client</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson-provider</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.sun.xsom</groupId>
 			<artifactId>xsom</artifactId>
@@ -144,22 +352,6 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>jaxrs-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson-provider</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
 		</dependency>
@@ -177,25 +369,22 @@
 		</dependency>
 
 		<dependency>
-  			<groupId>org.jboss.resteasy</groupId>
-  			<artifactId>resteasy-test-tjws</artifactId>
-  			<scope>test</scope>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-test-tjws</artifactId>
+			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-test-utils</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
@@ -209,15 +398,6 @@
 		<finalName>${rest-context}</finalName>
 
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-
 			<!-- Adds integration test directories to resources -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -298,12 +478,6 @@
 					<warName>${rest-context}</warName>
 					<failOnMissingWebXml>true</failOnMissingWebXml>
 					<webXml>src\main\webapp\WEB-INF\web.xml</webXml>
-					<!-- Ensure this never gets added to war and deployed since only required 
-						for local testing using tomcat. This works since the tomcat7:run-war uses 
-						the exploded version of the war and not the war archive itself. -->
-					<packagingExcludes>
-						WEB-INF/lib/jaxrs-ri-*.jar
-					</packagingExcludes>
 
 					<!-- Avoid filtering certain types of file -->
 					<nonFilteredFileExtensions>
@@ -320,6 +494,12 @@
 							<targetPath>api-docs</targetPath>
 						</resource>
 					</webResources>
+
+					<archive>
+             			<manifestEntries>
+                			<Dependencies>${manifest.dependencies}</Dependencies>
+             			</manifestEntries>
+          			</archive>
 				</configuration>
 			</plugin>
 
@@ -339,12 +519,12 @@
 							<skip>${integration.skipTests}</skip>
 							<artifactItems>
 								<artifactItem>
-									<groupId>org.jboss.as</groupId>
-									<artifactId>jboss-as-dist</artifactId>
-									<version>${version.org.jboss.as}</version>
+									<groupId>${test.server.group.id}</groupId>
+									<artifactId>${test.server.artifact.id}</artifactId>
+									<version>${test.server.version}</version>
 									<type>zip</type>
 									<overWrite>false</overWrite>
-									<outputDirectory>${project.basedir}/lib/jbossas/</outputDirectory>
+									<outputDirectory>${project.basedir}/lib/test-server/</outputDirectory>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
@@ -362,11 +542,11 @@
 								<artifactItem>
 									<groupId>org.jboss.teiid</groupId>
 									<artifactId>teiid</artifactId>
-									<version>${version.teiid.default}</version>
-									<classifier>jboss-dist</classifier>
+									<version>${teiid.version.default}</version>
+									<classifier>${teiid.classifier.default}</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
-									<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}</outputDirectory>
+									<outputDirectory>${project.basedir}/lib/test-server/${test.server.name}</outputDirectory>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
@@ -386,7 +566,8 @@
 						</goals>
 						<configuration>
 							<skip>${integration.skipTests}</skip>
-							<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}/standalone/configuration</outputDirectory>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.basedir}/lib/test-server/${test.server.name}/standalone/configuration</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/resources/credentials</directory>
@@ -396,11 +577,12 @@
 									<filtering>true</filtering>
 								</resource>
 								<resource>
-									<targetPath>${project.basedir}/lib/jbossas/${version.jbossas.test}/standalone/configuration/ssl</targetPath>
+									<targetPath>${project.basedir}/lib/test-server/${test.server.name}/standalone/configuration/ssl</targetPath>
 									<directory>src/test/resources/ssl</directory>
 								</resource>
 								<resource>
-									<directory>src/test/resources</directory>
+									<!-- Different version for jboss-as and wildfly -->
+									<directory>src/test/resources/standalone-teiid/${teiid.version.default}</directory>
 									<includes>
 										<include>standalone-teiid.xml</include>
 									</includes>
@@ -426,6 +608,12 @@
 						<configuration>
 							<!-- Skips integration tests -->
 							<skipTests>${integration.skipTests}</skipTests>
+
+							<!-- Properties ensure that each integration test class is started -->
+							<!-- up in a brand new jvm instance so that the jmx resources in infinispan -->
+							<!-- are not reused, which causes errors and deployment failure -->
+							<forkCount>1</forkCount>
+							<reuseForks>false</reuseForks>
 						</configuration>
 					</execution>
 				</executions>
@@ -437,7 +625,7 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>${project.basedir}/lib/jbossas</directory>
+							<directory>${project.basedir}/lib/test-server</directory>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
@@ -483,81 +671,4 @@
 		</pluginManagement>
 	</build>
 
-	<profiles>
-
-		<profile>
-			<id>jboss</id>
-
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-jaxrs</artifactId>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<!-- Profile that adds in the glassfish jaxrs implementation to execute 
-			rest applications in tomcat. Note: this is NOT required when deploying the 
-			war to jboss / wildfly. To use do mvn clean -P tomcat-test-server tomcat7:run-war -->
-		<profile>
-			<id>tomcat-test-server</id>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.tomcat.maven</groupId>
-						<artifactId>tomcat7-maven-plugin</artifactId>
-						<version>2.2</version>
-						<configuration>
-							<!-- http port -->
-							<port>9090</port>
-							<!-- application path always starts with / -->
-							<path>/${rest-context}</path>
-							<systemProperties>
-								<!-- adds the var/vdb-builder directory to the project structure -->
-								<komodo.dataDir>var/${rest-context}</komodo.dataDir>
-							</systemProperties>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-jaxrs</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-client</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-json-p-provider</artifactId>
-				</dependency>
-
-				<!-- Used with tomcat test server as jaxrs implementation -->
-				<dependency>
-					<groupId>org.glassfish.jersey.bundles</groupId>
-					<artifactId>jaxrs-ri</artifactId>
-				</dependency>
-			</dependencies>
-
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.glassfish.jersey.bundles</groupId>
-						<artifactId>jaxrs-ri</artifactId>
-						<version>${version.jaxrs}</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-
-		</profile>
-	</profiles>
 </project>
