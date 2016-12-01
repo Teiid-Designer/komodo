@@ -24,7 +24,6 @@ package org.komodo.relational.teiid.internal;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
-import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -55,6 +54,7 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.teiid.TeiidServiceProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
 
@@ -406,7 +406,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         try {
-            TeiidService teiidService = PluginService.getInstance().getTeiidService(teiidVersion);
+            TeiidService teiidService = TeiidServiceProvider.getInstance().getTeiidService(teiidVersion);
             TeiidJdbcInfo jdbcInfo = new TeiidJdbcInfoImpl();
 
             //
@@ -461,7 +461,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         TeiidVersion version = null;
         try {
             version = getVersion(uow);
-            TeiidService teiidService = PluginService.getInstance().getTeiidService(version);
+            TeiidService teiidService = TeiidServiceProvider.getInstance().getTeiidService(version);
 
             String host = getHost(uow);
             int port = getJdbcPort(uow);
@@ -567,7 +567,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         Long port = getObjectProperty(uow, PropertyValueType.LONG, "getAdminPort", TeiidArchetype.ADMIN_PORT); //$NON-NLS-1$
-        return port != null ? port.intValue() : TeiidAdminInfo.DEFAULT_PORT;
+        return port != null ? port.intValue() : TeiidAdminInfo.Util.defaultPort(getVersion(uow));
     }
 
     /**

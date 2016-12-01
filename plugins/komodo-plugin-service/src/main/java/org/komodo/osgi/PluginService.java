@@ -74,9 +74,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.komodo.osgi.storage.StorageServiceProvider;
-import org.komodo.osgi.teiid.TeiidServiceProvider;
 import org.komodo.plugin.framework.AbstractBundleService;
-import org.komodo.plugin.framework.teiid.AbstractDataTypeManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.constants.StringConstants;
@@ -86,7 +84,6 @@ import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageService;
@@ -152,8 +149,6 @@ public class PluginService implements StringConstants {
     private String cacheDir = pluginServiceDir + File.separator + "cache";
 
     private final Framework framework;
-
-    private TeiidServiceProvider teiidServiceProvider;
 
     private StorageServiceProvider storageServiceProvider;
 
@@ -223,8 +218,6 @@ public class PluginService implements StringConstants {
              */
             // org.komodo.plugin.framework
             AbstractBundleService.class,
-            // org.komodo.plugin.framework.teiid
-            AbstractDataTypeManager.class,
 
             /**
              * utils
@@ -438,9 +431,6 @@ public class PluginService implements StringConstants {
 
         framework.start();
 
-        this.teiidServiceProvider = new TeiidServiceProvider(this);
-        this.teiidServiceProvider.open();
-
         this.storageServiceProvider = new StorageServiceProvider(this);
         this.storageServiceProvider.open();
 
@@ -495,9 +485,6 @@ public class PluginService implements StringConstants {
         if (getState() <= Bundle.INSTALLED)
             return;
 
-        if (teiidServiceProvider != null)
-            teiidServiceProvider.dispose();
-
         if (storageServiceProvider != null)
             storageServiceProvider.dispose();
 
@@ -529,11 +516,6 @@ public class PluginService implements StringConstants {
         Enumeration<String> keys = headers.keys();
         while(keys.hasMoreElements()) {
             String key = keys.nextElement();
-            if (TeiidService.VERSION_PROPERTY.equals(key)) {
-                teiidServiceProvider.register(headers.get(key), bundle.getSymbolicName());
-                break;
-            }
-
             if (StorageService.STORAGE_ID_PROPERTY.equals(key)) {
                 storageServiceProvider.register(headers.get(key), bundle.getSymbolicName());
                 break;
@@ -608,46 +590,6 @@ public class PluginService implements StringConstants {
             return;
 
         bundle.stop();
-    }
-
-    /**
-     * @return the set of supported Teiid versions
-     */
-    public Set<TeiidVersion> getSupportedTeiidVersions() throws Exception {
-        if (!isActive())
-            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
-
-        return teiidServiceProvider.getSupportedTeiidVersions();
-    }
-
-    /**
-     * @return the current teiid service or null if none fetched
-     */
-    public TeiidService getCurrentTeiidService() throws Exception {
-        if (!isActive())
-            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
-
-        return teiidServiceProvider.getTeiidService();
-    }
-
-    /**
-     * @param version
-     * @return the teiid service for the given version
-     * @throws Exception
-     */
-    public synchronized TeiidService getTeiidService(TeiidVersion version) throws Exception {
-        if (!isActive())
-            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
-
-        return teiidServiceProvider.getTeiidService(version);
-    }
-
-    /**
-     * @return the teiid service for the default teiid version ({@link Version#DEFAULT_TEIID_VERSION})
-     * @throws Exception
-     */
-    public TeiidService getDefaultTeiidService() throws Exception {
-        return getTeiidService(Version.DEFAULT_TEIID_VERSION.get());
     }
 
     /**

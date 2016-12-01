@@ -618,7 +618,10 @@ public final class KomodoDatasourceService extends KomodoService {
             mgr.delete(uow, datasource);
 
             KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
-            kso.addAttribute(datasourceName, "Successfully deleted"); //$NON-NLS-1$
+            if (mgr.hasChild(uow, datasourceName))
+                kso.addAttribute(datasourceName, "Deletion failure"); //$NON-NLS-1$
+            else
+                kso.addAttribute(datasourceName, "Successfully deleted"); //$NON-NLS-1$
 
             return commit(uow, mediaTypes, kso);
         } catch (final Exception e) {

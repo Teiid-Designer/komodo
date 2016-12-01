@@ -53,7 +53,8 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
-import org.komodo.rest.cors.CorsInterceptor;
+import org.komodo.rest.cors.KCorsFactory;
+import org.komodo.rest.cors.KCorsHandler;
 import org.komodo.rest.cors.OptionsExceptionMapper;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.service.KomodoDataserviceService;
@@ -81,6 +82,8 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import io.swagger.converter.ModelConverters;
@@ -479,6 +482,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      *         if the Komodo engine cannot be started
      */
     public KomodoRestV1Application() throws WebApplicationException {
+        KCorsHandler corsHandler;
         try {
             // Set the log path to something relative to the deployment location of this application
             // Try to use the base directory in jboss. If not in jboss this would probably be empty so
@@ -495,6 +499,8 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
 
             // Ensure server logging level is reduced to something sane!
             KLog.getLogger().setLevel(Level.INFO);
+
+            corsHandler = initCorsHandler();
         } catch (Exception ex) {
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
@@ -514,24 +520,22 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoImportExportService( this.kengine ));
 
         objs.add(new OptionsExceptionMapper());
-
-        CorsInterceptor corsFilter = initCorsFilter();
-        objs.add(corsFilter);
+        objs.add(corsHandler);
 
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();
     }
 
-    private CorsInterceptor initCorsFilter() {
-        CorsInterceptor corsFilter = new CorsInterceptor();
-
-        corsFilter.getAllowedOrigins().add(STAR);
-        corsFilter.setAllowedHeaders(CorsInterceptor.ALLOW_HEADERS);
-        corsFilter.setAllowCredentials(true);
-        corsFilter.setAllowedMethods(CorsInterceptor.ALLOW_METHODS);
-        corsFilter.setCorsMaxAge(1209600);
-        return corsFilter;
+    private KCorsHandler initCorsHandler() throws Exception {
+        TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+        KCorsHandler corsHandler = KCorsFactory.getInstance().createHandler(teiidVersion);
+        corsHandler.getAllowedOrigins().add(STAR);
+        corsHandler.setAllowedHeaders(KCorsHandler.ALLOW_HEADERS);
+        corsHandler.setAllowCredentials(true);
+        corsHandler.setAllowedMethods(KCorsHandler.ALLOW_METHODS);
+        corsHandler.setCorsMaxAge(1209600);
+        return corsHandler;
     }
 
     @SuppressWarnings( "nls" )

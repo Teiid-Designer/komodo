@@ -52,7 +52,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
 public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
     private final static String PORTFOLIO_DATA_PATH = "/tko:komodo/tko:workspace/" + USER_NAME + "/Portfolio";

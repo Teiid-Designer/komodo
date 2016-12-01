@@ -66,6 +66,11 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
+			<artifactId>komodo-teiid-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -77,6 +82,5 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 </project>

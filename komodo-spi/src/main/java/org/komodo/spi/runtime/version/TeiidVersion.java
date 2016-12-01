@@ -124,7 +124,15 @@ public interface TeiidVersion {
 
         TEIID_8_12_4(EIGHT + DOT + ONE + TWO + DOT + FOUR),
 
-        TEIID_8_13(EIGHT + DOT + ONE + THREE + DOT + ZERO);
+        TEIID_8_12_7(EIGHT + DOT + ONE + TWO + DOT + SEVEN),
+
+        TEIID_8_13(EIGHT + DOT + ONE + THREE + DOT + ZERO),
+
+        TEIID_9_0(NINE + DOT + ZERO + DOT + ZERO),
+
+        TEIID_9_1(NINE + DOT + ONE + DOT + ZERO),
+
+        TEIID_9_1_1(NINE + DOT + ONE + DOT + ONE);
 
         private final String id;
 

@@ -48,6 +48,9 @@ public final class TeiidVersionProvider {
      * @return the teiidVersion
      */
     public TeiidVersion getTeiidVersion() {
+        if (this.teiidVersion == null)
+            this.teiidVersion =  Version.DEFAULT_TEIID_VERSION.get();
+
         return this.teiidVersion;
     }
 
@@ -55,7 +58,10 @@ public final class TeiidVersionProvider {
      * @param teiidVersion the teiidVersion to set
      */
     public void setTeiidVersion(TeiidVersion teiidVersion) {
-        this.teiidVersion = teiidVersion;
+        if (teiidVersion == null)
+            this.teiidVersion =  Version.DEFAULT_TEIID_VERSION.get();
+        else
+            this.teiidVersion = teiidVersion;
     }
 
 }

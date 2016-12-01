@@ -69,7 +69,7 @@ public final class CachedTeiidImplTest extends RelationalModelTest {
 
     private static final String ADMIN_PASSWORD = TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
 
-    private static final int ADMIN_PORT = TeiidAdminInfo.DEFAULT_PORT;
+    private static final int ADMIN_PORT = TeiidAdminInfo.Util.defaultPort(TEIID_VERSION);
 
     private static final boolean ADMIN_SECURE = false;
 

@@ -21,6 +21,9 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+
 /**
  *
  */
@@ -30,10 +33,6 @@ public interface TeiidAdminInfo extends TeiidConnectionInfo {
      * The default Teiid Admin persist password flag. Value is {@value} .
      */
     public static final boolean DEFAULT_PERSIST_PASSWORD = true;
-    /**
-     * The default Teiid Admin port number. Value is {@value} .
-     */
-    public static final int DEFAULT_PORT = 9999;
     
     /**
      * The default Teiid Admin secure protocol flag. Value is {@value} .
@@ -49,4 +48,21 @@ public interface TeiidAdminInfo extends TeiidConnectionInfo {
      */
     public static final String DEFAULT_ADMIN_PASSWORD = "admin"; //$NON-NLS-1$
 
+    static class Util {
+
+        public static int defaultPort(TeiidVersion version) {
+            if (version == null)
+                return 9999;
+
+            if (DefaultTeiidVersion.Version.TEIID_9_1.get().isGreaterThan(version))
+                return 9999;
+
+            // Teiid 9.1 and Wildfly 10.x no longer use 9999 by default
+            return 9990;
+        }
+
+        public static int defaultPort(String version) {
+            return defaultPort(new DefaultTeiidVersion(version));
+        }
+    }
 }

@@ -73,7 +73,7 @@ public class RestTeiidVdbStatusVdb implements KRestEntity {
 
     private String deployedName;
 
-    private int version;
+    private String version;
 
     private boolean active;
 
@@ -126,11 +126,11 @@ public class RestTeiidVdbStatusVdb implements KRestEntity {
         this.deployedName = deployedName;
     }
 
-    public int getVersion() {
+    public String getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(String version) {
         this.version = version;
     }
 
@@ -176,7 +176,7 @@ public class RestTeiidVdbStatusVdb implements KRestEntity {
         result = prime * result + (failed ? 1231 : 1237);
         result = prime * result + (loading ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + version;
+        result = prime * result + ((version == null) ? 0 : version.hashCode());
         return result;
     }
 

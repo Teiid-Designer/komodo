@@ -139,7 +139,7 @@ public class KomodoTeiidService extends KomodoService {
     /**
      * Time to wait after deploying/undeploying an artifact from the teiid instance
      */
-    private final static int DEPLOYMENT_WAIT_TIME = 2000;
+    private final static int DEPLOYMENT_WAIT_TIME = 10000;
 
     /**
      * Mapping of driverName to default translator
@@ -334,7 +334,7 @@ public class KomodoTeiidService extends KomodoService {
             throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
         }
         
-        return teiidInstance.getSchema(vdbName, 1, modelName);
+        return teiidInstance.getSchema(vdbName, "1", modelName);
     }
 
     private Response createTimeoutResponse(List<MediaType> mediaTypes) {
@@ -1898,9 +1898,6 @@ public class KomodoTeiidService extends KomodoService {
             // Await the deployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
-            // Make sure Dataservice constituents are current in the cachedTeiid
-            refreshCachedFromDataService(teiidNode, dataService);
-
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
 
@@ -1922,6 +1919,13 @@ public class KomodoTeiidService extends KomodoService {
 
                 status.addAttribute(dataService.getName(uow),
                                     RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYED_WITH_ERRORS));
+            }
+
+            try {
+                // Make sure Dataservice constituents are current in the cachedTeiid
+                refreshCachedFromDataService(teiidNode, dataService);
+            } catch (Exception ex) {
+                status.addAttribute("RefreshError", ex.getLocalizedMessage());
             }
 
            return commit(uow, mediaTypes, status);

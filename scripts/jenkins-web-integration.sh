@@ -13,8 +13,8 @@ JB_USER_PROPS="$WORKSPACE/vdb-builder-sources/server/komodo-rest/src/test/resour
 JB_ROLES_PROPS_NAME="application-roles.properties"
 JB_ROLES_PROPS="$WORKSPACE/vdb-builder-sources/server/komodo-rest/src/test/resources/credentials/$JB_ROLES_PROPS_NAME"
 
-TEIID_DIR="$WORKSPACE/maven-repo/org/jboss/teiid/teiid/8.12.4"
-TEIID="teiid-8.12.4-jboss-dist.zip"
+TEIID_DIR="$WORKSPACE/maven-repo/org/jboss/teiid/teiid/8.12.7.6_3"
+TEIID="teiid-8.12.7.6_3-jboss-dist.zip"
 
 VDBBUILDER_NAME="vdb-builder.war"
 VDBBUILDER="$WORKSPACE/vdb-builder-sources/server/komodo-rest/target/$VDBBUILDER_NAME"

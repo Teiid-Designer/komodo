@@ -221,7 +221,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         // May be multiple versions deployed - see if there is one matching supplied version
         Collection<TeiidVdb> serverVdbs = teiidInstance.getVdbs();
         for(TeiidVdb serverVdb : serverVdbs) {
-            if(serverVdb.getName().equals(vdbName) && serverVdb.getVersion()==vdbVersion) {
+            if(serverVdb.getName().equals(vdbName) && serverVdb.getVersion().equals(vdbVersion)) {
                 return true;
             }
         }

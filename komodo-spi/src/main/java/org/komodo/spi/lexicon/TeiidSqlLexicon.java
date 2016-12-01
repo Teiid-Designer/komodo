@@ -1595,6 +1595,15 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean TABLE_PROP_MULTIPLE = false;
 
+		/**
+         * LATERAL Property
+         */
+        String LATERAL_PROP_NAME = Namespace.PREFIX + COLON + "lateral";
+
+        Class<?> LATERAL_PROP_TYPE =  Boolean.class;
+
+        boolean LATERAL_PROP_MULTIPLE = false;
+
 	}
 
 	/**

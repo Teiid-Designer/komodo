@@ -24,6 +24,9 @@ import org.komodo.relational.commands.teiid.UnsetTeiidPropertyCommand;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 
 /**
  * Test Class to test {@link UnsetTeiidPropertyCommand}.
@@ -45,7 +48,8 @@ public final class ServerUnsetPropertyCommandTest extends AbstractServerCommandT
         KomodoObject serverObj = results.get(0);
         if(Teiid.RESOLVER.resolvable(getTransaction(), serverObj)) {
             Teiid server = Teiid.RESOLVER.resolve(getTransaction(), serverObj);
-            assertTrue(server.getAdminPort(getTransaction())==9999);
+            TeiidVersion version = TeiidVersionProvider.getInstance().getTeiidVersion();
+            assertTrue(server.getAdminPort(getTransaction())==TeiidAdminInfo.Util.defaultPort(version));
         }
     }
 

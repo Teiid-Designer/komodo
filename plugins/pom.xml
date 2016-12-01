@@ -20,11 +20,12 @@
 		<imported.packages>
 			org.komodo.spi.*,
 			org.komodo.plugin.framework,
-			org.komodo.plugin.framework.teiid,
 			org.komodo.utils.*,
 			javax.jcr,
 			org.modeshape.jcr.api,
 			!javax.binding,
+			!javax.enterprise.*,
+			!javax.interceptor,
 			!javax.persistence,
 			!javax.resource*,
 			!javax.security.auth.message*,
@@ -40,8 +41,6 @@
 
 	<modules>
 		<module>komodo-plugin-framework</module>
-		<module>teiid-8.11</module>
-		<module>teiid-8.12</module>
 		<module>komodo-plugin-service</module>
 		<module>storage-file</module>
 		<module>storage-git</module>
@@ -56,16 +55,6 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>org.komodo.plugins.teiid</groupId>
-				<artifactId>teiid-8.11</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.komodo.plugins.teiid</groupId>
-				<artifactId>teiid-8.12</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.komodo.plugins.storage</groupId>
 				<artifactId>storage-file</artifactId>

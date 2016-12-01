@@ -54,11 +54,13 @@ import javax.jcr.observation.EventListenerIterator;
 import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.teiid.TeiidServiceProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
@@ -119,10 +121,19 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
+    private void checkSupportedPlugins() throws Exception {
+        //
+        // Only run these tests if the correct teiid version is available
+        //
+        boolean supported = TeiidServiceProvider.getInstance().isSupportedTeiidVersion(getTeiidVersion());
+        Assume.assumeTrue(supported);
+    }
+
     @Override
     @Before
     public void beforeEach() throws Exception {
         super.beforeEach();
+        checkSupportedPlugins();
         rootNode = session().getRootNode();
     }
 

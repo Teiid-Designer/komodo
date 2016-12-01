@@ -30,19 +30,14 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.osgi.PluginService;
-import org.komodo.osgi.teiid.TeiidServiceProvider;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
@@ -61,6 +56,8 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.teiid.TeiidServiceProvider;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -78,20 +75,6 @@ public final class TeiidImplTest extends RelationalModelTest {
 
     private CachedTeiid cachedTeiid;
 
-    private PluginService setPluginServiceTeiidService(TeiidService teiidService) throws Exception, NoSuchFieldException, IllegalAccessException {
-        PluginService service = PluginService.getInstance();
-        unmockedTeiidService = service.getCurrentTeiidService();
-
-        TeiidServiceProvider teiidProvider = new TeiidServiceProvider(service);
-        teiidProvider.setTeiidService(teiidService);
-
-        Field teiidServiceProviderField = service.getClass().getDeclaredField("teiidServiceProvider");
-        assertNotNull(teiidServiceProviderField);
-        teiidServiceProviderField.setAccessible(true);
-        teiidServiceProviderField.set(service, teiidProvider);
-        return service;
-    }
-
     private TeiidInstance mockTeiidInstance() throws Exception {
         TeiidInstance teiidInstance = mock(TeiidInstance.class);
         when(teiidInstance.getVersion()).thenReturn(version);
@@ -102,10 +85,7 @@ public final class TeiidImplTest extends RelationalModelTest {
         when(teiidService.getTeiidInstance(any(TeiidParent.class), any(TeiidJdbcInfo.class)))
                     .thenReturn(teiidInstance);
 
-        PluginService service = setPluginServiceTeiidService(teiidService);
-
-        assertEquals(teiidService, service.getCurrentTeiidService());
-        assertEquals(teiidService, service.getTeiidService(version));
+        TeiidServiceProvider.getInstance().setTeiidService(teiidService);
 
         return teiidInstance;
     }
@@ -124,12 +104,12 @@ public final class TeiidImplTest extends RelationalModelTest {
 
         this.teiid = createTeiid( TEIID_NAME );
         this.version = teiid.getVersion(getTransaction());
-        this.unmockedTeiidService = PluginService.getInstance().getTeiidService(version);
+        this.unmockedTeiidService = TeiidServiceProvider.getInstance().getTeiidService(version);
     }
 
     @After
     public void teardown() throws Exception {
-        setPluginServiceTeiidService(unmockedTeiidService);
+        TeiidServiceProvider.getInstance().setTeiidService(unmockedTeiidService);
 
         if (this.cachedTeiid != null) {
             this.cachedTeiid.remove(sysTx());
@@ -236,7 +216,8 @@ public final class TeiidImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveDefaultAdminPortAfterConstruction() throws Exception {
-        assertThat( this.teiid.getAdminPort( getTransaction() ), is( TeiidAdminInfo.DEFAULT_PORT ) );
+        TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+        assertThat( this.teiid.getAdminPort( getTransaction() ), is( TeiidAdminInfo.Util.defaultPort(teiidVersion) ) );
     }
 
     @Test

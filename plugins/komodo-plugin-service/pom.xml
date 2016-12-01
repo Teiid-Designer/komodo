@@ -14,7 +14,6 @@
 		<version.apache.felix.framework>5.4.0</version.apache.felix.framework>
 		<version.apache.felix.fileinstall>3.5.2</version.apache.felix.fileinstall>
 		<includePluginGroupIds>
-			org.komodo.plugins.teiid,
 			org.komodo.plugins.storage
 		</includePluginGroupIds>
 	</properties>
@@ -67,15 +66,14 @@
 			<artifactId>org.apache.felix.fileinstall</artifactId>
 		</dependency>
 
+		<!--
+			Has to be added below apache.felix since the arquillian
+			dependencies from this get added to the Maven-Dependencies
+			container in eclipse and they contain an old version of felix.
+		 -->
 		<dependency>
-			<groupId>org.komodo.plugins.teiid</groupId>
-			<artifactId>teiid-8.11</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.komodo.plugins.teiid</groupId>
-			<artifactId>teiid-8.12</artifactId>
-			<scope>provided</scope>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-teiid-client</artifactId>
 		</dependency>
 
 		<dependency>
@@ -187,45 +185,6 @@
 							<overWriteIfNewer>true</overWriteIfNewer>
 						</configuration>
 					</execution>
-					<execution>
-						<id>unpack-for-teiid-testing</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.jboss.as</groupId>
-									<artifactId>jboss-as-dist</artifactId>
-									<version>${version.org.jboss.as}</version>
-									<type>zip</type>
-									<overWrite>false</overWrite>
-									<outputDirectory>${project.basedir}/lib/jbossas/</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-teiid</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.jboss.teiid</groupId>
-									<artifactId>teiid</artifactId>
-									<version>${version.teiid.default}</version>
-									<classifier>jboss-dist</classifier>
-									<type>zip</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 
@@ -268,18 +227,6 @@
 				</dependencies>
 			</plugin>
 
-			<!-- On clean, remove the jbossas testing directory -->
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${project.basedir}/lib/jbossas</directory>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
 		</plugins>
 
 		<pluginManagement>

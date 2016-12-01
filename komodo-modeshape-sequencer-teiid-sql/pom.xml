@@ -106,7 +106,7 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-plugin-service</artifactId>
+			<artifactId>komodo-teiid-client</artifactId>
 		</dependency>
 
 	</dependencies>

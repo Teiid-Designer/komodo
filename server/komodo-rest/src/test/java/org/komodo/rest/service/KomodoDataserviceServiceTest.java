@@ -50,9 +50,10 @@ import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
 import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.test.utils.TestUtilities;
 
-@SuppressWarnings( {"javadoc", "nls"} )
+@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
 public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTest {
 
     public static final String DATASERVICE_NAME = "MyDataService"; 
@@ -145,7 +146,10 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         RestDataSource dataSource = datasources[0];
         assertEquals("MySqlPool", dataSource.getId());
         assertEquals("java:/MySqlDS", dataSource.getJndiName());
-        assertEquals("mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1", dataSource.getDriverName());
+        if (getTeiidVersion().isGreaterThanOrEqualTo(Version.TEIID_9_0))
+            assertEquals("mysql-connector-java-5.1.39-bin.jar_com.mysql.jdbc.Driver_5_1", dataSource.getDriverName());
+        else
+            assertEquals("mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1", dataSource.getDriverName());
 
         Collection<RestLink> links = dataSource.getLinks();
         assertNotNull(links);

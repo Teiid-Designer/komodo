@@ -24,6 +24,7 @@
         <module>komodo-spi</module>
         <module>komodo-utils-logger</module>
         <module>komodo-utils</module>
+        <module>komodo-teiid-client</module>
         <module>plugins</module>
         <module>komodo-modeshape-sequencer-teiid-sql</module>
         <module>komodo-core</module>
@@ -66,40 +67,7 @@
 		<version.apache.commons.compress>1.9</version.apache.commons.compress>
 		<version.log4j>1.2.16</version.log4j>
 		<version.slf4j.log4j>1.7.2</version.slf4j.log4j>
-		<version.xnio>3.2.0.Final</version.xnio>
 	</properties>
-
-	<profiles>
-		<!-- 
-		  This profile is used to run longer-running performance tests,
-		  and must be activated manually, as in "mvn ... -Pperformance ..."
-		-->
-        <profile>
-            <id>performance</id>
-            <modules>
-                <!--
-                    The JBoss AS7 subsystem needs the web components and (local) JDBC drivers.
-                -->
-                <module>komodo-performance-tests</module>
-            </modules>
-        </profile>
-		
-        <!-- TODO Might need later -->
-		<!-- 
-		  This profile is used to build everything for a release, including all assemblies,
-			and must be activated manually, as in "mvn ... -Passembly ..."
-		-->
-        <!--
-        <profile>
-            <id>assembly</id>
-            <modules>
-                <module>komodo-jca-rar</module>
-                <module>komodo-client</module>
-                <module>integration</module>
-            </modules>
-        </profile>
-        -->
-	</profiles>
 
 	<dependencyManagement>
 		<dependencies>
@@ -176,17 +144,6 @@
 				<version>${version.apache.commons.compress}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.jboss.xnio</groupId>
-				<artifactId>xnio-api</artifactId>
-				<version>${version.xnio}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.jboss.xnio</groupId>
-				<artifactId>xnio-nio</artifactId>
-				<version>${version.xnio}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

@@ -3,7 +3,8 @@
     xmlns="urn:infinispan:config:7.2">
 
     <cache-container>
-        <local-cache name="Test Repository">
+        <local-cache name="Test Repository" statistics="false">
+
             <transaction
                 transaction-manager-lookup="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
                 mode="NON_XA"
