@@ -267,6 +267,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SOURCE_PLACEHOLDER = "{sourceName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for the collection of catalogs
+         */
+        String JDBC_CATALOG_SCHEMA_SEGMENT = "JdbcCatalogSchema"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the jdbc info
+         */
+        String JDBC_INFO_SEGMENT = "JdbcInfo"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of tables of a model
          */
         String TABLES_SEGMENT = "Tables"; //$NON-NLS-1$
