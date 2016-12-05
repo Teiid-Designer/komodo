@@ -43,6 +43,32 @@
 			</dependencies>
 		</profile>
 		<profile>
+			<id>release</id>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-cli</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-controller-client</artifactId>
+				</dependency>
+
+				<dependency>
+					<groupId>org.jboss.spec</groupId>
+					<artifactId>jboss-javaee-6.0</artifactId>
+					<type>pom</type>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
 			<id>wildfly</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>

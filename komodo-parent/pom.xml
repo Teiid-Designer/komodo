@@ -184,6 +184,62 @@
 		</profile>
 
 		<profile>
+			<id>release</id>
+
+			<properties>
+				<server.platform>release</server.platform>
+
+				<!-- The default version of teiid targeted for development -->
+				<teiid.version.default>8.12.4</teiid.version.default>
+				<teiid.classifier.default>jboss-dist</teiid.classifier.default>
+
+				<!-- The version of server to use with testing -->
+				<test.server.group.id>org.jboss.as</test.server.group.id>
+				<test.server.artifact.id>jboss-as-dist</test.server.artifact.id>
+				<test.server.version>7.5.0.Final-redhat-15</test.server.version>
+				<!-- The test version of server when its unpacked -->
+				<test.server.name>jboss-eap-6.4</test.server.name>
+
+				<version.aesh>0.33.12.redhat-1</version.aesh>
+				<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
+
+				<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
+				<version.arquillian>1.1.9.Final</version.arquillian>
+				<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
+				<arquillian.container.name>jbossas-managed</arquillian.container.name>
+			</properties>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.jboss.as</groupId>
+						<artifactId>jboss-as-cli</artifactId>
+						<version>${test.server.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.as</groupId>
+						<artifactId>jboss-as-controller-client</artifactId>
+						<version>${test.server.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.spec</groupId>
+						<artifactId>jboss-javaee-6.0</artifactId>
+						<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
+						<type>pom</type>
+						<scope>test</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.as</groupId>
+						<artifactId>jboss-as-arquillian-container-managed</artifactId>
+						<version>${version.arquillian-container}</version>
+						<scope>test</scope>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+
+		</profile>
+
+		<profile>
 			<id>wildfly</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>

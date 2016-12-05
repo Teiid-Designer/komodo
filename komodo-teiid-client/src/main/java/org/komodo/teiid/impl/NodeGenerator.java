@@ -21,6 +21,7 @@
  */
 package org.komodo.teiid.impl;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import javax.jcr.Node;
@@ -770,7 +771,18 @@ public class NodeGenerator extends AbstractNodeGenerator<LanguageObject>implemen
                 Node node = transform(obj);
 
                 setProperty(node, TeiidSqlLexicon.SubqueryFromClause.NAME_PROP_NAME, obj.getName());
-                setProperty(node, TeiidSqlLexicon.SubqueryFromClause.TABLE_PROP_NAME, obj.isLateral());
+
+                //
+                // Change of API between 8.12.4 and 8.12.7+
+                //
+                Method getter = null;
+                try {
+                    getter = obj.getClass().getMethod("isLateral");
+                } catch (NoSuchMethodException ex) {
+                    getter = obj.getClass().getMethod("isTable");
+                }
+
+                setProperty(node, TeiidSqlLexicon.SubqueryFromClause.TABLE_PROP_NAME, getter.invoke(obj));
 
                 visitFromClause(node, obj);
 
