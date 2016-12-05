@@ -25,16 +25,10 @@ import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
 import org.komodo.rest.relational.response.RestTeiidStatus;
-import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 public class TeiidStatusSerializer extends BasicEntitySerializer<RestTeiidStatus> {
-
-    @Override
-    protected boolean isComplete(final RestTeiidStatus teiid) {
-        return super.isComplete(teiid) && !StringUtils.isBlank(teiid.getConnectionUrl());
-    }
 
     @Override
     protected RestTeiidStatus createEntity() {
