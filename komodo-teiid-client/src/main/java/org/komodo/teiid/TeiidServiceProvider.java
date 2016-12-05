@@ -74,7 +74,7 @@ public class TeiidServiceProvider {
      */
     public Set<TeiidVersion> getSupportedTeiidVersions() {
         TeiidVersion version = DefaultTeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
-        DefaultTeiidVersion wildcard = new DefaultTeiidVersion(version.getMajor(), version.getMicro(), TeiidVersion.WILDCARD);
+        DefaultTeiidVersion wildcard = new DefaultTeiidVersion(version.getMajor(), version.getMinor(), TeiidVersion.WILDCARD);
         Set<TeiidVersion> versions = new HashSet<>();
         versions.add(version);
         versions.add(wildcard);
@@ -112,8 +112,9 @@ public class TeiidServiceProvider {
     public synchronized TeiidService getTeiidService(TeiidVersion version) throws Exception {
         init();
 
-        if (teiidService != null && teiidService.getVersion().compareTo(version))
+        if (teiidService != null && isSupportedTeiidVersion(version)) {
             return teiidService;
+        }
 
         throw new UnsupportedTeiidException(version);
     }
