@@ -5,6 +5,7 @@
 		<groupId>org.komodo</groupId>
 		<artifactId>komodo-parent</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
+		<relativePath>../komodo-parent</relativePath>
 	</parent>
 	<artifactId>komodo-teiid-client</artifactId>
 	<name>Teiid Client</name>
