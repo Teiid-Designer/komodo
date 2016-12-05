@@ -1028,6 +1028,31 @@ public final class RelationalMessages {
         TEIID_SERVICE_UPDATE_DDL_DNE,
         
         /**
+         * An error indicating data source isn not a JDBC source.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_NOT_JDBC_ERROR,
+        
+        /**
+         * An error indicating attempt to get source JDBC connection failed.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR,
+        
+        /**
+         * An error indicating attempt to fetch source JDBC tables failed.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_TABLE_FETCH_ERROR,
+        
+        /**
+         * An error indicating attempt to get source tables failed.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_TABLES_ERROR,
+
+        /**
+         * An error indicating attempt to get source catalog and schema failed.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_CATALOG_SCHEMA_ERROR,
+
+           /**
          * An error indicating update attempt failed
          */
         TEIID_SERVICE_UPDATE_ERROR,
