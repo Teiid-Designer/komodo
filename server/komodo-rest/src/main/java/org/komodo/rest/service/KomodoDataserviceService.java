@@ -99,6 +99,10 @@ public final class KomodoDataserviceService extends KomodoService {
 
     private static final int ALL_AVAILABLE = -1;
 
+    private static final String SERVICE_VDB_SUFFIX = "VDB"; //$NON-NLS-1$
+    private static final String SERVICE_VDB_VIEW_MODEL = "views"; //$NON-NLS-1$
+    private static final String SERVICE_VDB_VIEW_SUFFIX = "View"; //$NON-NLS-1$
+    
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
@@ -512,7 +516,7 @@ public final class KomodoDataserviceService extends KomodoService {
         if (StringUtils.isBlank( dataserviceName )) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_NAME);
         }
-        String serviceVdbName = dataserviceName+"SvcVdb"; //$NON-NLS-1$
+        String serviceVdbName = dataserviceName+SERVICE_VDB_SUFFIX;
         
         String absTablePath = attr.getViewTablePath();
         // Error if the viewTablePath is missing 
@@ -565,11 +569,11 @@ public final class KomodoDataserviceService extends KomodoService {
             Vdb serviceVdb = Vdb.RESOLVER.resolve(uow, vdbObj);
             
             // Add to the ServiceVdb a virtual model for the View
-            Model viewModel = serviceVdb.addModel(uow, "SvcModel"); //$NON-NLS-1$
+            Model viewModel = serviceVdb.addModel(uow, SERVICE_VDB_VIEW_MODEL);
             viewModel.setModelType(uow, Type.VIRTUAL);
             
             // Generate the ViewDDL using the specified table, then set the viewModel content.
-            String viewDdl = ViewDdlBuilder.getODataViewDdl(uow, "SvcView", sourceTable); //$NON-NLS-1$
+            String viewDdl = ViewDdlBuilder.getODataViewDdl(uow, dataserviceName+SERVICE_VDB_VIEW_SUFFIX, sourceTable);
         	viewModel.setModelDefinition(uow, viewDdl);
 
         	// Add a physical model of same name to the service VDB
