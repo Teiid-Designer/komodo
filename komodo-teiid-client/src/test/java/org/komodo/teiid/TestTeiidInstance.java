@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -55,6 +56,7 @@ import org.komodo.teiid.impl.TeiidInstanceImpl;
 import org.komodo.test.utils.DummyEventManager;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
+import org.teiid.adminapi.AdminProcessingException;
 
 @RunWith( Arquillian.class )
 public class TestTeiidInstance {
@@ -273,6 +275,24 @@ public class TestTeiidInstance {
             DataSourceDriver driver = iter.next();
             assertTrue(driverNames.contains(driver.getName()));
             assertTrue(classNames.contains(driver.getClassName()));
+        }
+    }
+
+    @Test
+    public void testGetSchema() throws Exception {
+        getTeiidInstance().connect();
+        assertTrue(getTeiidInstance().isConnected());
+
+        try {
+            getTeiidInstance().getSchema("blah", "1.0", "model");
+        } catch (InvocationTargetException ex) {
+            //
+            // Should throw this exception since blah does not exist but should not
+            // throw a NumberFormatException or NoSuchMethodException
+            //
+            Throwable cause = ex.getCause();
+            assertTrue(cause instanceof AdminProcessingException);
+            assertTrue(cause.getMessage().contains("does not exist or is not ACTIVE"));
         }
     }
 }

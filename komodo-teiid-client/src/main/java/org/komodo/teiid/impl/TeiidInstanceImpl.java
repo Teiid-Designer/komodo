@@ -50,6 +50,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.teiid.AbstractConnectionManager;
 import org.komodo.teiid.AbstractTeiidInstance;
 import org.komodo.teiid.Messages;
+import org.komodo.utils.KLog;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
@@ -370,9 +371,20 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
             return (String) method.invoke(admin, vdbName, vdbVersion, modelName, null, null);
         } else {
             method = admin.getClass().getMethod(methodName,
-                                                String.class, Integer.class, String.class,
+                                                String.class, int.class, String.class,
                                                 EnumSet.class, String.class);
-            int version = Integer.parseInt(vdbVersion);
+            int version;
+            try {
+                version = (int) Double.parseDouble(vdbVersion);
+            } catch (NumberFormatException ex1) {
+                try {
+                    version = Integer.parseInt(vdbVersion);
+                } catch (Exception ex2) {
+                    KLog.getLogger().error("Cannot parse vdb version: " + vdbVersion + ". Defaulting to version 1", ex2);
+                    version = 1;
+                }
+            }
+
             return (String) method.invoke(admin, vdbName, version, modelName, null, null);
         }
     }

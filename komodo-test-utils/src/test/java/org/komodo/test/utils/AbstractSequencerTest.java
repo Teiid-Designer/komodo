@@ -127,6 +127,23 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         //
         boolean supported = TeiidServiceProvider.getInstance().isSupportedTeiidVersion(getTeiidVersion());
         Assume.assumeTrue(supported);
+
+        //
+        // Above will return true for 8.12.4 even if tests are for 8.12.7 so need an additional test
+        //
+        supported = false;
+        Set<TeiidVersion> supportedTeiidVersions = TeiidServiceProvider.getInstance().getSupportedTeiidVersions();
+        for (TeiidVersion version : supportedTeiidVersions) {
+            if (version.hasWildCards())
+                continue;
+
+            if (version.equals(getTeiidVersion())) {
+                supported = true;
+                break;
+            }
+        }
+
+        Assume.assumeTrue(supported);
     }
 
     @Override
