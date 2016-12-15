@@ -50,6 +50,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestException;
+import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.RelationalMessages;
@@ -79,6 +80,14 @@ public final class KomodoUtilService extends KomodoService {
     private static final String REPO_CONFIG_LABEL = "Repository Configuration"; //$NON-NLS-1$
 
     private static final String REPO_VDB_TOTAL = "Repository Vdb Total"; //$NON-NLS-1$
+
+    static final String APP_NAME = "App Name"; //$NON-NLS-1$
+
+    static final String APP_TITLE = "App Title"; //$NON-NLS-1$
+
+    static final String APP_DESCRIPTION = "App Description"; //$NON-NLS-1$
+
+    static final String APP_VERSION = "App Version"; //$NON-NLS-1$
 
     /**
      * The sample vdbs provided by this service
@@ -123,6 +132,11 @@ public final class KomodoUtilService extends KomodoService {
 
         KomodoStatusObject repoStatus = new KomodoStatusObject();
 
+        repoStatus.addAttribute(APP_NAME, KomodoRestV1Application.V1Constants.App.name());
+        repoStatus.addAttribute(APP_TITLE, KomodoRestV1Application.V1Constants.App.title());
+        repoStatus.addAttribute(APP_DESCRIPTION, KomodoRestV1Application.V1Constants.App.description());
+        repoStatus.addAttribute(APP_VERSION, KomodoRestV1Application.V1Constants.App.version());
+
         Id id = this.repo.getId();
         repoStatus.addAttribute(REPO_WKSP_LABEL, id.getWorkspaceName());
         repoStatus.addAttribute(REPO_CONFIG_LABEL, id.getConfiguration().toString());
@@ -133,7 +147,6 @@ public final class KomodoUtilService extends KomodoService {
             // find VDBs
             uow = systemTx("getVdbs", true); //$NON-NLS-1$
             Vdb[] vdbs = getWorkspaceManager(uow).findVdbs(uow);
-
             repoStatus.addAttribute(REPO_VDB_TOTAL, Integer.toString(vdbs.length));
 
         } catch (final Exception e) {

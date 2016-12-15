@@ -47,8 +47,15 @@ public interface ExtensionConstants extends StringConstants {
 
     String READ_CHILDREN_NAMES = "read-children-names";
 
+    String READ_ATTRIBUTE = "read-attribute";
+
+    String NAME = "name";
+
     String CONNECTION_FIELD = "connection";
 
     String DOMAIN_MODE_FIELD = "domainMode";
 
+    String TEIID = "teiid";
+
+    String TEIID_RUNTIME_VERSION = "runtime-version";
 }

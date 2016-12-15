@@ -52,6 +52,7 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.teiid.impl.TeiidInstanceImpl;
 import org.komodo.test.utils.DummyEventManager;
 import org.komodo.test.utils.TestUtilities;
@@ -276,6 +277,15 @@ public class TestTeiidInstance {
             assertTrue(driverNames.contains(driver.getName()));
             assertTrue(classNames.contains(driver.getClassName()));
         }
+    }
+
+    @Test
+    public void testRuntimeVersion() throws Exception {
+        getTeiidInstance().connect();
+        assertTrue(getTeiidInstance().isConnected());
+        TeiidVersion version = getTeiidInstance().getRuntimeVersion();
+        assertNotNull(version);
+        assertEquals(TeiidVersionProvider.getInstance().getTeiidVersion(), version);
     }
 
     @Test

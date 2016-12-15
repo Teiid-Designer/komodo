@@ -82,6 +82,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         for (String expected : EXPECTED) {
             assertTrue(entity.contains(expected));
         }
+
+        // This are generated on build from maven variables so check they are listed
+        assertTrue(entity.contains(KomodoUtilService.APP_NAME));
+        assertTrue(entity.contains(KomodoUtilService.APP_TITLE));
+        assertTrue(entity.contains(KomodoUtilService.APP_VERSION));
+        assertTrue(entity.contains(KomodoUtilService.APP_DESCRIPTION));
     }
 
     @Test

@@ -33,6 +33,8 @@ import org.jboss.as.cli.operation.impl.DefaultOperationRequestBuilder;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.teiid.ExtensionConstants;
 import org.komodo.teiid.Messages;
 import org.teiid.adminapi.Admin;
@@ -235,5 +237,20 @@ public class JbossExtensions implements ExtensionConstants {
             }
         }
         return dataSourceDrivers;
+    }
+
+    public TeiidVersion getTeiidRuntimeVersion(Admin admin) throws Exception {
+        if (admin == null)
+            throw new Exception(Messages.getString(Messages.TeiidInstance.requestTeiidVersionFailure));
+
+        final ModelNode request = buildRequest(admin, TEIID, READ_ATTRIBUTE, NAME, TEIID_RUNTIME_VERSION);
+        ModelNode outcome = getConnection(admin).execute(request);
+        if (Util.isSuccess(outcome)) {
+            ModelNode result = outcome.get(RESULT);
+            String versionId = result.asString();
+            return new DefaultTeiidVersion(versionId);
+        }
+
+        throw new Exception(Messages.getString(Messages.TeiidInstance.requestTeiidVersionFailure));
     }
 }

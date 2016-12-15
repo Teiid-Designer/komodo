@@ -61,10 +61,23 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
     String DATASOURCE_DISPLAYNAME = "display-name"; //$NON-NLS-1$
     
     /**
-     * @return the version information of this instance
+     * @return the version information of this instance, either the client or runtime version
+     *                  depending on connection, ie. unconnected returns client while connected returns runtime.
+     *
      * @throws Exception 
      */
     TeiidVersion getVersion();
+
+    /**
+     * @return the client version of this instance
+     */
+    TeiidVersion getClientVersion();
+
+    /**
+     * @return the runtime / server version of this instance
+     * @throws Exception 
+     */
+    TeiidVersion getRuntimeVersion() throws Exception;
 
     /**
      * Disconnect then connect to this instance. This is preferable to 
@@ -97,6 +110,11 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * @return the unique identifier of this instance
      */
     String getId();
+
+    /**
+     * @return the version of teiid this instance was built with
+     */
+    TeiidVersion getSupportedVersion();
 
     /**
      * @return the teiid instance parent
