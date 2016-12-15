@@ -27,6 +27,12 @@
 		<!-- To be injected into swagger index.html -->
 		<rest-context>vdb-builder</rest-context>
 		<rest-version>v1</rest-version>
+
+		<app.rest.name>${rest-context}</app.rest.name>
+		<app.rest.title>Vdb Builder</app.rest.title>
+		<app.rest.version>${project.version}</app.rest.version>
+		<app.rest.description>A tool that allows creating, editing and managing dynamic VDBs and their contents</app.rest.description>
+
 	</properties>
 
 	<profiles>
@@ -451,6 +457,17 @@
 	</dependencies>
 
 	<build>
+		<!-- Write out the app properties to file -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<!-- Set the name of the war, used as the context root when the app is 
 			deployed -->
 		<finalName>${rest-context}</finalName>

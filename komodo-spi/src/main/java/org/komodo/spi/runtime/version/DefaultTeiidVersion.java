@@ -22,6 +22,7 @@
 package org.komodo.spi.runtime.version;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.komodo.spi.Messages;
@@ -47,6 +48,12 @@ public class DefaultTeiidVersion implements TeiidVersion {
             return version;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                // Do Nothing
+            }
         }
     }
 

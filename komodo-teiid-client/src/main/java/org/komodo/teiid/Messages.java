@@ -55,7 +55,8 @@ public class Messages implements StringConstants {
         reconnectErrorMsg,
         noSuchField,
         buildOperationFailure,
-        requestDriverFailure;
+        requestDriverFailure,
+        requestTeiidVersionFailure;
 
         @Override
         public String toString() {

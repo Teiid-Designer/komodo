@@ -478,7 +478,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid host property
+     * @return value of teiid version property
      * @throws KException
      *         if error occurs
      */

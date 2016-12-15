@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -100,15 +101,56 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      */
     public static interface V1Constants extends JsonConstants {
 
-        /**
-         * Application name and context
-         */
-        String APP_NAME = "vdb-builder"; //$NON-NLS-1$
+        class App {
 
-        /**
-         * Version of the application
-         */
-        String APP_VERSION = "0.0.3"; //$NON-NLS-1$
+            private static final Properties properties = new Properties();
+
+            private static void init() {
+                InputStream fileStream = KomodoRestV1Application.class.getClassLoader().getResourceAsStream("app.properties");
+
+                try {
+                    properties.load(fileStream);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            /**
+             * Application name and context
+             */
+            public static String name() {
+                init();
+
+                return properties.getProperty("app.name");
+            }
+
+            /**
+             * Application display title
+             */
+            public static String title() {
+                init();
+
+                return properties.getProperty("app.title");
+            }
+
+            /**
+             * Application description
+             */
+            public static String description() {
+                init();
+
+                return properties.getProperty("app.description");
+            }
+
+            /**
+             * Version of the application
+             */
+            public static String version() {
+                init();
+
+                return properties.getProperty("app.version");
+            }
+        }
 
         /**
          * The komodo engine's data directory system property
@@ -567,11 +609,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         converters.addConverter(new RestDataserviceConverter());
 
         BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setTitle("Vdb Builder");
-        beanConfig.setDescription("A tool that allows creating, editing and managing dynamic VDBs and their contents");
-        beanConfig.setVersion(V1Constants.APP_VERSION);
-        beanConfig.setSchemes(new String[]{"http"});
-        beanConfig.setBasePath(V1Constants.APP_NAME + V1Constants.APP_PATH);
+        beanConfig.setTitle(V1Constants.App.title());
+        beanConfig.setDescription(V1Constants.App.description());
+        beanConfig.setVersion(V1Constants.App.version());
+        beanConfig.setSchemes(new String[]{"https"});
+        beanConfig.setBasePath(V1Constants.App.name() + V1Constants.APP_PATH);
 
         // No need to setHost as it will pick up the one its running on
 

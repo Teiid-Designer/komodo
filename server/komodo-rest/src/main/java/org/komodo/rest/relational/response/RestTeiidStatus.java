@@ -36,6 +36,8 @@ import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  * A Teiid Status object that can be used by GSON to build a JSON document representation.
@@ -46,6 +48,11 @@ public final class RestTeiidStatus extends RestTeiid {
      * Label used to describe whether teiid instance is available
      */
     public static final String TEIID_INSTANCE_AVAILABLE_LABEL = "instanceAvailable";
+
+    /**
+     * Label used to describe the version of teiid used to build this
+     */
+    public static final String TEIID_BUILT_VERSION_LABEL = "builtVersion";
 
     /**
      * Label used to describe teiid connection url
@@ -126,6 +133,8 @@ public final class RestTeiidStatus extends RestTeiid {
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().cachedTeiidUri(teiid.getId(uow))));
         removeLink(LinkType.CHILDREN);
 
+        setBuiltWithVersion(new DefaultTeiidVersion(super.getVersion()));
+
         synchronized (TeiidInstance.TEIID_INSTANCE_LOCK) {
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
             setTeiidInstanceAvailable(teiidInstance != null);
@@ -136,6 +145,7 @@ public final class RestTeiidStatus extends RestTeiid {
             try {
                 teiidInstance.connect();
 
+                setVersion(teiidInstance.getVersion().toString());
                 setConnectionUrl(teiidInstance.getUrl());
                 setConnected(teiidInstance.isConnected());
                 setConnectionError(teiidInstance.getConnectionError());
@@ -166,6 +176,15 @@ public final class RestTeiidStatus extends RestTeiid {
                 throw new KException(ex);
             }
         }
+    }
+
+    public String getBuiltWithVersion() {
+        Object versionObj = tuples.get(TEIID_BUILT_VERSION_LABEL);
+        return versionObj != null ? versionObj.toString() : null;
+    }
+
+    protected void setBuiltWithVersion(TeiidVersion teiidVersion) {
+        tuples.put(TEIID_BUILT_VERSION_LABEL, teiidVersion.toString());
     }
 
     public boolean isTeiidInstanceAvailable() {

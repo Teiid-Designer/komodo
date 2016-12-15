@@ -49,10 +49,12 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
+import org.teiid.core.util.ApplicationInfo;
 
 public abstract class AbstractTeiidInstance implements TeiidInstance, StringConstants {
 
@@ -158,7 +160,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
 
     private TeiidJdbcInfo jdbcInfo;
 
-    private TeiidVersion version;
+    private TeiidVersion supportedVersion;
 
     private String connectionError;
 
@@ -167,7 +169,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         ArgCheck.isNotNull(jdbcInfo);
         ArgCheck.isNotNull(parent);
         this.parent = parent;
-        this.version = teiidVersion;
+        this.supportedVersion = teiidVersion;
         this.adminInfo = new TeiidAdminInfoImpl();
         this.jdbcInfo = jdbcInfo;
     }
@@ -242,8 +244,34 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
     }
 
     @Override
+    public TeiidVersion getSupportedVersion() {
+        return supportedVersion;
+    }
+
+    @Override
+    public TeiidVersion getClientVersion() {
+        return new DefaultTeiidVersion(ApplicationInfo.getInstance().getBuildNumber());
+    }
+
+    @Override
+    public abstract TeiidVersion getRuntimeVersion() throws Exception;
+
+    @Override
     public TeiidVersion getVersion() {
-        return version;
+        TeiidVersion version;
+
+        if (isConnected()) {
+            try {
+                version = getRuntimeVersion();
+                if (version != null)
+                    return version;
+
+            } catch (Exception ex) {
+                KLog.getLogger().error(ex.getMessage(), ex);
+            }
+        }
+
+        return getClientVersion();
     }
 
     @Override
@@ -302,7 +330,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
             // which does not return any data so the read() hangs
             // and never returns.
             //
-            if (getVersion().isLessThan(Version.TEIID_9_1)) {
+            if (getClientVersion().isLessThan(Version.TEIID_9_1)) {
                 /*
                  * This may not seem necessary since a socket connection
                  * should be enough. However, TEIIDDES-1971 has shown

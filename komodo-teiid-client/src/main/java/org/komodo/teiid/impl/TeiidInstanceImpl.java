@@ -77,6 +77,11 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
     }
 
     @Override
+    public TeiidVersion getRuntimeVersion() throws Exception {
+        return ext.getTeiidRuntimeVersion(admin);
+    }
+
+    @Override
     protected boolean isCoherent() {
         return admin != null;
     }
