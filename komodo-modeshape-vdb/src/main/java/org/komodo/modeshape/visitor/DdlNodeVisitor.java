@@ -40,10 +40,10 @@ import javax.jcr.nodetype.NodeType;
 import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.spi.lexicon.TeiidSqlConstants.NonReserved;
 import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
-import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -73,6 +73,11 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         EXCLUDE_TABLES,
 
         /**
+         * Exclude Table Constraints
+         */
+        EXCLUDE_TABLE_CONSTRAINTS,
+
+        /**
          * Exclude Procedures
          */
         EXCLUDE_PROCEDURES,
@@ -86,6 +91,8 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
     private StringBuilder ddlBuffer = new StringBuilder();
 
     private boolean includeTables = true;
+
+    private boolean includeTableConstraints = true;
 
     private boolean includeProcedures = true;
 
@@ -252,6 +259,9 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
                 switch (exclusion) {
                     case EXCLUDE_TABLES:
                         this.includeTables = false;
+                        break;
+                    case EXCLUDE_TABLE_CONSTRAINTS:
+                        this.includeTableConstraints = false;
                         break;
                     case EXCLUDE_PROCEDURES:
                         this.includeProcedures = false;
@@ -716,7 +726,9 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
                     append(COMMA);
             }
 
-            constraints(node);
+            if(includeTableConstraints) {
+                constraints(node);
+            }
             append(NEW_LINE);
             append(CLOSE_BRACKET);
         }

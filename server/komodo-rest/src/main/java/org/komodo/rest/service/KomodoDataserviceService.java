@@ -35,6 +35,7 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -75,6 +76,7 @@ import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -582,7 +584,9 @@ public final class KomodoDataserviceService extends KomodoService {
         	sourceModel.setModelType(uow, Type.PHYSICAL);
 
             // The source model DDL contains the table DDL only.  This limits the source metadata which is loaded on deployment.
-        	byte[] bytes = sourceTable.export(uow, null);
+            Properties exportProps = new Properties();
+            exportProps.put( ExportConstants.EXCLUDE_TABLE_CONSTRAINTS_KEY, true );
+        	byte[] bytes = sourceTable.export(uow, exportProps);
         	String tableString = new String(bytes);
             sourceModel.setModelDefinition(uow, tableString);
             
