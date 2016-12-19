@@ -53,6 +53,7 @@ import org.komodo.relational.model.Table.OnCommit;
 import org.komodo.relational.model.Table.TemporaryType;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -928,6 +929,7 @@ public final class TableImplTest extends RelationalModelTest {
     
     @Test
     public void shouldExportDdl() throws Exception {
+        // Add columns
         final Column column1 = this.table.addColumn( getTransaction(), "column1" );
         column1.setDescription( getTransaction(), "Col1 Description" );
         column1.setDatatypeName( getTransaction(), "string" );
@@ -936,14 +938,53 @@ public final class TableImplTest extends RelationalModelTest {
         column2.setDescription( getTransaction(), "Col2 Description" );
         column2.setDatatypeName( getTransaction(), "string" );
         column2.setNameInSource( getTransaction(), "Col2_NIS" );
-        
+
+        // Add a FK
+        final Table refTable = RelationalModelFactory.createTable( getTransaction(), _repo, mock( Model.class ), "refTable" );
+        final String name = "foreignKey";
+        this.table.addForeignKey( getTransaction(), name, refTable );
+
+        // Export the table
         byte[] bytes = this.table.export(getTransaction(), new Properties());
         String exportedDdl = new String(bytes);
         
+        // Check exported DDL
         assertThat( exportedDdl.contains("CREATE FOREIGN TABLE"), is( true ) );
         assertThat( exportedDdl.contains("myTable"), is( true ) );
         assertThat( exportedDdl.contains("column1"), is( true ) );
         assertThat( exportedDdl.contains("column2"), is( true ) );
+        assertThat( exportedDdl.contains("FOREIGN KEY"), is( true ) );
+    }
+    
+    @Test
+    public void shouldExportDdlExcludeConstraints() throws Exception {
+        // Add columns
+        final Column column1 = this.table.addColumn( getTransaction(), "column1" );
+        column1.setDescription( getTransaction(), "Col1 Description" );
+        column1.setDatatypeName( getTransaction(), "string" );
+        column1.setNameInSource( getTransaction(), "Col1_NIS" );
+        final Column column2 = this.table.addColumn( getTransaction(), "column2" );
+        column2.setDescription( getTransaction(), "Col2 Description" );
+        column2.setDatatypeName( getTransaction(), "string" );
+        column2.setNameInSource( getTransaction(), "Col2_NIS" );
+
+        // Add a FK
+        final Table refTable = RelationalModelFactory.createTable( getTransaction(), _repo, mock( Model.class ), "refTable" );
+        final String name = "foreignKey";
+        this.table.addForeignKey( getTransaction(), name, refTable );
+
+        // Export the table
+        Properties exportProps = new Properties();
+        exportProps.put( ExportConstants.EXCLUDE_TABLE_CONSTRAINTS_KEY, true );
+        byte[] bytes = this.table.export(getTransaction(), exportProps);
+        String exportedDdl = new String(bytes);
+        
+        // Check exported DDL
+        assertThat( exportedDdl.contains("CREATE FOREIGN TABLE"), is( true ) );
+        assertThat( exportedDdl.contains("myTable"), is( true ) );
+        assertThat( exportedDdl.contains("column1"), is( true ) );
+        assertThat( exportedDdl.contains("column2"), is( true ) );
+        assertThat( exportedDdl.contains("FOREIGN KEY"), is( false ) );
     }
 
 }

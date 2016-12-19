@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
+import org.komodo.modeshape.visitor.DdlNodeVisitor.VisitorExclusions;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -42,6 +43,7 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
@@ -1042,7 +1044,13 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     }
 
     private String exportDdl(UnitOfWork transaction, Properties exportProperties) throws Exception {
-        DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false);
+        List<VisitorExclusions> exclusions = new ArrayList<VisitorExclusions>();
+        if( exportProperties != null && !exportProperties.isEmpty() ) {
+            if(exportProperties.containsKey(ExportConstants.EXCLUDE_TABLE_CONSTRAINTS_KEY)) {
+                exclusions.add(VisitorExclusions.EXCLUDE_TABLE_CONSTRAINTS);
+            }
+        }
+        DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false, exclusions.toArray(new VisitorExclusions[0]));
         visitor.visit(node(transaction));
 
         String result = visitor.getDdl();
