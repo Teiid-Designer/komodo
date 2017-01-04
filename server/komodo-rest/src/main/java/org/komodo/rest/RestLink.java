@@ -125,9 +125,9 @@ public final class RestLink {
         SOURCE_VDB_MATCHES,
         
         /**
-         * Service vdb view table names
+         * Service vdb view info
          */
-        SERVICE_VIEW_TABLES,
+        SERVICE_VIEW_INFO,
 
         /**
          * A link to a data service's connections

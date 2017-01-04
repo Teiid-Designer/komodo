@@ -21,6 +21,9 @@
  */
 package org.komodo.rest.relational.request;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -41,23 +44,79 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
     public static final String DATASERVICE_NAME_LABEL = "dataserviceName"; //$NON-NLS-1$
 
     /**
-     * Label for the viewTablePath used for the update
+     * Label for the tablePath used for the update
      */
-    public static final String DATASERVICE_VIEW_TABLE_PATH_LABEL = "viewTablePath"; //$NON-NLS-1$
+    public static final String DATASERVICE_TABLE_PATH_LABEL = "tablePath"; //$NON-NLS-1$
 
     /**
      * Label for the modelSourcePath used for the update
      */
     public static final String DATASERVICE_MODEL_SOURCE_PATH_LABEL = "modelSourcePath"; //$NON-NLS-1$
 
+    /**
+     * Label for the column names to include in the service view
+     */
+    public static final String DATASERVICE_COLUMN_NAMES_LABEL = "columnNames"; //$NON-NLS-1$
+
+    /**
+     * Label for the rhTablePath used for the update
+     */
+    public static final String DATASERVICE_RH_TABLE_PATH_LABEL = "rhTablePath"; //$NON-NLS-1$
+
+    /**
+     * Label for the rhModelSourcePath used for the update
+     */
+    public static final String DATASERVICE_RH_MODEL_SOURCE_PATH_LABEL = "rhModelSourcePath"; //$NON-NLS-1$
+
+    /**
+     * Label for the rh column names to include in the service view
+     */
+    public static final String DATASERVICE_RH_COLUMN_NAMES_LABEL = "rhColumnNames"; //$NON-NLS-1$
+
+    /**
+     * Label for the service view join type
+     */
+    public static final String DATASERVICE_JOIN_TYPE_LABEL = "joinType"; //$NON-NLS-1$
+
+    /**
+     * Label for the service view lh join column
+     */
+    public static final String DATASERVICE_JOIN_LH_COLUMN_LABEL = "lhJoinColumn"; //$NON-NLS-1$
+
+    /**
+     * Label for the service view rh join column
+     */
+    public static final String DATASERVICE_JOIN_RH_COLUMN_LABEL = "rhJoinColumn"; //$NON-NLS-1$
+
     @JsonProperty(DATASERVICE_NAME_LABEL)
     private String dataserviceName;
 
-    @JsonProperty(DATASERVICE_VIEW_TABLE_PATH_LABEL)
-    private String viewTablePath;
+    @JsonProperty(DATASERVICE_TABLE_PATH_LABEL)
+    private String tablePath;
 
     @JsonProperty(DATASERVICE_MODEL_SOURCE_PATH_LABEL)
     private String modelSourcePath;
+
+    @JsonProperty(DATASERVICE_COLUMN_NAMES_LABEL)
+    private List<String> columnNames;
+
+    @JsonProperty(DATASERVICE_RH_TABLE_PATH_LABEL)
+    private String rhTablePath;
+
+    @JsonProperty(DATASERVICE_RH_MODEL_SOURCE_PATH_LABEL)
+    private String rhModelSourcePath;
+
+    @JsonProperty(DATASERVICE_RH_COLUMN_NAMES_LABEL)
+    private List<String> rhColumnNames;
+
+    @JsonProperty(DATASERVICE_JOIN_TYPE_LABEL)
+    private String joinType;
+    
+    @JsonProperty(DATASERVICE_JOIN_LH_COLUMN_LABEL)
+    private String lhJoinColumn;
+
+    @JsonProperty(DATASERVICE_JOIN_RH_COLUMN_LABEL)
+    private String rhJoinColumn;
 
     /**
      * Default constructor for deserialization
@@ -93,17 +152,17 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
     }
 
     /**
-     * @return view table path
+     * @return table path
      */
-    public String getViewTablePath() {
-        return viewTablePath;
+    public String getTablePath() {
+        return tablePath;
     }
 
     /**
-     * @param viewTablePath the view table path
+     * @param tablePath the table path
      */
-    public void setViewTablePath(String viewTablePath) {
-        this.viewTablePath = viewTablePath;
+    public void setTablePath(String tablePath) {
+        this.tablePath = tablePath;
     }
 
     /**
@@ -119,14 +178,134 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
     public void setModelSourcePath(String modelSourcePath) {
         this.modelSourcePath = modelSourcePath;
     }
+    
+    /**
+     * @return the column names
+     */
+    public List<String> getColumnNames() {
+        if (columnNames == null)
+            return Collections.emptyList();
+
+        return Collections.unmodifiableList(this.columnNames);
+    }
+
+    /**
+     * set column names
+     * @param colNames the column names
+     */
+    public void setColumnNames(List<String> colNames) {
+        if (this.columnNames == null)
+            this.columnNames = new ArrayList<>();
+
+        this.columnNames.addAll(colNames);
+    }
+
+    /**
+     * @return rhTable path
+     */
+    public String getRhTablePath() {
+        return rhTablePath;
+    }
+
+    /**
+     * @param rhTablePath the rhTable path
+     */
+    public void setRhTablePath(String rhTablePath) {
+        this.rhTablePath = rhTablePath;
+    }
+
+    /**
+     * @return RH model source path
+     */
+    public String getRhModelSourcePath() {
+        return rhModelSourcePath;
+    }
+
+    /**
+     * @param rhModelSourcePath the rh source model path
+     */
+    public void setRhModelSourcePath(String rhModelSourcePath) {
+        this.rhModelSourcePath = rhModelSourcePath;
+    }
+    
+    /**
+     * @return the rh column names
+     */
+    public List<String> getRhColumnNames() {
+        if (rhColumnNames == null)
+            return Collections.emptyList();
+
+        return Collections.unmodifiableList(this.rhColumnNames);
+    }
+
+    /**
+     * set rh column names
+     * @param rhColNames the rh column names
+     */
+    public void setRhColumnNames(List<String> rhColNames) {
+        if (this.rhColumnNames == null)
+            this.rhColumnNames = new ArrayList<>();
+
+        this.rhColumnNames.addAll(rhColNames);
+    }
+    
+    /**
+     * @return join type
+     */
+    public String getJoinType() {
+        return joinType;
+    }
+
+    /**
+     * @param joinType the join type
+     */
+    public void setJoinType(String joinType) {
+        this.joinType = joinType;
+    }
+
+    /**
+     * @return left join column
+     */
+    public String getLhJoinColumn() {
+        return lhJoinColumn;
+    }
+
+    /**
+     * @param joinCol the join column
+     */
+    public void setLhJoinColumn(String joinCol) {
+        this.lhJoinColumn = joinCol;
+    }
+
+    /**
+     * @return right join column
+     */
+    public String getRhJoinColumn() {
+        return rhJoinColumn;
+    }
+
+    /**
+     * @param joinCol the join column
+     */
+    public void setRhJoinColumn(String joinCol) {
+        this.rhJoinColumn = joinCol;
+    }
+
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((viewTablePath == null) ? 0 : viewTablePath.hashCode());
-        result = prime * result + ((modelSourcePath == null) ? 0 : modelSourcePath.hashCode());
         result = prime * result + ((dataserviceName == null) ? 0 : dataserviceName.hashCode());
+        result = prime * result + ((tablePath == null) ? 0 : tablePath.hashCode());
+        result = prime * result + ((modelSourcePath == null) ? 0 : modelSourcePath.hashCode());
+        result = prime * result + ((columnNames == null) ? 0 : columnNames.hashCode());
+        result = prime * result + ((rhTablePath == null) ? 0 : rhTablePath.hashCode());
+        result = prime * result + ((rhModelSourcePath == null) ? 0 : rhModelSourcePath.hashCode());
+        result = prime * result + ((rhColumnNames == null) ? 0 : rhColumnNames.hashCode());
+        result = prime * result + ((joinType == null) ? 0 : joinType.hashCode());
+        result = prime * result + ((lhJoinColumn == null) ? 0 : lhJoinColumn.hashCode());
+        result = prime * result + ((rhJoinColumn == null) ? 0 : rhJoinColumn.hashCode());
         return result;
     }
 
@@ -139,26 +318,84 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
         if (getClass() != obj.getClass())
             return false;
         KomodoDataserviceUpdateAttributes other = (KomodoDataserviceUpdateAttributes)obj;
-        if (viewTablePath == null) {
-            if (other.viewTablePath != null)
+        if (dataserviceName == null) {
+            if (other.dataserviceName != null)
                 return false;
-        } else if (!viewTablePath.equals(other.viewTablePath))
+        } else if (!dataserviceName.equals(other.dataserviceName))
+            return false;
+        if (tablePath == null) {
+            if (other.tablePath != null)
+                return false;
+        } else if (!tablePath.equals(other.tablePath))
             return false;
         if (modelSourcePath == null) {
             if (other.modelSourcePath != null)
                 return false;
         } else if (!modelSourcePath.equals(other.modelSourcePath))
             return false;
-        if (dataserviceName == null) {
-            if (other.dataserviceName != null)
+        if (columnNames == null) {
+            if (other.columnNames != null)
                 return false;
-        } else if (!dataserviceName.equals(other.dataserviceName))
+        } else if (!columnNames.equals(other.columnNames))
+            return false;
+        if (rhTablePath == null) {
+            if (other.rhTablePath != null)
+                return false;
+        } else if (!rhTablePath.equals(other.rhTablePath))
+            return false;
+        if (rhModelSourcePath == null) {
+            if (other.rhModelSourcePath != null)
+                return false;
+        } else if (!rhModelSourcePath.equals(other.rhModelSourcePath))
+            return false;
+        if (rhColumnNames == null) {
+            if (other.rhColumnNames != null)
+                return false;
+        } else if (!rhColumnNames.equals(other.rhColumnNames))
+            return false;
+        if (joinType == null) {
+            if (other.joinType != null)
+                return false;
+        } else if (!joinType.equals(other.joinType))
+            return false;
+        if (lhJoinColumn == null) {
+            if (other.lhJoinColumn != null)
+                return false;
+        } else if (!lhJoinColumn.equals(other.lhJoinColumn))
+            return false;
+        if (rhJoinColumn == null) {
+            if (other.rhJoinColumn != null)
+                return false;
+        } else if (!rhJoinColumn.equals(other.rhJoinColumn))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "KomodoDataserviceUpdateAttributes [dataserviceName=" + dataserviceName + ", viewTablePath=" + viewTablePath + ", modelSourcePath=" + modelSourcePath + "]";
+        StringBuilder sb = new StringBuilder("KomodoDataserviceUpdateAttributes [dataserviceName=" + dataserviceName + ", tablePath=" + tablePath + ", modelSourcePath=" + modelSourcePath);
+        if(rhTablePath!=null) {
+            sb.append(", rhTablePath =" + rhTablePath);
+        }
+        if(rhModelSourcePath!=null) {
+            sb.append(", rhModelSourcePath =" + rhModelSourcePath);
+        }
+        if(columnNames!=null) {
+            sb.append(", columnNames length =" + columnNames.size());
+        }
+        if(rhColumnNames!=null) {
+            sb.append(", rhColumnNames length =" + rhColumnNames.size());
+        }
+        if(joinType!=null) {
+            sb.append(", joinType =" + joinType);
+        }
+        if(lhJoinColumn!=null) {
+            sb.append(", lhJoinColumn =" + lhJoinColumn);
+        }
+        if(rhJoinColumn!=null) {
+            sb.append(", rhJoinColumn =" + rhJoinColumn);
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
