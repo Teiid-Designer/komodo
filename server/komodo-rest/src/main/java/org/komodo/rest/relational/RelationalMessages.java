@@ -268,9 +268,9 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR,
         
         /**
-         * An error indicating an error occurred trying to find a service source table
+         * An error indicating an error occurred trying to find a service view info
          */
-        DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR,
+        DATASERVICE_SERVICE_FIND_VIEW_INFO_ERROR,
 
         /**
          * An error indicating an error occurred trying to find a matching source VDB
@@ -346,6 +346,21 @@ public final class RelationalMessages {
          * An error indicating set attempt failed because the modelSource path was missing
          */
         DATASERVICE_SERVICE_SET_SERVICE_MISSING_MODELSOURCE_PATH,
+        
+        /**
+         * An error indicating set attempt failed because the Join type was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_TYPE,
+        
+        /**
+         * An error indicating set attempt failed because the Join criteria lh column was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_LH_COLUMN,
+        
+        /**
+         * An error indicating set attempt failed because the Join criteria rh column was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_RH_COLUMN,
         
         /**
          * An error indicating set attempt failed

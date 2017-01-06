@@ -29,7 +29,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -47,7 +46,6 @@ import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
-import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -193,7 +191,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
 
     @Test
-    public void shouldGetViewTablesForDataService() throws Exception {
+    public void shouldGetViewInfoForDataService() throws Exception {
         loadStatesDataService();
 
         // get
@@ -201,22 +199,19 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
         _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
 
-        URI uri = _uriBuilder.dataserviceUri(LinkType.SERVICE_VIEW_TABLES, settings);
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SERVICE_VIEW_INFO, settings);
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
         ClientResponse<String> response = request.get(String.class);
 
         final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
-        KomodoStatusObject kso = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
-        assertNotNull(kso);
-
-        Map<String,String> attrs = kso.getAttributes();
-        assertEquals(1,attrs.size());
-        
-        // Should find one viewTable - 'state'
-        assertTrue(attrs.containsKey("SourceTable1"));
-        assertEquals("state",attrs.get("SourceTable1"));
+        assertTrue(entity.contains("sourceVdbName"));
+        assertTrue(entity.contains("ServiceSource"));
+        assertTrue(entity.contains("tableName"));
+        assertTrue(entity.contains("state"));
+        assertTrue(entity.contains("columnNames"));
+        assertTrue(entity.contains("id"));
     }
     
     @Test
@@ -275,7 +270,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
         updateAttr.setDataserviceName(DATASERVICE_NAME);
-        updateAttr.setViewTablePath("/path/to/table");
+        updateAttr.setTablePath("/path/to/table");
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
         addJsonConsumeContentType(request);
@@ -297,7 +292,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
         updateAttr.setDataserviceName(DATASERVICE_NAME);
-        updateAttr.setViewTablePath("/path/to/table");
+        updateAttr.setTablePath("/path/to/table");
         updateAttr.setModelSourcePath("/path/to/ModelSource");
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
@@ -320,7 +315,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
         updateAttr.setDataserviceName(DATASERVICE_NAME);
-        updateAttr.setViewTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
         updateAttr.setModelSourcePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/Accounts/vdb:sources/h2-connector");
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

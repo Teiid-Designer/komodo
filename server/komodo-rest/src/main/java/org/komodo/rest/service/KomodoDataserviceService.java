@@ -23,8 +23,8 @@ package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR;
-import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_FIND_SOURCE_VDB_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_FIND_VIEW_INFO_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
@@ -34,7 +34,9 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -74,6 +76,7 @@ import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestDataserviceViewInfo;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
@@ -83,6 +86,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.utils.StringUtils;
+import org.teiid.language.SQLConstants;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import io.swagger.annotations.Api;
@@ -104,6 +108,14 @@ public final class KomodoDataserviceService extends KomodoService {
     private static final String SERVICE_VDB_SUFFIX = "VDB"; //$NON-NLS-1$
     private static final String SERVICE_VDB_VIEW_MODEL = "views"; //$NON-NLS-1$
     private static final String SERVICE_VDB_VIEW_SUFFIX = "View"; //$NON-NLS-1$
+    private static final String LH_TABLE_ALIAS = "A"; //$NON-NLS-1$
+    private static final String LH_TABLE_ALIAS_DOT = "A."; //$NON-NLS-1$
+    private static final String RH_TABLE_ALIAS = "B"; //$NON-NLS-1$
+    private static final String RH_TABLE_ALIAS_DOT = "B."; //$NON-NLS-1$
+    private static final String INNER_JOIN = "INNER JOIN"; //$NON-NLS-1$
+    private static final String LEFT_OUTER_JOIN = "LEFT OUTER JOIN"; //$NON-NLS-1$
+    private static final String RIGHT_OUTER_JOIN = "RIGHT OUTER JOIN"; //$NON-NLS-1$
+    private static final String FULL_OUTER_JOIN = "FULL OUTER JOIN"; //$NON-NLS-1$
     
     /**
      * @param engine
@@ -483,7 +495,7 @@ public final class KomodoDataserviceService extends KomodoService {
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Sets the dataservice vdb using parameters provided in the request body",
                   notes = "Syntax of the json request body is of the form " +
-                          "{ dataserviceName='serviceName', viewTablePath='path/to/table', modelSourcePath='path/to/modelSource' }")
+                          "{ dataserviceName='serviceName', tablePath='path/to/table', modelSourcePath='path/to/modelSource' }")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
@@ -500,11 +512,11 @@ public final class KomodoDataserviceService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        // Get the attributes for doing the service update
+        // Get the attributes for doing the service update for single table view
         KomodoDataserviceUpdateAttributes attr;
         try {
         	attr = KomodoJsonMarshaller.unmarshall(dataserviceUpdateAttributes, KomodoDataserviceUpdateAttributes.class);
-            Response response = checkDataserviceUpdateAttributes(attr, mediaTypes);
+            Response response = checkDataserviceUpdateAttributesSingleTableView(attr, mediaTypes);
             if (response.getStatus() != Status.OK.getStatusCode())
                 return response;
 
@@ -520,7 +532,7 @@ public final class KomodoDataserviceService extends KomodoService {
         }
         String serviceVdbName = dataserviceName+SERVICE_VDB_SUFFIX;
         
-        String absTablePath = attr.getViewTablePath();
+        String absTablePath = attr.getTablePath();
         // Error if the viewTablePath is missing 
         if (StringUtils.isBlank( absTablePath )) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_TABLEPATH, dataserviceName);
@@ -531,6 +543,9 @@ public final class KomodoDataserviceService extends KomodoService {
         if (StringUtils.isBlank( absServiceModelSourcePath )) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_MODELSOURCE_PATH, dataserviceName);
         }
+
+        // Desired column names for the service (may be empty)
+        List<String> columnNames = attr.getColumnNames();
         
         UnitOfWork uow = null;
         try {
@@ -575,12 +590,16 @@ public final class KomodoDataserviceService extends KomodoService {
             viewModel.setModelType(uow, Type.VIRTUAL);
             
             // Generate the ViewDDL using the specified table, then set the viewModel content.
-            String viewDdl = ViewDdlBuilder.getODataViewDdl(uow, dataserviceName+SERVICE_VDB_VIEW_SUFFIX, sourceTable);
+            String viewDdl = ViewDdlBuilder.getODataViewDdl(uow, dataserviceName+SERVICE_VDB_VIEW_SUFFIX, sourceTable, columnNames);
         	viewModel.setModelDefinition(uow, viewDdl);
 
-        	// Add a physical model of same name to the service VDB
-        	String svcModelSourceName = svcModelSource.getName(uow);
-        	Model sourceModel = serviceVdb.addModel(uow, svcModelSourceName);
+        	// Add a physical model to the VDB for the sources
+        	// physicalModelName ==> sourceVDBName
+        	// physicalModelSourceName ==> sourceVDBModelName
+        	String physicalModelName = svcModelSource.getParent(uow).getParent(uow).getName(uow);
+        	String physicalModelSourceName = svcModelSource.getParent(uow).getName(uow);
+        	
+        	Model sourceModel = serviceVdb.addModel(uow, physicalModelName);
         	sourceModel.setModelType(uow, Type.PHYSICAL);
 
             // The source model DDL contains the table DDL only.  This limits the source metadata which is loaded on deployment.
@@ -591,11 +610,269 @@ public final class KomodoDataserviceService extends KomodoService {
             sourceModel.setModelDefinition(uow, tableString);
             
         	// Add a ModelSource of same name to the physical model and set its Jndi and translator
-        	ModelSource modelSource = sourceModel.addSource(uow, svcModelSourceName);
+        	ModelSource modelSource = sourceModel.addSource(uow, physicalModelSourceName);
         	modelSource.setJndiName(uow, svcModelSource.getJndiName(uow));
         	modelSource.setTranslatorName(uow, svcModelSource.getTranslatorName(uow));     
             
             // Set the service VDB on the dataservice
+            dataservice.setServiceVdb(uow, serviceVdb);
+
+            KomodoStatusObject kso = new KomodoStatusObject("Update DataService Status"); //$NON-NLS-1$
+            kso.addAttribute(dataserviceName, "Successfully updated"); //$NON-NLS-1$
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_SET_SERVICE_ERROR);
+        }
+    }
+    
+    /**
+     * Sets the service VDB for the specified Dataservice using the specified tables and sourceModels
+     * The supplied table is used to generate the view DDL for the service vdb's view
+     * The supplied modelSource is used to generate the sourceModel for the service vdb
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceUpdateAttributes
+     *        the attributes for the update (cannot be empty)
+     * @return a JSON representation of the updated dataservice (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error updating the VDB
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VDB_FOR_JOIN_TABLES )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Sets the dataservice vdb using parameters provided in the request body",
+                  notes = "Syntax of the json request body is of the form " +
+                          "{ dataserviceName='serviceName', "+ 
+                             "tablePath='path/to/table', modelSourcePath='path/to/modelSource', " +
+                             "rhTablePath='path/to/rhTable', rhModelSourcePath='path/to/modelSource', " +
+                             "colNames='columnNames', rhColNames='rhColumnNames', joinType='joinType' }" )
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response setServiceVdbForTwoTables( final @Context HttpHeaders headers,
+            final @Context UriInfo uriInfo,
+            final String dataserviceUpdateAttributes) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Get the attributes for doing the service update
+        KomodoDataserviceUpdateAttributes attr;
+        try {
+            attr = KomodoJsonMarshaller.unmarshall(dataserviceUpdateAttributes, KomodoDataserviceUpdateAttributes.class);
+            Response response = checkDataserviceUpdateAttributesJoinView(attr, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.DATASERVICE_SERVICE_REQUEST_PARSING_ERROR);
+        }
+        
+        // Inputs for constructing the Service VDB.  The paths should be obtained from the Attributes passed in.
+        String dataserviceName = attr.getDataserviceName();
+        // Error if the dataservice name is missing 
+        if (StringUtils.isBlank( dataserviceName )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_NAME);
+        }
+        String serviceVdbName = dataserviceName+SERVICE_VDB_SUFFIX;
+        
+        String absLhTablePath = attr.getTablePath();
+        String absRhTablePath = attr.getRhTablePath();
+        // Error if the viewTablePath is missing 
+        if (StringUtils.isBlank( absLhTablePath ) || StringUtils.isBlank( absRhTablePath )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_TABLEPATH, dataserviceName);
+        }
+        
+        String absLhModelSourcePath = attr.getModelSourcePath();
+        String absRhModelSourcePath = attr.getRhModelSourcePath();
+        // Error if the modelSourcePath is missing 
+        if (StringUtils.isBlank( absLhModelSourcePath ) || StringUtils.isBlank( absRhModelSourcePath )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_MODELSOURCE_PATH, dataserviceName);
+        }
+        // Determine if the tables are from the same model
+        boolean sameLeftAndRightModel = absLhModelSourcePath.trim().equals(absRhModelSourcePath.trim());
+
+        // JoinType
+        String joinType = attr.getJoinType();
+        // Error if the join type is missing
+        if (StringUtils.isBlank( joinType )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_TYPE, dataserviceName);
+        }
+
+        // LH Join criteria column
+        String lhJoinColumn = attr.getLhJoinColumn();
+        // Error if the LH join column is missing
+        if (StringUtils.isBlank( lhJoinColumn )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_LH_COLUMN, dataserviceName);
+        }
+
+        // RH Join criteria column
+        String rhJoinColumn = attr.getRhJoinColumn();
+        // Error if the RH join column is missing
+        if (StringUtils.isBlank( rhJoinColumn )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_RH_COLUMN, dataserviceName);
+        }
+
+        // Desired column names for the service (may be empty)
+        List<String> lhColumnNames = attr.getColumnNames();
+        List<String> rhColumnOriginalNames = attr.getRhColumnNames();
+        
+        // Disallow duplicate column names.  Remove duplicates from the RH table
+        List<String> rhColumnNames = new ArrayList<String>();
+        for(String rhCol : rhColumnOriginalNames) {
+            if(!lhColumnNames.contains(rhCol)) {
+                rhColumnNames.add(rhCol);
+            }
+        }
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "setDataserviceServiceVDB", false ); //$NON-NLS-1$
+
+            // -------------------------------------------------------------------------------------
+            // Check for existence of necessary objects
+            // -------------------------------------------------------------------------------------
+            WorkspaceManager wkspMgr = getWorkspaceManager(uow);
+            
+            // Check for existence of DataService
+            final boolean exists = wkspMgr.hasChild( uow, dataserviceName );
+            if ( !exists ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_DNE);
+            }
+            final KomodoObject kobject = wkspMgr.getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
+            final Dataservice dataservice = wkspMgr.resolve( uow, kobject, Dataservice.class );
+
+            // Check for existence of LH Table
+            List<KomodoObject> tableObjs = wkspMgr.getRepository().searchByPath(uow, absLhTablePath);
+            if( tableObjs.isEmpty() || !Table.RESOLVER.resolvable(uow, tableObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SOURCE_TABLE_DNE, absLhTablePath);
+            }
+            Table lhSourceTable = Table.RESOLVER.resolve(uow, tableObjs.get(0));
+
+            // Check for existence of RH Table
+            tableObjs = wkspMgr.getRepository().searchByPath(uow, absRhTablePath);
+            if( tableObjs.isEmpty() || !Table.RESOLVER.resolvable(uow, tableObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SOURCE_TABLE_DNE, absRhTablePath);
+            }
+            Table rhSourceTable = Table.RESOLVER.resolve(uow, tableObjs.get(0));
+
+            // Check for existence of LH ModelSource
+            List<KomodoObject> modelObjs = wkspMgr.getRepository().searchByPath(uow, absLhModelSourcePath);
+            if( modelObjs.isEmpty() || !ModelSource.RESOLVER.resolvable(uow, modelObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MODEL_SOURCE_DNE, absLhModelSourcePath);
+            }
+            ModelSource lhModelSource = ModelSource.RESOLVER.resolve(uow, modelObjs.get(0));
+
+            ModelSource rhModelSource = lhModelSource;
+            if(!sameLeftAndRightModel) {
+                // Check for existence of RH ModelSource
+                modelObjs = wkspMgr.getRepository().searchByPath(uow, absRhModelSourcePath);
+                if( modelObjs.isEmpty() || !ModelSource.RESOLVER.resolvable(uow, modelObjs.get(0)) ) {
+                    return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MODEL_SOURCE_DNE, absRhModelSourcePath);
+                }
+                rhModelSource = ModelSource.RESOLVER.resolve(uow, modelObjs.get(0));
+            }
+
+            // ----------------------------------------------------------------------------------------------
+            // Find the service VDB definition for this Dataservice.  If one exists already, it is replaced.
+            // ----------------------------------------------------------------------------------------------
+            dataservice.setServiceVdb(uow,null);
+            if(wkspMgr.hasChild(uow, serviceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+                KomodoObject svcVdbObj = wkspMgr.getChild(uow, serviceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                svcVdbObj.remove(uow);
+            }
+            KomodoObject vdbObj = wkspMgr.createVdb(uow, null, serviceVdbName, serviceVdbName);
+            Vdb serviceVdb = Vdb.RESOLVER.resolve(uow, vdbObj);
+            
+            // ----------------------------------------------------------------
+            // Add to the ServiceVdb a virtual model for the View
+            // ----------------------------------------------------------------
+            Model viewModel = serviceVdb.addModel(uow, SERVICE_VDB_VIEW_MODEL);
+            viewModel.setModelType(uow, Type.VIRTUAL);
+            
+            // Generate the ViewDDL using the specified tables, then set the viewModel content.
+            String viewDdl = ViewDdlBuilder.getODataViewJoinDdl(uow, dataserviceName+SERVICE_VDB_VIEW_SUFFIX, 
+                                                                lhSourceTable, LH_TABLE_ALIAS, lhColumnNames, 
+                                                                rhSourceTable, RH_TABLE_ALIAS, rhColumnNames, 
+                                                                lhJoinColumn, rhJoinColumn, joinType);
+            viewModel.setModelDefinition(uow, viewDdl);
+
+            // --------------------------------------------------
+            // Add physical model for lh modelSource
+            // --------------------------------------------------
+            // Add a physical model to the VDB for the sources
+            // physicalModelName ==> sourceVDBName
+            // physicalModelSourceName ==> sourceVDBModelName
+            String lhPhysicalModelName = lhModelSource.getParent(uow).getParent(uow).getName(uow);
+            String lhPhysicalModelSourceName = lhModelSource.getParent(uow).getName(uow);
+
+            Model lhPhysicalModel = serviceVdb.addModel(uow, lhPhysicalModelName);
+            lhPhysicalModel.setModelType(uow, Type.PHYSICAL);
+
+            // The source model DDL contains the table DDL only.  This limits the source metadata which is loaded on deployment.
+            Properties exportProps = new Properties();
+            exportProps.put( ExportConstants.EXCLUDE_TABLE_CONSTRAINTS_KEY, true );
+            // LH Table DDL
+            byte[] bytes = lhSourceTable.export(uow, exportProps);
+            String lhTableDdl = new String(bytes);
+            // RH Table DDL
+            bytes = rhSourceTable.export(uow, exportProps);
+            String rhTableDdl = new String(bytes);
+            
+            // If same LH and RH Model, add the RH table DDL as well
+            if(sameLeftAndRightModel) {
+                lhPhysicalModel.setModelDefinition(uow, lhTableDdl+rhTableDdl);
+            } else {
+                lhPhysicalModel.setModelDefinition(uow, lhTableDdl);
+            }
+            
+            // Add a ModelSource of same name to the physical model and set its Jndi and translator
+            ModelSource lhPhysicalModelSource = lhPhysicalModel.addSource(uow, lhPhysicalModelSourceName);
+            lhPhysicalModelSource.setJndiName(uow, lhModelSource.getJndiName(uow));
+            lhPhysicalModelSource.setTranslatorName(uow, lhModelSource.getTranslatorName(uow));
+            
+            // --------------------------------------------------
+            // Add physical model for rh modelSource
+            // - (dont add duplicate if same as left)
+            // --------------------------------------------------
+            if(!sameLeftAndRightModel) {
+                // Add a physical model to the VDB for the sources
+                // physicalModelName ==> sourceVDBName
+                // physicalModelSourceName ==> sourceVDBModelName
+                String rhPhysicalModelName = rhModelSource.getParent(uow).getParent(uow).getName(uow);
+                String rhPhysicalModelSourceName = rhModelSource.getParent(uow).getName(uow);
+
+                Model rhPhysicalModel = serviceVdb.addModel(uow, rhPhysicalModelName);
+                rhPhysicalModel.setModelType(uow, Type.PHYSICAL);
+
+                rhPhysicalModel.setModelDefinition(uow, rhTableDdl);
+                
+                // Add a ModelSource of same name to the physical model and set its Jndi and translator
+                ModelSource rhPhysicalModelSource = rhPhysicalModel.addSource(uow, rhPhysicalModelSourceName);
+                rhPhysicalModelSource.setJndiName(uow, rhModelSource.getJndiName(uow));
+                rhPhysicalModelSource.setTranslatorName(uow, rhModelSource.getTranslatorName(uow));     
+            }
+            
+            // -------------------------------------------
+            // Set the service VDB on the dataservice
+            // -------------------------------------------
             dataservice.setServiceVdb(uow, serviceVdb);
 
             KomodoStatusObject kso = new KomodoStatusObject("Update DataService Status"); //$NON-NLS-1$
@@ -810,14 +1087,37 @@ public final class KomodoDataserviceService extends KomodoService {
         }
     }
     
-    private Response checkDataserviceUpdateAttributes(KomodoDataserviceUpdateAttributes attr,
-    		List<MediaType> mediaTypes) throws Exception {
-    	
-    	if (attr == null || attr.getDataserviceName() == null || attr.getViewTablePath() == null || attr.getModelSourcePath() == null) {
-    		return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
-    	}
+    /*
+     * Checks the supplied attributes for single table view
+     *  - dataserviceName, table path and modelSource path are required
+     *  - columnNames is optional
+     */
+    private Response checkDataserviceUpdateAttributesSingleTableView(KomodoDataserviceUpdateAttributes attr,
+                                                                     List<MediaType> mediaTypes) throws Exception {
 
-    	return Response.ok().build();
+        if (attr == null || attr.getDataserviceName() == null || attr.getTablePath() == null || attr.getModelSourcePath() == null) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
+        }
+
+        return Response.ok().build();
+    }
+
+    /*
+     * Checks the supplied attributes for single table view
+     *  - dataserviceName, tablePath, modelSourcePath, rhTablePath, rhModelSourcePath, joinType are required
+     *  - columnNames and rhColumnNames are optional
+     */
+    private Response checkDataserviceUpdateAttributesJoinView(KomodoDataserviceUpdateAttributes attr,
+                                                              List<MediaType> mediaTypes) throws Exception {
+
+        if (attr == null || attr.getDataserviceName() == null || attr.getJoinType() == null 
+                         || attr.getTablePath() == null || attr.getModelSourcePath() == null
+                         || attr.getRhTablePath() == null || attr.getRhModelSourcePath() == null 
+                         || attr.getLhJoinColumn() == null || attr.getRhJoinColumn() == null ) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
+        }
+
+        return Response.ok().build();
     }
 
     /**
@@ -989,24 +1289,26 @@ public final class KomodoDataserviceService extends KomodoService {
             if (dataservice == null)
                 return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
 
-            // Get JNDIs for the service physical sources
+            // They physical source models are named with the name of the service source VDB
             Vdb serviceVdb = dataservice.getServiceVdb(uow);
-            List<String> serviceJndis = new ArrayList<String>();
+            List<String> sourceVdbNames = new ArrayList<String>();
             Model[] models = serviceVdb.getModels(uow);
             for(Model model : models) {
                 if(model.getModelType(uow) == Model.Type.PHYSICAL) {
-                    ModelSource[] modelSources = model.getSources(uow);
-                    if(modelSources.length>0) {
-                        serviceJndis.add(modelSources[0].getJndiName(uow));
-                    }
+                    sourceVdbNames.add(model.getName(uow));
                 }
             }
             
-            // Get list of source VDBs that have matching jndis
             List<Vdb> sourceVdbs = new ArrayList<Vdb>();
-            for(String serviceJndi : serviceJndis) {
-                Vdb sourceVdb = getSourceVdbWithJndi(uow, serviceJndi);
-                if(sourceVdb!=null) sourceVdbs.add(sourceVdb);
+            if(!sourceVdbNames.isEmpty()) {
+                // Add Vdbs with the source vdb names
+                WorkspaceManager wsMgr = getWorkspaceManager(uow);
+                Vdb[] wsVdbs = wsMgr.findVdbs(uow);
+                for(Vdb wsVdb : wsVdbs) {
+                    if(sourceVdbNames.contains(wsVdb.getName(uow))) {
+                        sourceVdbs.add(wsVdb);
+                    }
+                }
             }
             
             final List< RestVdb > entities = new ArrayList< >();
@@ -1033,36 +1335,6 @@ public final class KomodoDataserviceService extends KomodoService {
         }
     }
     
-    /*
-     * Returns first service source vdb that has source jndi matching the supplied jndi
-     */
-    private Vdb getSourceVdbWithJndi(final UnitOfWork uow, final String jndiName) throws KException {
-        // Look for source vdb that has physical source with matching jndi
-        WorkspaceManager wsMgr = getWorkspaceManager(uow);
-        Vdb[] wsVdbs = wsMgr.findVdbs(uow);
-        for(Vdb wsVdb : wsVdbs) {
-            if(!isServiceSourceVdb(uow, wsVdb)) continue;
-            Model[] models = wsVdb.getModels(uow);
-            for(Model model : models) {
-                if(model.getModelType(uow) == Model.Type.PHYSICAL) {
-                    ModelSource[] modelSources = model.getSources(uow);
-                    for(ModelSource modelSource : modelSources) {
-                        String sourceJndi = modelSource.getJndiName(uow);
-                        if(sourceJndi.equals(jndiName)) {
-                            return wsVdb;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    private boolean isServiceSourceVdb(final UnitOfWork uow, final Vdb vdb) throws KException {
-        return (vdb.hasProperty(uow, DSB_PROP_SERVICE_SOURCE)) ? true : false;
-    }
-    
     /**
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -1070,23 +1342,23 @@ public final class KomodoDataserviceService extends KomodoService {
      *        the request URI information (never <code>null</code>)
      * @param dataserviceName
      *        the id of the Dataservice (cannot be empty)
-     * @return the JSON representation of the VDB (never <code>null</code>)
+     * @return the info response (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     *         if there is a problem finding the specified workspace Dataservice or constructing the info response.
      */
     @GET
-    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER + StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VIEW_TABLES)
+    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER + StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VIEW_INFO)
     @Produces( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "retrieve the service view tableNames for a dataservice")
+    @ApiOperation(value = "retrieve the service view information for a dataservice")
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No dataservice could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getServiceViewTablesForDataService( final @Context HttpHeaders headers,
-                                                        final @Context UriInfo uriInfo,
-                                                        @ApiParam(value = "Id of the dataservice", required = true)
-                                                        final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+    public Response getServiceViewInfoForDataService( final @Context HttpHeaders headers,
+                                                      final @Context UriInfo uriInfo,
+                                                      @ApiParam(value = "Id of the dataservice", required = true)
+                                                      final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1096,39 +1368,60 @@ public final class KomodoDataserviceService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction(principal, "getServiceViewTablesForDataService", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getServiceViewInfoForDataService", true ); //$NON-NLS-1$
 
             Dataservice dataservice = findDataservice(uow, dataserviceName);
             if (dataservice == null)
                 return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
 
-            // Get the View Query Expression and extract the table names
-            String[] viewTables = null;
+            // Get the View Query Expression and extract the table names from the query
+            String viewDdl = null;
+            Map<String,String> tableSourceVdbMap = new HashMap<String, String>();
+            
             Vdb serviceVdb = dataservice.getServiceVdb(uow);
             Model[] models = serviceVdb.getModels(uow);
             for(Model model : models) {
+                // Get the view DDL from the virtual model
                 if(model.getModelType(uow) == Model.Type.VIRTUAL) {
                     View[] views = model.getViews(uow);
-                    String viewDdl = views[0].getQueryExpression(uow);
-                    if(!StringUtils.isEmpty(viewDdl)) {
-                        // View source table name is after the FROM, to the end of the query.
-                        int startIndex = viewDdl.indexOf("FROM ")+("FROM ").length(); //$NON-NLS-1$ //$NON-NLS-2$
-                        String viewTableStr = viewDdl.substring(startIndex);
-                        viewTables = viewTableStr.split(COMMA);
+                    viewDdl = views[0].getQueryExpression(uow);
+                // get the tables for each physical model
+                } else if(model.getModelType(uow) == Model.Type.PHYSICAL) {
+                    // saves mapping of table to source vdb name (physical models were named using ServiceSourceVdb name)
+                    Table[] tables = model.getTables(uow);
+                    for(Table table : tables) {
+                        tableSourceVdbMap.put(table.getName(uow), model.getName(uow));
                     }
-                    break;
                 }
             }
-                        
-            // Return a status object with the sourceTable
-            KomodoStatusObject kso = new KomodoStatusObject();
-            if(viewTables!=null) {
-                for (int i = 0; i < viewTables.length; ++i) {
-                    kso.addAttribute("SourceTable" + (i + 1), viewTables[i]); //$NON-NLS-1$
+            
+            // Generate source table info for each view table
+            final List< RestDataserviceViewInfo > viewInfos = new ArrayList<RestDataserviceViewInfo>();
+            Map<String, List<String>> tableColumnMap = getTableColumnNameMap(viewDdl);
+            
+            for (String viewTable : tableSourceVdbMap.keySet()) {
+                RestDataserviceViewInfo viewInfo = new RestDataserviceViewInfo();
+                if(viewInfos.size()==0) {
+                    viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
+                } else {
+                    viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
                 }
+                viewInfo.setSourceVdbName(tableSourceVdbMap.get(viewTable));
+                viewInfo.setTableName(viewTable);
+                List<String> colsForTable = tableColumnMap.get(viewTable);
+                if(!colsForTable.isEmpty()) {
+                    viewInfo.setColumnNames(colsForTable);
+                }
+                viewInfos.add(viewInfo);
+            }
+            
+            // Get criteria info for the view
+            List<RestDataserviceViewInfo> criteriaInfos = getCriteriaInfo(viewDdl);
+            if( !criteriaInfos.isEmpty() ) {
+                viewInfos.addAll(criteriaInfos);
             }
 
-            return commit(uow, mediaTypes, kso);
+            return commit(uow, mediaTypes, viewInfos);
 
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
@@ -1139,8 +1432,121 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR, dataserviceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_FIND_VIEW_INFO_ERROR, dataserviceName);
         }
+    }
+    
+    /*
+     * Generate a mapping of tableName to columnName list from the DDL
+     */
+    private Map<String,List<String>> getTableColumnNameMap(String viewDdl) {
+        Map<String,List<String>> tableColumnMap = new HashMap<String,List<String>>();
+        
+        List<String> colNames = new ArrayList<String>();
+
+        if(!StringUtils.isEmpty(viewDdl)) {
+            // Collect the ColumnNames - after the SELECT and before the FROM
+            int startIndex = viewDdl.indexOf(SQLConstants.Reserved.SELECT)+(SQLConstants.Reserved.SELECT).length();
+            int endIndex = viewDdl.indexOf(SQLConstants.Reserved.FROM+StringConstants.SPACE);
+            String viewColumnsStr = viewDdl.substring(startIndex,endIndex);
+            String[] viewCols = viewColumnsStr.split(COMMA);
+            for(String cName : viewCols ) {
+                String trimmedName = cName.trim();
+                if(!trimmedName.startsWith("ROW_NUMBER()")) { //$NON-NLS-1$
+                    colNames.add(cName.trim());
+                }
+            }
+            
+            // Get the FROM clause - if this is a join - determine how the tables are aliased.
+            startIndex = viewDdl.indexOf(SQLConstants.Reserved.FROM+StringConstants.SPACE)+(SQLConstants.Reserved.FROM+StringConstants.SPACE).length();
+            String fromStr = viewDdl.substring(startIndex);
+            // If this is a join, extract the table names / aliases
+            if(fromStr.contains(INNER_JOIN) || fromStr.contains(LEFT_OUTER_JOIN) || fromStr.contains(RIGHT_OUTER_JOIN) || fromStr.contains(FULL_OUTER_JOIN)) {
+                int indxStart = 0;
+                int indxEnd = fromStr.indexOf(SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS); 
+                String lhTable = fromStr.substring(indxStart, indxEnd).trim();
+                
+                indxStart = fromStr.indexOf(SQLConstants.Reserved.JOIN+StringConstants.SPACE)+(SQLConstants.Reserved.JOIN+StringConstants.SPACE).length();
+                indxEnd = fromStr.indexOf(SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS);
+                String rhTable = fromStr.substring(indxStart,indxEnd).trim();
+                
+                // Now the table aliases have been determined - separate the original column names with the appropriate alias
+                List<String> lhCols = new ArrayList<>();
+                List<String> rhCols = new ArrayList<>();
+                
+                for(String colName : colNames) {
+                    if(colName.startsWith(LH_TABLE_ALIAS_DOT)) {
+                        lhCols.add(colName.substring(LH_TABLE_ALIAS_DOT.length()));
+                    } else if(colName.startsWith(RH_TABLE_ALIAS_DOT)) {
+                        rhCols.add(colName.substring(RH_TABLE_ALIAS_DOT.length()));
+                    }
+                }
+                tableColumnMap.put(lhTable, lhCols);
+                tableColumnMap.put(rhTable, rhCols);
+            } else {
+                String tableName = fromStr.trim();
+                tableColumnMap.put(tableName, colNames);
+            }
+            
+        }
+
+        return tableColumnMap;
+    }
+    
+    /*
+     * create the list of criteria info
+     */
+    private List<RestDataserviceViewInfo> getCriteriaInfo(String viewDdl) {
+        List<RestDataserviceViewInfo> criteriaInfos = new ArrayList<RestDataserviceViewInfo>();
+        
+        // If ddl does not have a join, return empty list
+        if(!hasJoin(viewDdl)) {
+            return criteriaInfos;
+        }
+        
+        if(!StringUtils.isEmpty(viewDdl)) {
+            RestDataserviceViewInfo criteriaInfo = new RestDataserviceViewInfo();
+            if(viewDdl.indexOf(INNER_JOIN) != -1) {
+                criteriaInfo.setJoinType(RestDataserviceViewInfo.JOIN_INNER);
+            } else if(viewDdl.indexOf(LEFT_OUTER_JOIN) != -1) {
+                criteriaInfo.setJoinType(RestDataserviceViewInfo.JOIN_LEFT_OUTER);
+            } else if(viewDdl.indexOf(RIGHT_OUTER_JOIN) != -1) {
+                criteriaInfo.setJoinType(RestDataserviceViewInfo.JOIN_RIGHT_OUTER);
+            } else if(viewDdl.indexOf(FULL_OUTER_JOIN) != -1) {
+                criteriaInfo.setJoinType(RestDataserviceViewInfo.JOIN_FULL_OUTER);
+            }
+            
+            // Find the criteria string
+            String asRhAliasOn = SQLConstants.Reserved.AS + StringConstants.SPACE + RH_TABLE_ALIAS + StringConstants.SPACE + SQLConstants.Reserved.ON;
+            int startIndex = viewDdl.indexOf(asRhAliasOn)+(asRhAliasOn).length();
+            String criteriaStr = viewDdl.substring(startIndex);
+            
+            criteriaInfo.setCriteria(StringConstants.EQUALS);
+            criteriaInfo.setInfoType(RestDataserviceViewInfo.CRITERIA_INFO);
+            String[] criteriaCols = criteriaStr.split(StringConstants.EQUALS);
+            for(int i=0; i<criteriaCols.length; i++ ) {
+                String cCol = criteriaCols[i].trim();
+                if(cCol.startsWith(LH_TABLE_ALIAS_DOT)) {
+                    criteriaInfo.setLHCriteriaColumn(cCol.substring(LH_TABLE_ALIAS_DOT.length()));
+                } else if(cCol.startsWith(RH_TABLE_ALIAS_DOT)) {
+                    criteriaInfo.setRHCriteriaColumn(cCol.substring(RH_TABLE_ALIAS_DOT.length()));
+                }
+            }
+            criteriaInfos.add(criteriaInfo);
+        }
+        
+        return criteriaInfos;
+    }
+    
+    /*
+     * Determine if the ddl has a join
+     */
+    private boolean hasJoin(String viewDdl) {
+        if( !StringUtils.isEmpty(viewDdl) && 
+            ( viewDdl.indexOf(INNER_JOIN)!=-1 || viewDdl.indexOf(LEFT_OUTER_JOIN)!=-1 || viewDdl.indexOf(RIGHT_OUTER_JOIN)!=-1 || viewDdl.indexOf(FULL_OUTER_JOIN)!=-1 ) ) {
+            return true;
+        }
+        return false;
     }
     
 }
