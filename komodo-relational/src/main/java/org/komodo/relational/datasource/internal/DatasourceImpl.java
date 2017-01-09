@@ -23,12 +23,18 @@ package org.komodo.relational.datasource.internal;
 
 import java.util.Collection;
 import java.util.Properties;
+
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.ExcludeQNamesFilter;
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.internal.RelationalChildRestrictedObject;
+import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
@@ -38,21 +44,25 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
+import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
+import org.teiid.modeshape.sequencer.dataservice.Connection;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * Implementation of datasource instance model
  */
-public class DatasourceImpl extends RelationalChildRestrictedObject implements Datasource, EventManager {
+public class DatasourceImpl extends RelationalObjectImpl implements Datasource, EventManager {
 
     /**
      * A filter to exclude specific, readonly properties.
      */
-    private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( KomodoLexicon.DataSource.CLASS_NAME );
-    
+    private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( DataVirtLexicon.Connection.CLASS_NAME );
+
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
@@ -67,7 +77,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
                       final Repository repository,
                       final String path ) throws KException {
         super(uow, repository, path);
-        
+
         // Update filters based on JDBC
         updatePropFilters(uow);
     }
@@ -93,7 +103,17 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         final String result = prop.getStringValue( transaction );
         return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#getDocumentType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public DocumentType getDocumentType( final UnitOfWork transaction ) {
+        return DOC_TYPE;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -112,7 +132,29 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public String getJndiName( final UnitOfWork uow ) throws KException {
         return getObjectProperty( uow, PropertyValueType.STRING, "getJndiName", //$NON-NLS-1$
-                                  KomodoLexicon.DataSource.JNDI_NAME);
+                                  DataVirtLexicon.Connection.JNDI_NAME);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getDescription( final UnitOfWork uow ) throws KException {
+        return getObjectProperty( uow, PropertyValueType.STRING, "getDescription", //$NON-NLS-1$
+                                  KomodoLexicon.LibraryComponent.DESCRIPTION);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#getExternalLocation(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getExternalLocation( final UnitOfWork uow ) throws KException {
+        return getObjectProperty( uow, PropertyValueType.STRING, "getExternalLocation", //$NON-NLS-1$
+                                  KomodoLexicon.WorkspaceItem.EXT_LOC);
     }
 
     /**
@@ -123,9 +165,9 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public String getDriverName( final UnitOfWork uow ) throws KException {
         return getObjectProperty( uow, PropertyValueType.STRING, "getDriverName", //$NON-NLS-1$
-                                  KomodoLexicon.DataSource.DRIVER_NAME);
+                                  DataVirtLexicon.Connection.DRIVER_NAME);
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -134,18 +176,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public String getClassName(UnitOfWork uow) throws KException {
         return getObjectProperty( uow, PropertyValueType.STRING, "getClassName", //$NON-NLS-1$
-                                  KomodoLexicon.DataSource.CLASS_NAME);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.datasource.Datasource#getProfileName(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public String getProfileName(UnitOfWork uow) throws KException {
-        return getObjectProperty( uow, PropertyValueType.STRING, "getProfileName", //$NON-NLS-1$
-                                  KomodoLexicon.DataSource.PROFILE_NAME);
+                                  DataVirtLexicon.Connection.CLASS_NAME);
     }
 
     /**
@@ -155,26 +186,16 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      */
     @Override
     public boolean isJdbc(UnitOfWork uow) throws KException {
-       Boolean isJdbc = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isJdbc", KomodoLexicon.DataSource.JDBC); //$NON-NLS-1$
-       if ( isJdbc == null ) {
-           return Datasource.DEFAULT_JDBC;
-       }
+        final String connectionType = getObjectProperty(uow,
+                                                        PropertyValueType.STRING,
+                                                        "isJdbc", //$NON-NLS-1$
+                                                        DataVirtLexicon.Connection.TYPE);
 
-       return isJdbc;
-    }
+        if ( connectionType == null ) {
+            return Datasource.DEFAULT_JDBC;
+        }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.datasource.Datasource#isPreview(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public boolean isPreview(UnitOfWork uow) throws KException {
-       Boolean isPreview = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isPreview", KomodoLexicon.DataSource.PREVIEW); //$NON-NLS-1$
-       if( isPreview == null ) {
-           return Datasource.DEFAULT_PREVIEW;
-       }
-       return isPreview;
+        return ( Connection.Type.JDBC.name().equals(connectionType) );
     }
 
     /**
@@ -185,9 +206,9 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public void setDriverName( final UnitOfWork uow,
                                final String driverName ) throws KException {
-        setObjectProperty( uow, "setDriverName", KomodoLexicon.DataSource.DRIVER_NAME, driverName ); //$NON-NLS-1$
+        setObjectProperty( uow, "setDriverName", DataVirtLexicon.Connection.DRIVER_NAME, driverName ); //$NON-NLS-1$
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -196,9 +217,31 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public void setJndiName( final UnitOfWork uow,
                              final String jndiName ) throws KException {
-        setObjectProperty( uow, "setJndiName", KomodoLexicon.DataSource.JNDI_NAME, jndiName ); //$NON-NLS-1$
+        setObjectProperty( uow, "setJndiName", DataVirtLexicon.Connection.JNDI_NAME, jndiName ); //$NON-NLS-1$
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setDescription( final UnitOfWork uow,
+                                final String description ) throws KException {
+        setObjectProperty( uow, "setDescription", KomodoLexicon.LibraryComponent.DESCRIPTION, description ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setExternalLocation(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setExternalLocation( final UnitOfWork uow,
+                                     final String extLoc ) throws KException {
+        setObjectProperty( uow, "setExternalLocation", KomodoLexicon.WorkspaceItem.EXT_LOC, extLoc ); //$NON-NLS-1$
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -207,18 +250,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public void setClassName(UnitOfWork uow,
                              String className) throws KException {
-        setObjectProperty( uow, "setClassName", KomodoLexicon.DataSource.CLASS_NAME, className ); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.datasource.Datasource#setProfileName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public void setProfileName(UnitOfWork uow,
-                               String profileName) throws KException {
-        setObjectProperty( uow, "setProfileName", KomodoLexicon.DataSource.PROFILE_NAME, profileName ); //$NON-NLS-1$
+        setObjectProperty( uow, "setClassName", DataVirtLexicon.Connection.CLASS_NAME, className ); //$NON-NLS-1$
     }
 
     /**
@@ -229,21 +261,11 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public void setJdbc(UnitOfWork uow,
                         boolean isJdbc) throws KException {
-        setObjectProperty( uow, "setJdbc", KomodoLexicon.DataSource.JDBC, isJdbc ); //$NON-NLS-1$
+        final String connectionType = ( isJdbc ? Connection.Type.JDBC.name() : Connection.Type.RESOURCE.name() );
+        setObjectProperty( uow, "setJdbc", DataVirtLexicon.Connection.TYPE, connectionType ); //$NON-NLS-1$
         updatePropFilters(uow);
     }
-    
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.datasource.Datasource#setPreview(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
-     */
-    @Override
-    public void setPreview(UnitOfWork uow,
-                           boolean isPreview) throws KException {
-        setObjectProperty( uow, "isPreview", KomodoLexicon.DataSource.PREVIEW, isPreview ); //$NON-NLS-1$
-    }
-    
+
     private void updatePropFilters(UnitOfWork uow) throws KException {
         // If JDBC, do not show the "class-name" property
         if(isJdbc(uow)) {
@@ -264,19 +286,31 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     public Properties getPropertiesForServerDeployment(UnitOfWork transaction,
                                                        TeiidInstance teiidInstance) throws Exception {
         Properties sourceProps = new Properties();
-        
+
         // Get the Property Defns for this type of source.
         Collection<TeiidPropertyDefinition> templatePropDefns = teiidInstance.getTemplatePropertyDefns(getDriverName(transaction));
 
-        if(isJdbc(transaction)) {
-            String driverName = getDriverName(transaction);
-            sourceProps.setProperty(TeiidInstance.DATASOURCE_DRIVERNAME,driverName);
-            String jndiName = getJndiName(transaction);
-            sourceProps.setProperty(TeiidInstance.DATASOURCE_JNDINAME, jndiName);
-        } else {
-            sourceProps.setProperty(TeiidInstance.DATASOURCE_CLASSNAME, getClassName(transaction));
+        // Datasource driverName and jndiName must be defined.
+        String driverName = getDriverName(transaction);
+        if(StringUtils.isBlank(driverName)) {
+            throw new Exception( Messages.getString( Relational.DATASOURCE_DRIVERNAME_NOT_DEFINED ) );
         }
-        
+        sourceProps.setProperty(TeiidInstance.DATASOURCE_DRIVERNAME,driverName);
+        String jndiName = getJndiName(transaction);
+        if(StringUtils.isBlank(jndiName)) {
+            throw new Exception( Messages.getString( Relational.DATASOURCE_JNDINAME_NOT_DEFINED ) );
+        }
+        sourceProps.setProperty(TeiidInstance.DATASOURCE_JNDINAME, jndiName);
+
+        // Non-jdbc className is needed.
+        if(!isJdbc(transaction)) {
+            String className = getClassName(transaction);
+            if(StringUtils.isBlank(className)) {
+                throw new Exception( Messages.getString( Relational.DATASOURCE_CLASSNAME_NOT_DEFINED ) );
+            }
+            sourceProps.setProperty(TeiidInstance.DATASOURCE_CLASSNAME, className);
+        }
+
         // Iterate the datasource properties.  Compare them against the valid properties for the server source type.
         String[] propNames = getPropertyNames(transaction);
         for(String propName : propNames) {
@@ -286,20 +320,24 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
                 String sourcePropValue = getProperty(transaction, propName).getStringValue(transaction);
                 // Template has no default - set the property
                 if(!hasDefault) {
-                    sourceProps.setProperty(propName, sourcePropValue);
+                    if(sourcePropValue!=null) {
+                        sourceProps.setProperty(propName, sourcePropValue);
+                    }
                     // Template has default - if source property matches it, no need to provide it.
                 } else {
                     String templateDefaultValue = propDefn.getDefaultValue().toString();
                     if(!templateDefaultValue.equals(sourcePropValue)) {
-                        sourceProps.setProperty(propName, sourcePropValue);
+                        if(sourcePropValue!=null) {
+                            sourceProps.setProperty(propName, sourcePropValue);
+                        }
                     }
                 }
             }
         }
-        
+
         return sourceProps;
     }
-    
+
     private TeiidPropertyDefinition getTemplatePropertyDefn(Collection<TeiidPropertyDefinition> templatePropDefns, String propName) {
         TeiidPropertyDefinition propDefn = null;
         for(TeiidPropertyDefinition aDefn : templatePropDefns) {
@@ -315,7 +353,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export(UnitOfWork transaction,
+    public byte[] export(UnitOfWork transaction,
                          Properties exportProperties) throws KException {
 
         // Get the XML result
@@ -327,10 +365,10 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
                          transaction.getName(),
                          xmlResult);
         }
-        
-        return xmlResult;
+
+        return xmlResult.getBytes();
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -341,28 +379,56 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     public void setProperty( final UnitOfWork transaction,
                              final String propertyName,
                              final Object... values ) throws KException {
-        
+
         int nsPrefixLength = (KomodoLexicon.Namespace.PREFIX+StringConstants.COLON).length();
-        
-        if( propertyName.equals(KomodoLexicon.DataSource.CLASS_NAME.substring(nsPrefixLength)) ) {
+
+        if( propertyName.equals(DataVirtLexicon.Connection.CLASS_NAME.substring(nsPrefixLength)) ) {
             setClassName(transaction, (String)values[0]);
-        } else if ( propertyName.equals(KomodoLexicon.DataSource.DRIVER_NAME.substring(nsPrefixLength)) ) {
+        } else if ( propertyName.equals(DataVirtLexicon.Connection.DRIVER_NAME.substring(nsPrefixLength)) ) {
             setDriverName(transaction, (String)values[0]);
-        } else if ( propertyName.equals(KomodoLexicon.DataSource.JNDI_NAME.substring(nsPrefixLength)) ) {
+        } else if ( propertyName.equals(DataVirtLexicon.Connection.JNDI_NAME.substring(nsPrefixLength)) ) {
             setJndiName(transaction, (String)values[0]);
-        } else if ( propertyName.equals(KomodoLexicon.DataSource.PREVIEW.substring(nsPrefixLength)) ) {
-            boolean isPreview = false;
-            if( (String)values[0] != null ) {
-                isPreview = Boolean.parseBoolean((String)values[0]);
-            }
-            setPreview(transaction, isPreview);
-        } else if ( propertyName.equals(KomodoLexicon.DataSource.PROFILE_NAME.substring(nsPrefixLength)) ) {
-            setProfileName(transaction, (String)values[0]);
         } else {
             super.setProperty(transaction, propertyName, values);
         }
     }
-    
+
+    @Override
+    public DeployStatus deploy(UnitOfWork uow, Teiid teiid) {
+        ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiid, "teiid"); //$NON-NLS-1$
+
+        DeployStatus status = new DeployStatus();
+        TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+        
+        try {
+            String dataSrcName = getName(uow);
+            status.addProgressMessage("Starting deployment of data source " + dataSrcName); //$NON-NLS-1$
+
+            String jndiName = getJndiName(uow);
+            String sourceType = getDriverName(uow);
+            Properties properties = getPropertiesForServerDeployment(uow, teiidInstance);
+
+            status.addProgressMessage("Attempting to deploy data source " + dataSrcName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            TeiidDataSource teiidDataSrc = teiidInstance.getOrCreateDataSource(dataSrcName,
+                                                                               jndiName,
+                                                                               sourceType,
+                                                                               properties);
+            if (teiidDataSrc == null) {
+                status.addErrorMessage("Data source " + dataSrcName + " failed to deploy"); //$NON-NLS-1$ //$NON-NLS-2$
+                return status;
+            }
+
+            status.addProgressMessage("Data source deployed " + dataSrcName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (Exception ex) {
+            status.addErrorMessage(ex);
+        }
+
+        return status;
+    }
+
     @Override
     public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;

@@ -38,7 +38,7 @@ public final class WorkspaceCommandTest extends AbstractCommandTest {
                                     WorkspaceCommand.NAME };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
+        assertContextIs(RepositoryImpl.komodoWorkspacePath(getTransaction()));
     }
 
 }

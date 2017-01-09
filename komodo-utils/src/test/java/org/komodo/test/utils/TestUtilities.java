@@ -23,6 +23,7 @@ package org.komodo.test.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -33,6 +34,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,6 +49,11 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.CoreLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import org.w3c.dom.Attr;
@@ -119,6 +133,51 @@ public class TestUtilities implements StringConstants {
                             "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
 
     /**
+     * Dataservice vdb
+     */
+    public static final String DATASERVICE_VDB_FILE = "myService-vdb.xml";
+
+    /**
+     * Sample Dataservice Example Zip
+     */
+    public static final String SAMPLE_DATASERVICE_FILE = "sample-ds.zip";
+
+    /**
+     * US States Dataservice Example Zip
+     */
+    public static final String US_STATES_DATASERVICE_TEIID_8_FILE = "usstates-dataservice-teiid8.zip";
+
+    /**
+     * US States Dataservice Example Zip
+     */
+    public static final String US_STATES_DATASERVICE_TEIID_9_FILE = "usstates-dataservice-teiid9.zip";
+
+    /**
+     * US States Dataservice name
+     */
+    public static final String US_STATES_DATA_SERVICE_NAME = "UsStatesService";
+
+    /**
+     * US States Dataservice Example vdb name
+     */
+    public static final String US_STATES_VDB_NAME = "usstates";
+
+    /**
+     * US States Dataservice Example data source name
+     */
+    public static final String US_STATES_DATA_SOURCE_NAME = "MySqlDS";
+
+    /**
+     * US States Dataservice Example data source name
+     */
+    public static final String US_STATES_DRIVER_NAME = "mysql-connector-java-5.1.39-bin.jar";
+
+    /**
+     * Patients DDL
+     */
+    public static final String PATIENTS_DDL_FILE = "patientsDDL.ddl";
+
+    /**
      * Portfolio vdb
      */
     public static final String PORTFOLIO_VDB_FILE = "portfolio-vdb.xml";
@@ -132,6 +191,11 @@ public class TestUtilities implements StringConstants {
      * Parts vdb
      */
     public static final String PARTS_VDB_FILE = "parts_dynamic-vdb.xml";
+
+    /**
+     * Service Source vdb for usstates
+     */
+    public static final String USSTATES_SOURCE_VDB_FILE = "USStates-source-vdb.xml";
 
     /**
      * Parts vdb name
@@ -157,6 +221,11 @@ public class TestUtilities implements StringConstants {
      * Roles vdb
      */
     public static final String ROLES_VDB_NAME = "z";
+
+    /**
+     * MySql Driver Jar
+     */
+    public static final String MYSQL_DRIVER_FILENAME = "mysql-connector-java-5.1.39-bin.jar";
 
     public static String convertPackageToDirPath(Package pkg) {
         return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, FORWARD_SLASH);
@@ -1039,10 +1108,64 @@ public class TestUtilities implements StringConstants {
      * @return input stream of portfolio example xml
      * @throws Exception if error occurs
      */
+    public static InputStream dataserviceVdbExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   DATASERVICE_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of sample data service example
+     * @throws Exception if error occurs
+     */
+    public static InputStream sampleDataserviceExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   SAMPLE_DATASERVICE_FILE);
+    }
+
+    /**
+     * @return input stream of us-states data service example
+     * @throws Exception if error occurs
+     */
+    public static InputStream usStatesDataserviceExample() throws Exception {
+        //
+        // Need to differentiate since the MySql driver name is specified slightly
+        // differently between versions:
+        // * MySql Driver jar deploys as 2 drivers identifiable by concatenating their
+        //    respective classes to the 'mysql-connector' prefix
+        // * Teiid 8.x.x concatenates them directly
+        // * Teiid 9.x.x+  concatenates separating the prefix from the classname with an underscore
+        //
+        TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+        if (teiidVersion.isGreaterThanOrEqualTo(Version.TEIID_9_0.get()))
+            return getResourceAsStream(TestUtilities.class,
+                                       RESOURCES_DIRECTORY,
+                                       US_STATES_DATASERVICE_TEIID_9_FILE);
+
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   US_STATES_DATASERVICE_TEIID_8_FILE);
+    }
+
+    /**
+     * @return input stream of portfolio example xml
+     * @throws Exception if error occurs
+     */
     public static InputStream portfolioExample() throws Exception {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    PORTFOLIO_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of patients ddl
+     * @throws Exception if error occurs
+     */
+    public static InputStream patientsDdl() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   PATIENTS_DDL_FILE);
     }
 
     /**
@@ -1053,6 +1176,16 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    PARTS_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of usstates service source xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream usStatesSourceExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   USSTATES_SOURCE_VDB_FILE);
     }
 
     /**
@@ -1073,6 +1206,16 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    ROLES_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of mysql driver
+     * @throws Exception
+     */
+    public static InputStream mySqlDriver() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                  RESOURCES_DIRECTORY,
+                                  MYSQL_DRIVER_FILENAME);
     }
 
     /**
@@ -1110,7 +1253,12 @@ public class TestUtilities implements StringConstants {
      * @throws Exception if error occurs
      */
     public static InputStream getResourceAsStream(Class<?> klazz, String parentDirectory, String fileName, String suffix) throws Exception {
-        String filePath = parentDirectory + File.separator + fileName + suffix;
+        String filePath;
+        if (parentDirectory == null || parentDirectory.isEmpty())
+            filePath = fileName + suffix;
+        else
+            filePath = parentDirectory + FORWARD_SLASH + fileName + suffix;
+
         InputStream fileStream = klazz.getClassLoader().getResourceAsStream(filePath);
         assertNotNull("File " + filePath + " does not exist", fileStream);
 
@@ -1135,16 +1283,48 @@ public class TestUtilities implements StringConstants {
      * @return String representation of stream
      * @throws IOException if error occurs
      */
-    public static String streamToString(InputStream inStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
-        StringBuilder builder = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
-            builder.append(NEW_LINE);
-        }
+    public static byte[] streamToBytes(InputStream inStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try {
+            int nRead;
+            byte[] data = new byte[16384];
 
-        return builder.toString();
+            while ((nRead = inStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            buffer.flush();
+
+            return buffer.toByteArray();
+        } finally {
+            buffer.close();
+            inStream.close();
+        }
+    }
+
+    /**
+     * @param inStream input stream
+     * @return String representation of stream
+     * @throws IOException if error occurs
+     */
+    public static String streamToString(InputStream inStream) throws IOException {
+        InputStreamReader in = new InputStreamReader(inStream);
+        BufferedReader reader = new BufferedReader(in);
+
+        try {
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append(NEW_LINE);
+            }
+
+            return builder.toString();
+        } finally {
+            reader.close();
+            in.close();
+            inStream.close();
+        }
     }
 
     /**
@@ -1349,5 +1529,112 @@ public class TestUtilities implements StringConstants {
         }
 
         return buf.toString();
+    }
+
+    /**
+     * @param prefix
+     * @param suffix
+     * @return a temporary file that is deleted on exit
+     * @throws IOException
+     */
+    public static File createTempFile(String prefix, String suffix) throws IOException {
+        File tempFile = File.createTempFile(prefix, suffix);
+        tempFile.deleteOnExit();
+        return tempFile;
+    }
+
+    /**
+     * Compare the contents of 2 files
+     *
+     * @param original
+     * @param fileToCompare
+     * @throws IOException
+     */
+    public static void compareFileContents(File original, File fileToCompare) throws IOException {
+        assertTrue(org.apache.commons.io.FileUtils.contentEquals(original, fileToCompare));
+    }
+
+    /**
+     * Tries to open a zip and if an error occurs fails the test
+     *
+     * @param zipFile
+     */
+    public static void testZipFile(File zipFile) {
+        ZipFile zipfile = null;
+        try {
+            zipfile = new ZipFile(zipFile);
+        } catch (IOException e) {
+            fail("Zip file test failed: " + e.getLocalizedMessage());
+        } finally {
+            try {
+                if (zipfile != null) {
+                    zipfile.close();
+                    zipfile = null;
+                }
+            } catch (IOException e) {}
+        }
+    }
+
+    /**
+     * Return a list of a zip file's contents
+     *
+     * @param zipName the name of the zip file. Cannot be <code>null</code>
+     * @param fileStream a file stream to a zip file. Cannot be <code>null</code>
+     *                  Will be closed on completion.
+     *
+     * @throws Exception if an error occurs
+     *
+     * Note: This function uses a {@link ZipFile} with a temp file to return the entries
+     *            of the {@link InputStream}. This is necessary since {@link ZipInputStream}
+     *            cannot be relied upon to return all entries.
+     */
+    public static List<String> zipEntries(String zipName, InputStream fileStream) throws Exception {
+        ArgCheck.isNotNull(zipName, "zip name");
+        ArgCheck.isNotNull(fileStream, "file stream");
+
+        List<String> entries = new ArrayList<String>();
+        File tmpFile = null;
+        ZipFile zipFile = null;
+        try {
+            tmpFile = File.createTempFile(zipName, ZIP_SUFFIX);
+            FileUtils.write(fileStream, tmpFile);
+
+            zipFile = new ZipFile(tmpFile);
+            Enumeration<? extends ZipEntry> zEntries = zipFile.entries();
+            while (zEntries.hasMoreElements()) {
+                ZipEntry entry = zEntries.nextElement();
+                String fileName = entry.getName();
+                String entryName = zipName == null ? fileName : zipName + FORWARD_SLASH + fileName;
+
+                // Remove trailing forward slashes
+                if (entryName.endsWith(FORWARD_SLASH))
+                    entryName = entryName.substring(0, entryName.length() - 1);
+
+                entries.add(entryName);
+            }
+        } finally {
+            try {
+                if (zipFile != null) {
+                    zipFile.close();
+                    zipFile = null;
+                }
+
+                if (tmpFile != null)
+                    tmpFile.delete();
+            } catch (IOException e) {
+            }
+        }
+
+        return entries;
+    }
+
+    /**
+     * @param bytes
+     * @return checksum value of the given bytes
+     */
+    public static long checksum(byte[] bytes) {
+        Checksum contentCRC = new CRC32();
+        contentCRC.update(bytes, 0, bytes.length);
+        return contentCRC.getValue();
     }
 }

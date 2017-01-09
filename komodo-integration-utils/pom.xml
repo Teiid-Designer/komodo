@@ -1,0 +1,109 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo-parent</artifactId>
+		<version>0.0.4</version>
+		<relativePath>../komodo-parent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>komodo-integration-utils</artifactId>
+	<name>Komodo Integration Utilities</name>
+	<description>Provides Utilities for Komodo Integration Testing</description>
+
+	<properties>
+		<version.resteasy.jboss.zip>resteasy-jboss-modules-${version.resteasy}.zip</version.resteasy.jboss.zip>
+	</properties>
+
+	<build>
+
+		<plugins>
+			<!-- Downloads resteasy jaxrs from resteasy for use in integration tests -->
+			<!-- NOT CURRENTLY REQUIRED SINCE THE REVERSION TO THE RESTEASY VERSION
+			       THAT IS SHIPPED WITH JBOSS AS -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 				<artifactId>maven-antrun-plugin</artifactId> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>download-resteasy</id> -->
+<!-- 						<phase>process-sources</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>run</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							Not required if skipping integration tests -->
+<!-- 							<skip>${integration.skipTests}</skip> -->
+<!-- 							<target> -->
+<!-- 								<property name="version.resteasy" value="${version.resteasy}" /> -->
+<!-- 								<property name="destination.resteasy" value="${project.build.directory}/resteasy" /> -->
+<!-- 								<property name="resteasy.final.module.name.zip" value="${resteasy.module.zip}" /> -->
+<!-- 								<ant antfile="${project.basedir}/download-resteasy.xml" -->
+<!-- 									target="download" /> -->
+<!-- 							</target> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+<!-- 			<plugin> -->
+<!-- 				<artifactId>maven-assembly-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					Not required if skipping integration tests -->
+<!-- 					 <skipAssembly>${integration.skipTests}</skipAssembly> -->
+<!-- 					<descriptors> -->
+<!-- 						<descriptor>assembly/assemble.xml</descriptor> -->
+<!-- 					</descriptors> -->
+<!-- 				</configuration> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>make-assembly-zip</id> -->
+<!-- 						<phase>package</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>single</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.8,)
+										</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

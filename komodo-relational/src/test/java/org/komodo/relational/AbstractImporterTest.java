@@ -21,16 +21,20 @@
  ************************************************************************************/
 package org.komodo.relational;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.spi.repository.KomodoObject;
@@ -54,6 +58,8 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
     protected static final String DDL_DIRECTORY = "ddl";
 
+    protected static final String CONNECTION_DIRECTORY = "connection";
+
     protected abstract void runImporter(Repository repository,
                                                 InputStream inputStream,
                                                 KomodoObject parentObject,
@@ -65,7 +71,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
                                                 KomodoObject parentObject,
                                                 ImportOptions importOptions,
                                                 ImportMessages importMessages) throws Exception;
-    
+
     protected void runImporter(Repository repository, Object content,
                                                                  KomodoObject parentObject, ImportOptions importOptions,
                                                                  ImportMessages importMessages) throws Exception {
@@ -87,7 +93,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         assertNotNull(importMessages);
 
         runImporter(_repo, content, parentObject, importOptions, importMessages);
-        
+
         if (importMessages.hasError()) {
             KLog.getLogger().debug(importMessages.errorMessagesToString());
         }
@@ -104,18 +110,17 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         Property property = node.getRawProperty(getTransaction(), propertyName);
         assertNotNull(property);
 
-        List<String> values;
-        if (property.isMultiple(getTransaction()))
-            values = Arrays.asList(property.getStringValues(getTransaction()));
-        else {
-            values = new ArrayList<String>();
-            values.add(property.getStringValue(getTransaction()));
+        if ( property.isMultiple( getTransaction() ) ) {
+            final List< String > values = Arrays.asList( property.getStringValues( getTransaction() ) );
+            assertThat( values.size(), is( expectedValues.length ) );
+
+            for ( String expectedValue : expectedValues ) {
+                assertTrue( values.contains( expectedValue ) );
+            }
+        } else {
+            assertThat( property.getStringValue( getTransaction() ), is( expectedValues[ 0 ] ) );
         }
 
-        assertEquals(expectedValues.length, values.size());
-        for (String expectedValue : expectedValues) {
-            assertTrue(values.contains(expectedValue));
-        }
     }
 
     protected void verifyPrimaryType(KomodoObject node, String expectedValue) throws Exception {

@@ -221,7 +221,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         // command can't be found
         return createCommandNotFound(commandName);
     }
-
+    
     /* (non-Javadoc)
      * @see org.komodo.shell.api.ShellCommandFactory#createCommandNotFound(java.lang.String)
      */

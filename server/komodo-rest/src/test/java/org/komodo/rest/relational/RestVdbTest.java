@@ -1,31 +1,59 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest.relational;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.net.URI;
+import java.util.Collection;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.folder.Folder;
+import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.RestLink;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.mockito.Mockito;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class RestVdbTest {
+public final class RestVdbTest implements StringConstants {
 
-    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/workspace/").build();
+    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/").build();
+    private static final URI BASE_TEIID_URI = UriBuilder.fromUri("http://localhost:8081/v1/teiid").build();
     private static final String WORKSPACE_DATA_PATH = "/workspace";
     private static final String VDB_NAME = "MyVdb";
     private static final String VDB_DATA_PATH = "/workspace/vdbs/vdb1";
@@ -64,7 +92,11 @@ public final class RestVdbTest {
         KomodoObject workspace = Mockito.mock(KomodoObject.class);
         Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
 
+        Descriptor vdbType = Mockito.mock(Descriptor.class);
+        when(vdbType.getName()).thenReturn(VdbLexicon.Vdb.VIRTUAL_DATABASE);
+
         Vdb theVdb = Mockito.mock(Vdb.class);
+        Mockito.when(theVdb.getPrimaryType(transaction)).thenReturn(vdbType);
         Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
         Mockito.when(theVdb.getAbsolutePath()).thenReturn(VDB_DATA_PATH);
         Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
@@ -80,6 +112,11 @@ public final class RestVdbTest {
         this.vdb.setConnectionType(CONNECTION_TYPE);
         this.vdb.setPreview(false);
         this.vdb.setVersion(VERSION);
+    }
+
+    @Test
+    public void shouldHaveBaseUri() {
+        assertEquals(BASE_URI, this.vdb.getBaseUri());
     }
 
     @Test
@@ -101,7 +138,6 @@ public final class RestVdbTest {
         assertNull(empty.getBaseUri());
         assertNull(empty.getName());
         assertNull(empty.getDescription());
-        assertNull(empty.getOriginalFilePath());
         assertEquals(empty.getProperties().isEmpty(), true);
         assertEquals(empty.getLinks().size(), 0);
     }
@@ -154,4 +190,58 @@ public final class RestVdbTest {
         assertEquals(this.vdb.getOriginalFilePath(), newPath);
     }
 
+    @SuppressWarnings( "incomplete-switch" )
+    @Test
+    public void shouldReturnACachedTeiidRestVdb() throws Exception {
+
+        String parentDataPath = "/tko:komodo/tko:workspace/tko:teiidCache/localhost/";
+        UnitOfWork transaction = Mockito.mock(UnitOfWork.class);
+
+        Descriptor teiidType = Mockito.mock(Descriptor.class);
+        when(teiidType.getName()).thenReturn(KomodoLexicon.CachedTeiid.NODE_TYPE);
+        Descriptor folderType = Mockito.mock(Descriptor.class);
+        when(folderType.getName()).thenReturn(KomodoLexicon.Folder.NODE_TYPE);
+
+        CachedTeiid cachedTeiid = Mockito.mock(CachedTeiid.class);
+        Folder vdbFolder = mock(Folder.class);
+        Mockito.when(cachedTeiid.getName(transaction)).thenReturn("localhost");
+        Mockito.when(cachedTeiid.getAbsolutePath()).thenReturn(parentDataPath);
+        Mockito.when(cachedTeiid.getTypeIdentifier(transaction)).thenReturn(KomodoType.CACHED_TEIID);
+        Mockito.when(cachedTeiid.getPrimaryType(transaction)).thenReturn(teiidType);
+        Mockito.when(vdbFolder.getName(transaction)).thenReturn("localhost/" + CachedTeiid.VDBS_FOLDER);
+        Mockito.when(vdbFolder.getPrimaryType(transaction)).thenReturn(folderType);
+        
+        Vdb theVdb = Mockito.mock(Vdb.class);
+        Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
+        Mockito.when(theVdb.getAbsolutePath()).thenReturn(parentDataPath + FORWARD_SLASH + VDB_NAME);
+        Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
+        Mockito.when(theVdb.hasChildren(transaction)).thenReturn(true);
+        Mockito.when(theVdb.getPropertyNames(transaction)).thenReturn(new String[0]);
+        Mockito.when(theVdb.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
+        Mockito.when(theVdb.getParent(transaction)).thenReturn(vdbFolder);
+        Mockito.when(vdbFolder.getParent(transaction)).thenReturn(cachedTeiid);
+
+        RestVdb restVdb = new RestVdb(BASE_URI, theVdb, false, transaction);
+        assertEquals(BASE_URI, restVdb.getBaseUri());
+        assertEquals(parentDataPath + FORWARD_SLASH + VDB_NAME, restVdb.getDataPath());
+        Collection<RestLink> links = restVdb.getLinks();
+        assertNotNull(links);
+        for (RestLink link :  links) {
+            switch (link.getRel()) {
+                case SELF:
+                    assertEquals(BASE_TEIID_URI + FORWARD_SLASH +
+                                             cachedTeiid.getName(transaction) + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT + FORWARD_SLASH +
+                                             VDB_NAME,
+                                             link.getHref().toString());
+                    break;
+                case PARENT:
+                    assertEquals(BASE_TEIID_URI + FORWARD_SLASH +
+                                             cachedTeiid.getName(transaction) + FORWARD_SLASH +
+                                             V1Constants.VDBS_SEGMENT,
+                                             link.getHref().toString());
+                    break;
+            }
+        }
+    }
 }

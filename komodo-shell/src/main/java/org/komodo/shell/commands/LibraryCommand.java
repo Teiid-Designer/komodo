@@ -26,10 +26,10 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -67,7 +67,7 @@ public class LibraryCommand extends BuiltInShellCommand {
 
         try {
             getWorkspaceStatus().setCurrentContext( new ObjectImpl( current.getRepository(),
-                                                                    KomodoObjectLabelProvider.LIB_PATH,
+                                                                    DefaultLabelProvider.LIB_PATH,
                                                                     0 ) );
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {

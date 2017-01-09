@@ -28,6 +28,8 @@ import org.komodo.repository.ObjectImplTest;
 import org.komodo.repository.search.TestObjectSearcher;
 import org.komodo.repository.test.TestLocalRepository;
 import org.komodo.repository.test.TestLocalRepositoryPersistence;
+import org.komodo.repository.test.TestMultiUsers;
+import org.komodo.repository.validation.RuleFactoryTest;
 import org.komodo.repository.validation.ValidationManagerImplTest;
 
 @SuppressWarnings( "javadoc" )
@@ -38,7 +40,9 @@ import org.komodo.repository.validation.ValidationManagerImplTest;
     TestObjectSearcher.class,
     TestLocalRepositoryPersistence.class,
     ValidationManagerImplTest.class,
-    TestObjectOperations.class
+    RuleFactoryTest.class,
+    TestObjectOperations.class,
+    TestMultiUsers.class
     } )
 public class AllTests {
     // nothing to do

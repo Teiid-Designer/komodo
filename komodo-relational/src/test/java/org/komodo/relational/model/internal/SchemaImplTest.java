@@ -1,14 +1,27 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -46,7 +59,7 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
         workspace = _repo.komodoWorkspace(getTransaction());
         this.schema = manager.createSchema(getTransaction(), workspace, NAME);
         commit();
@@ -102,7 +115,8 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportEmptyDdl() throws Exception {
-        final String fragment = this.schema.export(getTransaction(), new Properties());
+        byte[] fragmentBytes = this.schema.export(getTransaction(), new Properties());
+        final String fragment = new String(fragmentBytes);
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -116,7 +130,8 @@ public class SchemaImplTest extends RelationalModelTest {
 
         traverse( getTransaction(), this.schema.getAbsolutePath() );
 
-        final String fragment = this.schema.export(getTransaction(), new Properties());
+        byte[] fragmentBytes = this.schema.export(getTransaction(), new Properties());
+        final String fragment = new String(fragmentBytes);
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -126,7 +141,8 @@ public class SchemaImplTest extends RelationalModelTest {
         setRenditionValueAwaitSequencing(DDL_VIEW);
 
         // test
-        final String fragment = this.schema.export(getTransaction(), new Properties());
+        byte[] fragmentBytes = this.schema.export(getTransaction(), new Properties());
+        final String fragment = new String(fragmentBytes);
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(false));
         assertEquals(DDL_VIEW, fragment);
@@ -154,21 +170,6 @@ public class SchemaImplTest extends RelationalModelTest {
                 assertThat( filter.rejectProperty( name ), is( false ) );
             }
         }
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Schema.RESOLVER.create( getTransaction(), _repo, null, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Schema.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
 }

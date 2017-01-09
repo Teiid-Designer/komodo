@@ -24,6 +24,7 @@ package org.komodo.relational;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 
@@ -43,6 +44,12 @@ public class Messages implements StringConstants {
     public enum Relational {
 
         /**
+         * An error message indicating the object lacks a UUID property, implying its not referenceable,
+         * ie. does not extend mix:referenceable
+         */
+        NO_UUID_PROPERTY,
+
+        /**
          * An error message indicating a column could not be removed because its ID was not found in a columns multi-valued
          * property.
          */
@@ -59,6 +66,21 @@ public class Messages implements StringConstants {
         CONSTRAINT_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating the datasource className property was undefined.
+         */
+        DATASOURCE_CLASSNAME_NOT_DEFINED,
+
+        /**
+         * An error message indicating the datasource driverName property was undefined.
+         */
+        DATASOURCE_DRIVERNAME_NOT_DEFINED,
+
+        /**
+         * An error message indicating the datasource jndiName property was undefined.
+         */
+        DATASOURCE_JNDINAME_NOT_DEFINED,
+
+        /**
          * An error message indicating a VDB data role could not be removed because it was not found.
          */
         DATA_ROLE_NOT_FOUND_TO_REMOVE,
@@ -72,6 +94,11 @@ public class Messages implements StringConstants {
          * An error message indicating a VDB entry could not be removed because it was not found.
          */
         ENTRY_NOT_FOUND_TO_REMOVE,
+
+        /**
+         * An error message indicating a empty resources was being exported.
+         */
+        EXPORT_FAILED_NO_CONTENT,
 
         /**
          * An error message indicating a function could not be removed.
@@ -179,6 +206,11 @@ public class Messages implements StringConstants {
         REFERENCED_COLUMN_NOT_FOUND,
 
         /**
+         * An error message indicating a data service referenced resource could not be found.
+         */
+        REFERENCED_RESOURCE_NOT_FOUND,
+
+        /**
          * An error message indicating a table with a specified JCR UUID could not be found.
          */
         REFERENCED_TABLE_NOT_FOUND,
@@ -242,7 +274,32 @@ public class Messages implements StringConstants {
         /**
          * Indicates a table type other than a table or view was found.
          */
-        UNEXPECTED_TABLE_TYPE;
+        UNEXPECTED_TABLE_TYPE,
+
+        /**
+         * An error indicating a teiid instance could not be generated
+         */
+        TEIID_INSTANCE_ERROR,
+
+        /**
+         * An error indicating a teiid instance could not connect
+         */
+        TEIID_INSTANCE_CONNECTION_ERROR,
+
+        /**
+         * An error indicating server manager failed to create the default teiid server model
+         */
+        SERVER_MANAGER_DEFAULT_TEIID_ERROR,
+
+        /**
+         * An error indicating there is no storage plugin for the given storage type
+         */
+        STORAGE_TYPE_INVALID,
+
+        /**
+         * An error indicating there document type of an import is invalid
+         */
+        STORAGE_DOCUMENT_TYPE_INVALID;
 
         @Override
         public String toString() {
@@ -250,7 +307,7 @@ public class Messages implements StringConstants {
         }
 
     }
-    
+
     /**
      * Messages relating to the datasource parser.
      */
@@ -266,6 +323,132 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
 
+    }
+
+    public enum DataserviceConveyor {
+
+        /**
+         * An error message indicating the driver cannot be found in the data service
+         */
+        DATA_SERVICE_DRIVER_NOT_FOUND,
+
+        /**
+         * An error message indicating the driver failed to deploy
+         */
+        DATA_SERVICE_DRIVER_FAILED_TO_DEPLOY,
+
+        /**
+         * An error message indicating the data source cannot be found in the data service
+         */
+        DATA_SERVICE_DATA_SOURCE_NOT_FOUND,
+
+        /**
+         * An error message indicating the data source failed to deploy
+         */
+        DATA_SERVICE_DATA_SOURCE_FAILED_TO_DEPLOY,
+
+        /**
+         * An error message indicating the vdb cannot be found in the data service
+         */
+        DATA_SERVICE_VDB_NOT_FOUND,
+
+        /**
+         * A message indicating a data service is being deployed.
+         */
+        DATA_SERVICE_START_DEPLOY,
+
+        /**
+         * A message indicating a data service has been successfully deployed.
+         */
+        DATA_SERVICE_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * A message indicating a connection is being deployed.
+         */
+        DATA_SERVICE_CONNECTION_START_DEPLOY,
+
+        /**
+         * A message indicating a connection has been successfully deployed.
+         */
+        DATA_SERVICE_CONNECTION_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * A message indicating a driver is being deployed.
+         */
+        DATA_SERVICE_DRIVER_START_DEPLOY,
+
+        /**
+         * A message indicating a driver has been successfully deployed.
+         */
+        DATA_SERVICE_DRIVER_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * A message indicating a VDB is being deployed.
+         */
+        DATA_SERVICE_VDB_START_DEPLOY,
+
+        /**
+         * A message indicating a VDB has been successfully deployed.
+         */
+        DATA_SERVICE_VDB_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * An error message indicating the vdb contents cannot be exported from the data service
+         */
+        DATA_SERVICE_VDB_CONTENTS_FAILURE;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    /**
+     * Messages for CachedTeiid
+     */
+    public enum CachedTeiid {
+
+        /**
+         * An error message indicating get Vdbs from server failed.
+         */
+        GET_SERVER_VDBS_ERROR,
+
+        /**
+         * An error message indicating get a Vdb from server failed.
+         */
+        GET_SERVER_VDB_ERROR,
+
+        /**
+         * An error message indicating get DataSources from server failed.
+         */
+        GET_SERVER_DATA_SOURCES_ERROR,
+
+        /**
+         * An error message indicating get a DataSource from server failed.
+         */
+        GET_SERVER_DATA_SOURCE_ERROR,
+
+        /**
+         * An error message indicating get Drivers from server failed.
+         */
+        GET_SERVER_DRIVERS_ERROR,
+
+        /**
+         * An error message indicating get Translators from server failed.
+         */
+        GET_SERVER_TRANSLATORS_ERROR,
+
+        /**
+         * An error message indicating get a Translator from server failed.
+         */
+        GET_SERVER_TRANSLATOR_ERROR;
+
+
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
     }
 
     /**

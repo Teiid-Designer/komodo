@@ -10,6 +10,19 @@
 	<name>Komodo Relational</name>
 	<description>Relational modelling framework</description>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>
@@ -48,6 +61,16 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
+			<artifactId>komodo-ui</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-teiid-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -57,18 +80,6 @@
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-test-utils</artifactId>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

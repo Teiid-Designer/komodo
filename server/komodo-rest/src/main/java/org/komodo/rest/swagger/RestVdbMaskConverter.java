@@ -21,8 +21,8 @@
  */
 package org.komodo.rest.swagger;
 
-import org.komodo.rest.relational.RestVdb;
-import org.komodo.rest.relational.RestVdbMask;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.rest.relational.response.RestVdbMask;
 import org.komodo.spi.repository.KomodoType;
 import io.swagger.converter.ModelConverterContext;
 import io.swagger.models.ModelImpl;

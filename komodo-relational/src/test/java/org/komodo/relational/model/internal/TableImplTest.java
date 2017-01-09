@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.model.internal;
 
@@ -18,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +53,7 @@ import org.komodo.relational.model.Table.OnCommit;
 import org.komodo.relational.model.Table.TemporaryType;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -910,26 +926,65 @@ public final class TableImplTest extends RelationalModelTest {
         this.table.setUuid( getTransaction(), value );
         assertThat( this.table.getUuid( getTransaction() ), is( value ) );
     }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
+    
     @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-        final KomodoObject kobject = Table.RESOLVER.create( getTransaction(), _repo, this.model, name, null );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Table.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
-    }
+    public void shouldExportDdl() throws Exception {
+        // Add columns
+        final Column column1 = this.table.addColumn( getTransaction(), "column1" );
+        column1.setDescription( getTransaction(), "Col1 Description" );
+        column1.setDatatypeName( getTransaction(), "string" );
+        column1.setNameInSource( getTransaction(), "Col1_NIS" );
+        final Column column2 = this.table.addColumn( getTransaction(), "column2" );
+        column2.setDescription( getTransaction(), "Col2 Description" );
+        column2.setDatatypeName( getTransaction(), "string" );
+        column2.setNameInSource( getTransaction(), "Col2_NIS" );
 
-    @Test( expected = KException.class )
-    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
-        Table.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
+        // Add a FK
+        final Table refTable = RelationalModelFactory.createTable( getTransaction(), _repo, mock( Model.class ), "refTable" );
+        final String name = "foreignKey";
+        this.table.addForeignKey( getTransaction(), name, refTable );
+
+        // Export the table
+        byte[] bytes = this.table.export(getTransaction(), new Properties());
+        String exportedDdl = new String(bytes);
+        
+        // Check exported DDL
+        assertThat( exportedDdl.contains("CREATE FOREIGN TABLE"), is( true ) );
+        assertThat( exportedDdl.contains("myTable"), is( true ) );
+        assertThat( exportedDdl.contains("column1"), is( true ) );
+        assertThat( exportedDdl.contains("column2"), is( true ) );
+        assertThat( exportedDdl.contains("FOREIGN KEY"), is( true ) );
+    }
+    
+    @Test
+    public void shouldExportDdlExcludeConstraints() throws Exception {
+        // Add columns
+        final Column column1 = this.table.addColumn( getTransaction(), "column1" );
+        column1.setDescription( getTransaction(), "Col1 Description" );
+        column1.setDatatypeName( getTransaction(), "string" );
+        column1.setNameInSource( getTransaction(), "Col1_NIS" );
+        final Column column2 = this.table.addColumn( getTransaction(), "column2" );
+        column2.setDescription( getTransaction(), "Col2 Description" );
+        column2.setDatatypeName( getTransaction(), "string" );
+        column2.setNameInSource( getTransaction(), "Col2_NIS" );
+
+        // Add a FK
+        final Table refTable = RelationalModelFactory.createTable( getTransaction(), _repo, mock( Model.class ), "refTable" );
+        final String name = "foreignKey";
+        this.table.addForeignKey( getTransaction(), name, refTable );
+
+        // Export the table
+        Properties exportProps = new Properties();
+        exportProps.put( ExportConstants.EXCLUDE_TABLE_CONSTRAINTS_KEY, true );
+        byte[] bytes = this.table.export(getTransaction(), exportProps);
+        String exportedDdl = new String(bytes);
+        
+        // Check exported DDL
+        assertThat( exportedDdl.contains("CREATE FOREIGN TABLE"), is( true ) );
+        assertThat( exportedDdl.contains("myTable"), is( true ) );
+        assertThat( exportedDdl.contains("column1"), is( true ) );
+        assertThat( exportedDdl.contains("column2"), is( true ) );
+        assertThat( exportedDdl.contains("FOREIGN KEY"), is( false ) );
     }
 
 }

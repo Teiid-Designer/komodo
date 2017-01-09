@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.server;
 
@@ -43,7 +57,6 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
     static final String NAME = "server-deploy-vdb"; //$NON-NLS-1$
 
     private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
-    private static final String VDB_DEPLOYMENT_SUFFIX = "-vdb.xml"; //$NON-NLS-1$
 
     /**
      * @param status
@@ -73,12 +86,12 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             }
 
             // Return if VDB object not found
-            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            if(!getWorkspaceManager(getTransaction()).hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceVdbNotFound, vdbName ), null );
             }
 
             // Find the VDB to deploy
-            final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final KomodoObject vdbObj = getWorkspaceManager(getTransaction()).getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             final Vdb vdbToDeploy = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
 
             // Validates that a server is connected
@@ -91,38 +104,50 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
 
             // Determine if the server already has a deployed VDB with this name and version
-            boolean serverHasVdb = serverHasVdb( teiidInstance,
-                                                 vdbToDeploy.getName( getTransaction() ),
-                                                 vdbToDeploy.getVersion( getTransaction() ) );
-            if(serverHasVdb && !overwrite) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ServerCommandsI18n.vdbDeploymentOverwriteDisabled,
-                                                         vdbName,
-                                                         vdbToDeploy.getVersion( getTransaction() ) ),
-                                              null );
-            }
+            boolean serverHasVdb;
+            try {
+                serverHasVdb = serverHasVdb( teiidInstance,
+                                             vdbToDeploy.getName( getTransaction() ),
+                                             vdbToDeploy.getVersion( getTransaction() ) );
+                if(serverHasVdb && !overwrite) {
+                    return new CommandResultImpl( false,
+                                                  I18n.bind( ServerCommandsI18n.vdbDeploymentOverwriteDisabled,
+                                                             vdbName,
+                                                             vdbToDeploy.getVersion( getTransaction() ) ),
+                                                             null );
+                }
 
-            // All VDB source model jndis must exist on the connected server
-            Set<String> sourceJndiNames = getPhysicalModelJndis(vdbToDeploy);
-            if(!sourceJndiNames.isEmpty()) {
-                List<String> serverJndiNames = ServerUtils.getDatasourceJndiNames(teiidInstance);
-                for(String sourceJndiName : sourceJndiNames) {
-                    if(!serverJndiNames.contains(sourceJndiName)) {
-                        return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeployFailedMissingSourceJndi, sourceJndiName ), null);
+                // All VDB source model jndis must exist on the connected server
+                Set<String> sourceJndiNames = getPhysicalModelJndis(vdbToDeploy);
+                if(!sourceJndiNames.isEmpty()) {
+                    List<String> serverJndiNames = ServerUtils.getDatasourceJndiNames(teiidInstance);
+                    for(String sourceJndiName : sourceJndiNames) {
+                        if(!serverJndiNames.contains(sourceJndiName)) {
+                            return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeployFailedMissingSourceJndi, sourceJndiName ), null);
+                        }
                     }
                 }
-            }
 
-            // Get VDB content
-            String vdbXml = vdbToDeploy.export(getTransaction(), null);
-            if (vdbXml == null || vdbXml.isEmpty()) {
-                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbExportFailed ), null);
-            }
+                // Get VDB content
+                byte[] vdbXml = vdbToDeploy.export(getTransaction(), null);
+                if (vdbXml == null || vdbXml.length == 0) {
+                    return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbExportFailed ), null);
+                }
 
-            String vdbToDeployName = vdbToDeploy.getName(getTransaction());
-            String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
-            InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
-            teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+                String vdbToDeployName = vdbToDeploy.getName(getTransaction());
+                String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
+                InputStream stream = new ByteArrayInputStream(vdbXml);
+                try {
+                    teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeploymentError, ex.getLocalizedMessage() ), null );
+                    return result;
+                }
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.vdbDeployFinished) );
             result = CommandResult.SUCCESS;
@@ -196,7 +221,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         // May be multiple versions deployed - see if there is one matching supplied version
         Collection<TeiidVdb> serverVdbs = teiidInstance.getVdbs();
         for(TeiidVdb serverVdb : serverVdbs) {
-            if(serverVdb.getName().equals(vdbName) && serverVdb.getVersion()==vdbVersion) {
+            if(serverVdb.getName().equals(vdbName) && serverVdb.getVersion().equals(vdbVersion)) {
                 return true;
             }
         }
@@ -235,7 +260,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] vdbs = mgr.findVdbs(uow);
         List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
         for(KomodoObject vdb : vdbs) {

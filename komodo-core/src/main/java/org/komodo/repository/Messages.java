@@ -101,19 +101,21 @@ public class Messages implements StringConstants {
          * An error message indicating the type of the object is not incorrect.
          */
         INCORRECT_TYPE,
-
-        ADD_CHILD_NOT_ALLOWED,
-        ADD_DESCRIPTOR_NOT_ALLOWED,
         NO_ARTIFACT_DESCRIPTION,
-        REMOVE_DESCRIPTOR_NOT_ALLOWED,
-        REMOVE_NOT_ALLOWED,
         REMOVE_WORKSPACE_OBJECT_ERROR,
-        RENAME_NOT_ALLOWED,
-        SET_PRIMARY_TYPE_NOT_ALLOWED,
+
+        /**
+         * Security permission error messages
+         */
+        READ_NOT_ALLOWED,
         SET_PROPERTY_NOT_ALLOWED,
+        ADD_REMOVE_CHILD_NOT_ALLOWED,
+        REMOVE_NOT_ALLOWED,
+
         UNABLE_TO_CONSTRUCT_PROPERTY,
         UNABLE_TO_CONVERT_VALUE,
         UNABLE_TO_FIND_PROPERTY,
+        UNABLE_TO_OBTAIN_NAME,
         UNABLE_TO_REMOVE_CHILD,
         UNABLE_TO_REMOVE_NON_EXISTENT_WORKSPACE_ITEM,
         UNABLE_TO_REMOVE_PROPERTY_THAT_DOES_NOT_EXIST,

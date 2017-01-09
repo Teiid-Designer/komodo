@@ -16,8 +16,10 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.LinkedList;
 import java.util.List;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -53,8 +55,8 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and property value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
-        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(propertyName), wsStatus.getGlobalProperties().getProperty(propertyName));
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath( null ));
+        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(propertyName), wsStatus.getGlobalProperties(false).getProperty(propertyName));
     }
 
     @Test
@@ -71,9 +73,9 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and properties value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
-        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(firstPropName), wsStatus.getGlobalProperties().getProperty(firstPropName));
-        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(secondPropName), wsStatus.getGlobalProperties().getProperty(secondPropName));
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath( null ));
+        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(firstPropName), wsStatus.getGlobalProperties(false).getProperty(firstPropName));
+        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(secondPropName), wsStatus.getGlobalProperties(false).getProperty(secondPropName));
     }
 
     @Test

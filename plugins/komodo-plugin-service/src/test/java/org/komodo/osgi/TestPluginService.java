@@ -23,20 +23,17 @@ package org.komodo.osgi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
-import javax.jcr.Node;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.mockito.Mockito;
+import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageConnector.Descriptor;
+import org.komodo.spi.storage.StorageService;
 import org.osgi.framework.Bundle;
 
 public class TestPluginService extends AbstractTestPluginService implements StringConstants {
@@ -97,114 +94,23 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
     }
 
     @Test
-    public void testTeiidBundleStartingStopping() throws Exception {
+    public void testGetGitStorageConnector()  throws Exception {
         assertEquals(Bundle.ACTIVE, service.getState());
 
-        TeiidVersion version = Version.TEIID_8_12.get();
-        String bundleName = TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor();
-        service.startBundle(bundleName);
-        assertEquals(Bundle.ACTIVE, service.bundleState(bundleName));
+        String storageType = "git";
+        Set<String> storageTypes = service.getSupportedStorageTypes();
+        assertTrue(storageTypes.contains(storageType));
 
-        service.stopBundle(bundleName);
-        assertEquals(Bundle.RESOLVED, service.bundleState(bundleName));
-    }
+        StorageService storageService = service.getStorageService(storageType);
+        assertNotNull(storageService);
 
-    @Test
-    public void testBundleIndex() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
+        Properties parameters = new Properties();
+        parameters.setProperty("repo-path-property", "http://github.com/test/blob.git");
+        StorageConnector connector = storageService.getConnector(parameters);
+        assertNotNull(connector);
 
-        Set<TeiidVersion> versions = service.getSupportedTeiidVersions();
-        TeiidVersion TEIID_8_12_4 = Version.TEIID_8_12_4.get();
-        versions.contains(TEIID_8_12_4);
-        DefaultTeiidVersion TEIID_8_12_x = new DefaultTeiidVersion(
-                                                                                       TeiidVersion.EIGHT, 
-                                                                                       TeiidVersion.ONE + TeiidVersion.TWO,
-                                                                                       TeiidVersion.WILDCARD);
-        versions.contains(TEIID_8_12_x);
-
-        TeiidService teiidService1 = service.getTeiidService(TEIID_8_12_4);
-        assertNotNull(teiidService1);
-        String teiidService1Bundle = teiidService1.getParentBundle();
-        String teiidService1Version = teiidService1.getVersion().toString();
-
-        TeiidService teiidService2 = service.getTeiidService(TEIID_8_12_x);
-        assertNotNull(teiidService2);
-        String teiidService2Bundle = teiidService2.getParentBundle();
-        String teiidService2Version = teiidService2.getVersion().toString();
-
-        // Same bundle referred to by both versions
-        assertEquals(teiidService1Bundle, teiidService2Bundle);
-        assertEquals(teiidService1Version, teiidService2Version);
-    }
-
-    @Test
-    public void testFindTeiidBundleAndStart() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = Version.TEIID_8_12.get();
-        TeiidService teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        assertEquals(TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor(),
-                     teiidService.getParentBundle());
-        TeiidVersion actualVersion = Version.TEIID_8_12_4.get();
-        assertEquals(actualVersion, teiidService.getVersion());
-
-        // Should NOT throw an exception but complete correctly
-        teiidService.getVersion();
-    }
-
-    @Test
-    public void testFindTeiidBundlesAndStartStopStartDifferentOne() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = Version.TEIID_8_12.get();
-        TeiidService teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        assertEquals(TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor(),
-                     teiidService.getParentBundle());
-        TeiidVersion actualVersion = Version.TEIID_8_12_4.get();
-        assertEquals(actualVersion, teiidService.getVersion());
-
-        // Should NOT throw an exception but complete correctly
-        teiidService.getVersion();
-
-        //
-        // Fetch teiid 8.11 version
-        // * Stops teiid 8.12
-        // * Starts teiid 8.11
-        // * Returns teiid service
-        //
-
-        version = Version.TEIID_8_11.get();
-        teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        String bundleId = TEIID_BUNDLE_PREFIX + version.getMajor() + DOT + version.getMinor();
-        assertEquals(bundleId, teiidService.getParentBundle());
-        actualVersion = Version.TEIID_8_11_5.get();
-        assertEquals(actualVersion, teiidService.getVersion());
-
-        // Should NOT throw an exception but complete correctly
-        teiidService.getVersion();
-
-        service.stopBundle(bundleId);
-        assertNull(service.getTeiidService());
-    }
-
-    @Test
-    public void testJcrPassesAcrossBundleClassLoadingFence() throws Exception {
-        assertEquals(Bundle.ACTIVE, service.getState());
-
-        TeiidVersion version = Version.TEIID_8_12.get();
-        TeiidService teiidService = service.getTeiidService(version);
-        assertNotNull(teiidService);
-
-        // Call convert() to check that javax.jcr.Node is export by the PluginService and correctly
-        // imported by the bundle
-        // Calling convert with a null sql parameter should return the method without an exception
-        Node node = Mockito.mock(Node.class);
-        teiidService.nodeConvert(null, node);
+        Set<Descriptor> descriptors = connector.getDescriptors();
+        assertNotNull(descriptors);
+        assertTrue(descriptors.size() > 0);
     }
 }

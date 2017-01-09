@@ -46,7 +46,7 @@ public final class AddParameterCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -63,6 +63,21 @@ public final class AddParameterCommandTest extends AbstractCommandTest {
         Parameter[] params = functions[0].getParameters(getTransaction());
         assertEquals(1, params.length);
         assertEquals("myParameter", params[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateParameterWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-parameter myParameter";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-pushdown-function myPushdownFunction",
+                                    "cd myPushdownFunction",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

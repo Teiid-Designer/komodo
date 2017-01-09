@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.repository;
 
@@ -173,6 +187,20 @@ public class PropertyImpl implements Property {
         ArgCheck.isNotNull(factory, "factory"); //$NON-NLS-1$
         ArgCheck.isNotNull(value, "value"); //$NON-NLS-1$
 
+        if (PropertyType.UNDEFINED == jcrPropType) {
+            return createValue(factory, value);
+        }
+
+        if (PropertyType.BINARY == jcrPropType) {
+            if (value instanceof InputStream) {
+                InputStream stream = (InputStream) value;
+                Binary binary = factory.createBinary(stream);
+                return factory.createValue(binary);
+            }
+
+            throw new Exception("A Binary property value must be in the form of an InputStream");
+        }
+
         if (PropertyType.BOOLEAN == jcrPropType) {
             if (value instanceof Boolean) {
                 return factory.createValue((Boolean)value);
@@ -278,6 +306,32 @@ public class PropertyImpl implements Property {
     @Override
     public String getAbsolutePath() {
         return this.path;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getBinaryValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public InputStream getBinaryValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final Binary result = getSession(transaction).getProperty(this.path).getBinary();
+            if (result == null)
+                return null;
+
+            return result.getStream();
+
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
     }
 
     /**

@@ -40,6 +40,8 @@ import org.komodo.utils.KLog;
 @SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractLoggingTest implements StringConstants {
 
+    protected static final String TEST_USER = "user";
+
     private static Path _dataDirectory;
 
     private static File configureLogPath(KLog logger) throws Exception {

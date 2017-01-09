@@ -42,7 +42,9 @@ public class Messages implements StringConstants {
 
         BundleNotFound,
         BundleFragmentStartError,
-        TeiidServiceBundleFailedToStop;
+        TeiidServiceBundleFailedToStop,
+        ServiceNotStarted,
+        CannotModifyCache;
 
         @Override
         public String toString() {
@@ -53,7 +55,8 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum Error {
 
-        UnsupportedTeiid;
+        UnsupportedTeiid,
+        UnsupportedStorageType;
 
         @Override
         public String toString() {

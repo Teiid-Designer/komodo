@@ -320,9 +320,9 @@ public interface StringConstants {
   String JAVA = "java"; //$NON-NLS-1$
 
   /**
-   * DDL File Extension
+   * ZIP File Extension
    */
-  String FILE_DDL = "ddl"; //$NON-NLS-1$
+  String ZIP = "zip"; //$NON-NLS-1$
 
   /**
    * src directory
@@ -358,5 +358,40 @@ public interface StringConstants {
    * RegExp pattern for determining a property's prefix and name
    */
   String PREFIX_PATTERN = "([a-zA-Z]+):(.*)"; //$NON-NLS-1$
+
+  /**
+   * Vdb Prefix
+   */
+  String VDB_PREFIX = "Vdb-"; //$NON-NLS-1$
+
+  /**
+   * XML Suffix
+   */
+  String XML_SUFFIX = DOT + XML;
+
+  /**
+   * ZIP Suffix
+   */
+  String ZIP_SUFFIX = DOT + ZIP;
+
+  /**
+   * Vdb Deployment Suffix
+   */
+  String VDB_DEPLOYMENT_SUFFIX = "-vdb" + XML_SUFFIX; //$NON-NLS-1$
+
+  /**
+   * Connection Suffix
+   */
+  String CONNECTION_SUFFIX = "-connection.xml"; //$NON-NLS-1$
+
+  /**
+   * jboss temp directory
+   */
+  String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir"; //$NON-NLS-1$
+
+  /**
+   * Java temp directory
+   */
+  String JAVA_IO_TMPDIR = "java.io.tmpdir"; //$NON-NLS-1$
 }
 

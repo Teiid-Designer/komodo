@@ -31,7 +31,7 @@ public final class ImportVdbCommandTest extends AbstractCommandTest {
         final String[] commands = { "create-vdb testVdb1 vdbPath" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
+        assertContextIs(RepositoryImpl.komodoWorkspacePath(getTransaction()));
     }
 
 }

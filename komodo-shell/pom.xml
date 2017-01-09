@@ -15,6 +15,16 @@
 	</properties>
 
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -34,6 +44,16 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!--
+			Needs to be specified before org.komodo.teiid-client since
+			its dependency on wildfly-cli brings in a transitive dependency
+			on aesh-0.66.4 which causes compilation errors
+		-->
+		<dependency>
+			<groupId>org.jboss.aesh</groupId>
+			<artifactId>aesh</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-spi</artifactId>
@@ -55,27 +75,23 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jboss.aesh</groupId>
-			<artifactId>aesh</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-test-utils</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
+			<artifactId>komodo-ui</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.komodo</groupId>
+            <artifactId>komodo-utils</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.komodo</groupId>
+            <artifactId>komodo-test-utils</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

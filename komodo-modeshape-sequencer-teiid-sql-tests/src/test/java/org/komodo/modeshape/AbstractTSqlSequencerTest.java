@@ -29,6 +29,7 @@ import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
+import org.junit.AfterClass;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.AliasSymbol;
@@ -44,7 +45,6 @@ import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
-import org.komodo.spi.type.DataTypeManager;
 import org.komodo.test.utils.AbstractSequencerTest;
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
@@ -60,6 +60,14 @@ public abstract class AbstractTSqlSequencerTest extends AbstractSequencerTest {
     public AbstractTSqlSequencerTest(TeiidVersion teiidVersion) {
         super();
         TeiidVersionProvider.getInstance().setTeiidVersion(teiidVersion);
+    }
+
+    @AfterClass
+    public static void resetTeiidVersionProvider() {
+        //
+        // Resets version provider to default
+        //
+        TeiidVersionProvider.getInstance().setTeiidVersion(null);
     }
 
     @Override

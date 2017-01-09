@@ -21,7 +21,6 @@
  */
 package org.komodo.repository;
 
-import java.io.File;
 import java.io.PrintStream;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -29,6 +28,7 @@ import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.OperationType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
@@ -200,6 +200,7 @@ public class RepositoryTools implements StringConstants {
     	StringBuilder sb = new StringBuilder();
         final Type type = property.getDescriptor( transaction ).getType();
         final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
+        final boolean propIsBinary = ( Type.BINARY == type );
 
     	if (property.isMultiple(transaction)) {
     		sb.append('[');
@@ -214,6 +215,9 @@ public class RepositoryTools implements StringConstants {
                         value = path;
                     }
                 }
+
+                if (propIsBinary)
+                    value = "*** binary value not shown ***";
 
     			sb.append(value);
     			if ((i + 1) < values.length)
@@ -230,6 +234,9 @@ public class RepositoryTools implements StringConstants {
                     value = path;
                 }
             }
+
+            if (propIsBinary)
+                value = "*** binary value not shown ***";
 
             sb.append(value);
     	}
@@ -268,7 +275,7 @@ public class RepositoryTools implements StringConstants {
 
         private String createIndent(String path) {
             StringBuffer indent = new StringBuffer(TAB);
-            String[] levels = path.split(File.separator);
+            String[] levels = path.split(FORWARD_SLASH);
 
             for (int i = 0; i < levels.length; ++i) {
                 indent.append(TAB);
@@ -278,22 +285,27 @@ public class RepositoryTools implements StringConstants {
         }
 
         @Override
+        public OperationType getRequestType() {
+            return OperationType.READ_OPERATION;
+        }
+
+        @Override
         public String visit(UnitOfWork transaction,
                             KomodoObject object) throws Exception {
             String indent = createIndent(object.getAbsolutePath());
             buffer.append(indent + object.getName(transaction) + NEW_LINE);
 
-            String[] propertyNames = object.getPropertyNames(transaction);
-
-            for (String propertyName : propertyNames) {
-                Property property = object.getProperty(transaction, propertyName);
-                buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
-            }
-
             //
             // Avoid relational filters of object's children
             //
             ObjectImpl bareObject = new ObjectImpl(object.getRepository(), object.getAbsolutePath(), object.getIndex());
+            String[] propertyNames = bareObject.getPropertyNames(transaction);
+
+            for (String propertyName : propertyNames) {
+                Property property = bareObject.getProperty(transaction, propertyName);
+                buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
+            }
+
             KomodoObject[] children = bareObject.getChildren(transaction);
             for (int i = 0; i < children.length; ++i)
                 children[i].accept(transaction, this);

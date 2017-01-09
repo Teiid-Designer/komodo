@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -42,7 +43,7 @@ public final class AddVirtualProcedureCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(vdbs.length,1);
@@ -55,6 +56,19 @@ public final class AddVirtualProcedureCommandTest extends AbstractCommandTest {
         assertEquals(1, procs.length);
         assertEquals(true, procs[0] instanceof VirtualProcedure);
         assertEquals("myVirtualProcedure", procs[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateVirtualProcedureWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-virtual-procedure myVirtualProcedure";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

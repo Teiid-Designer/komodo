@@ -1,0 +1,408 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+
+//------------------------------------------------------------------------------
+// N A M E S P A C E S
+//------------------------------------------------------------------------------
+
+<jcr='http://www.jcp.org/jcr/1.0'>
+<mix='http://www.jcp.org/jcr/mix/1.0'>
+<nt='http://www.jcp.org/jcr/nt/1.0'>
+<tko='http://www.teiid.org/komodo/1.0'>
+<dv = "http://www.jboss.org/dv/1.0">
+<tsql='http://www.teiid.org/sql/1.0'>
+<vdb = "http://www.metamatrix.com/metamodels/VirtualDatabase">
+<mmcore = "http://www.metamatrix.com/metamodels/Core">
+
+/*
+ * The Komodo store includes a workspace and a library.
+ */
+[tko:komodo] > nt:unstructured
+  + tko:workspace (tko:workspace) copy
+  + tko:library (tko:library) copy
+  + tko:environment (tko:environment) copy
+
+/*
+ * A workspace item.
+ */
+[tko:workspaceItem] > mix:referenceable mixin
+  - tko:externalLocation (string)
+  + tko:originalFile (nt:file) copy
+
+/*
+ * A Komodo library component is versionable and referenceable.
+ */
+[tko:libraryComponent] > mix:created, mix:versionable, mix:lockable mixin
+  - tko:description (string)
+
+/*
+ * An abstract node type that does not allow same named siblings. Otherwise is identical to nt:unstructured.
+ */
+[tko:uniqueChildren] orderable abstract
+  - * (undefined) multiple
+  - * (undefined)
+  + * (nt:base) = tko:uniqueChildren version
+
+/*
+ * The Komodo workspace keeps track of the Teiid servers, Komodo repositories, Teiid 
+ * data sources, dataservices, folders and other resources created and being worked by users.
+ */
+[tko:workspace] > nt:unstructured
+
+/*
+ * Home directories distinguish the assets of individual users.
+ */
+[tko:home] > nt:unstructured
+
+/*
+ * The repository grouping node used by the workspace. Child nodes are Komodo local or 
+ * remote/shared repositories.
+ */
+[tko:repositories] > nt:unstructured
+  + * (tko:repository) copy
+
+/*
+ * A Komodo repository. Node name can be user-defined.
+ */
+[tko:repository] > nt:unstructured, tko:workspaceItem
+  - tko:type (string) mandatory < 'LOCAL', 'SHARED'
+  + * (nt:address) copy
+
+/*
+ * The Teiid server grouping node used by the workspace. Child nodes are Teiid servers 
+ * known to the workspace.
+ */
+[tko:teiids] > nt:unstructured
+  + * (tko:teiid) copy
+
+/*
+ * An abstract node implementation of a Teiid server's connection properties
+ */
+ [tko:teiidArchetype] > nt:unstructured abstract
+  - tko:host (string) = 'localhost'
+  - tko:version (string)
+  - tko:adminPort (long) = 9999
+  - tko:adminUser (string) = 'admin'
+  - tko:adminPswd (string) // encrypted
+  - tko:adminSecure (boolean) = 'true'
+  - tko:jdbcPort (long) = 31000
+  - tko:jdbcUser (string) = 'user'
+  - tko:jdbcPswd (string) // encrypted
+  - tko:jdbcSecure (boolean) = false
+
+/*
+ * A Teiid server known by the workspace. Node name can be user-defined.
+ */
+[tko:teiid] > tko:teiidArchetype, tko:workspaceItem
+  - tko:lastPingTime (long)
+  - tko:connected (boolean)
+
+/*
+ * The Komodo teiid cache keeps track of live Teiid server content
+ */
+[tko:teiidCache] > nt:unstructured
+  + * (tko:cachedTeiid) copy
+  - tko:expirationThreshold (long) = 600000
+
+/*
+ * A model caching the state of a live teiid server
+ */
+[tko:cachedTeiid] > tko:teiidArchetype
+ + * (vdb:virtualDatabase) copy
+ + * (vdb:translator) copy
+ + * (dv:connection) copy
+ - tko:timestamp (long)
+
+/*
+ * The data source grouping node used by both the workspace and the library. Child nodes are data source definitions.
+ */
+[tko:dataSources] > nt:unstructured
+  + * (dv:connection) copy
+
+/*
+ * The Komodo library identifies the Teiid artifacts intended to be reused by multiple VDBs, workspaces, or Komodo repositories.
+ */
+[tko:library] > nt:unstructured
+  + tko:schemas (tko:schemas) copy
+  + tko:vdbs (tko:vdbs) copy
+  + tko:vdbImports (tko:vdbImports) copy
+  + tko:vdbModels (tko:vdbModels) copy
+  + tko:vdbModelSources (tko:vdbModelSources) copy
+  + tko:vdbTranslators (tko:vdbTranslators) copy
+  + tko:vdbEntries (tko:vdbEntries) copy
+  + tko:dataSources (tko:dataSources) copy
+
+/*
+ * A folder
+ */
+[tko:folder] > nt:unstructured
+  + * (tko:folder) copy
+  + * (tko:vdb) copy
+  + * (dv:connection) copy
+  + * (dv:dataService) copy
+  + * (tko:schema) copy
+
+/*
+ * The schemas/models grouping node used by the library. Child nodes represent Teiid DDL.
+ */
+[tko:schemas] > nt:unstructured
+  + * (tko:schema) copy
+
+/*
+ * A Teiid schema/model in the workspace or in the library. Node name is the schema/model name.
+ */
+[tko:schema] > nt:unstructured, tko:libraryComponent
+  - tko:rendition (string)
+  + * (tsql:languageObject) copy sns
+
+/*
+ * The VDB grouping node used by the library. Child nodes represent Teiid VDBs.
+ */
+[tko:vdbs] > nt:unstructured
+  + tko:vdb (tko:vdb) copy
+
+/*
+ * A Teiid VDB either in the workspace or in the library. Node name is the VDB name.
+ */
+[tko:vdb] > vdb:virtualDatabase, tko:libraryComponent
+
+/*
+ * The data service grouping node used by the workspace. Child nodes are data services.
+ */
+[tko:dataServices] > nt:unstructured
+  + * (dv:dataService) copy
+ 
+/*
+ * The VDB imports grouping node used by the library. Child nodes represent Import VDB definitions.
+ */
+[tko:vdbImports] > nt:unstructured
+  + * (tko:vdbImport) copy
+
+/*
+ * A VDB Import VDB definition found in the library. The node name is the imported VDB's name.
+ */
+[tko:vdbImport] > vdb:importVdb, tko:libraryComponent
+
+/*
+ * The VDB manifest model grouping node used by the library. Child nodes represent VDB manifest model definitions.
+ */
+[tko:vdbModels] > nt:unstructured
+  + * (tko:vdbModel) copy sns
+
+/*
+ * A VDB manifest model definition found in the library. The node name is the model name.
+ */
+[tko:vdbModel] > vdb:declarativeModel, tko:libraryComponent
+  + * (tko:vdbModelSource) copy
+
+/*
+ * The VDB manifest model source grouping node used by the library. Child nodes represent VDB model source definitions.
+ */
+[tko:vdbModelSources] > nt:unstructured
+  + * (tko:vdbModelSource) copy
+
+/*
+ * A VDB manifest model source definition found in the library. The node name is the model source's name.
+ */
+[tko:vdbModelSource] > vdb:source, tko:libraryComponent
+
+/*
+ * The VDB translator grouping node used by the library. Child nodes represent VDB translator definitions.
+ */
+[tko:vdbTranslators] > nt:unstructured
+  + * (tko:vdbTranslator) copy
+
+/*
+ * A VDB translator definition found in the library. The node name is the translator's name.
+ */
+[tko:vdbTranslator] > vdb:translator, tko:libraryComponent
+
+/*
+ * The VDB entry grouping node used by the library. Child nodes represent VDB entry definitions.
+ */
+[tko:vdbEntries] > nt:unstructured
+  + * (tko:vdbEntry) copy sns
+
+/*
+ * A VDB entry definition found in the library. The node name is the last segment of the path.
+ */
+[tko:vdbEntry] > vdb:entry, tko:libraryComponent
+
+/*
+ * The Komodo environment keeps any environmental settings used by the user.
+ */
+[tko:environment] > nt:unstructured
+  + tko:validation (nt:unstructured)
+  + tko:servers (nt:unstructured)
+  + tko:teiidCache (tko:teiidCache)
+
+/*
+ * A grouping node for localized messages.
+ */
+[tko:localizedMessageGroup] > nt:unstructured
+  + * (tko:localizedMessage) = tko:localizedMessage copy
+
+/*
+ * A localized message. The node name is the message key.
+ */
+[tko:localizedMessage] > nt:unstructured
+  + * (tko:localizedText) = tko:localizedText copy
+
+/*
+ * A localized text. The node name is the locale code.
+ */
+[tko:localizedText] > nt:unstructured
+  - tko:text (string) mandatory
+
+/*
+ * The propRestrictions grouping node used by rule. 
+ */
+[tko:propRestrictions] > nt:unstructured
+  + * (tko:propRestriction) copy
+
+/*
+ * A property restriction. Node name is the property name.
+ */
+[tko:propRestriction] > nt:unstructured
+  - tko:type (string) = 'NODE' mandatory autocreated < 'NODE', 'CHILD'
+  - tko:propValue (string)
+  
+/*
+ * A validation rule.
+ */
+[tko:rule] > nt:unstructured abstract
+  - tko:nodeType (string) mandatory // fully-qualified JCR node type name
+  - tko:builtIn (boolean) = 'false' mandatory autocreated
+  - tko:validationType (string) mandatory < 'CHILD', 'NODE', 'PROPERTY'
+  - tko:jcrName (string) // could be a property name or a child node type name
+  - tko:ruleType (string) mandatory < 'NUMBER', 'PATTERN', 'RELATIONSHIP', 'REQUIRED', 'SAME_NAME_SIBLING'
+  - tko:required (boolean) = 'false' mandatory autocreated
+  - tko:enabled (boolean) = 'true' mandatory autocreated
+  - tko:severity (string) = 'ERROR' mandatory autocreated < 'ERROR', 'WARNING', 'INFO', 'OK'
+  + tko:propRestrictions (tko:propRestrictions) copy
+  + tko:messages (tko:localizedMessageGroup) = tko:localizedMessageGroup copy
+  
+/*
+ * A validation rule that requires a numeric property value to fall within a range.
+ * At least one of the minValue or maxValue properties must be present.
+ */
+[tko:numberRule] > tko:rule
+  - tko:ruleType (string) = 'NUMBER' mandatory autocreated < 'NUMBER'
+  - tko:minValue (string)
+  - tko:minInclusive (boolean) = 'true'
+  - tko:maxValue (string)
+  - tko:maxInclusive (boolean) = 'true'
+  
+/*
+ * A validation rule that requires a node name or property value to match a pattern.
+ */
+[tko:patternRule] > tko:rule
+  - tko:ruleType (string) = 'PATTERN' mandatory autocreated < 'PATTERN'
+  - tko:pattern (string) mandatory
+  
+/*
+ * A validation rule that requires child nodes or properties to either exist or not exist.
+ */
+[tko:relationshipRule] > tko:rule
+  - tko:ruleType (string) = 'RELATIONSHIP' mandatory autocreated < 'RELATIONSHIP'
+  - tko:propExists (string) multiple // properties that must exist
+  - tko:propAbsent (string) multiple // properties that must not exist
+  - tko:childExists (string) multiple // child node types that a child must have
+  - tko:childAbsent (string) multiple // child node types that children cannot be
+  
+/*
+ * A validation rule that requires sibling nodes to not have the same name.
+ */
+[tko:snsRule] > tko:rule
+  - tko:ruleType (string) = 'SAME_NAME_SIBLING' mandatory autocreated < 'SAME_NAME_SIBLING'
+  - tko:matchType (boolean) = 'true' mandatory
+
+/*
+ * A grouping node for searches made on the repository
+ */
+[tko:searches] > nt:unstructured
+ + * (tko:search) copy
+
+/*
+ * A configuration for building a search query on the repository
+ */
+[tko:search] > nt:unstructured
+ - tko:searchDate (string) mandatory
+ - tko:customWhereClause (string)
+ + * (tko:fromType) copy sns
+ + * (tko:whereClause) copy sns
+
+/*
+ * A From clause for a search
+ */
+[tko:fromType] > nt:unstructured
+ - tko:type (string) mandatory
+ - tko:alias (string)
+
+/*
+ * Where clause for a search
+ */
+[tko:whereClause] > nt:unstructured abstract
+ - tko:preClauseOperator (string) < 'AND', 'OR'
+ - tko:alias (string)
+
+/*
+ * Where Paranthesis clause
+ */
+[tko:whereParanthesisClause] > tko:whereClause
+ + * (tko:whereClause) copy sns
+
+/*
+ * Where Compare clause
+ */
+[tko:whereCompareClause] > tko:whereClause
+ - tko:property (string) mandatory
+ - tko:compareOperator (string) mandatory < '=', '!=', '<', '<=', '>', '>=', 'LIKE', 'NOT LIKE'
+ - tko:value (string) mandatory
+ - tko:caseInsensitive (boolean) = 'false' mandatory
+
+/*
+ * Where Contains clause
+ */
+[tko:whereContainsClause] > tko:whereClause
+ - tko:property (string) mandatory
+ - tko:keywords (string) multiple
+ - tko:keywordCriteria (string) = 'ALL' autocreated < 'ALL', 'ANY', 'NONE'
+
+/*
+ * Where Set clause
+ */
+[tko:whereSetClause] > tko:whereClause
+ - tko:property (string) mandatory
+ - tko:values (string) multiple
+
+/*
+ * Where Path clause
+ */
+[tko:wherePathClause] > tko:whereClause
+ - tko:path (string) mandatory
+
+/*
+ * Where Parent Path clause
+ */
+[tko:whereParentPathClause] > tko:wherePathClause
+ - tko:childrenOnly (boolean) = 'true'

@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -222,7 +224,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertTrue(tmpFile.length() > 0);
 
         // Make file unreadable
-        tmpFile.setReadable(false);
+        if (! tmpFile.setReadable(false)) {
+            //
+            // Cannot set the permissions on the file.
+            // Some platforms do not allow this, eg. Windows
+            // Abort the test
+            //
+            return;
+        }
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -292,7 +301,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @UseConnectorMetadata=cached
          */
         verify(tweetNode.getParent(getTransaction()), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-        verifyMixinType(tweetNode, "mix:referenceable");
         verifyProperty(tweetNode, VdbLexicon.Vdb.NAME, "twitter");
         verifyProperty(tweetNode, VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
 
@@ -455,19 +463,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
     	// Commit the transaction and handle any import exceptions
+        SynchronousCallback importCallback = this.callback;
+        commit(State.ERROR);
 
-        SynchronousCallback testCallback = this.callback;
-        this.getTransaction().commit();
-
-        assertTrue(this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ));
-        assertEquals(State.ERROR, getTransaction().getState());
-
-        if ( testCallback.hasError() ) {
-            importMessages.addErrorMessage( testCallback.error() );
+        if ( importCallback.hasError() ) {
+            importMessages.addErrorMessage( importCallback.error() );
         }
 
     	// Retrieve vdb after import
-        createInitialTransaction();
         KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull(vdbNode);
 
@@ -491,7 +494,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME);
         assertNotNull(vdbNode);
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo, getTransaction());
 
         KomodoObject twitterView = vdbNode.getChild(getTransaction(), TWITTER_VIEW_MODEL);
         Model model = wkspManager.resolve(getTransaction(), twitterView, Model.class);
@@ -618,11 +621,11 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         KomodoObject myVdbExample = verify(allElementsNode.getParent(getTransaction()),
                                                                     TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME,
                                                                     VdbLexicon.Vdb.VIRTUAL_DATABASE,
-                                                                    "mix:referenceable");
+                                                                    null);
         assertEquals(allElementsNode, myVdbExample);
         verifyProperty(myVdbExample, VdbLexicon.Vdb.NAME, "myVDB");
         verifyProperty(myVdbExample, VdbLexicon.Vdb.DESCRIPTION, "vdb description");
-        verifyProperty(myVdbExample, VdbLexicon.Vdb.CONNECTION_TYPE, "BY_VERSION");
+        verifyProperty(myVdbExample, VdbLexicon.Vdb.CONNECTION_TYPE, "NONE");
         verifyProperty(myVdbExample, VdbLexicon.Vdb.PREVIEW, Boolean.FALSE.toString());
         verifyProperty(myVdbExample, VdbLexicon.Vdb.VERSION, Integer.toString(1));
         verifyProperty(myVdbExample, "vdb-property2", "vdb-value2");
@@ -890,7 +893,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -908,7 +911,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(2, vdb.getModels(getTransaction()).length);
 
         assertEquals(1, vdb.getDataRoles(getTransaction()).length);
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
     	assertEquals("publishers-only", dataRole.getName(getTransaction()));
     	assertNotNull(dataRole.getProperty(getTransaction(), "vdb:grantAll"));
         assertEquals("true", dataRole.getProperty(getTransaction(), "vdb:grantAll").getValue(getTransaction()).toString());
@@ -916,7 +919,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(2, dataRole.getMappedRoles(getTransaction()).length);
 
         assertEquals(1, vdb.getTranslators(getTransaction()).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
+        Translator translator = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
     	assertEquals("books_db2", translator.getName(getTransaction()));
     	assertEquals("db2", translator.getType(getTransaction()));
     	assertNotNull(translator.getProperty(getTransaction(), "requiresCriteria"));
@@ -955,7 +958,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1012,7 +1015,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1049,7 +1052,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1090,7 +1093,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 		    </data-role>
         */
 
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
     	assertEquals("publishers-only", dataRole.getName(getTransaction()));
     	assertNotNull(dataRole.getProperty(getTransaction(), "vdb:grantAll"));
         assertEquals("true", dataRole.getProperty(getTransaction(), "vdb:grantAll").getValue(getTransaction()).toString());
@@ -1124,7 +1127,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         assertEquals("BooksVirtualModelOnly", vdb.getVdbName(getTransaction()));
@@ -1163,7 +1166,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         /*
 		    <description>Sample vdb containing only a tranlator override element</description>
@@ -1180,7 +1183,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertEquals(0, vdb.getModels(getTransaction()).length);
         assertEquals(1, vdb.getTranslators(getTransaction()).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
+        Translator translator = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
     	assertEquals("books_db2", translator.getName(getTransaction()));
     	assertEquals("db2", translator.getType(getTransaction()));
 
@@ -1220,7 +1223,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1269,7 +1272,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String connType = vdb.getConnectionType(getTransaction());
@@ -1328,7 +1331,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb vdb = manager.resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
@@ -1357,7 +1360,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
      */
     private void importVdb(InputStream vdbStream) throws Exception {
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = _repo.createTransaction("Import Vdb", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = _repo.createTransaction(TEST_USER, "Import Vdb", false, callback); //$NON-NLS-1$
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -1383,12 +1386,12 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
 //        SELECT [jcr:path], [mode:localName]
 //        FROM [nt:unstructured] AS nt
-//        WHERE (CONTAINS(nt.*, 'view')
+//        WHERE (CONTAINS(nt.*, 'view') OR LOWER(NAME(nt)) LIKE '%view%')
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         String ALIAS = "nt";
-        os.addFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
-        String whereSql = "(CONTAINS(nt.*, '*view*'))";
+        os.setFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
+        String whereSql = "(CONTAINS(nt.*, '*view*') OR LOWER(NAME(nt)) LIKE '%view%')";
         os.setCustomWhereClause(whereSql);
 
         List<KomodoObject> results = os.searchObjects(getTransaction());
@@ -1397,6 +1400,35 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
             paths.add(ko.getAbsolutePath());
         Collections.sort(paths);
 
+        for (String path : paths)
+            System.out.println(path);
+
         assertEquals(23, results.size());
     }
+
+    @Test
+    public void testPatientVdb() throws Exception {
+        InputStream vdbStream = TestUtilities.getResourceAsStream(TestUtilities.class, TestUtilities.RESOURCES_DIRECTORY, "patients-vdb.xml");
+        assertNotNull(vdbStream);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        executeImporter(vdbStream, workspace, importOptions, importMessages);
+
+        // Commit the transaction and handle any import exceptions
+        commitHandleErrors(importMessages);
+
+        // Test that a vdb was created
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), "patients", VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        KomodoObject patientModel = verify(vdbNode, "Patients", VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        verify(patientModel, "TheServiceView");
+    }
+
 }

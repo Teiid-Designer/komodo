@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -38,7 +39,7 @@ public final class AddModelCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -46,6 +47,17 @@ public final class AddModelCommandTest extends AbstractCommandTest {
         Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
         assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateModelWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-model myModel";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

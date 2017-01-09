@@ -38,8 +38,8 @@ public final class FindCommandTest extends AbstractCommandTest {
 
         // Make sure the two VDBs are found
         String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("/workspace/testVdb1"));
-        assertTrue(writerOutput.contains("/workspace/testVdb2"));
+        assertTrue(writerOutput.contains("/workspace/" + TEST_USER + "/testVdb1"));
+        assertTrue(writerOutput.contains("/workspace/" + TEST_USER + "/testVdb2"));
     }
 
 }

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.activation.MimeType;
 import javax.crypto.Cipher;
 import javax.crypto.spec.PSource;
@@ -53,13 +54,15 @@ import javax.security.auth.x500.X500Principal;
 import javax.security.sasl.Sasl;
 import javax.sql.RowSet;
 import javax.sql.rowset.serial.SerialArray;
+import javax.transaction.Transaction;
+import javax.transaction.xa.Xid;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.events.Namespace;
-import javax.xml.stream.util.StreamReaderDelegate;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.XMLEventConsumer;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMLocator;
 import javax.xml.transform.sax.SAXTransformerFactory;
@@ -70,19 +73,22 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import org.komodo.osgi.teiid.UnsupportedTeiidException;
+import org.komodo.osgi.storage.StorageServiceProvider;
+import org.komodo.plugin.framework.AbstractBundleService;
+import org.komodo.spi.KException;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.TeiidService;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageService;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
-import org.komodo.teiid.framework.AbstractDataTypeManager;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KEnvironment;
 import org.modeshape.jcr.api.Session;
@@ -93,10 +99,13 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.XMLReader;
+import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 public class PluginService implements StringConstants {
 
-    public static final String INDEX_TEIID_PATH = "/teiids/teiid/filename/text()";
+    public static final String INDEX_BUNDLE_PATH = "/bundles/bundle/filename/text()";
 
     private static final String VERSION_PREFIX = ";version=";
 
@@ -110,11 +119,27 @@ public class PluginService implements StringConstants {
         KEnvironment.checkDataDirProperty();
     }
 
+    private static final Object lock = new Object();
+
     private static PluginService instance;
 
+    //
+    // Double check synchronization to protect felix bundle cache
+    // from attempts to start it multiple times from concurrent threads
+    //
     public static PluginService getInstance() throws Exception {
-        if (instance == null)
-            instance = new PluginService();
+        PluginService service = instance;
+        if (service == null) {
+            synchronized (lock) {
+                // While we were waiting for the lock, another
+                // thread may have instantiated the object.
+                service = instance;
+                if (service == null) {
+                    service = new PluginService();
+                    instance = service;
+                }
+            }
+        }
 
         return instance;
     }
@@ -125,11 +150,11 @@ public class PluginService implements StringConstants {
 
     private final Framework framework;
 
-    private PluginServiceTracker tracker;
+    private StorageServiceProvider storageServiceProvider;
 
-    private TeiidService teiidService;
+    private int cacheExpirationValue = 10;
 
-    private Map<TeiidVersion, String> bundleIndex = new HashMap<TeiidVersion, String>();
+    private TimeUnit cacheExpirationUnits = TimeUnit.MINUTES;
 
     private PluginService() throws Exception {
         createDirectory(pluginServiceDir);
@@ -159,9 +184,12 @@ public class PluginService implements StringConstants {
     }
 
     private StringBuffer exportPackages() {
+        VersionProvider provider = VersionProvider.getInstance();
         StringBuffer pkgs = new StringBuffer();
 
         Class<?>[] classes = new Class<?>[] {
+            // org.komodo.spi
+            KException.class,
             // org.komodo.spi.constants
             StringConstants.class,
             // org.komodo.spi.query
@@ -180,12 +208,22 @@ public class PluginService implements StringConstants {
             Outcome.class,
             // org.komodo.spi.uuid
             WorkspaceUUIDService.class,
+            // org.komodo.spi.storage
+            StorageConnector.class,
+            // org.komodo.spi.repository
+            Exportable.class,
 
             /**
-             * plugin teiid framework
+             * plugin framework
              */
-            // org.komodo.teiid.framework
-            AbstractDataTypeManager.class,
+            // org.komodo.plugin.framework
+            AbstractBundleService.class,
+
+            /**
+             * utils
+             */
+            // org.komodo.utils
+            ArgCheck.class,
 
             /**
              * The javax libraries are not exported by default in osgi
@@ -235,12 +273,6 @@ public class PluginService implements StringConstants {
             QName.class,
             // javax.xml.parsers
             DocumentBuilder.class,
-            // javax.xml.stream
-            XMLStreamWriter.class,
-            // javax.xml.stream.events
-            Namespace.class,
-            // javax.xml.stream.util
-            StreamReaderDelegate.class,
             // javax.xml.transform
             Transformer.class,
             // javax.xml.transform.dom
@@ -254,7 +286,18 @@ public class PluginService implements StringConstants {
             // javax.xml.validation
             SchemaFactory.class,
             // javax.xml.xpath
-            XPath.class
+            XPath.class,
+
+            /**
+             * The org.xml libraries are not exported by default in osgi
+             * so need to specify the packages needed by teiid
+             */
+            // org.xml.sax
+            XMLReader.class,
+            // org.xml.sax.ext
+            DefaultHandler2.class,
+            // org.xml.sax.helpers
+            XMLReaderFactory.class
         };
 
         for (Class<?> klazz : classes) {
@@ -262,10 +305,37 @@ public class PluginService implements StringConstants {
         }
 
         //
+        // javax.xml.stream classes need a requirement version
+        // even though they are being provided by the jre
+        //
+        Class<?>[] streamClasses = new Class<?>[] {
+            // javax.xml.stream
+            XMLStreamWriter.class,
+            // javax.xml.stream.events
+            XMLEvent.class,
+            // javax.xml.stream.util
+            XMLEventConsumer.class
+        };
+
+        pkgs.append(appendVersionedPackages(provider.getJavaxXmlStreamVersion(), streamClasses));
+
+        //
+        // javax.xml.stream classes need a requirement version
+        // even though they are being provided by the jre
+        //
+        Class<?>[] txClasses = new Class<?>[] {
+            // javax.transaction
+            Transaction.class,
+            // javax.transaction.xa
+            Xid.class
+        };
+
+        pkgs.append(appendVersionedPackages(provider.getJavaxTransactionVersion(), txClasses));
+
+        //
         // 3rd party dependencies in the bundles get wired up with a version requirement
         // so need to provide the version pragma with these packages to match
         //
-        VersionProvider provider = VersionProvider.getInstance();
         pkgs.append(Session.class.getPackage().getName())
                 .append(VERSION_PREFIX)
                 .append(SPEECH_MARK)
@@ -284,6 +354,20 @@ public class PluginService implements StringConstants {
         return pkgs;
     }
 
+    private String appendVersionedPackages(String version, Class<?>[] pkgClasses) {
+        StringBuffer pkgs = new StringBuffer();
+        for (Class<?> klazz : pkgClasses) {
+            pkgs.append(pkg(klazz))
+                    .append(VERSION_PREFIX)
+                    .append(SPEECH_MARK)
+                    .append(version)
+                    .append(SPEECH_MARK)
+                    .append(COMMA);
+        }
+
+        return pkgs.toString();
+    }
+
     private void createDirectory(String path) {
         File dir = new File(path);
         if (dir.exists())
@@ -292,7 +376,19 @@ public class PluginService implements StringConstants {
         dir.mkdirs();
     }
 
-    private Bundle findBundleBySymbolicName(String symbolicName) throws Exception {
+    private boolean isActive() {
+        return getState() == Bundle.ACTIVE;
+    }
+
+    /**
+     * @param symbolicName
+     * @return the bundle with the given symbolic name or <code>null</code>
+     * @throws Exception
+     */
+    public Bundle findBundleBySymbolicName(String symbolicName) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+ 
         Bundle[] bundles = framework.getBundleContext().getBundles();
         if (bundles == null || bundles.length == 0)
             return null;
@@ -307,25 +403,10 @@ public class PluginService implements StringConstants {
         return theBundle;
     }
 
-    private String searchBundleIndex(TeiidVersion teiidVersion) {
-        String bundleName = bundleIndex.get(teiidVersion);
-        if (bundleName != null)
-            return bundleName;
-
-        teiidVersion = new DefaultTeiidVersion(teiidVersion.getMajor(),
-                                                                               teiidVersion.getMinor(),
-                                                                               TeiidVersion.WILDCARD);
-        return bundleIndex.get(teiidVersion);
-    }
-
     /**
-     * @return the set of supported Teiid versions
+     * @return the bundle context of the framework
      */
-    public Set<TeiidVersion> getSupportedTeiidVersions() {
-        return Collections.unmodifiableSet(bundleIndex.keySet());
-    }
-
-    BundleContext getContext() {
+    public BundleContext getContext() {
          return framework.getBundleContext(); 
     }
 
@@ -333,9 +414,6 @@ public class PluginService implements StringConstants {
      * @return the state of this service
      */
     public int getState() {
-        if (framework == null)
-            return Bundle.UNINSTALLED;
-
         return framework.getState();
     }
 
@@ -345,15 +423,16 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void start() throws Exception {
-        ArgCheck.isNotNull(framework);
+        if (isActive())
+            return;
 
         if (getState() == Bundle.ACTIVE)
             return;
 
         framework.start();
 
-        this.tracker = new PluginServiceTracker(this);
-        this.tracker.open();
+        this.storageServiceProvider = new StorageServiceProvider(this);
+        this.storageServiceProvider.open();
 
         installBundles();
     }
@@ -377,7 +456,7 @@ public class PluginService implements StringConstants {
             XPath xpath = xpathFactory.newXPath();
 
             // XPath expression to find all the teiid jar filenames
-            XPathExpression expr = xpath.compile(INDEX_TEIID_PATH);
+            XPathExpression expr = xpath.compile(INDEX_BUNDLE_PATH);
 
             //evaluate expression result on XML document
             NodeList nodes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
@@ -400,13 +479,14 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void shutdown() throws Exception {
-        if (framework == null)
+        if (!isActive())
             return;
 
         if (getState() <= Bundle.INSTALLED)
             return;
 
-        this.tracker.close();
+        if (storageServiceProvider != null)
+            storageServiceProvider.dispose();
 
         framework.stop();
 
@@ -421,6 +501,9 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void installBundle(URL bundleUrl) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
         if (bundleUrl == null)
             return; // nothing to do
 
@@ -433,26 +516,20 @@ public class PluginService implements StringConstants {
         Enumeration<String> keys = headers.keys();
         while(keys.hasMoreElements()) {
             String key = keys.nextElement();
-            if (!TeiidService.VERSION_PROPERTY.equals(key))
-                continue;
-
-            // This bundle is a teiid service bundle
-            String value = headers.get(key);
-            TeiidVersion teiidVersion = new DefaultTeiidVersion(value);
-            bundleIndex.put(teiidVersion, bundle.getSymbolicName());
-
-            // Add a fallback
-            teiidVersion = new DefaultTeiidVersion(teiidVersion.getMajor(),
-                                                                                   teiidVersion.getMinor(),
-                                                                                   TeiidVersion.WILDCARD);
-            bundleIndex.put(teiidVersion, bundle.getSymbolicName());
+            if (StorageService.STORAGE_ID_PROPERTY.equals(key)) {
+                storageServiceProvider.register(headers.get(key), bundle.getSymbolicName());
+                break;
+            }
         }
     }
 
     /**
      * @return a list of all bundles currently installed
      */
-    public List<String> installedBundles() {
+    public List<String> installedBundles() throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
         Bundle[] bundles = framework.getBundleContext().getBundles();
         if (bundles == null || bundles.length == 0)
             return Collections.emptyList();
@@ -515,44 +592,47 @@ public class PluginService implements StringConstants {
         bundle.stop();
     }
 
-    public TeiidService getTeiidService() {
-        return teiidService;
+    /**
+     * @return the set of supported storage services
+     */
+    public Set<String> getSupportedStorageTypes() throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
+        return storageServiceProvider.getSupportedStorageTypes();
     }
 
-    public TeiidService getTeiidService(TeiidVersion version) throws Exception {
-        if (teiidService != null) {
-            if (teiidService.getVersion().equals(version))
-                return teiidService;
+    /**
+     * @param storageType
+     * @return the storage service for the given storage type
+     * @throws Exception
+     */
+    public synchronized StorageService getStorageService(String storageType) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
 
-            //
-            // teiid service is not the appropriate version so stop its parent bundle
-            //
-            String parentBundleName = teiidService.getParentBundle();
-
-            // Once the bundle has stopped, the PluginServiceTracker
-            // should null the teiidService field
-            stopBundle(parentBundleName);
-
-            if (getTeiidService() != null)
-                throw new Exception(Messages.getString(Messages.PluginService.TeiidServiceBundleFailedToStop, parentBundleName));
-        }
-
-        String symbolicName = searchBundleIndex(version);
-        if (symbolicName == null)
-            throw new UnsupportedTeiidException(version);
-
-        Bundle bundle = findBundleBySymbolicName(symbolicName);
-        if (bundle == null)
-            throw new UnsupportedTeiidException(version);
-
-        // Once the bundle has become active, the PluginServiceTracker
-        // should assign the TeiidService back to this service
-        startBundle(symbolicName);
-
-        return this.teiidService;
+        return storageServiceProvider.getStorageService(storageType);
     }
 
-    void setTeiidService(TeiidService teiidService) {
-        this.teiidService = teiidService;
+    public int getCacheExpirationValue() {
+        return cacheExpirationValue;
+    }
+
+    public void setCacheExpirationValue(int value) throws Exception {
+        if (isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.CannotModifyCache));
+
+        cacheExpirationValue = value;
+    }
+
+    public TimeUnit getCacheExpirationUnits() {
+        return cacheExpirationUnits;
+    }
+
+    public void setCacheExpirationUnits(TimeUnit units) throws Exception {
+        if (isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.CannotModifyCache));
+
+        cacheExpirationUnits = units;
     }
 }

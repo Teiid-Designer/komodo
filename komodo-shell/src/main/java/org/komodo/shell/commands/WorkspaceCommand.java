@@ -26,7 +26,6 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
@@ -67,7 +66,7 @@ public class WorkspaceCommand extends BuiltInShellCommand {
 
         try {
             getWorkspaceStatus().setCurrentContext( new ObjectImpl( current.getRepository(),
-                                                                    KomodoObjectLabelProvider.WORKSPACE_PATH,
+                                                                    getWorkspaceStatus().getLabelProvider().getWorkspacePath(),
                                                                     0 ) );
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {

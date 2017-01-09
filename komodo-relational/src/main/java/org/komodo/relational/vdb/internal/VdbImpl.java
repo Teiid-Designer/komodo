@@ -1,28 +1,42 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.vdb.internal;
 
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.internal.ModelImpl;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
@@ -34,6 +48,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -42,22 +57,23 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 /**
  * An implementation of a virtual database manifest.
  */
-public final class VdbImpl extends RelationalObjectImpl implements Vdb {
+public class VdbImpl extends RelationalObjectImpl implements Vdb {
 
     /**
      * The allowed child types.
      */
     private static final KomodoType[] CHILD_TYPES = new KomodoType[] { DataRole.IDENTIFIER, Entry.IDENTIFIER, Model.IDENTIFIER,
-                                                                      Translator.IDENTIFIER, VdbImport.IDENTIFIER };
+                                                                         Translator.IDENTIFIER, VdbImport.IDENTIFIER };
 
 	/**
 	 * Include the special properties into the primary type descriptor.
@@ -190,26 +206,12 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
          */
         @Override
         public Document asDocument() throws KException {
-            String xmlText = this.xml.replaceAll(NEW_LINE, SPACE);
-            xmlText = xmlText.replaceAll(">[\\s]+<", CLOSE_ANGLE_BRACKET + OPEN_ANGLE_BRACKET); //$NON-NLS-1$
-            xmlText = xmlText.replaceAll("[\\s]+", SPACE); //$NON-NLS-1$
-            xmlText = xmlText.replaceAll("CDATA\\[[\\s]+", "CDATA["); //$NON-NLS-1$ //$NON-NLS-2$
-            xmlText = xmlText.replaceAll("; \\]\\]", ";]]"); //$NON-NLS-1$ //$NON-NLS-2$
+            return FileUtils.createDocument(this.xml);
+        }
 
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setIgnoringElementContentWhitespace(true);
-            dbf.setIgnoringComments(true);
-
-            try {
-                final DocumentBuilder db = dbf.newDocumentBuilder();
-                final Document doc = db.parse(new InputSource(new StringReader(xmlText)));
-                doc.setXmlStandalone(true);
-                doc.normalizeDocument();
-
-                return doc;
-            } catch (final Exception e) {
-                throw new KException(e);
-            }
+        @Override
+        public String getName(UnitOfWork transaction) throws KException {
+            return getVdbName(transaction);
         }
 
         /**
@@ -218,10 +220,14 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
          * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
          */
         @Override
-        public String export( final UnitOfWork transaction, Properties properties) {
-            return this.xml;
+        public byte[] export( final UnitOfWork transaction, Properties properties) {
+            return this.xml == null ? new byte[0] : this.xml.getBytes();
         }
 
+        @Override
+        public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
+            return DocumentType.VDB_XML;
+        }
     }
 
     /**
@@ -325,12 +331,12 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export( final UnitOfWork transaction,
+    public byte[] export( final UnitOfWork transaction,
                           final Properties properties ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final String result = createManifest( transaction, properties ).export( transaction, properties );
+        final byte[] result = createManifest( transaction, properties ).export( transaction, properties );
         return result;
     }
 
@@ -521,7 +527,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         } else if ( VdbLexicon.Translator.TRANSLATOR.equals( type ) ) {
             result = getTranslators( transaction, namePatterns );
         } else {
-            result = KomodoObject.EMPTY_ARRAY;
+            result = super.getChildrenOfType(transaction, type, namePatterns);
         }
 
         return result;
@@ -1231,4 +1237,44 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         setObjectProperty(uow, "setVersion", VdbLexicon.Vdb.VERSION, newVersion); //$NON-NLS-1$
     }
 
+    @Override
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
+        return DocumentType.VDB_XML;
+    }
+    
+    @Override
+    public DeployStatus deploy(UnitOfWork uow, Teiid teiid) {
+        ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiid, "teiid"); //$NON-NLS-1$
+
+        DeployStatus status = new DeployStatus();
+        TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+        
+        try {
+            String vdbName = getName(uow);
+            status.addProgressMessage("Starting deployment of vdb " + vdbName); //$NON-NLS-1$
+
+            status.addProgressMessage("Attempting to deploy VDB " + vdbName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            // Get VDB content
+            byte[] vdbXml = export(uow, null);
+            if (vdbXml == null || vdbXml.length == 0) {
+                status.addErrorMessage("VDB " + vdbName + " content is empty"); //$NON-NLS-1$ //$NON-NLS-2$
+                return status;
+            }
+
+            String vdbToDeployName = getName(uow);
+            String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
+            teiidInstance.deployDynamicVdb(vdbDeploymentName, new ByteArrayInputStream(vdbXml));
+
+            status.addProgressMessage("VDB deployed " + vdbName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (Exception ex) {
+            status.addErrorMessage(ex);
+        }
+
+        
+        return status;
+    }
+    
 }

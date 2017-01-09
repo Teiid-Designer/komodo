@@ -1,0 +1,62 @@
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+
+    <!-- ================================================================== -->
+    <!-- Parent -->
+    <!-- ================================================================== -->
+    <parent>
+        <groupId>org.komodo</groupId>
+        <artifactId>komodo</artifactId>
+        <version>0.0.4</version>
+    </parent>
+
+    <!-- ================================================================== -->
+    <!-- Self -->
+    <!-- ================================================================== -->
+    <artifactId>komodo-ui</artifactId>
+    <description>UI-related Frameworks and Utilities not dependent on a specific technology or tool.</description>
+    <modelVersion>4.0.0</modelVersion>
+    <name>Komodo Core UI Frameworks and Utilities</name>
+    <packaging>jar</packaging>
+
+
+    <!-- ================================================================== -->
+    <!-- Build -->
+    <!-- ================================================================== -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+    <!-- ================================================================== -->
+    <!-- Dependencies -->
+    <!-- ================================================================== -->
+    <dependencies>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-spi</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+		</dependency>
+    </dependencies>
+    
+</project>

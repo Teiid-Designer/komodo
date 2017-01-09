@@ -1,13 +1,28 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.datasource;
 
 import java.util.List;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
@@ -52,25 +67,21 @@ public final class SetDatasourcePropertyCommand extends DatasourceShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            if ( JNDI_NAME.equals( name ) ) {
+            if ( DESCRIPTION.equals( name ) ) {
+                datasource.setDescription( transaction, value );
+            } else if ( EXT_LOC.equals( name ) ) {
+                datasource.setExternalLocation( transaction, value );
+            } else if ( JNDI_NAME.equals( name ) ) {
                 datasource.setJndiName( transaction, value );
             } else if ( DRIVER_NAME.equals( name ) ) {
                 datasource.setDriverName( transaction, value );
             } else if ( CLASS_NAME.equals( name ) ) {
                 datasource.setClassName( transaction, value );
-            } else if ( PROFILE_NAME.equals( name ) ) {
-                datasource.setProfileName( transaction, value );
             } else if ( JDBC.equals( name ) ) {
                 if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                     datasource.setJdbc( transaction, Boolean.parseBoolean( value ) );
                 } else {
                     errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC );
-                }
-            } else if ( PREVIEW.equals( name ) ) {
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    datasource.setPreview( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
                 }
             } else {
                 errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );

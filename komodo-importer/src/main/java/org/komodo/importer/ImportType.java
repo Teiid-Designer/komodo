@@ -38,5 +38,10 @@ public enum ImportType {
     /**
      * Import vdb
      */
-    VDB;
+    VDB,
+
+    /**
+     * Import data source
+     */
+    DS;
 }

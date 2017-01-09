@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.vdb.internal;
 
@@ -13,6 +27,7 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,8 +41,6 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
@@ -199,9 +212,9 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportEmptyVdb() throws Exception {
-        final String manifest = this.vdb.export( getTransaction(), new Properties() );
+        byte[] manifest = this.vdb.export( getTransaction(), new Properties() );
         assertThat( manifest, is( notNullValue() ) );
-        assertThat( manifest.isEmpty(), is( false ) );
+        assertTrue( manifest.length > 0 );
     }
 
     @Test
@@ -223,9 +236,9 @@ public final class VdbImplTest extends RelationalModelTest {
         }
 
         // test
-        final String manifest = this.vdb.export( getTransaction(), new Properties() );
+        byte[] manifest = this.vdb.export( getTransaction(), new Properties() );
         assertThat( manifest, is( notNullValue() ) );
-        assertThat( manifest.isEmpty(), is( false ) );
+        assertTrue( manifest.length > 0 );
     }
 
     @Test
@@ -568,7 +581,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
         commit(); // commit the import
 
-        final Vdb[] vdbs = WorkspaceManager.getInstance( _repo ).findVdbs( getTransaction() );
+        final Vdb[] vdbs = WorkspaceManager.getInstance( _repo, getTransaction() ).findVdbs( getTransaction() );
         assertThat( vdbs.length, is( 2 ) );
 
         // find the imported VDB
@@ -722,7 +735,8 @@ public final class VdbImplTest extends RelationalModelTest {
                     assertThat( ddl, is( expected ) );
 
                     // since the actual export will have the CDATA marker make sure by actually doing an export here
-                    final String export = importedVdb.export( getTransaction(), null );
+                    byte[] exportBytes = importedVdb.export( getTransaction(), null );
+                    String export = new String(exportBytes);
                     assertThat( export.contains( "<![CDATA[" ), is( true ) );
                     assertThat( export.contains( "]]>" ), is( true ) );
                 }
@@ -818,25 +832,6 @@ public final class VdbImplTest extends RelationalModelTest {
         final int newValue = ( Vdb.DEFAULT_VERSION + 10 );
         this.vdb.setVersion( getTransaction(), newValue );
         assertThat( this.vdb.getVersion( getTransaction() ), is( newValue ) );
-    }
-
-    /*
-     * ********************************************************************
-     * *****                  Resolver Tests                          *****
-     * ********************************************************************
-     */
-
-    @Test
-    public void shouldCreateUsingResolver() throws Exception {
-        final String name = "blah";
-
-        final RelationalProperties props = new RelationalProperties();
-        props.add( new RelationalProperty( VdbLexicon.Vdb.ORIGINAL_FILE, "/my/path/vdb.vdb" ) );
-
-        final KomodoObject kobject = Vdb.RESOLVER.create( getTransaction(), _repo, null, name, props );
-        assertThat( kobject, is( notNullValue() ) );
-        assertThat( kobject, is( instanceOf( Vdb.class ) ) );
-        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
 }

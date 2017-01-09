@@ -214,6 +214,8 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
     private volatile boolean stop = false;
 
+    private volatile Exception error = null;
+
     private final WorkspaceIdentifier identifier;
 
     private final Repository.Id repoId;
@@ -241,7 +243,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             LOGGER.debug("ModeshapeEngineThread: No callback assigned"); //$NON-NLS-1$
     }
 
-    private void errorCallback(final Request request, Exception e) {
+    private void errorCallback(final Request request, Throwable e) {
         if (request.getCallback() != null) {
             request.getCallback().errorOccurred(e);
         }
@@ -344,6 +346,13 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
     public boolean isRunning() {
         return ModeshapeUtils.isEngineRunning(msEngine) &&
                     ModeshapeUtils.isRepositoryRunning(identifier.getRepository());
+    }
+
+    /**
+     * @return any error that may have occurred when the run method threw an error
+     */
+    public Exception getError() {
+        return this.error;
     }
 
     private synchronized void rollbackSession( final Request request ) {
@@ -508,7 +517,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             sequencers = new KSequencers( identifier );
 
             respondCallback(request, null);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             LOGGER.error(Messages.getString(Messages.Komodo.ERROR_STARTING_ENGINE, ex));
             errorCallback(request, ex);
         }
@@ -586,7 +595,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                             final Node kid = itr.nextNode();
 
                             // don't delete validation rules
-                            if (Environment.VALIDATION.equals( kid.getName() )) {
+                            if (Environment.VALIDATION.equals( kid.getName() ) || Environment.SERVERS.equals( kid.getName() )) {
                                 continue;
                             }
 
@@ -656,6 +665,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
             } catch (final Exception e) {
                 stop = true;
+                error = e;
                 KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), e);
             }
         }

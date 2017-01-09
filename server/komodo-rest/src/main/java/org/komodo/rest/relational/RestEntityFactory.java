@@ -22,7 +22,13 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+
+import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Table;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
@@ -34,6 +40,20 @@ import org.komodo.relational.vdb.VdbImport;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.dataservice.RestDataservice;
+import org.komodo.rest.relational.datasource.RestDataSource;
+import org.komodo.rest.relational.response.RestTeiid;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.rest.relational.response.RestVdbCondition;
+import org.komodo.rest.relational.response.RestVdbDataRole;
+import org.komodo.rest.relational.response.RestVdbImport;
+import org.komodo.rest.relational.response.RestVdbMask;
+import org.komodo.rest.relational.response.RestVdbModel;
+import org.komodo.rest.relational.response.RestVdbModelSource;
+import org.komodo.rest.relational.response.RestVdbModelTable;
+import org.komodo.rest.relational.response.RestVdbModelTableColumn;
+import org.komodo.rest.relational.response.RestVdbPermission;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -55,9 +75,10 @@ public class RestEntityFactory implements V1Constants {
      * @return the rest object for the given kObject
      * @throws KException if error occurs
      */
+    @SuppressWarnings( "unchecked" )
     public <T extends RestBasicEntity> T create(KomodoObject kObject, URI baseUri,
                                                                  UnitOfWork uow, KomodoProperties properties) throws KException {
-        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository(), uow);
         KomodoType kType = kObject.getTypeIdentifier(uow);
 
         switch (kType) {
@@ -83,12 +104,27 @@ public class RestEntityFactory implements V1Constants {
             case VDB_MODEL_SOURCE:
                 ModelSource source = wsMgr.resolve(uow, kObject, ModelSource.class);
                 return (T) new RestVdbModelSource(baseUri, source, uow);
+            case TABLE:
+                Table table = wsMgr.resolve(uow, kObject, Table.class);
+                return (T) new RestVdbModelTable(baseUri, table, uow);
+            case COLUMN:
+                Column column = wsMgr.resolve(uow, kObject, Column.class);
+                return (T) new RestVdbModelTableColumn(baseUri, column, uow);
             case VDB_PERMISSION:
                 Permission permission = wsMgr.resolve(uow, kObject, Permission.class);
                 return (T) new RestVdbPermission(baseUri, permission, uow);
             case VDB_TRANSLATOR:
                 Translator translator = wsMgr.resolve(uow, kObject, Translator.class);
                 return (T) new RestVdbTranslator(baseUri, translator, uow);
+            case TEIID:
+                Teiid teiid = wsMgr.resolve(uow, kObject, Teiid.class);
+                return (T) new RestTeiid(baseUri, teiid, uow);
+            case DATASOURCE:
+                Datasource dataSource = wsMgr.resolve(uow, kObject, Datasource.class);
+                return (T) new RestDataSource(baseUri, dataSource, uow);
+            case DATASERVICE:
+                Dataservice dataService = wsMgr.resolve(uow, kObject, Dataservice.class);
+                return (T) new RestDataservice(baseUri, dataService, false, uow);
             case UNKNOWN:
                 return null;
             default:

@@ -24,7 +24,6 @@
 package org.komodo.test.utils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -55,11 +54,13 @@ import javax.jcr.observation.EventListenerIterator;
 import javax.jcr.observation.ObservationManager;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.teiid.TeiidServiceProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
@@ -120,10 +121,36 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         return TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
+    private void checkSupportedPlugins() throws Exception {
+        //
+        // Only run these tests if the correct teiid version is available
+        //
+        boolean supported = TeiidServiceProvider.getInstance().isSupportedTeiidVersion(getTeiidVersion());
+        Assume.assumeTrue(supported);
+
+        //
+        // Above will return true for 8.12.4 even if tests are for 8.12.7 so need an additional test
+        //
+        supported = false;
+        Set<TeiidVersion> supportedTeiidVersions = TeiidServiceProvider.getInstance().getSupportedTeiidVersions();
+        for (TeiidVersion version : supportedTeiidVersions) {
+            if (version.hasWildCards())
+                continue;
+
+            if (version.equals(getTeiidVersion())) {
+                supported = true;
+                break;
+            }
+        }
+
+        Assume.assumeTrue(supported);
+    }
+
     @Override
     @Before
     public void beforeEach() throws Exception {
         super.beforeEach();
+        checkSupportedPlugins();
         rootNode = session().getRootNode();
     }
 
@@ -173,6 +200,8 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
                 node.setProperty(VdbLexicon.Model.MODEL_DEFINITION, text);
                 break;
             case VDB:
+            case DATA_SERVICE:
+            case CONNECTION:
                 throw new UnsupportedOperationException("Not tested by these sequencer tests");
         }
 

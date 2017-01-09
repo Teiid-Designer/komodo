@@ -29,57 +29,57 @@ public class WorkspaceStatusPropertyTest extends AbstractCommandTest {
     @Test
     public void shouldSetGlobalProperty() throws Exception {
         // Test default
-        assertEquals( "true" , wsStatus.getGlobalProperties().getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
+        assertEquals( "true" , wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
         
         // Set a property
         wsStatus.setGlobalProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY, "false");
         
         // Test property changed
-        assertEquals( "false" , wsStatus.getGlobalProperties().getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
+        assertEquals( "false" , wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
     }
     
     @Test
-    public void shouldSetProvidedProperty() throws Exception {
+    public void shouldSetProvidedGlobalProperty() throws Exception {
         // Test no provided properties
-        assertEquals( 0 , wsStatus.getProvidedProperties().size() );
+        assertEquals( 0 , wsStatus.getProvidedGlobalProperties().size() );
         
         // Set a property
-        wsStatus.setProvidedProperty("myPropKey", "aValue");
+        wsStatus.setProvidedGlobalProperty("myPropKey", "aValue", "String");
         
         // Test property was set
-        assertEquals( "aValue" , wsStatus.getProvidedProperties().getProperty("myPropKey") );
+        assertEquals( "aValue" , wsStatus.getProvidedGlobalProperties().getProperty("myPropKey") );
     }
     
     @Test
     public void shouldTestGlobalAfterAddingProvided() throws Exception {
         // Number of global at startup
-        int startingGlobal = wsStatus.getGlobalProperties().size();
+        int startingGlobal = wsStatus.getGlobalProperties(false).size();
         
         // Test no provided properties
-        assertEquals( 0 , wsStatus.getProvidedProperties().size() );
+        assertEquals( 0 , wsStatus.getProvidedGlobalProperties().size() );
         
         // Set provided properties
-        wsStatus.setProvidedProperty("myPropKey1", "aValue1");
-        wsStatus.setProvidedProperty("myPropKey2", "aValue2");
-        wsStatus.setProvidedProperty("myPropKey3", "aValue3");
+        wsStatus.setProvidedGlobalProperty("myPropKey1", "aValue1", "String");
+        wsStatus.setProvidedGlobalProperty("myPropKey2", "aValue2", "String");
+        wsStatus.setProvidedGlobalProperty("myPropKey3", "aValue3", "String");
         
         // Count global after adding provided properties
-        assertEquals( startingGlobal , wsStatus.getGlobalProperties().size() );
+        assertEquals( startingGlobal , wsStatus.getGlobalProperties(false).size() );
         // Count provided after adding provided properties
-        assertEquals( 3 , wsStatus.getProvidedProperties().size() );
+        assertEquals( 3 , wsStatus.getProvidedGlobalProperties().size() );
         
         // Ensure global does not contain provided properties
-        assertEquals( "aValue1", wsStatus.getProvidedProperties().getProperty("myPropKey1"));
-        assertEquals( "aValue2", wsStatus.getProvidedProperties().getProperty("myPropKey2"));
-        assertEquals( "aValue3", wsStatus.getProvidedProperties().getProperty("myPropKey3"));
+        assertEquals( "aValue1", wsStatus.getProvidedGlobalProperties().getProperty("myPropKey1"));
+        assertEquals( "aValue2", wsStatus.getProvidedGlobalProperties().getProperty("myPropKey2"));
+        assertEquals( "aValue3", wsStatus.getProvidedGlobalProperties().getProperty("myPropKey3"));
     }
 
     @Test
     public void shouldTestProvidedAfterSettingGlobal() throws Exception {
         // Number of provided at startup
-        int startingProvided = wsStatus.getProvidedProperties().size();
+        int startingProvided = wsStatus.getProvidedGlobalProperties().size();
         // Number of global at startup
-        int startingGlobal = wsStatus.getGlobalProperties().size();
+        int startingGlobal = wsStatus.getGlobalProperties(false).size();
         
         // Set global properties
         wsStatus.setGlobalProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY, "false");
@@ -87,9 +87,9 @@ public class WorkspaceStatusPropertyTest extends AbstractCommandTest {
         wsStatus.setGlobalProperty(WorkspaceStatus.EXPORT_DEFAULT_DIR_KEY, "exportDefaultDir");
         
         // Number of global doesnt change - they all have defaults
-        assertEquals( startingGlobal , wsStatus.getGlobalProperties().size() );
+        assertEquals( startingGlobal , wsStatus.getGlobalProperties(false).size() );
         // Number of provided does not change
-        assertEquals( startingProvided , wsStatus.getProvidedProperties().size() );
+        assertEquals( startingProvided , wsStatus.getProvidedGlobalProperties().size() );
     }
 
 }

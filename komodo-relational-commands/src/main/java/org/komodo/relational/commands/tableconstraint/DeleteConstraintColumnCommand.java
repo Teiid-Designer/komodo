@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.tableconstraint;
 
@@ -16,10 +30,10 @@ import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -138,7 +152,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
      */
     @Override
     public TabCompletionModifier tabCompletion( final String lastArgument,
-                              final List< CharSequence > candidates ) throws Exception {
+                                                final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final TableConstraint constraint = getTableConstraint();
             final Column[] refCols = constraint.getColumns( getTransaction() );
@@ -153,7 +167,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
             if(refCols.length!=0){
 				KomodoObjectLabelProvider provider = getWorkspaceStatus().getObjectLabelProvider(refCols[0]);
 				for (final Column column : refCols) {
-					final String displayPath = provider.getDisplayPath(column);
+					final String displayPath = provider.getDisplayPath(getTransaction(), column, null);
 					final String absolutePath = column.getAbsolutePath();
 
 					if (noLastArg || displayPath.startsWith(lastArgument) || absolutePath.startsWith(lastArgument)) {

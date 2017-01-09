@@ -243,7 +243,8 @@
 
 [tsql:subqueryFromClause]	>	tsql:fromClause, tsql:subqueryContainer mixin
 	- tsql:name (string)
-	- tsql:table (boolean)
+	- tsql:table (boolean) // pre-8.12.7
+	- tsql:lateral (boolean) // post-8.12.7
 
 [tsql:unaryFromClause]	>	tsql:fromClause mixin
 	+ tsql:group (tsql:groupSymbol)

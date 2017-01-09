@@ -39,7 +39,7 @@ public class CdCommandTest extends AbstractCommandTest {
         final String[] commands = { "cd /workspace" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
+        assertContextIs(RepositoryImpl.komodoWorkspacePath(null));
     }
 
     @Test
@@ -50,8 +50,8 @@ public class CdCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
     	// Check WorkspaceContext
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
-        assertEquals("/", contextPath);
+        String contextPath = wsStatus.getCurrentContextDisplayPath(null);
+        assertEquals("/workspace", contextPath);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class CdCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
+        String contextPath = wsStatus.getCurrentContextDisplayPath(null);
         assertEquals("/workspace", contextPath);
     }
 
@@ -70,7 +70,7 @@ public class CdCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
+        String contextPath = wsStatus.getCurrentContextDisplayPath(null);
         assertEquals("/workspace", contextPath);
     }
 

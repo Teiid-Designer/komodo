@@ -21,29 +21,13 @@
  */
 package org.komodo.spi.query;
 
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 
-public interface TeiidService extends StringConstants {
-
-    /**
-     * The prefix of all teiid service bundles
-     */
-    String TEIID_BUNDLE_PREFIX = "org.komodo.teiid" + HYPHEN;
-
-    /**
-     * The version property designated in the manifests of the Teiid bundles
-     */
-    String VERSION_PROPERTY = "Teiid-Client-Version";
-
-    /**
-     * The class property designated in the manifests of the teiid bundles
-     */
-    String CLASS_PROPERTY = "Teiid-Service-Class";
+public interface TeiidService {
 
     /**
      * @return version of this service
@@ -56,11 +40,6 @@ public interface TeiidService extends StringConstants {
      * @throws Exception 
      */
     DataTypeManager getDataTypeManager() throws Exception;
-
-    /**
-     * @return the symbolic name of this service's parent bundle
-     */
-    String getParentBundle();
 
     /**
      * Convert the sql into a tree beneath parent
@@ -76,10 +55,24 @@ public interface TeiidService extends StringConstants {
      * Get the runtime teiid client instance
      *
      * @param teiidParent
-     * @param teiidVersion 
      * @param jdbcInfo
      * @return an instance model of the teiid client
      * @throws Exception 
      */
-    TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) throws Exception;
+    TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception;
+
+    /**
+     * @param host the host
+     * @param port the port
+     * @param user jdbc username
+     * @param passwd jdbc password
+     * @param isSecure is connection secure
+     * @return the query service for the version of teiid
+     */
+    QueryService getQueryService(String host, int port, String user, String passwd, boolean isSecure) throws Exception;
+
+    /**
+     * Dispose of this service
+     */
+    void dispose();
 }

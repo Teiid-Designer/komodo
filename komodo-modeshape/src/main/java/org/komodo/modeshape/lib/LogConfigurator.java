@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
-import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -44,6 +43,8 @@ public class LogConfigurator {
     private String logPath;
 
     private String level = "INFO"; //$NON-NLS-1$
+
+    private RollingFileAppender fileAppender;
 
     private static LogConfigurator instance;
 
@@ -97,7 +98,7 @@ public class LogConfigurator {
         if (rootLogger.getAppender(FILE_APPENDER) == null) {
             //Add console appender to root logger
             PatternLayout layout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m%n"); //$NON-NLS-1$
-            RollingFileAppender fileAppender = new RollingFileAppender(layout, this.logPath);
+            fileAppender = new RollingFileAppender(layout, this.logPath);
             fileAppender.setName(FILE_APPENDER);
             rootLogger.addAppender(fileAppender);
         }
@@ -116,9 +117,11 @@ public class LogConfigurator {
      */
     public void setLogPath(String logPath) throws Exception {
         Logger rootLogger = Logger.getRootLogger();
-        Appender appender = rootLogger.getAppender(FILE_APPENDER);
-        if (appender != null) {
-            rootLogger.removeAppender(appender);
+
+        if (fileAppender != null) {
+            fileAppender.close();
+            rootLogger.removeAppender(fileAppender);
+            fileAppender = null;
         }
 
         if (this.logPath != null) {

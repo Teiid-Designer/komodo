@@ -18,6 +18,8 @@ package org.komodo.shell.api;
 import java.io.Writer;
 import java.util.List;
 
+import org.komodo.utils.i18n.I18n;
+
 /**
  * Interface implemented by all shell commands.
  *

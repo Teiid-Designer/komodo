@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.model;
 
@@ -100,13 +114,13 @@ public final class ImportCommand extends ModelShellCommand {
                     KomodoObject[] children = tempSchema.getChildren(getTransaction());
                     for(KomodoObject child : children) {
                         RenameCommand renameCommand = new RenameCommand(getWorkspaceStatus());
-                        String oldFullName = wsStatus.getDisplayPath(child);
-                        String contextName = wsStatus.getDisplayPath(getContext());
+                        String oldFullName = wsStatus.getDisplayPath(child, null);
+                        String contextName = wsStatus.getDisplayPath(getContext(), null);
                         renameCommand.setArguments(new Arguments( oldFullName + StringConstants.SPACE + contextName + StringConstants.FORWARD_SLASH + child.getName(getTransaction()) ));
                         renameCommand.execute();
                     }
                     // Clean up the temp schema
-                    deleteSchema(wsStatus.getDisplayPath(tempSchema));
+                    deleteSchema(wsStatus.getDisplayPath(tempSchema, null));
 
                     return new CommandResultImpl( true, I18n.bind( ModelCommandsI18n.ddlImportSuccessMsg, fileName ), null );
                 // Problem with the import.  Fail and delete all the parents children
@@ -114,13 +128,13 @@ public final class ImportCommand extends ModelShellCommand {
                     print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.importFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
-                    deleteSchema(wsStatus.getDisplayPath(tempSchema));
+                    deleteSchema(wsStatus.getDisplayPath(tempSchema, null));
                 }
             } else {
                 print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.importFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
-                deleteSchema(wsStatus.getDisplayPath(tempSchema));
+                deleteSchema(wsStatus.getDisplayPath(tempSchema, null));
             }
 
             return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName ), null );
@@ -204,7 +218,7 @@ public final class ImportCommand extends ModelShellCommand {
             result = createCommand.execute();
 
             if(result.isOk()) {
-                final KomodoObject[] schemas = getWorkspaceManager().findSchemas(getTransaction());
+                final KomodoObject[] schemas = getWorkspaceManager(getTransaction()).findSchemas(getTransaction());
                 for(KomodoObject schema : schemas) {
                     if(schema.getName(getTransaction()).equals(schemaName)) {
                         resultSchema = schema;
@@ -214,7 +228,7 @@ public final class ImportCommand extends ModelShellCommand {
             }
 
             // Cd back into the original Context
-            String path = getWorkspaceStatus().getDisplayPath(origContext);
+            String path = getWorkspaceStatus().getDisplayPath(origContext, null);
             cdCommand.setArguments(new Arguments(path));
             cdCommand.execute();
         } catch (Exception e) {

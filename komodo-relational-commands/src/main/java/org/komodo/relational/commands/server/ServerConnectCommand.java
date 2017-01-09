@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.server;
 
@@ -11,7 +25,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -36,21 +49,14 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        if ( !hasWorkspaceServer() ) {
-            return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.noTeiidDefined ), null );
-        }
-
         CommandResult result = null;
 
         try {
             final String serverName = getWorkspaceServerName();
             print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.attemptingToConnect, serverName ) );
 
-            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-
             try {
-                teiidInstance.connect();
-                boolean connected = teiidInstance.isConnected();
+                boolean connected = connectWorkspaceServer();
                 String connectStatus = connected ? I18n.bind( ServerCommandsI18n.connected )
                                                  : I18n.bind( ServerCommandsI18n.notConnected );
 
@@ -61,10 +67,10 @@ public final class ServerConnectCommand extends ServerShellCommand {
                                                            serverName,
                                                            connectStatus ) );
             } catch ( Exception ex ) {
-                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError, ex.getLocalizedMessage() ), ex );
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError ), ex );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError, e.getLocalizedMessage() ), e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError ), e );
         }
 
         return result;
@@ -87,7 +93,7 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        return hasWorkspaceServer();
+        return !hasConnectedWorkspaceServer();
     }
 
     /**

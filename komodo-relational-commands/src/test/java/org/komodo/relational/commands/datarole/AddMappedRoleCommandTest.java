@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -43,7 +44,7 @@ public class AddMappedRoleCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
         assertEquals(1, vdbs.length);
 
@@ -54,6 +55,20 @@ public class AddMappedRoleCommandTest extends AbstractCommandTest {
         assertEquals(1, mappedRoles.length);
 
         assertEquals("myMappedRole", mappedRoles[0]); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateMappedRoleWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-mapped-role myMappedRole";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-data-role myDataRole",
+                                    "cd myDataRole",
+                                    "add-permission myPermission",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

@@ -1,27 +1,47 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.relational.commands.workspace;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceParser;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.utils.KLog;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.modeshape.jcr.api.JcrConstants;
+import org.teiid.modeshape.sequencer.dataservice.Connection;
+import org.teiid.modeshape.sequencer.dataservice.ConnectionReader;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * Loads a {@link Datasource DS} from a local file.
@@ -65,53 +85,36 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
                 }
             }
 
-            // read file
-            final String content = new String( Files.readAllBytes( Paths.get( fileName ) ) );
+            // Reader validates the XML file and gets the connection name which we need to check for overwriting
+            final Repository.UnitOfWork uow = getTransaction();
+            final File connectionFile = new File(fileName);
+            final ConnectionReader reader = new ConnectionReader();
+            final Connection connection = reader.read( new FileInputStream( connectionFile ) );
+            final boolean hasConnection = getWorkspaceManager(uow).hasChild( uow,
+                                                                          connection.getName(),
+                                                                          DataVirtLexicon.Connection.NODE_TYPE );
 
-            if ( StringUtils.isEmpty( content ) ) {
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceInputFileIsEmpty, fileName ), null );
-            }
-
-            // Parser validates xml file and obtains dsNames
-            DatasourceParser datasourceParser = new DatasourceParser( getRepository(), overwrite );
-            
-            File dsXmlFile = new File(fileName);
-            // Validate the data source XML file and get names
-            String[] dsNames = datasourceParser.validate(getTransaction(), dsXmlFile);
-            // Collect fatalErrors and Errors
-            List<String> parseErrors = datasourceParser.getFatalErrors();
-            if(parseErrors.isEmpty()) {
-                parseErrors.addAll(datasourceParser.getErrors());
-            }
-            // If any error encountered, log first one and return.
-            if( !parseErrors.isEmpty() ) {
-                KLog.getLogger().error( "Datasource file parsing error encountered : ", parseErrors.get(0) ); //$NON-NLS-1$
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
+            if ( hasConnection && !overwrite ) {
+                return new CommandResultImpl( false,
+                                              I18n.bind( WorkspaceCommandsI18n.datasourceOverwriteDisabled,
+                                                         fileName,
+                                                         connection.getName() ),
+                                              null );
             }
 
-            // If any data sources already exist, overwrite must be specified.
-            for( String dsName : dsNames ) {
-                boolean hasSource = getWorkspaceManager().hasChild(getTransaction(), dsName, KomodoLexicon.DataSource.NODE_TYPE);
-                if ( hasSource && !overwrite ) {
-                    return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceOverwriteDisabled, fileName, dsName ), null );
-                }
+            // delete current if necessary
+            if ( hasConnection && overwrite ) {
+                getWorkspaceManager(uow).removeChild( uow, connection.getName() );
             }
 
-            // Parse creates the sources in the repo.
-            datasourceParser.parse(getTransaction(), dsXmlFile);
-            
-            // Check again for parse errors
-            parseErrors = datasourceParser.getFatalErrors();
-            if(parseErrors.isEmpty()) {
-                parseErrors.addAll(datasourceParser.getErrors());
-            }
-            // If any error encountered, log first one and return.
-            if( !parseErrors.isEmpty() ) {
-                KLog.getLogger().error( "Datasource file parsing error encountered : ", parseErrors.get(0) ); //$NON-NLS-1$
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
-            }
+            // upload data source file so that it will be sequenced
+            final Datasource ds = getWorkspaceManager(uow).createDatasource( uow, null, connection.getName() );
+            final KomodoObject fileNode = ds.addChild( uow, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE );
+            final byte[] content = Files.readAllBytes( Paths.get( fileName ) );
+            final ByteArrayInputStream stream = new ByteArrayInputStream( content );
+            fileNode.setProperty( uow, JcrConstants.JCR_DATA, stream );
 
-            return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourcesUploaded ) );
+            return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceUploaded, connection.getName() ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }

@@ -172,7 +172,7 @@ public class TestKLog {
         String fileMsg = retrieveLogContents(newLogFile);
         System.out.println("The File Message: " + fileMsg);
         assertTrue(fileMsg.contains("ERROR " + KLogger.class.getName() + "  - " + msg));
-        assertTrue(fileMsg.contains(sw.toString()));
+        assertTrue(fileMsg.contains(msg));
     }
 
 }

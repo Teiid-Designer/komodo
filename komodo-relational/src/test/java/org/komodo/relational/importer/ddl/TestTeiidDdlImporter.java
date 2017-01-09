@@ -24,11 +24,13 @@ package org.komodo.relational.importer.ddl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -140,8 +142,15 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	assertTrue(tmpFile.exists());
     	assertTrue(tmpFile.length() > 0);
 
-    	// Make file unreadable
-    	tmpFile.setReadable(false);
+        // Make file unreadable
+        if (! tmpFile.setReadable(false)) {
+            //
+            // Cannot set the permissions on the file.
+            // Some platforms do not allow this, eg. Windows
+            // Abort the test
+            //
+            return;
+        }
 
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
@@ -286,8 +295,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                   DDL_DIRECTORY, TEIID_MYSQL_ACCTS);
 
         // Create a VDB and Model that the content will be put under
-        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
-        Model model = WorkspaceManager.getInstance(_repo).createModel(getTransaction(), vdb, MODEL_NAME);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
+        Model model = WorkspaceManager.getInstance(_repo, getTransaction()).createModel(getTransaction(), vdb, MODEL_NAME);
 
     	ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -314,7 +323,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                   DDL_DIRECTORY, TEIID_MYSQL_ACCTS);
 
         // Create a Schema that the content will be put under
-        Schema schema = WorkspaceManager.getInstance(_repo).createSchema(getTransaction(), null, SCHEMA_NAME);
+        Schema schema = WorkspaceManager.getInstance(_repo, getTransaction()).createSchema(getTransaction(), null, SCHEMA_NAME);
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -324,8 +333,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	commitHandleErrors(importMessages);
 
     	// Retrive schema after import
-    	assertEquals(1, WorkspaceManager.getInstance(_repo).findSchemas(getTransaction()).length);
-    	Schema schemaNode = WorkspaceManager.getInstance(_repo).findSchemas(getTransaction())[0];
+    	assertEquals(1, WorkspaceManager.getInstance(_repo, getTransaction()).findSchemas(getTransaction()).length);
+    	Schema schemaNode = WorkspaceManager.getInstance(_repo, getTransaction()).findSchemas(getTransaction())[0];
 
         // Test that a Schema was created
         assertNotNull("Failed - No Schema fragment Created ", schemaNode);
@@ -352,7 +361,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(), DDL_DIRECTORY, TEIID_FLATFILE);
 
         // Get the model created in the first import
-        Model model = WorkspaceManager.getInstance(_repo).findModels(getTransaction())[0];
+        Model model = WorkspaceManager.getInstance(_repo, getTransaction()).findModels(getTransaction())[0];
 
     	ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -362,7 +371,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	commitHandleErrors(importMessages);
 
     	// Retrieve model after import
-        Model[] models = WorkspaceManager.getInstance(_repo).findModels(getTransaction());
+        Model[] models = WorkspaceManager.getInstance(_repo, getTransaction()).findModels(getTransaction());
     	assertEquals(1, models.length);
     	Model resultModel = models[0];
 
@@ -416,8 +425,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                   DDL_DIRECTORY, TEIID_FLATFILE);
 
         // Create a VDB and Model that the content will be put under
-        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
-        Model model = WorkspaceManager.getInstance(_repo).createModel(getTransaction(), vdb, MODEL_NAME);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
+        Model model = WorkspaceManager.getInstance(_repo, getTransaction()).createModel(getTransaction(), vdb, MODEL_NAME);
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -448,7 +457,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                   DDL_DIRECTORY, TEIID_FLATFILE);
 
         // Create a Schema that the content will be put under
-        Schema schema = WorkspaceManager.getInstance(_repo).createSchema(getTransaction(), null, SCHEMA_NAME);
+        Schema schema = WorkspaceManager.getInstance(_repo, getTransaction()).createSchema(getTransaction(), null, SCHEMA_NAME);
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -458,8 +467,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	commitHandleErrors(importMessages);
 
     	// Retrive schema after import
-    	assertEquals(1, WorkspaceManager.getInstance(_repo).findSchemas(getTransaction()).length);
-    	Schema schemaNode = WorkspaceManager.getInstance(_repo).findSchemas(getTransaction())[0];
+    	assertEquals(1, WorkspaceManager.getInstance(_repo, getTransaction()).findSchemas(getTransaction()).length);
+    	Schema schemaNode = WorkspaceManager.getInstance(_repo, getTransaction()).findSchemas(getTransaction())[0];
 
         // Test that a Model was created
         assertNotNull("Failed - No Schema fragment Created ", schemaNode);
@@ -479,8 +488,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                    INVALID_KEYWORD_DDL);
 
         // Create a VDB and Model that the content will be put under
-        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
-        Model model = WorkspaceManager.getInstance(_repo).createModel(getTransaction(), vdb, MODEL_NAME);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
+        Model model = WorkspaceManager.getInstance(_repo, getTransaction()).createModel(getTransaction(), vdb, MODEL_NAME);
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -512,8 +521,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                    INVALID_COLUMN_DDL);
 
         // Create a VDB and Model that the content will be put under
-        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
-        Model model = WorkspaceManager.getInstance(_repo).createModel(getTransaction(), vdb, MODEL_NAME);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).createVdb(getTransaction(), null, VDB_NAME, "externalPath");
+        Model model = WorkspaceManager.getInstance(_repo, getTransaction()).createModel(getTransaction(), vdb, MODEL_NAME);
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();

@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.server;
 
@@ -51,7 +65,20 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            TeiidDataSource source = getWorkspaceTeiidInstance().getDataSource(sourceName);
+            TeiidDataSource source = null;
+            try {
+                // Check the data source name to make sure its valid
+                List< String > existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+                if(!existingSourceNames.contains(sourceName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null);
+                }
+                // Get the data source
+                source = getWorkspaceTeiidInstance().getDataSource(sourceName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(source==null) {
                 return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null);
             }
@@ -121,19 +148,25 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingSourceNames);
+        try {
+            List<String> existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingSourceNames);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingSourceNames );
-            } else {
-                for ( final String item : existingSourceNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingSourceNames );
+                } else {
+                    for ( final String item : existingSourceNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

@@ -1,31 +1,46 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.datasource;
 
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A base class for @{link {@link Datasource Datasource}-related shell commands.
+ * A base class for @{link {@link Datasource}-related shell commands.
  */
 abstract class DatasourceShellCommand extends RelationalShellCommand {
 
     protected static final String JNDI_NAME = "jndiName"; //$NON-NLS-1$
+    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
+    protected static final String EXT_LOC = "externalLocation"; //$NON-NLS-1$
     protected static final String DRIVER_NAME = "driverName"; //$NON-NLS-1$
     protected static final String CLASS_NAME = "className"; //$NON-NLS-1$
     protected static final String JDBC = "jdbc"; //$NON-NLS-1$
-    protected static final String PREVIEW = "preview"; //$NON-NLS-1$
-    protected static final String PROFILE_NAME = "profileName"; //$NON-NLS-1$
 
-    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { JNDI_NAME, DRIVER_NAME, CLASS_NAME, JDBC, PREVIEW, PROFILE_NAME } );
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, EXT_LOC, JNDI_NAME, DRIVER_NAME, CLASS_NAME, JDBC } );
 
     protected DatasourceShellCommand( final String name,
                                   final WorkspaceStatus status ) {

@@ -23,6 +23,7 @@ package org.komodo.modeshape.visitor;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 

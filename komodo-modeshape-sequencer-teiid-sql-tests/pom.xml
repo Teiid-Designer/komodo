@@ -10,6 +10,19 @@
 	<name>Komodo Modeshape Teiid SQL Sequencer Tests</name>
 	<description>Tests for sequencer that are separate to avoid cyclic dependencies</description>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>
@@ -30,12 +43,6 @@
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-test-utils</artifactId>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

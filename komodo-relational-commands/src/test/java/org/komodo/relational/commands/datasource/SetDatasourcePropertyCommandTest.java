@@ -15,7 +15,10 @@
  */
 package org.komodo.relational.commands.datasource;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.datasource.Datasource;
@@ -37,13 +40,45 @@ public final class SetDatasourcePropertyCommandTest extends AbstractCommandTest 
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] sources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, sources.length);
         assertEquals("testSource", sources[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals("java:/testSource", sources[0].getJndiName(getTransaction()));
+    }
+
+    @Test
+    public void shouldSetDescription() throws Exception {
+        final String description = "blah";
+        final String[] commands = { "create-datasource testSource",
+                                    "cd testSource",
+                                    "set-property description " + description };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
+        final Datasource[] sources = wkspMgr.findDatasources( getTransaction() );
+
+        assertThat( sources.length, is( 1 ) );
+        assertThat( sources[ 0 ].getDescription( getTransaction() ), is( description ) );
+    }
+
+    @Test
+    public void shouldSetExternalLocation() throws Exception {
+        final String extLoc = "/Users/sledge/blah";
+        final String[] commands = { "create-datasource testSource",
+                                    "cd testSource",
+                                    "set-property externalLocation " + extLoc };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
+        final Datasource[] sources = wkspMgr.findDatasources( getTransaction() );
+
+        assertThat( sources.length, is( 1 ) );
+        assertThat( sources[ 0 ].getExternalLocation( getTransaction() ), is( extLoc ) );
     }
 
 }

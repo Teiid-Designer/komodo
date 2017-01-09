@@ -1,16 +1,30 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.vdb.internal;
 
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.vdb.Translator;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
@@ -62,13 +76,26 @@ public final class TranslatorImpl extends RelationalChildRestrictedObject implem
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Vdb getParent( final UnitOfWork transaction ) throws KException {
+    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
 
-        final KomodoObject grouping = super.getParent( transaction );
-        final Vdb result = Vdb.RESOLVER.resolve( transaction, grouping.getParent( transaction ) );
-        return result;
+        KomodoObject parent = super.getParent(transaction);
+        Descriptor parentType = parent.getPrimaryType(transaction);
+
+        if (VdbLexicon.Vdb.TRANSLATORS.equals(parentType.getName())) {
+            //
+            // Ignore the translators grouping node
+            // and return the parent vdb
+            //
+            return parent.getParent(transaction);
+        }
+
+        //
+        // Otherwise, eg. translator is below a CachedTeiid
+        // return the parent as is.
+        //
+        return parent;
     }
 
     /**

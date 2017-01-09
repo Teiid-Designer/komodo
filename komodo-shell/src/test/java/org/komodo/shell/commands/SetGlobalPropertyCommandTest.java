@@ -16,8 +16,10 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.LinkedList;
 import java.util.List;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -48,8 +50,8 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and property value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
-        assertEquals("true", wsStatus.getGlobalProperties().getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath(null));
+        assertEquals("true", wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
     }
 
     @Test
@@ -59,8 +61,8 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and property value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
-        assertEquals("/aRecordingFile.txt", wsStatus.getGlobalProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY));
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath(null));
+        assertEquals("/aRecordingFile.txt", wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.RECORDING_FILE_KEY));
     }
 
     @Test

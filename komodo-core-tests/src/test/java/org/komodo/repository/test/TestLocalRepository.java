@@ -51,9 +51,11 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestLocalRepository extends AbstractLocalRepositoryTest {
@@ -120,7 +122,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // Create a single test node with no relationship to the sequencers or
         // with any relevant properties
         //
-        _repo.add( getTransaction(), RepositoryImpl.WORKSPACE_ROOT, "Test1", null );
+        _repo.add( getTransaction(), RepositoryImpl.komodoWorkspacePath(getTransaction()), "Test1", null );
         commit();
 
         //
@@ -137,7 +139,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // Create a single test node with no relationship to the sequencers or
         // with any relevant properties
         //
-        _repo.add(getTransaction(), RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        _repo.add(getTransaction(), RepositoryImpl.komodoWorkspacePath(getTransaction()), "Test1", null);
         commit();
     }
 
@@ -156,7 +158,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         commit();
 
         // Create the test object to test the addition of a property
-        KomodoObject testObject = _repo.add(getTransaction(), RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        KomodoObject testObject = _repo.add(getTransaction(), RepositoryImpl.komodoWorkspacePath(getTransaction()), "Test1", null);
         assertNotNull(testObject);
         commit();
 
@@ -212,14 +214,14 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // tests
         assertThat(rootNode, is(notNullValue()));
         assertThat(rootNode.getName(getTransaction()), is(name));
-        assertThat(rootNode.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + name));
+        assertThat(rootNode.getAbsolutePath(), is(RepositoryImpl.komodoWorkspacePath(getTransaction()) + FORWARD_SLASH + name));
     }
 
     @Test
     public void shouldCreateRollbackTransaction() throws Exception {
         // setup
         final String name = "elvis";
-        final UnitOfWork transaction = _repo.createTransaction(name, true, null);
+        final UnitOfWork transaction = _repo.createTransaction(TEST_USER, name, true, null);
 
         // tests
         assertThat(transaction, is(notNullValue()));
@@ -234,7 +236,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     public void shouldCreateUpdateTransaction() throws Exception {
         // setup
         final String name = "elvis";
-        final UnitOfWork transaction = _repo.createTransaction(name, false, null);
+        final UnitOfWork transaction = _repo.createTransaction(TEST_USER, name, false, null);
 
         // tests
         assertThat(transaction, is(notNullValue()));
@@ -279,10 +281,62 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     }
 
     @Test
-    public void shouldGetWorkspaceRoot() throws Exception {
+    public void shouldGetWorkspaceHomeofTestUser() throws Exception {
         final KomodoObject rootNode = _repo.getFromWorkspace(getTransaction(), null);
         assertThat(rootNode, is(notNullValue()));
-        assertThat(rootNode.getName(getTransaction()), is(KomodoLexicon.Komodo.WORKSPACE));
+        assertThat(rootNode.getName(getTransaction()), is(TEST_USER));
+        assertThat(rootNode.getPrimaryType(getTransaction()).getName(), is(KomodoLexicon.Home.NODE_TYPE));
+    }
+
+    @Test
+    public void shouldDynamicallyCreateWorkspaceHomeofNewUser() throws Exception {
+        String newUser = "newUser";
+
+        SynchronousCallback callback = new TestTransactionListener();
+        UnitOfWork tx = createTransaction(newUser, (this.name.getMethodName()), false, callback);
+
+        String userWksp = RepositoryImpl.komodoWorkspacePath(tx);
+
+        List<KomodoObject> results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertTrue(results.isEmpty());
+
+        //
+        // getFromWorkspace dynamically creates user home
+        //
+        KomodoObject userHome = _repo.getFromWorkspace(tx, userWksp);
+        assertNotNull(userHome);
+        commit(tx, State.COMMITTED);
+
+        results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertFalse(results.isEmpty());
+    }
+
+    @Test
+    public void shouldDynamicallyCreateWorkspaceHomeofNewUser2() throws Exception {
+        String newUser = "newUser";
+
+        SynchronousCallback callback = new TestTransactionListener();
+        UnitOfWork tx = createTransaction(newUser, (this.name.getMethodName()), false, callback);
+
+        String userWksp = RepositoryImpl.komodoWorkspacePath(tx);
+
+        List<KomodoObject> results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertTrue(results.isEmpty());
+
+        //
+        // _repo.checkSettings() dynamically creates user home
+        //
+        KomodoObject wkspObject = new ObjectImpl(_repo, userWksp, 0);
+        KomodoObject vdb = wkspObject.addChild(tx, "testVdb", VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull(vdb);
+        commit(tx, State.COMMITTED);
+
+        results = _repo.searchByPath(sysTx(), userWksp);
+        sysCommit();
+        assertFalse(results.isEmpty());
     }
 
     @Test( timeout = 60000 )
@@ -297,7 +351,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
         // tests
         assertThat(kobject, is(notNullValue()));
-        assertThat(kobject.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + name));
+        assertThat(kobject.getAbsolutePath(), is(RepositoryImpl.komodoWorkspacePath(getTransaction()) + FORWARD_SLASH + name));
         assertThat(kobject.getIndex(), is(0));
         assertThat(hasMixin(KomodoLexicon.WorkspaceItem.MIXIN_TYPE, kobject), is(true));
         assertThat(kobject.getName(getTransaction()), is(name));
@@ -370,20 +424,22 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     }
 
     @Test
-    public void shouldTraverseEntireRepository() throws Exception {
-        KomodoObject komodoWksp = _repo.komodoWorkspace(getTransaction());
+    public void shouldTraverseUserWorkspace() throws Exception {
+        UnitOfWork sysTx = sysTx();
+        KomodoObject komodoWksp = _repo.komodoWorkspace(sysTx);
         assertNotNull(komodoWksp);
-        assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE +
-                             FORWARD_SLASH + KomodoLexicon.Komodo.WORKSPACE,
-                             komodoWksp.getAbsolutePath());
+        String komodoRootPath = FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE;
+        String komodoWkspPath = komodoRootPath + FORWARD_SLASH + KomodoLexicon.Komodo.WORKSPACE;
+
+        assertEquals(komodoWkspPath, komodoWksp.getAbsolutePath());
         verifyJcrNode(komodoWksp);
 
-        KomodoObject komodoRoot = komodoWksp.getParent(getTransaction());
+        KomodoObject komodoRoot = komodoWksp.getParent(sysTx);
         assertNotNull(komodoRoot);
-        assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE, komodoRoot.getAbsolutePath());
+        assertEquals(komodoRootPath, komodoRoot.getAbsolutePath());
         verifyJcrNode(komodoRoot);
 
-        final KomodoObject nullParent = komodoRoot.getParent( getTransaction() );
+        final KomodoObject nullParent = komodoRoot.getParent(sysTx);
         assertThat( nullParent, is( nullValue() ) );
     }
 
@@ -504,7 +560,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // Perform the search
         for (int i = 1; i <= 5; ++i) {
             List<KomodoObject> results = _repo.searchByPath(getTransaction(),
-                                                           komodoWksp.getAbsolutePath() + File.separator + "test" + i);
+                                                           komodoWksp.getAbsolutePath() + FORWARD_SLASH + "test" + i);
             // Validate the results are as expected
             assertEquals(1, results.size());
             KomodoObject searchObject = results.iterator().next();

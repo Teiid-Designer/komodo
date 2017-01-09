@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.teiid;
 
@@ -19,6 +33,8 @@ import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -53,24 +69,25 @@ public final class UnsetTeiidPropertyCommand extends TeiidShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            if ( ADMIN_PORT.equals( name ) ) {
-                teiid.setAdminPort( transaction, TeiidAdminInfo.DEFAULT_PORT );
-            } else if ( ADMIN_PASSWORD.equals( name ) ) {
-                teiid.setAdminPassword( transaction, null );
-            } else if ( ADMIN_SECURE.equals( name ) ) {
-                teiid.setAdminSecure( transaction, TeiidAdminInfo.DEFAULT_SECURE );
-            } else if ( ADMIN_USER.equals( name ) ) {
-                teiid.setAdminUser( transaction, null );
-            } else if ( JDBC_PORT.equals( name ) ) {
-                teiid.setJdbcPort( transaction, TeiidJdbcInfo.DEFAULT_PORT );
-            } else if ( JDBC_PASSWORD.equals( name ) ) {
-                teiid.setJdbcPassword( transaction, null );
-            } else if ( JDBC_SECURE.equals( name ) ) {
-                teiid.setJdbcSecure( transaction, TeiidJdbcInfo.DEFAULT_SECURE );
-            } else if ( JDBC_USER.equals( name ) ) {
-                teiid.setJdbcUsername( transaction, null );
+            if (name.equals(ADMIN_PORT)) {
+                TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+                teiid.setAdminPort(transaction, TeiidAdminInfo.Util.defaultPort(teiidVersion));
+            } else if (name.equals(ADMIN_PASSWORD)) {
+                teiid.setAdminPassword(transaction, null);
+            } else if (name.equals(ADMIN_SECURE)) {
+                teiid.setAdminSecure(transaction, TeiidAdminInfo.DEFAULT_SECURE);
+            } else if (name.equals(ADMIN_USER)) {
+                teiid.setAdminUser(transaction, null);
+            } else if (name.equals(JDBC_PORT)) {
+                teiid.setJdbcPort(transaction, TeiidJdbcInfo.DEFAULT_PORT);
+            } else if (name.equals(JDBC_PASSWORD)) {
+                teiid.setJdbcPassword(transaction, null);
+            } else if (name.equals(JDBC_SECURE)) {
+                teiid.setJdbcSecure(transaction, TeiidJdbcInfo.DEFAULT_SECURE);
+            } else if (name.equals(JDBC_USER)) {
+                teiid.setJdbcUsername(transaction, null);
             } else {
-                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName() );
+                errorMsg = I18n.bind(WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName());
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

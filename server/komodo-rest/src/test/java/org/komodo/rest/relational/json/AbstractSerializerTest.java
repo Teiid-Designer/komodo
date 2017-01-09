@@ -49,6 +49,8 @@ public abstract class AbstractSerializerTest implements JsonConstants {
     protected static final String WORKSPACE_DATA_PATH = "/workspace";
     protected static final String VDB_NAME = "vdb1";
     protected static final String VDB_DATA_PATH = "/workspace/vdbs/vdb1";
+    protected static final String DATASERVICE_NAME = "dataservice1";
+    protected static final String DATASERVICE_DATA_PATH = "/workspace/dataservices/dataservice1";
     protected static final String SEARCH = "/workspace/search?";
 
     @Mock
@@ -71,6 +73,7 @@ public abstract class AbstractSerializerTest implements JsonConstants {
         repository = Mockito.mock(Repository.class);
         UnitOfWorkListener listener = Matchers.any();
         Mockito.when(repository.createTransaction(Matchers.anyString(),
+                                                  Matchers.anyString(),
                                                   Matchers.anyBoolean(),
                                                   listener)).thenReturn(uow);
     }

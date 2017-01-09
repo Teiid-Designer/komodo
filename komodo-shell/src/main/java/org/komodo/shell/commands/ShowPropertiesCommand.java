@@ -69,7 +69,7 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         // Not valid in root, workspace, library or environment
-        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getContext()) ) {
+        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getTransaction(), getContext()) ) {
             return false;
         }
         return true;

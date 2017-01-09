@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands;
 
@@ -20,11 +34,12 @@ import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -149,8 +164,9 @@ public final class FindCommand extends RelationalShellCommand {
                                   final String parentPath,
                                   final String pattern ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
-        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( wsStatus.getCurrentContext().getRepository() );
-        final String[] searchResults = wsMgr.findByType( wsStatus.getTransaction(), lexiconType, parentPath, pattern );
+        final UnitOfWork transaction = wsStatus.getTransaction();
+        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( wsStatus.getCurrentContext().getRepository(), transaction );
+        final String[] searchResults = wsMgr.findByType( transaction, lexiconType, parentPath, pattern, false );
 
         if ( searchResults.length == 0 ) {
             return searchResults;
@@ -167,7 +183,7 @@ public final class FindCommand extends RelationalShellCommand {
         final String[] result = new String[ searchResults.length ];
         int i = 0;
         for ( final String absolutePath : searchResults ) {
-            result[i] = labelProvider.getDisplayPath( absolutePath );
+            result[i] = labelProvider.getDisplayPath( transaction, absolutePath, null );
             ++i;
         }
 

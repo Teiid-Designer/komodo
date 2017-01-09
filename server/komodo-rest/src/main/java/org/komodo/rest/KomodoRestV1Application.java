@@ -1,42 +1,72 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest;
 
-import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_CLEAR_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_CLEAR_TIMEOUT;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_TIMEOUT;
-import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_TIMEOUT;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.annotation.PreDestroy;
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ExistingNodeOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceConveyor;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
+import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.cors.KCorsFactory;
+import org.komodo.rest.cors.KCorsHandler;
+import org.komodo.rest.cors.OptionsExceptionMapper;
 import org.komodo.rest.json.JsonConstants;
-import org.komodo.rest.relational.KomodoSearchService;
-import org.komodo.rest.relational.KomodoVdbService;
+import org.komodo.rest.service.KomodoDataserviceService;
+import org.komodo.rest.service.KomodoDatasourceService;
+import org.komodo.rest.service.KomodoDriverService;
+import org.komodo.rest.service.KomodoImportExportService;
+import org.komodo.rest.service.KomodoSearchService;
+import org.komodo.rest.service.KomodoTeiidService;
+import org.komodo.rest.service.KomodoUtilService;
+import org.komodo.rest.service.KomodoVdbService;
+import org.komodo.rest.swagger.RestDataserviceConverter;
 import org.komodo.rest.swagger.RestPropertyConverter;
 import org.komodo.rest.swagger.RestVdbConditionConverter;
 import org.komodo.rest.swagger.RestVdbConverter;
@@ -53,7 +83,10 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.KLog;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import io.swagger.converter.ModelConverters;
 import io.swagger.jaxrs.config.BeanConfig;
 
@@ -68,15 +101,66 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      */
     public static interface V1Constants extends JsonConstants {
 
-        /**
-         * Application name and context
-         */
-        String APP_NAME = "vdb-builder"; //$NON-NLS-1$
+        class App {
+
+            private static final Properties properties = new Properties();
+
+            private static void init() {
+                InputStream fileStream = KomodoRestV1Application.class.getClassLoader().getResourceAsStream("app.properties");
+
+                try {
+                    properties.load(fileStream);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            /**
+             * Application name and context
+             */
+            public static String name() {
+                init();
+
+                return properties.getProperty("app.name");
+            }
+
+            /**
+             * Application display title
+             */
+            public static String title() {
+                init();
+
+                return properties.getProperty("app.title");
+            }
+
+            /**
+             * Application description
+             */
+            public static String description() {
+                init();
+
+                return properties.getProperty("app.description");
+            }
+
+            /**
+             * Version of the application
+             */
+            public static String version() {
+                init();
+
+                return properties.getProperty("app.version");
+            }
+        }
 
         /**
-         * Version of the application
+         * The komodo engine's data directory system property
          */
-        String APP_VERSION = "0.0.3"; //$NON-NLS-1$
+        String KOMODO_DATA_DIR = "komodo.dataDir"; //$NON-NLS-1$
+
+        /**
+         * Jboss server base directory
+         */
+        String JBOSS_SERVER_BASE_DIR = "jboss.server.base.dir"; //$NON-NLS-1$
 
         /**
          * Location for the log file passed to {@link KLog} logger
@@ -100,6 +184,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SERVICE_SEGMENT = "service"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for the teiid service.
+         */
+        String TEIID_SEGMENT = "teiid"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the Komodo schema.
          */
         String SCHEMA_SEGMENT = "schema"; //$NON-NLS-1$
@@ -115,6 +204,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String ABOUT = "about"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for a Vdb in the Komodo workspace.
+         */
+        String VDB_SEGMENT = "vdb"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of VDBs in the Komodo workspace.
          */
         String VDBS_SEGMENT = "vdbs"; //$NON-NLS-1$
@@ -123,6 +217,76 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific vdb id
          */
         String VDB_PLACEHOLDER = "{vdbName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for clone.
+         */
+        String CLONE_SEGMENT = "clone"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for creating workspace VDBs from teiid
+         */
+        String VDBS_FROM_TEIID = "VdbsFromTeiid"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for undeploy.
+         */
+        String UNDEPLOY = "undeploy"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of DataServices in the Komodo workspace.
+         */
+        String DATA_SERVICES_SEGMENT = "dataservices"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a DataService in the Komodo workspace.
+         */
+        String DATA_SERVICE_SEGMENT = "dataservice"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific data service id
+         */
+        String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for finding source vdb matches for a DataService
+         */
+        String SOURCE_VDB_MATCHES = "sourceVdbMatches"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for finding the service view table names for a DataService
+         */
+        String SERVICE_VIEW_TABLES = "serviceViewTables"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a Dataservice's connections in the Komodo workspace.
+         */
+        String CONNECTIONS_SEGMENT = "connections"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a setting a dataservice's service vdb
+         */
+        String SERVICE_VDB_FOR_SINGLE_TABLE = "ServiceVdbForSingleTable"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
+         */
+        String DATA_SOURCES_SEGMENT = "datasources"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a Datasource in the Komodo workspace.
+         */
+        String DATA_SOURCE_SEGMENT = "datasource"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific data source id
+         */
+        String DATA_SOURCE_PLACEHOLDER = "{datasourceName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of Drivers in the Komodo workspace.
+         */
+        String DRIVERS_SEGMENT = "drivers"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the collection of models of a vdb
@@ -143,6 +307,36 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific source id
          */
         String SOURCE_PLACEHOLDER = "{sourceName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of catalogs
+         */
+        String JDBC_CATALOG_SCHEMA_SEGMENT = "JdbcCatalogSchema"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the jdbc info
+         */
+        String JDBC_INFO_SEGMENT = "JdbcInfo"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of tables of a model
+         */
+        String TABLES_SEGMENT = "Tables"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific table id
+         */
+        String TABLE_PLACEHOLDER = "{tableName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of columns of a table
+         */
+        String COLUMNS_SEGMENT = "Columns"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for default translator
+         */
+        String TRANSLATOR_DEFAULT_SEGMENT = "TranslatorDefault"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the collection of translators of a vdb
@@ -255,34 +449,112 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SAVED_SEARCHES_SEGMENT = "savedSearches"; //$NON-NLS-1$
 
         /**
+         * The name of the URI vdb name parameter
+         */
+        String VDB_NAME_PARAMETER = "name"; //$NON-NLS-1$
+
+        /**
          * The vdb export xml property
          */
         String VDB_EXPORT_XML_PROPERTY = "vdb-export-xml"; //$NON-NLS-1$
 
+        /**
+         * The name of the URI path segment for creating a workspace vdb model using teiid ddl
+         */
+        String MODEL_FROM_TEIID_DDL = "ModelFromTeiidDdl"; //$NON-NLS-1$
+
+        /**
+         * The teiid credentials property for modifying the usernames and passwords
+         */
+        String TEIID_CREDENTIALS = "credentials"; //$NON-NLS-1$
+
+        /**
+         * The driver property for adding a driver to the teiid server
+         */
+        String TEIID_DRIVER = "driver"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific teiid driver id
+         */
+        String TEIID_DRIVER_PLACEHOLDER = "{driverName}"; //$NON-NLS-1$
+
+        /**
+         * The teiid status path segment
+         */
+        String STATUS_SEGMENT = "status"; //$NON-NLS-1$
+
+        /**
+         * The name of the resource used for importing and exporting artifacts
+         */
+        String IMPORT_EXPORT_SEGMENT = "importexport"; //$NON-NLS-1$
+
+        /**
+         * The export operation of the import export service
+         */
+        String EXPORT = "export"; //$NON-NLS-1$
+
+        /**
+         * The import operation of the import export service
+         */
+        String IMPORT = "import"; //$NON-NLS-1$
+
+        /**
+         * The available storage types of the import export service
+         */
+        String STORAGE_TYPES = "availableStorageTypes"; //$NON-NLS-1$
+
+        /**
+         * The teiid segment for running a query against the teiid server
+         */
+        String QUERY_SEGMENT = "query"; //$NON-NLS-1$
+
+        /**
+         * The teiid segment for running a ping against the teiid server
+         */
+        String PING_SEGMENT = "ping"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI ping type parameter
+         */
+        String PING_TYPE_PARAMETER = "pingType"; //$NON-NLS-1$
     }
 
     private static final int TIMEOUT = 1;
     private static final TimeUnit UNIT = TimeUnit.MINUTES;
 
     private KEngine kengine;
+    private Throwable engineException;
     private CountDownLatch latch;
     private final Set< Object > singletons;
 
     /**
      * Constructs a Komodo REST application.
      *
-     * @throws ServerErrorException
+     * @throws WebApplicationException
      *         if the Komodo engine cannot be started
      */
-    public KomodoRestV1Application() throws ServerErrorException {
+    public KomodoRestV1Application() throws WebApplicationException {
+        KCorsHandler corsHandler;
         try {
             // Set the log path to something relative to the deployment location of this application
-            KLog.getLogger().setLogPath(V1Constants.LOG_FILE_PATH);
+            // Try to use the base directory in jboss. If not in jboss this would probably be empty so
+            // otherwise use "." relative to the working directory
+            String baseDir = System.getProperty(V1Constants.JBOSS_SERVER_BASE_DIR, DOT) + File.separator;
+
+            // Set the komodo data directory prior to starting the engine
+            String komodoDataDir = System.getProperty(V1Constants.KOMODO_DATA_DIR);
+            if (komodoDataDir == null)
+                System.setProperty(V1Constants.KOMODO_DATA_DIR, baseDir + "data"); //$NON-NLS-1$
+
+            // Set the log file path
+            KLog.getLogger().setLogPath(baseDir + V1Constants.LOG_FILE_PATH);
 
             // Ensure server logging level is reduced to something sane!
             KLog.getLogger().setLevel(Level.INFO);
+
+            corsHandler = initCorsHandler();
         } catch (Exception ex) {
-            throw new ServerErrorException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ex);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
 
         this.latch = new CountDownLatch( 1 );
@@ -291,11 +563,31 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         final Set< Object > objs = new HashSet< Object >();
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoUtilService( this.kengine ) );
+        objs.add( new KomodoDataserviceService( this.kengine ) );
+        objs.add( new KomodoDatasourceService( this.kengine ) );
+        objs.add( new KomodoDriverService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
+        objs.add( new KomodoTeiidService( this.kengine ));
+        objs.add( new KomodoImportExportService( this.kengine ));
+
+        objs.add(new OptionsExceptionMapper());
+        objs.add(corsHandler);
+
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();
+    }
+
+    private KCorsHandler initCorsHandler() throws Exception {
+        TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
+        KCorsHandler corsHandler = KCorsFactory.getInstance().createHandler(teiidVersion);
+        corsHandler.getAllowedOrigins().add(STAR);
+        corsHandler.setAllowedHeaders(KCorsHandler.ALLOW_HEADERS);
+        corsHandler.setAllowCredentials(true);
+        corsHandler.setAllowedMethods(KCorsHandler.ALLOW_METHODS);
+        corsHandler.setCorsMaxAge(1209600);
+        return corsHandler;
     }
 
     @SuppressWarnings( "nls" )
@@ -314,13 +606,14 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         converters.addConverter(new RestVdbModelSourceConverter());
         converters.addConverter(new RestVdbPermissionConverter());
         converters.addConverter(new RestVdbTranslatorConverter());
+        converters.addConverter(new RestDataserviceConverter());
 
         BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setTitle("Vdb Builder");
-        beanConfig.setDescription("A tool that allows creating, editing and managing dynamic VDBs and their contents");
-        beanConfig.setVersion(V1Constants.APP_VERSION);
-        beanConfig.setSchemes(new String[]{"http"});
-        beanConfig.setBasePath(V1Constants.APP_NAME + V1Constants.APP_PATH);
+        beanConfig.setTitle(V1Constants.App.title());
+        beanConfig.setDescription(V1Constants.App.description());
+        beanConfig.setVersion(V1Constants.App.version());
+        beanConfig.setSchemes(new String[]{"https"});
+        beanConfig.setBasePath(V1Constants.App.name() + V1Constants.APP_PATH);
 
         // No need to setHost as it will pick up the one its running on
 
@@ -343,10 +636,10 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     /**
      * Clears the Komodo default repository.
      *
-     * @throws ServerErrorException
+     * @throws WebApplicationException
      *         if an error occurs clearing the repository
      */
-    public void clearRepository() throws ServerErrorException {
+    public void clearRepository() throws WebApplicationException {
         this.latch = new CountDownLatch( 1 );
 
         final RepositoryClientEvent event = RepositoryClientEvent.createClearEvent( this.kengine );
@@ -358,11 +651,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         try {
             cleared = this.latch.await( TIMEOUT, UNIT );
         } catch ( final Exception e ) {
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_CLEAR_ERROR ), Status.INTERNAL_SERVER_ERROR );
+            throw new WebApplicationException( e, Status.INTERNAL_SERVER_ERROR );
         }
 
         if ( !cleared ) {
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_CLEAR_TIMEOUT, TIMEOUT, UNIT ),
+            throw new WebApplicationException( new Exception(Messages.getString( KOMODO_ENGINE_CLEAR_TIMEOUT, TIMEOUT, UNIT )),
                                             Status.INTERNAL_SERVER_ERROR );
         }
     }
@@ -374,6 +667,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      */
     @Override
     public void eventOccurred() {
+        this.latch.countDown();
+    }
+
+    @Override
+    public void errorOccurred(Throwable e) {
+        this.engineException = e;
         this.latch.countDown();
     }
 
@@ -389,19 +688,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> resources = new HashSet();
+        Set<Class<?>> resources = new HashSet<Class<?>>();
 
         // Enable swagger support
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
-        // Enable cross origin support
-        resources.add(CORSFilter.class);
-
         return resources;
     }
 
-    private KEngine start() throws ServerErrorException {
+    private KEngine start() throws WebApplicationException {
         final KEngine kengine = KEngine.getInstance();
         final Repository repo = kengine.getDefaultRepository();
         repo.addObserver( this );
@@ -412,14 +708,20 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         try {
             kengine.start();
             started = this.latch.await( TIMEOUT, UNIT );
-        } catch ( final Exception e ) {
-            e.printStackTrace();
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_ERROR, e ), Status.INTERNAL_SERVER_ERROR );
+            if (engineException != null) {
+                //
+                // latch was released due to the engine throwing an error rather than starting
+                //
+                throw engineException;
+            }
+
+        } catch ( final Throwable e ) {
+            throw new WebApplicationException( e, Status.INTERNAL_SERVER_ERROR );
         }
 
         if ( !started ) {
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_TIMEOUT, TIMEOUT, UNIT ),
-                                            Status.REQUEST_TIMEOUT );
+            throw new WebApplicationException( new Exception(Messages.getString( KOMODO_ENGINE_STARTUP_TIMEOUT, TIMEOUT, UNIT )),
+                                            Status.INTERNAL_SERVER_ERROR );
         }
 
         return kengine;
@@ -428,11 +730,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     /**
      * Stops the Komodo Engine.
      *
-     * @throws ServerErrorException
+     * @throws WebApplicationException
      *         if there is a problem shutting down the Komodo engine
      */
     @PreDestroy
-    public void stop() throws ServerErrorException {
+    public void stop() throws WebApplicationException {
         if ( this.kengine != null ) {
             this.latch = new CountDownLatch( 1 );
 
@@ -443,15 +745,15 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
                 this.kengine.shutdown();
                 shutdown = this.latch.await( TIMEOUT, UNIT );
             } catch ( final Exception e ) {
-                throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_SHUTDOWN_ERROR ),
+                throw new WebApplicationException( new Exception(Messages.getString( KOMODO_ENGINE_SHUTDOWN_ERROR )),
                                                 Status.INTERNAL_SERVER_ERROR );
             } finally {
                 this.kengine = null;
             }
 
             if ( !shutdown ) {
-                throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_SHUTDOWN_TIMEOUT, TIMEOUT, UNIT ),
-                                                Status.REQUEST_TIMEOUT );
+                throw new WebApplicationException( new Exception(Messages.getString( KOMODO_ENGINE_SHUTDOWN_TIMEOUT, TIMEOUT, UNIT )),
+                                                Status.INTERNAL_SERVER_ERROR );
             }
         }
     }
@@ -460,13 +762,15 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      * Import a vdb into the komodo engine
      *
      * @param vdbStream vdb input stream
+     * @param user initiating import
+     *
      * @throws Exception if error occurs
      */
-    public void importVdb(InputStream vdbStream) throws Exception {
+    public void importVdb(InputStream vdbStream, String user) throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = repository.createTransaction("Import Vdb", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction(user, "Import Vdb", false, callback); //$NON-NLS-1$
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
@@ -479,17 +783,225 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     }
 
     /**
+     * Import a dataservice into the komodo engine
+     *
+     * @param dsStream dataservice input stream
+     * @param user initiating import
+     *
+     * @throws Exception if error occurs
+     */
+    public void importDataservice(InputStream dsStream, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Import Dataservice", false, callback); //$NON-NLS-1$
+
+        ImportOptions importOptions = new ImportOptions();
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+        DataserviceConveyor dsConveyor = new DataserviceConveyor(repository);
+        dsConveyor.dsImport(uow, dsStream, workspace, importOptions, importMessages);
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @param user initiating call
+     *
      * @return the vdbs directly from the kEngine
      * @throws Exception if error occurs
      */
-    public Vdb[] getVdbs() throws Exception {
+    public Vdb[] getVdbs(String user) throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
-        WorkspaceManager mgr = WorkspaceManager.getInstance(repository);
 
-        UnitOfWork uow = repository.createTransaction("Find vdbs", true, null); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction(user, "Find vdbs", true, null); //$NON-NLS-1$
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
         Vdb[] vdbs = mgr.findVdbs(uow);
+
         uow.commit();
 
         return vdbs;
+    }
+
+    /**
+     * Create a dataservice in the komodo engine (used for mostly test purposes)
+     *
+     * @param dataserviceName the service name
+     * @param populateWithSamples true if dataservice should be populated with example vdbs
+     * @param user initiating transaction
+     * @throws Exception if error occurs
+     */
+    public void createDataservice(String dataserviceName, boolean populateWithSamples, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Create Dataservice", false, callback); //$NON-NLS-1$
+
+        KomodoObject wkspace = repository.komodoWorkspace(uow);
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+
+        VdbImporter importer = new VdbImporter(repository);
+        ImportMessages importMessages = new ImportMessages();
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.HANDLE_EXISTING, ExistingNodeOptions.RETURN);
+
+        String portfolioSample = KomodoUtilService.SAMPLES[1];
+        String nwSample = KomodoUtilService.SAMPLES[4];
+        InputStream portSampleStream = KomodoUtilService.getVdbSample(portfolioSample);
+        InputStream nwindSampleStream = KomodoUtilService.getVdbSample(nwSample);
+
+        importer.importVdb(uow, portSampleStream, wkspace, importOptions, importMessages);
+        importer.importVdb(uow, nwindSampleStream, wkspace, importOptions, importMessages);
+
+        KomodoObject pfSampleObj = wkspace.getChild(uow, "Portfolio");
+        Vdb pfVdb = wsMgr.resolve(uow, pfSampleObj, Vdb.class);
+
+        KomodoObject nwSampleObj = wkspace.getChild(uow, "Northwind");
+        Vdb nwVdb = wsMgr.resolve(uow, nwSampleObj, Vdb.class);
+
+        Dataservice dataservice = wsMgr.createDataservice(uow, wkspace, dataserviceName);
+        dataservice.setDescription(uow, "This is my dataservice");
+
+        dataservice.addVdb(uow, pfVdb);
+        dataservice.setServiceVdb(uow, nwVdb);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @param user initiating call
+     *
+     * @return the dataservices directly from the kEngine
+     * @throws Exception if error occurs
+     */
+    public Dataservice[] getDataservices(String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        UnitOfWork uow = repository.createTransaction(user, "Find dataservices", true, null); //$NON-NLS-1$
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Dataservice[] services = mgr.findDataservices(uow);
+        uow.commit();
+
+        return services;
+    }
+    
+    /**
+     * Create a Vdb in the komodo engine
+     *
+     * @param vdbName the vdb name
+     * @param user initiating call
+     * @throws Exception if error occurs
+     */
+    public void createVdb(String vdbName, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Create VDB", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+        wsMgr.createVdb(uow, null, vdbName, vdbName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Create a Model within a vdb in the komodo engine
+     *
+     * @param vdbName the vdb name
+     * @param modelName the vdb name
+     * @param user initiating call
+     * @throws Exception if error occurs
+     */
+    public void createVdbModel(String vdbName, String modelName, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Create Model", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+        if(!wsMgr.hasChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            wsMgr.createVdb(uow, null, vdbName, vdbName);
+        }
+        
+        KomodoObject kobj = wsMgr.getChild(uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb vdb = Vdb.RESOLVER.resolve(uow, kobj);
+        
+        vdb.addModel(uow, modelName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Create a datasource in the komodo engine
+     *
+     * @param datasourceName the datasource name
+     * @param user initiating call
+     * @throws Exception if error occurs
+     */
+    public void createDatasource(String datasourceName, String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(user, "Create Datasource", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+        wsMgr.createDatasource(uow, null, datasourceName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @param user initiating call
+     *
+     * @return the datasources directly from the kEngine
+     * @throws Exception if error occurs
+     */
+    public Datasource[] getDatasources(String user) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        UnitOfWork uow = repository.createTransaction(user, "Find datasources", true, null); //$NON-NLS-1$
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Datasource[] sources = mgr.findDatasources(uow);
+        uow.commit();
+
+        return sources;
+    }
+    
+    /**
+     * Create a Driver in the komodo engine
+     *
+     * @param driverName the driver name
+     * @throws Exception if error occurs
+     */
+    public void createDriver(String driverName) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(Repository.SYSTEM_USER, "Create Driver", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
+        wsMgr.createDriver(uow, null, driverName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @return the drivers directly from the kEngine
+     * @throws Exception if error occurs
+     */
+    public Driver[] getDrivers() throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(Repository.SYSTEM_USER, "Find drivers", true, null); //$NON-NLS-1$
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
+        Driver[] drivers = mgr.findDrivers(uow);
+        uow.commit();
+
+        return drivers;
     }
 }

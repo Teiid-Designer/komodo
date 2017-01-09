@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.repository;
 
@@ -94,7 +108,7 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void shouldFailAddingDescriptorToReservedPath() throws Exception {
         final String descriptorName = "mix:referenceable";
 
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
             try {
                 final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
                 kobject.addDescriptor( getTransaction(), descriptorName );
@@ -197,7 +211,7 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
 
     @Test
     public void shouldNotAllowRemovingObjectsWithReservedPaths() throws Exception {
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
             try {
                 final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
                 kobject.remove( getTransaction() );
@@ -238,7 +252,7 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void shouldNotAllowRemovingDescriptorFromObjectWithReservedPath() throws Exception {
         final String descriptorName = "mix:referenceable";
 
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
             try {
                 final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
                 kobject.removeDescriptor( getTransaction(), descriptorName );
@@ -251,7 +265,7 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
 
     @Test
     public void shouldNotAllowRenamingObjectWithReservedPath() throws Exception {
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
             try {
                 final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
                 kobject.rename( getTransaction(), "blah" );
@@ -264,7 +278,7 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
 
     @Test
     public void shouldNotAllowSettingPrimaryTypeOfObjectsWithReservedPaths() throws Exception {
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
             try {
                 final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
                 kobject.setPrimaryType( getTransaction(), "nt:unstructured" );
@@ -279,17 +293,18 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void shouldNotHavePropertyWhenReservedPath() throws Exception {
         final String propertyName = "jcr:primaryType";
 
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
 
-            final Property property = kobject.getProperty( getTransaction(), propertyName );
+            final Property property = kobject.getProperty( sysTx, propertyName );
             assertThat( property, is( nullValue() ) );
 
-            final Property rawProperty = kobject.getRawProperty( getTransaction(), propertyName );
+            final Property rawProperty = kobject.getRawProperty( sysTx, propertyName );
             assertThat( rawProperty, is( nullValue() ) );
 
-            assertThat( kobject.hasProperty( getTransaction(), propertyName ), is( false ) );
-            assertThat( kobject.hasRawProperty( getTransaction(), propertyName ), is( false ) );
+            assertThat( kobject.hasProperty( sysTx, propertyName ), is( false ) );
+            assertThat( kobject.hasRawProperty( sysTx, propertyName ), is( false ) );
         }
     }
 
@@ -297,33 +312,36 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void shouldNotHavePropertyDescriptorWhenReservedPath() throws Exception {
         final String propertyName = "jcr:primaryType";
 
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
-            final PropertyDescriptor descriptor = kobject.getPropertyDescriptor( getTransaction(), propertyName );
+            final PropertyDescriptor descriptor = kobject.getPropertyDescriptor( sysTx, propertyName );
             assertThat( descriptor, is( nullValue() ) );
         }
     }
 
     @Test
     public void shouldNotHavePropertyDescriptorsWhenReservedPath() throws Exception {
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
-            final PropertyDescriptor[] descriptors = kobject.getPropertyDescriptors( getTransaction() );
+            final PropertyDescriptor[] descriptors = kobject.getPropertyDescriptors( sysTx );
             assertThat( descriptors.length, is( 0 ) );
 
-            final PropertyDescriptor[] rawDescriptors = kobject.getRawPropertyDescriptors( getTransaction() );
+            final PropertyDescriptor[] rawDescriptors = kobject.getRawPropertyDescriptors( sysTx );
             assertThat( rawDescriptors.length, is( 0 ) );
         }
     }
 
     @Test
     public void shouldNotHavePropertyNamesWhenReservedPath() throws Exception {
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
-            final String[] names = kobject.getPropertyNames( getTransaction() );
+            final String[] names = kobject.getPropertyNames( sysTx );
             assertThat( names.length, is( 0 ) );
 
-            final String[] rawNames = kobject.getRawPropertyNames( getTransaction() );
+            final String[] rawNames = kobject.getRawPropertyNames( sysTx );
             assertThat( rawNames.length, is( 0 ) );
         }
     }
@@ -341,15 +359,15 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void testRemoveThenAdd() throws Exception {
         String name = "testNode";
 
-        UnitOfWork transaction1 = _repo.createTransaction("create-node-to-remove", false, null);
+        UnitOfWork transaction1 = getTransaction();
         KomodoObject wkspNode = _repo.komodoWorkspace(transaction1);
         assertNotNull(wkspNode);
         KomodoObject testNode = wkspNode.addChild(transaction1, name, null);
         assertNotNull(testNode);
         String testNodePath = testNode.getAbsolutePath();
-        transaction1.commit();
+        commit();
 
-        UnitOfWork transaction2 = _repo.createTransaction("node-removal", false, null);
+        UnitOfWork transaction2 = getTransaction();
         wkspNode = _repo.komodoWorkspace(transaction2);
         assertNotNull(wkspNode);
         testNode = _repo.getFromWorkspace(transaction2, testNodePath);

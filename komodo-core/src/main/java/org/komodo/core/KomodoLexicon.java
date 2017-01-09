@@ -1,14 +1,29 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.core;
 
 import org.komodo.spi.constants.StringConstants;
 import org.modeshape.jcr.JcrNtLexicon;
+import org.modeshape.jcr.api.JcrConstants;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
 /**
@@ -29,49 +44,27 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
-     * The JCR names associated with a data source node type.
+     * The JCR names associated with a data service node type.
      */
-    public interface DataSource extends LibraryComponent, WorkspaceItem {
+    public interface DataService {
 
         /**
-         * The node type name of a data source. Value is {@value} .
+         * The name and node type name of the data services grouping node. Value is {@value} .
          */
-        String NODE_TYPE = Namespace.PREFIX + COLON + "dataSource"; //$NON-NLS-1$
+        String GROUP_NODE = Namespace.PREFIX + COLON + "dataServices"; //$NON-NLS-1$
+
+    }
+
+    /**
+     * The JCR names associated with a data source node type.
+     */
+    public interface DataSource {
 
         /**
          * The name and node type name of the data sources grouping node. Value is {@value} .
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "dataSources"; //$NON-NLS-1$
 
-        /**
-         * The name of the jdbc property. Value is {@value} .
-         */
-        String JDBC = Namespace.PREFIX + COLON + "jdbc"; //$NON-NLS-1$
-
-        /**
-         * The name of the preview property. Value is {@value} .
-         */
-        String PREVIEW = Namespace.PREFIX + COLON + "preview"; //$NON-NLS-1$
-
-        /**
-         * The name of the jndiName property. Value is {@value} .
-         */
-        String JNDI_NAME = Namespace.PREFIX + COLON + "jndiName"; //$NON-NLS-1$
-
-        /**
-         * The name of the driverName property. Value is {@value} .
-         */
-        String DRIVER_NAME = Namespace.PREFIX + COLON + "driverName"; //$NON-NLS-1$
-
-        /**
-         * The name of the className property. Value is {@value} .
-         */
-        String CLASS_NAME = Namespace.PREFIX + COLON + "className"; //$NON-NLS-1$
-
-        /**
-         * The name of the profileName property. Value is {@value} .
-         */
-        String PROFILE_NAME = Namespace.PREFIX + COLON + "profileName"; //$NON-NLS-1$
     }
 
     /**
@@ -93,6 +86,27 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the Komodo environment validation child node. Value is {@value} .
          */
         String VALIDATION = Namespace.PREFIX + COLON + "validation"; //$NON-NLS-1$
+
+        /**
+         * The name of the Komodo environment servers child node. Value is {@value} .
+         */
+        String SERVERS = Namespace.PREFIX + COLON + "servers"; //$NON-NLS-1$
+
+        /**
+         * The name and node type name of the Komodo Teiid Cache. Value is {@value}.
+         */
+        String TEIID_CACHE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
+    }
+
+    /**
+     * The JCR names associated with a folder node type.
+     */
+    public interface Folder extends LibraryComponent, WorkspaceItem {
+
+        /**
+         * The node type name of a folder. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "folder"; //$NON-NLS-1$
 
     }
 
@@ -121,6 +135,10 @@ public interface KomodoLexicon extends StringConstants {
          */
         String WORKSPACE = Namespace.PREFIX + COLON + "workspace"; //$NON-NLS-1$
 
+        /**
+         * The name and node type name of Komodo home nodes. Value is {@value} .
+         */
+        String HOME = Namespace.PREFIX + COLON + "home"; //$NON-NLS-1$
     }
 
     /**
@@ -326,7 +344,7 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the property used for the node type the rule pertains to. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "nodeType"; //$NON-NLS-1$
-        
+
         /**
          * The name of the property restrictions grouping node.  Value is {@value} .
          */
@@ -635,9 +653,25 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
-     * The JCR names associated with Teiid servers.
+     * The JCR names associated with the Komodo teiid cache node type.
      */
-    public interface Teiid extends WorkspaceItem {
+    public interface TeiidCache {
+        /**
+         * The name of the Teiid Cache node type. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
+
+        /**
+         * The threshold in milliseconds of how long a cached teiid should remain
+         * before a new request overwrites it
+         */
+        String EXPIRATION_THRESHOLD = Namespace.PREFIX + COLON + "expirationThreshold"; //$NON-NLS-1$
+    }
+
+    /**
+     * Abstract model of a Teiid connection properties
+     */
+    public interface TeiidArchetype {
 
         /**
          * The version property. Value is {@value} .
@@ -670,11 +704,6 @@ public interface KomodoLexicon extends StringConstants {
         String CONNECTED = Namespace.PREFIX + COLON + "connected"; //$NON-NLS-1$
 
         /**
-         * The name and node type name of the Komodo workspace's Teiid server grouping node. Value is {@value} .
-         */
-        String GROUP_NODE = Namespace.PREFIX + COLON + "teiids"; //$NON-NLS-1$
-
-        /**
          * The name of the host URL property. Value is {@value} .
          */
         String HOST = Namespace.PREFIX + COLON + "host"; //$NON-NLS-1$
@@ -695,20 +724,48 @@ public interface KomodoLexicon extends StringConstants {
         String JDBC_USER = Namespace.PREFIX + COLON + "jdbcUser"; //$NON-NLS-1$
 
         /**
-         * The name of the last ping time property. Value is {@value} .
-         */
-        String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
-
-        /**
          * The jdbc connection is encrypted. Value is {@value} .
          */
         String JDBC_SECURE = Namespace.PREFIX + COLON + "jdbcSecure"; //$NON-NLS-1$
+    }
+
+    /**
+     * The JCR names associated with Teiid servers.
+     */
+    public interface Teiid extends TeiidArchetype, WorkspaceItem {
+
+        /**
+         * The name and node type name of the Komodo workspace's Teiid server grouping node. Value is {@value} .
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "teiids"; //$NON-NLS-1$
+
+        /**
+         * The name of the last ping time property. Value is {@value} .
+         */
+        String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
 
         /**
          * The name of the Teiid node type. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "teiid"; //$NON-NLS-1$
 
+    }
+
+    /**
+     * The JCR names associated with the teiid cache, ie. those object that
+     * cache the representation of the contents of a live server
+     */
+    public interface CachedTeiid extends TeiidArchetype {
+
+        /**
+         * The name of the Cached Teiid node type. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "cachedTeiid"; //$NON-NLS-1$
+
+        /**
+         * The timestamp of when the cached teiid was created
+         */
+        String TIMESTAMP = Namespace.PREFIX + COLON + "timestamp"; //$NON-NLS-1$
     }
 
     /**
@@ -866,6 +923,22 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with the Komodo workspace node type.
+     */
+    public interface Home {
+
+        /**
+         * The name and node type name of the Komodo workspace node. Value is {@value} .
+         */
+        String NODE_TYPE = Komodo.HOME;
+
+        /**
+         * The unqualified name of the workspace area. Value is {@value}.
+         */
+        String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
+    }
+
+    /**
      * The JCR names associated with the workspace item mixin. Workspace item nodes are referenceable.
      */
     public interface WorkspaceItem {
@@ -883,7 +956,7 @@ public interface KomodoLexicon extends StringConstants {
         /**
          * The node type name of the file child node. Value is {@value} .
          */
-        String FILE_NODE_TYPE = JcrNtLexicon.FILE.getString();
+        String FILE_NODE_TYPE = JcrConstants.NT_FILE;
 
         /**
          * The node name of the child node that contains the original imported resource. Value is {@value} .

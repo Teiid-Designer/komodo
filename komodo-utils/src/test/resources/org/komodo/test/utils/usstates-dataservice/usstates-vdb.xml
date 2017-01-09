@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vdb name="usstates" version="1">
+
+<description>A US States Example Vdb</description>
+<connection-type>BY_VERSION</connection-type>
+<property name="UseConnectorMetadata" value="true"></property>
+
+<model name="states" type="PHYSICAL">
+<property name="importer.useFullSchemaName" value="false"></property>
+<source name="jdbc-connector" translator-name="mysql" connection-jndi-name="java:/MySqlDS"></source>
+</model>
+
+</vdb>

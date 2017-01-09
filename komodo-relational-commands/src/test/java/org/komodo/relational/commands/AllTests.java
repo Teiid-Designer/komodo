@@ -98,12 +98,13 @@ import org.komodo.relational.commands.server.ServerDatasourcesCommandTest;
 import org.komodo.relational.commands.server.ServerDeployDatasourceCommandTest;
 import org.komodo.relational.commands.server.ServerDeployVdbCommandTest;
 import org.komodo.relational.commands.server.ServerDisconnectCommandTest;
-import org.komodo.relational.commands.server.ServerRenameCommandTest;
-import org.komodo.relational.commands.server.ServerSetCommandTest;
+import org.komodo.relational.commands.server.ServerSetPropertyCommandTest;
+import org.komodo.relational.commands.server.ServerShowPropertiesCommandTest;
 import org.komodo.relational.commands.server.ServerTranslatorCommandTest;
 import org.komodo.relational.commands.server.ServerTranslatorsCommandTest;
 import org.komodo.relational.commands.server.ServerUndeployDatasourceCommandTest;
 import org.komodo.relational.commands.server.ServerUndeployVdbCommandTest;
+import org.komodo.relational.commands.server.ServerUnsetPropertyCommandTest;
 import org.komodo.relational.commands.server.ServerVdbCommandTest;
 import org.komodo.relational.commands.server.ServerVdbsCommandTest;
 import org.komodo.relational.commands.storedprocedure.SetStoredProcedurePropertyCommandTest;
@@ -135,9 +136,6 @@ import org.komodo.relational.commands.tableconstraint.TableConstraintCommandsI18
 import org.komodo.relational.commands.tabularresultset.TabularResultSetCommandsI18nTest;
 import org.komodo.relational.commands.tabularresultset.TabularResultSetSetPropertyCommandTest;
 import org.komodo.relational.commands.tabularresultset.TabularResultSetUnsetPropertyCommandTest;
-import org.komodo.relational.commands.teiid.SetTeiidPropertyCommandTest;
-import org.komodo.relational.commands.teiid.TeiidCommandsI18nTest;
-import org.komodo.relational.commands.teiid.UnsetTeiidPropertyCommandTest;
 import org.komodo.relational.commands.translator.SetTranslatorPropertyCommandTest;
 import org.komodo.relational.commands.translator.TranslatorCommandsI18nTest;
 import org.komodo.relational.commands.translator.TranslatorRenameCommandTest;
@@ -171,11 +169,9 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
 import org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandsI18nTest;
 import org.komodo.relational.commands.workspace.CreateDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.CreateSchemaCommandTest;
-import org.komodo.relational.commands.workspace.CreateTeiidCommandTest;
 import org.komodo.relational.commands.workspace.CreateVdbCommandTest;
 import org.komodo.relational.commands.workspace.DeleteDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
-import org.komodo.relational.commands.workspace.DeleteTeiidCommandTest;
 import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
 import org.komodo.relational.commands.workspace.ExportDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.ExportVdbCommandTest;
@@ -208,11 +204,9 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     // Workspace
     CreateDatasourceCommandTest.class,
     CreateSchemaCommandTest.class,
-    CreateTeiidCommandTest.class,
     CreateVdbCommandTest.class,
     DeleteDatasourceCommandTest.class,
     DeleteSchemaCommandTest.class,
-    DeleteTeiidCommandTest.class,
     DeleteVdbCommandTest.class,
 //    ImportVdbCommandTest.class,
     UploadVdbCommandTest.class,
@@ -361,14 +355,15 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     ServerDeployDatasourceCommandTest.class,
     ServerDeployVdbCommandTest.class,
     ServerDisconnectCommandTest.class,
-    ServerRenameCommandTest.class,
-    ServerSetCommandTest.class,
+    ServerShowPropertiesCommandTest.class,
     ServerTranslatorCommandTest.class,
     ServerTranslatorsCommandTest.class,
     ServerUndeployDatasourceCommandTest.class,
     ServerUndeployVdbCommandTest.class,
     ServerVdbCommandTest.class,
     ServerVdbsCommandTest.class,
+    ServerSetPropertyCommandTest.class,
+    ServerUnsetPropertyCommandTest.class,
 
     // StoredProcedure
     org.komodo.relational.commands.storedprocedure.AddParameterCommandTest.class,
@@ -412,11 +407,6 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     TabularResultSetCommandsI18nTest.class,
     TabularResultSetSetPropertyCommandTest.class,
     TabularResultSetUnsetPropertyCommandTest.class,
-
-    // Teiid
-    SetTeiidPropertyCommandTest.class,
-    TeiidCommandsI18nTest.class,
-    UnsetTeiidPropertyCommandTest.class,
 
     // Translator
     SetTranslatorPropertyCommandTest.class,

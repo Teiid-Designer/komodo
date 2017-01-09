@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.foreignkey;
 
@@ -54,7 +68,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
             // get reference of the column at the specified path
             Column column = null;
             { // see if valid column
-                String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath( columnPath );
+                String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath( getTransaction(), columnPath );
 
                 if ( StringUtils.isBlank( repoPath ) ) {
                     repoPath = columnPath;
@@ -85,7 +99,9 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                     result = new CommandResultImpl( false,
                                                     I18n.bind( ForeignKeyCommandsI18n.invalidColumn,
                                                                getWorkspaceStatus().getCurrentContextLabelProvider()
-                                                                                   .getDisplayPath( column.getAbsolutePath() ),
+                                                                                   .getDisplayPath( getTransaction(),
+                                                                                                    column.getAbsolutePath(),
+                                                                                                    null ),
                                                                foreignKey.getName( getTransaction() ) ),
                                                     null );
                 } else {
@@ -162,7 +178,8 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
 
             final Table parent = getForeignKey().getTable( uow );
             final String parentPath = parent.getAbsolutePath();
-            final String parentDisplayPath = getWorkspaceStatus().getCurrentContextLabelProvider().getDisplayPath( parentPath );
+            final String parentDisplayPath = getWorkspaceStatus().getCurrentContextLabelProvider()
+                                                                 .getDisplayPath( getTransaction(), parentPath, null );
 
             // only add columns NOT found in the parent table
             for ( final String displayPath : allDisplayPaths ) {

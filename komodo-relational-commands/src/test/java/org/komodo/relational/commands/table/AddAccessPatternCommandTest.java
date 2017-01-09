@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.AccessPattern;
@@ -44,7 +45,7 @@ public final class AddAccessPatternCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -60,6 +61,21 @@ public final class AddAccessPatternCommandTest extends AbstractCommandTest {
         AccessPattern[] accessPatterns = tables[0].getAccessPatterns(getTransaction());
         assertEquals(1, accessPatterns.length);
         assertEquals("myAccessPattern", accessPatterns[0].getName(getTransaction()));
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateAccessPatternWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-access-pattern myAccessPattern";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-table myTable",
+                                    "cd myTable",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

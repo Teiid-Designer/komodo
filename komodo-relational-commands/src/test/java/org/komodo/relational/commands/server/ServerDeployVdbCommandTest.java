@@ -33,15 +33,10 @@ import org.komodo.spi.runtime.TeiidVdb;
 public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotSet() throws Exception {
-        this.assertCommandsNotAvailable(ServerDeployVdbCommand.NAME);
-    }
-
-    @Test
     @Ignore
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
-        initServer("myTeiid", true, false, 
+        initServer("myTeiid", false, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
@@ -62,7 +57,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
         assertCommandResultOk(result);
         
         // Initialize mock server with artifacts
-        initServer("myTeiid", true, true, 
+        initServer("myTeiid", true, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
@@ -91,7 +86,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
         assertCommandResultOk(result);
         
         // Initialize mock server with artifacts
-        initServer("myTeiid", true, true, 
+        initServer("myTeiid", true, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
@@ -120,7 +115,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
         assertCommandResultOk(result);
         
         // Initialize mock server with artifacts
-        initServer("myTeiid", true, true, 
+        initServer("myTeiid", true, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
@@ -147,7 +142,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
         assertCommandResultOk(result);
         
         // Initialize mock server with artifacts
-        initServer("myTeiid", true, true, 
+        initServer("myTeiid", true, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
@@ -181,7 +176,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
         assertCommandResultOk(result);
         
         // Initialize mock server with artifacts
-        initServer("myTeiid", true, true, 
+        initServer("myTeiid", true, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         

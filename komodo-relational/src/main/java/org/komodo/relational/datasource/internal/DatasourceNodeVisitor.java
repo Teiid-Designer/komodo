@@ -23,10 +23,11 @@ package org.komodo.relational.datasource.internal;
 
 import java.io.StringWriter;
 import java.util.Properties;
+
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
@@ -34,6 +35,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * Visitor that will walk a Datasource node and convert it to Datasource xml
@@ -43,7 +45,7 @@ public class DatasourceNodeVisitor implements StringConstants {
     private static final int TAB1 = 1;
     private static final int TAB2 = 2;
     private static final int NEW_LINE1 = 1;
-    
+
     private final StringWriter strWriter;
     private XMLStreamWriter writer;
     private final Datasource dataSource;
@@ -60,18 +62,18 @@ public class DatasourceNodeVisitor implements StringConstants {
     public DatasourceNodeVisitor(final UnitOfWork uow, final Datasource dataSource, final Properties exportProperties) throws KException {
         super();
         this.dataSource = dataSource;
-        
+
         if( exportProperties != null && !exportProperties.isEmpty() ) {
             boolean useTabs = exportProperties.containsKey(ExportConstants.USE_TABS_PROP_KEY);
             setShowTabs(useTabs);
         }
-        
+
         this.strWriter = new StringWriter();
         this.writer = null;
         try {
 			final XMLOutputFactory xof = XMLOutputFactory.newInstance();
 			this.writer = xof.createXMLStreamWriter(strWriter);
-	        
+
 	        dataSource(uow, this.dataSource);
 		} catch (Exception e) {
 		    throw new KException(e);
@@ -85,7 +87,7 @@ public class DatasourceNodeVisitor implements StringConstants {
 		    }
 		}
     }
-    
+
     /**
      * Determines whether to tab the xml into a more readable format.
      * @param showTabs <code>true</code> will tab the generated xml.
@@ -93,7 +95,7 @@ public class DatasourceNodeVisitor implements StringConstants {
     public void setShowTabs( boolean showTabs ) {
         this.showTabs = showTabs;
     }
-    
+
     /**
      * Get the XML representation of the Datasource
      * @return the xml string
@@ -102,7 +104,7 @@ public class DatasourceNodeVisitor implements StringConstants {
     	if( strWriter != null ) {
     		return this.strWriter.toString();
     	}
-    	
+
     	return EMPTY_STRING;
     }
 
@@ -110,67 +112,78 @@ public class DatasourceNodeVisitor implements StringConstants {
         // Start new document
         writeStartDocument();
 
-        // ==============================
-        // DatasourceSet element
-        // ==============================
-        writeStartElement(Datasource.XML_ELEM_DATASOURCE_SET);
-        writeNewLine(NEW_LINE1);
-
         // -----------------------------------------------------------------
-        // Datasource element
+        // Data source element
         // -----------------------------------------------------------------
-        if(showTabs) writeTab(TAB1);
-        writeStartElement(Datasource.XML_ELEM_DATASOURCE);
+        final String dsType = ( dataSource.isJdbc( uow ) ? DataVirtLexicon.ConnectionXmlId.JDBC_CONNECTION
+                                                         : DataVirtLexicon.ConnectionXmlId.RESOURCE_CONNECTION );
+        writeStartElement( dsType );
         // Name attribute
-        writeAttribute(Datasource.XML_ATTR_NAME, dataSource.getName(uow));
-        // jdbc attribute
-        writeAttribute(Datasource.XML_ATTR_JDBC, Boolean.toString(dataSource.isJdbc(uow)));
+        writeAttribute(DataVirtLexicon.ConnectionXmlId.NAME_ATTR, dataSource.getName(uow));
 
         writeNewLine(NEW_LINE1);
+
+        // JNDI element
+        if ( this.showTabs ) {
+            writeTab( TAB1 );
+        }
+
+        writeStartElement( DataVirtLexicon.ConnectionXmlId.JNDI_NAME );
+        writeCharacters( dataSource.getJndiName( uow ) );
+        writeEndElement();
+
+        // driver name element
+        if ( this.showTabs ) {
+            writeTab( TAB1 );
+        }
+
+        writeStartElement( DataVirtLexicon.ConnectionXmlId.DRIVER_NAME );
+        writeCharacters( dataSource.getDriverName( uow ) );
+        writeEndElement();
 
         // Write property elements
-        int nsPrefixLength = (KomodoLexicon.Namespace.PREFIX+StringConstants.COLON).length();
-        
         String[] propNames = dataSource.getPropertyNames(uow);
         for(String propName : propNames) {
             Property prop = dataSource.getProperty(uow, propName);
             if(prop!=null) {
-                // Do not export properties with the "tko:" prefix
+                // Do not export properties that have there own element
                 if( isKnownProperty(propName) ) {
-                    propName = propName.substring(nsPrefixLength);
+                    continue;
                 }
                 String propValue = prop.getStringValue(uow);
-                if(!StringUtils.isBlank(propValue) && !propName.equals(Datasource.XML_ATTR_JDBC) ) {
+                if(!StringUtils.isBlank(propValue) ) {
                     if(showTabs) writeTab(TAB2);
                     writePropertyElement(propName, propValue);
                 }
             }
         }
-        if(showTabs) writeTab(TAB1);
-        writeEndElement();
-        // -----------------------------------------------------------------
-        // End Datasource element
-        // -----------------------------------------------------------------
 
+        // driver class element
+        if ( !dataSource.isJdbc( uow ) ) {
+            if ( this.showTabs ) {
+                writeTab( TAB1 );
+            }
+
+            writeStartElement( DataVirtLexicon.ConnectionXmlId.CLASSNAME );
+            writeCharacters( dataSource.getClassName( uow ) );
+            writeEndElement();
+        }
+
+        // -----------------------------------------------------------------
+        // End Data source element
+        // -----------------------------------------------------------------
         writeEndElement();
-        // ==============================
-        // End DatasourceSet element
-        // ==============================
-        
+
         writeEndDocument();
     }
-    
-    private boolean isKnownProperty ( final String propName ) {
-        if( propName.equals(KomodoLexicon.DataSource.CLASS_NAME) ||
-            propName.equals(KomodoLexicon.DataSource.DRIVER_NAME) ||
-            propName.equals(KomodoLexicon.DataSource.JDBC) ||
-            propName.equals(KomodoLexicon.DataSource.JNDI_NAME) ||
-            propName.equals(KomodoLexicon.DataSource.PREVIEW) ||
-            propName.equals(KomodoLexicon.DataSource.PROFILE_NAME) ) return true;
-        
-        return false;
+
+    private boolean isKnownProperty( final String propName ) {
+        return ( propName.equals( DataVirtLexicon.Connection.CLASS_NAME )
+                 || propName.equals( DataVirtLexicon.Connection.DRIVER_NAME )
+                 || propName.equals( DataVirtLexicon.Connection.TYPE )
+                 || propName.equals( DataVirtLexicon.Connection.JNDI_NAME ) );
     }
-    
+
     private void writeNewLine(int total) throws XMLStreamException {
         for (int i = 0; i < total; ++i)
             writer.writeCharacters(NEW_LINE);
@@ -179,7 +192,7 @@ public class DatasourceNodeVisitor implements StringConstants {
     private void writeNewLine() throws XMLStreamException {
         writeNewLine(1);
     }
-    
+
     private void writeTab(int total) throws XMLStreamException {
     	for (int i = 0; i < total; ++i)
     		writer.writeCharacters(TAB);
@@ -208,8 +221,8 @@ public class DatasourceNodeVisitor implements StringConstants {
     }
 
     private void writePropertyElement(String propName, String propValue) throws XMLStreamException {
-        writeStartElement(Datasource.XML_ELEM_PROPERTY);
-        writeAttribute(Datasource.XML_ATTR_NAME, propName);
+        writeStartElement(DataVirtLexicon.ConnectionXmlId.PROPERTY);
+        writeAttribute(DataVirtLexicon.ConnectionXmlId.NAME_ATTR, propName);
         writeCharacters(propValue);
         writeEndElement();
     }

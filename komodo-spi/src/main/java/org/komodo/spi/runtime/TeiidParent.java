@@ -73,5 +73,9 @@ public interface TeiidParent extends HostProvider {
      */
     EventManager getEventManager();
 
+    /**
+     * @return whether this parent is valid
+     */
+    boolean isSound();
 
 }

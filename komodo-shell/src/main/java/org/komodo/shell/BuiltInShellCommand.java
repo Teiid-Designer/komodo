@@ -20,10 +20,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.TabCompletionModifier;
@@ -34,6 +34,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
@@ -430,22 +431,22 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 		    if(KomodoObjectUtils.isRoot(getContext())) {
 		        entireDisplayPath = FORWARD_SLASH + displayPath;
 		    } else {
-		        entireDisplayPath = getWorkspaceStatus().getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+		        entireDisplayPath = getWorkspaceStatus().getCurrentContextDisplayPath( null )+FORWARD_SLASH+displayPath;
 		    }
 		}
 
 		// Try to locate the object at the specified path
         KomodoObject newContext = null;
-        String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath(entireDisplayPath);
+        String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath(getTransaction(), entireDisplayPath);
         if(!StringUtils.isBlank(repoPath)) {
             // TODO: probably need to add getFromLibrary method similar to getFromWorkspace instead of the below...
             // /tko:komodo/library
-            if ( KomodoObjectLabelProvider.LIB_PATH.equals( repoPath ) || KomodoObjectLabelProvider.LIB_SLASH_PATH.equals( repoPath ) ) {
+            if ( DefaultLabelProvider.LIB_PATH.equals( repoPath ) || DefaultLabelProvider.LIB_SLASH_PATH.equals( repoPath ) ) {
                 return CompletionConstants.OK;
             }
 
             // /tko:komodo/environment
-            if ( KomodoObjectLabelProvider.ENV_PATH.equals( repoPath ) || KomodoObjectLabelProvider.ENV_SLASH_PATH.equals( repoPath ) ) {
+            if ( DefaultLabelProvider.ENV_PATH.equals( repoPath ) || DefaultLabelProvider.ENV_SLASH_PATH.equals( repoPath ) ) {
                 return CompletionConstants.OK;
             }
 
@@ -502,7 +503,9 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     	if(lastArgument==null) {
     	    KomodoObject[] children = currentContext.getChildren( getTransaction() );
     		for(KomodoObject wsContext : children) {
-    		    final String contextName = this.wsStatus.getCurrentContextLabelProvider().getDisplayName( wsContext );
+                final String contextName = this.wsStatus.getCurrentContextLabelProvider().getDisplayName( getTransaction(),
+                                                                                                          wsContext,
+                                                                                                          null );
     			potentialsList.add(contextName+FORWARD_SLASH);
     		}
     		candidates.addAll(potentialsList);
@@ -523,11 +526,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     		    if(children.length != 0) {
     		        // Get all children as potentials
     		        for(KomodoObject childContext : children) {
-    		            final String absolutePath = this.wsStatus.getDisplayPath(childContext);
+    		            final String absolutePath = this.wsStatus.getDisplayPath(childContext, null);
     		            potentialsList.add(absolutePath+FORWARD_SLASH);
     		        }
     		    } else {
-    		        final String absolutePath = this.wsStatus.getDisplayPath(deepestMatchingContext);
+    		        final String absolutePath = this.wsStatus.getDisplayPath(deepestMatchingContext, null);
     		        potentialsList.add(absolutePath+FORWARD_SLASH);
     		    }
     		    updateCandidates(candidates, potentialsList, lastArgument);
@@ -545,8 +548,8 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     			if(children.length!=0) {
     				// Get all children as potentials
     				for(KomodoObject childContext : children) {
-                        final String absolutePath = this.wsStatus.getDisplayPath(childContext);
-    					String relativePath = convertAbsoluteDisplayPathToRelative(getWorkspaceStatus(), deepestMatchingContext, absolutePath);
+                        final String absolutePath = this.wsStatus.getDisplayPath(childContext, null);
+    					String relativePath = convertAbsoluteDisplayPathToRelative(deepestMatchingContext, absolutePath);
     					if(!StringUtils.isBlank(deepestMatchingPath) && lastArgument.startsWith(deepestMatchingPath)) {
     					    potentialsList.add(deepestMatchingPath+FORWARD_SLASH+relativePath+FORWARD_SLASH);
     					} else {
@@ -554,8 +557,8 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     					}
     				}
     			} else {
-                    final String absolutePath = this.wsStatus.getDisplayPath(deepestMatchingContext);
-    				String relativePath = convertAbsoluteDisplayPathToRelative(getWorkspaceStatus(), deepestMatchingContext, absolutePath);
+                    final String absolutePath = this.wsStatus.getDisplayPath(deepestMatchingContext, null);
+    				String relativePath = convertAbsoluteDisplayPathToRelative(deepestMatchingContext, absolutePath);
                     if(!StringUtils.isBlank(deepestMatchingPath) && lastArgument.startsWith(deepestMatchingPath)) {
                         potentialsList.add(deepestMatchingPath+FORWARD_SLASH+relativePath+FORWARD_SLASH);
                     } else {
@@ -594,7 +597,9 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                     result.setPath(prevPath);
                     break;
                 } else {
-                    String currContextPath = wsStatus.getCurrentContextLabelProvider().getDisplayPath(currentContext);
+                    String currContextPath = wsStatus.getCurrentContextLabelProvider().getDisplayPath( getTransaction(),
+                                                                                                       currentContext,
+                                                                                                       null );
                     String displayPath = currContextPath + FORWARD_SLASH + segment;
                     KomodoObject theContext = wsStatus.getContextForDisplayPath(displayPath);
 
@@ -649,7 +654,9 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         int nMatching = 0;
         try {
             for(KomodoObject theContext : currentContext.getChildren(wsStatus.getTransaction())) {
-                final String contextName = wsStatus.getCurrentContextLabelProvider().getDisplayName( theContext );
+                final String contextName = wsStatus.getCurrentContextLabelProvider().getDisplayName( wsStatus.getTransaction(),
+                                                                                                     theContext,
+                                                                                                     null );
                 if(contextName.startsWith(segmentName)) {
                     nMatching++;
                     if(nMatching>1) break;
@@ -668,15 +675,13 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
      * @param absolutePath the supplied absolute path
      * @return the path relative to the root context
      */
-    private String convertAbsoluteDisplayPathToRelative( WorkspaceStatus wsStatus,
-                                                         KomodoObject context,
+    private String convertAbsoluteDisplayPathToRelative( KomodoObject context,
                                                          final String absolutePath ) {
-        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
         ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( absolutePath, "absolutePath" ); //$NON-NLS-1$
 
-        final String absContextPath = wsStatus.getDisplayPath(context);
-        final String displayPath = wsStatus.getCurrentContextLabelProvider().getDisplayPath( absolutePath );
+        final String absContextPath = wsStatus.getDisplayPath(context, null);
+        final String displayPath = wsStatus.getCurrentContextLabelProvider().getDisplayPath( getTransaction(), absolutePath, null );
         String path = ( StringUtils.isBlank( displayPath ) ? absolutePath : displayPath );
 
         if ( path.startsWith( absContextPath ) ) {

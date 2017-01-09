@@ -1,10 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest;
 
 import java.net.URI;
@@ -51,6 +65,11 @@ public final class RestLink {
         SEARCH,
 
         /**
+         * A link to a VDB resource
+         */
+        VDBS(KomodoType.VDB),
+
+        /**
          * A link to a vdb imports resource
          */
         IMPORTS(KomodoType.VDB_IMPORT),
@@ -59,6 +78,16 @@ public final class RestLink {
          * A Link to a vdb models resource
          */
         MODELS(KomodoType.MODEL),
+
+        /**
+         * A link to a vdb table resource
+         */
+        TABLES(KomodoType.TABLE),
+
+        /**
+         * A link to a table column resource
+         */
+        COLUMNS(KomodoType.COLUMN),
 
         /**
          * A link to a vdb translators resource
@@ -88,7 +117,27 @@ public final class RestLink {
         /**
          * A link to a mask resource
          */
-        MASKS(KomodoType.VDB_MASK);
+        MASKS(KomodoType.VDB_MASK),
+
+        /**
+         * Source VDBs matching service source model jndi
+         */
+        SOURCE_VDB_MATCHES,
+        
+        /**
+         * Service vdb view table names
+         */
+        SERVICE_VIEW_TABLES,
+
+        /**
+         * A link to a data service's connections
+         */
+        CONNECTIONS,
+
+        /**
+         * A link to a data service's connections
+         */
+        DRIVERS;
 
         private KomodoType kType;
 

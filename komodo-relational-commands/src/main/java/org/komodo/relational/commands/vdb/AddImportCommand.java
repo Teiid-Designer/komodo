@@ -1,13 +1,29 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.vdb;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -41,6 +57,13 @@ public final class AddImportCommand extends VdbShellCommand {
             final String importName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingImportName ) );
 
             final Vdb vdb = getVdb();
+            
+            // Do not allow add if object of type with this name already exists
+            VdbImport[] imports = vdb.getImports(getTransaction(), importName);
+            if(imports.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, importName, VdbImport.class.getSimpleName() ), null );
+            }
+            
             vdb.addImport( getTransaction(), importName );
 
             result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.importAdded, importName ) );

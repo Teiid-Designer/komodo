@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.workspace;
 
@@ -18,7 +32,6 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
@@ -84,7 +97,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
 
             // Determine if the VDB exists
             if ( workspaceContext
-                 && !getWorkspaceManager().hasChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+                 && !getWorkspaceManager(getTransaction()).hasChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
             }
 
@@ -102,7 +115,8 @@ public final class ExportVdbCommand extends RelationalShellCommand {
                 final UnitOfWork uow = getTransaction();
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
-                final String manifest = vdbToExport.export( uow, properties );
+                byte[] manifestBytes = vdbToExport.export( uow, properties );
+                final String manifest = new String(manifestBytes);
 
                 // Write the file
                 try{
@@ -138,7 +152,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
         KomodoObject kobject = null;
 
         if ( workspaceContext ) {
-            kobject = getWorkspaceManager().getChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            kobject = getWorkspaceManager(getTransaction()).getChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
         } else {
             kobject = getContext();
         }
@@ -167,8 +181,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
 
     private boolean isWorkspaceContext() {
         final String path = getContext().getAbsolutePath();
-        return ( KomodoObjectLabelProvider.WORKSPACE_PATH.equals( path )
-                 || KomodoObjectLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
+        return getWorkspaceStatus().getLabelProvider().isWorkspacePath(path);
     }
 
     /**
@@ -213,7 +226,7 @@ public final class ExportVdbCommand extends RelationalShellCommand {
 
         if ( isWorkspaceContext() ) {
             // arg 0 = vdb name, arg 1 = output file name, arg 2 = overwrite
-            final KomodoObject[] vdbs = getWorkspaceManager().findVdbs( getTransaction() );
+            final KomodoObject[] vdbs = getWorkspaceManager(getTransaction()).findVdbs( getTransaction() );
 
             if ( args.isEmpty() && ( vdbs.length != 0 ) ) {
                 for ( final KomodoObject vdb : vdbs ) {

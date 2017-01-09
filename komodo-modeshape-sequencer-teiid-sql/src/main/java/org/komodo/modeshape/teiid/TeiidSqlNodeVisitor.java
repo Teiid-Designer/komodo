@@ -60,6 +60,7 @@ import org.komodo.spi.query.ParameterInfo;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.common.collection.EmptyIterator;
@@ -274,6 +275,8 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
 
     @SuppressWarnings( "unchecked" )
     protected <T> T propertyValue(Value value, DataTypeName dataTypeName) throws RepositoryException {
+        ArgCheck.isNotNull(dataTypeName, "dataTypeName");
+
         Object valueObject = null;
 
         switch (dataTypeName) {
@@ -321,7 +324,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         return (T) valueObject;
     }
 
-    <T> T propertyValue(Property property, DataTypeName dataTypeName) throws RepositoryException {
+    private <T> T propertyValue(Property property, DataTypeName dataTypeName) throws RepositoryException {
         if (property == null)
             return null;
 
@@ -3298,6 +3301,8 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
 
         String typeName = propertyString(node, Expression.TYPE_CLASS_PROP_NAME);
         DataTypeName dataTypeName = DataTypeName.findDataTypeName(typeName);
+        if (dataTypeName == null)
+            dataTypeName = DataTypeName.OBJECT;
 
         Class<?> type = getDataTypeManager().getDefaultDataClass(dataTypeName);
         boolean multiValued = propertyBoolean(node, Constant.MULTI_VALUED_PROP_NAME);

@@ -48,7 +48,7 @@
 											maven-assembly-plugin
 										</artifactId>
 										<versionRange>
-											[2.5.5,)
+											[2.4.1,)
 										</versionRange>
 										<goals>
 											<goal>single</goal>
@@ -104,6 +104,11 @@
 			<artifactId>komodo-relational</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-ui</artifactId>
+		</dependency>
+
 		<!-- Allows test classes in other modules to extend the classes in this module -->
 		<dependency>
 			<groupId>org.komodo</groupId>
@@ -123,18 +128,6 @@
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-test-utils</artifactId>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

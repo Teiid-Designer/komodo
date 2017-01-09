@@ -41,7 +41,7 @@ public class SetCustomOptionCommandTest extends CustomOptionCommandTest {
 
     @Test
     public void testCustomOptionTable() throws Exception {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         setup("commandFiles","addCustomOptions.cmd");
 
         String[][] expectedOptions={
@@ -63,7 +63,7 @@ public class SetCustomOptionCommandTest extends CustomOptionCommandTest {
 
     @Test
     public void testCustomOptionColumn() throws Exception {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         setup("commandFiles","addColumns.cmd");
         final String[] commands = {
             "cd myColumn1",
@@ -89,7 +89,7 @@ public class SetCustomOptionCommandTest extends CustomOptionCommandTest {
 
     @Test
     public void testCustomOptionProcedure() throws Exception {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         setup("commandFiles","addStoredProcedures.cmd");
         final String[] commands = {
             "cd myStoredProcedure1",
@@ -110,7 +110,7 @@ public class SetCustomOptionCommandTest extends CustomOptionCommandTest {
 
     @Test
     public void testCustomOptionResultSet() throws Exception {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         setup("commandFiles","addResSetColumns.cmd");
         final String[] commands = {
             "cd myColumn1",

@@ -2,11 +2,11 @@ package org.komodo.shell.commands;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
@@ -51,7 +51,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 			WorkspaceStatus status = getWorkspaceStatus();
 			if (firstArgument.equals(ARG_ALL)) {
 				// reset all global properties
-				status.setGlobalProperties(null);
+				status.resetGlobalProperties();
 				return new CommandResultImpl(I18n.bind(ShellI18n.globalResetAllProps)); //Reset all props OK
 			} else {
 				// reset single property
@@ -60,8 +60,8 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 					status.setGlobalProperty(firstArgument.toUpperCase(), null);
 					return new CommandResultImpl(I18n.bind(ShellI18n.globalPropertyReset,firstArgument));// Reset one prop OK
 				} else {
-					// invalid property name
-	                return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidGlobalProperty, validationStatus ), null );
+					// invalid property name or cannot reset
+	                return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidGlobalPropertyCannotReset ), null );
 				}
 			}
 		} catch (Exception e) {

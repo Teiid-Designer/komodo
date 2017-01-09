@@ -1,15 +1,29 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.shell.AbstractCommandTest;
@@ -29,17 +43,7 @@ public final class AddChildCommandTest extends AbstractCommandTest {
     }
 
     @Test
-    public void shouldAllowAtRoot() throws Exception {
-        final String child = "blah";
-        final String[] commands = { "add-child " + child };
-        final CommandResult result = execute( commands );
-        assertCommandResultOk( result );
-
-        final KomodoObject root = _repo.komodoWorkspace( getTransaction() ).getParent( getTransaction() );
-        assertThat( root.getChild( getTransaction(), child ), is( notNullValue() ) );
-    }
-
-    @Test
+    @Ignore("Security now locks this down until such time as the library start to be really used")
     public void shouldAddChildAtLibrary() throws Exception {
         final String childName = "blah";
         final String[] commands = { "library", "add-child " + childName };

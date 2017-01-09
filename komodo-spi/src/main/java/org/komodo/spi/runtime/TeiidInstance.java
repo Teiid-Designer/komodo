@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import java.util.Collection;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.runtime.version.TeiidVersion;
 /**
@@ -28,6 +29,11 @@ import org.komodo.spi.runtime.version.TeiidVersion;
  *
  */
 public interface TeiidInstance extends ExecutionAdmin, HostProvider {
+
+    /**
+     * Object used for synchronization locking on teiid instance implementations
+     */
+    Object TEIID_INSTANCE_LOCK = new Object();
 
     /**
      * The data source jndi property name.  Value is {@value} .
@@ -55,10 +61,23 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
     String DATASOURCE_DISPLAYNAME = "display-name"; //$NON-NLS-1$
     
     /**
-     * @return the version information of this instance
+     * @return the version information of this instance, either the client or runtime version
+     *                  depending on connection, ie. unconnected returns client while connected returns runtime.
+     *
      * @throws Exception 
      */
     TeiidVersion getVersion();
+
+    /**
+     * @return the client version of this instance
+     */
+    TeiidVersion getClientVersion();
+
+    /**
+     * @return the runtime / server version of this instance
+     * @throws Exception 
+     */
+    TeiidVersion getRuntimeVersion() throws Exception;
 
     /**
      * Disconnect then connect to this instance. This is preferable to 
@@ -91,6 +110,11 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * @return the unique identifier of this instance
      */
     String getId();
+
+    /**
+     * @return the version of teiid this instance was built with
+     */
+    TeiidVersion getSupportedVersion();
 
     /**
      * @return the teiid instance parent
@@ -143,4 +167,14 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      */
     void update(TeiidInstance otherInstance);
 
+    /**
+     * @return the collection of data source drivers resident on the server
+     * @throws Exception
+     */
+    Collection<DataSourceDriver> getDataSourceDrivers() throws Exception;
+
+    /**
+     * @return whether this teiid instance is still valid to be used
+     */
+    boolean isSound();
 }

@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.model.internal;
 
@@ -12,6 +26,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import org.komodo.modeshape.visitor.DdlNodeVisitor;
+import org.komodo.modeshape.visitor.DdlNodeVisitor.VisitorExclusions;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -26,7 +43,9 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -35,6 +54,7 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -1023,4 +1043,51 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         setStatementOption( transaction, StandardOption.UUID.name(), newUuid );
     }
 
+    private String exportDdl(UnitOfWork transaction, Properties exportProperties) throws Exception {
+        List<VisitorExclusions> exclusions = new ArrayList<VisitorExclusions>();
+        if( exportProperties != null && !exportProperties.isEmpty() ) {
+            if(exportProperties.containsKey(ExportConstants.EXCLUDE_TABLE_CONSTRAINTS_KEY)) {
+                exclusions.add(VisitorExclusions.EXCLUDE_TABLE_CONSTRAINTS);
+            }
+        }
+        DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false, exclusions.toArray(new VisitorExclusions[0]));
+        visitor.visit(node(transaction));
+
+        String result = visitor.getDdl();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
+     */
+    @Override
+    public byte[] export( final UnitOfWork transaction , Properties exportProperties) throws KException {
+        ArgCheck.isNotNull(transaction);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("tableimpl-export: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            String result = exportDdl(transaction, exportProperties);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("TableImpl: transaction = {0}, xml = {1}", //$NON-NLS-1$
+                             transaction.getName(),
+                             result);
+            }
+
+            return result.getBytes();
+
+        } catch (final Exception e) {
+            throw handleError(e);
+        }
+    }
+
+    @Override
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
+        return DocumentType.DDL;
+    }
 }

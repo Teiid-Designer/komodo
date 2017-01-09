@@ -34,10 +34,8 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         // VDBs
         when(VDB1.getName()).thenReturn("VDB1");
         when(VDB2.getName()).thenReturn("VDB2");
-        when(VDB1.getVersion()).thenReturn(1);
-        when(VDB2.getVersion()).thenReturn(2);
-        when(VDB1.isXmlDeployment()).thenReturn(true);
-        when(VDB2.isXmlDeployment()).thenReturn(true);
+        when(VDB1.getVersion()).thenReturn("1");
+        when(VDB2.getVersion()).thenReturn("2");
         when(VDB1.isActive()).thenReturn(true);
         when(VDB2.isActive()).thenReturn(false);
         when(VDB1.getModelNames()).thenReturn(Arrays.asList(new String[]{"Model1","Model2"}));
@@ -67,7 +65,6 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
     /**
      * Inits a mock server for the test
      * @param teiidName the name for the server
-     * @param makeDefaultServer 'true' to set the server as the workspace default
      * @param serverConnected 'true' if the server state is 'connected', 'false' if not connected.
      * @param vdbs the server VDBs
      * @param dataSources the server Datasources
@@ -75,9 +72,10 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
      * @param dataSourceTypes the server Datasource Types
      * @throws Exception
      */
-    protected void initServer(String teiidName, boolean makeDefaultServer, boolean serverConnected,
+    protected void initServer(String teiidName, boolean serverConnected,
                               TeiidVdb[] vdbs, TeiidDataSource[] dataSources,
                               TeiidTranslator[] translators, String[] dataSourceTypes) throws Exception {
+
         // Set up the Teiid mock instance
         Teiid teiid = mock(Teiid.class);
         when(teiid.getName(getTransaction())).thenReturn(teiidName);
@@ -86,9 +84,6 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(descriptor.getName()).thenReturn(KomodoLexicon.Teiid.NODE_TYPE);
         when(teiid.getPrimaryType(getTransaction())).thenReturn(descriptor);
         when(teiid.hasDescriptor(getTransaction(), KomodoLexicon.Teiid.NODE_TYPE)).thenReturn(true);
-        if(makeDefaultServer) {
-            wsStatus.setStateObject(ServerCommandProvider.SERVER_DEFAULT_KEY, teiid);
-        }
         _repo.add(getTransaction(), null, teiidName, KomodoLexicon.Teiid.NODE_TYPE);
 
         // The TeiidInstance

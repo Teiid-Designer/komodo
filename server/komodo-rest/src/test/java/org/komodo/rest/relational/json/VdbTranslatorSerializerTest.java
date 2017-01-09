@@ -1,16 +1,31 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest.relational.json;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.jboss.resteasy.util.Encode;
@@ -18,11 +33,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.repository.DescriptorImpl;
 import org.komodo.rest.RestProperty;
-import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.rest.relational.response.RestVdbTranslator;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.mockito.Mockito;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
@@ -43,8 +61,8 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
 
     private static final String JSON = EMPTY_STRING +
     OPEN_BRACE + NEW_LINE +
-    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
     "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
+    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
     "  \"" + DATA_PATH + "\": \"" + TR_DATA_PATH + "\"," + NEW_LINE +
     "  \"" + KTYPE + "\": \"" + KomodoType.VDB_TRANSLATOR.getType() + "\"," + NEW_LINE +
     "  \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
@@ -84,7 +102,9 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
 
     @Before
     public void init() throws Exception {
+        Descriptor vdbType = new DescriptorImpl(repository, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         Vdb theVdb = mockObject(Vdb.class, VDB_NAME, VDB_DATA_PATH, KomodoType.VDB, true);
+        when(theVdb.getPrimaryType(transaction)).thenReturn(vdbType);
 
         Translator theTranslator = mockObject(Translator.class,
                                                       NAME,
@@ -92,6 +112,9 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
                                                       KomodoType.VDB_TRANSLATOR,
                                                       false);
 
+        //
+        // translator implementation ignores the translators grouping node when calling getParent
+        //
         Mockito.when(theTranslator.getParent(transaction)).thenReturn(theVdb);
         Mockito.when(theTranslator.getPropertyNames(transaction)).thenReturn(PROPS_KEYS);
         Mockito.when(theTranslator.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);

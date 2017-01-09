@@ -1,10 +1,24 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.relational.commands.workspace;
 
 import java.nio.file.Files;
@@ -81,13 +95,18 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
             final Repository.UnitOfWork uow = getTransaction();
 
             // make sure we can overwrite
-            boolean hasVdb = getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            boolean hasVdb = getWorkspaceManager(getTransaction()).hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             if ( hasVdb && !overwrite ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbOverwriteDisabled, fileName, vdbName ), null );
             }
 
+            // If overwriting, delete existing vdb first
+            if(hasVdb) {
+                final KomodoObject vdbToDelete = getWorkspaceManager(getTransaction()).getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), vdbToDelete);
+            }
             // create VDB
-            final Vdb vdb = getWorkspaceManager().createVdb( uow, null, vdbName, fileName );
+            final Vdb vdb = getWorkspaceManager(getTransaction()).createVdb( uow, null, vdbName, fileName );
             final KomodoObject fileNode = vdb.addChild( uow, JcrLexicon.CONTENT.getString(), null );
             fileNode.setProperty( uow, JcrLexicon.DATA.getString(), content );
 
@@ -148,7 +167,7 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] vdbs = mgr.findVdbs(uow);
         List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
         for(KomodoObject vdb : vdbs) {

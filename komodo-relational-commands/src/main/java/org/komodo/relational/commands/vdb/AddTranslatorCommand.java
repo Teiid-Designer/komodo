@@ -1,12 +1,28 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.vdb;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -42,6 +58,13 @@ public class AddTranslatorCommand extends VdbShellCommand {
             final String translatorType = requiredArgument( 1, I18n.bind( VdbCommandsI18n.missingTranslatorType ) );
 
             final Vdb vdb = getVdb();
+            
+            // Do not allow add if object of type with this name already exists
+            Translator[] translators = vdb.getTranslators(getTransaction(), translatorName);
+            if(translators.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, translatorName, Translator.class.getSimpleName() ), null );
+            }
+            
             vdb.addTranslator( getTransaction(), translatorName, translatorType );
 
             result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.translatorAdded, translatorName ) );

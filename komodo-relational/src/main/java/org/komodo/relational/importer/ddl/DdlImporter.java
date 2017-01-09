@@ -67,7 +67,7 @@ public class DdlImporter extends AbstractImporter {
         switch(kType) {
             case MODEL:
             {
-            	Model model = (Model)parentObject;
+            	Model model = Model.RESOLVER.resolve(transaction, parentObject);
                 ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
                 model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
                 model.setModelDefinition(transaction, content);
@@ -76,7 +76,7 @@ public class DdlImporter extends AbstractImporter {
             }
             case SCHEMA:
             {
-            	Schema schema = (Schema)parentObject;
+            	Schema schema = Schema.RESOLVER.resolve(transaction, parentObject);
                 schema.setRendition(transaction, content);
                 schema.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
                 return;
@@ -91,8 +91,9 @@ public class DdlImporter extends AbstractImporter {
 	 */
     @Override
     protected boolean handleExistingNode(UnitOfWork transaction,
-    		ImportOptions importOptions,
-    		ImportMessages importMessages) throws KException {
+                                                                             KomodoObject parentObject,
+                                                                             ImportOptions importOptions,
+                                                                             ImportMessages importMessages) throws KException {
 
     	return true;
     }

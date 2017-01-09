@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -33,9 +34,24 @@ import org.komodo.spi.constants.StringConstants;
 public enum KomodoType {
 
     /**
+     * Dataservice
+     */
+    DATASERVICE("dataservice"), //$NON-NLS-1$
+
+    /**
      * Datasource
      */
-    DATASOURCE,
+    DATASOURCE("datasource"), //$NON-NLS-1$
+
+    /**
+     * Driver
+     */
+    DRIVER("driver"), //$NON-NLS-1$
+
+    /**
+     * Folder
+     */
+    FOLDER,
 
     /**
      * Schema
@@ -46,6 +62,11 @@ public enum KomodoType {
      * Teiid
      */
     TEIID,
+
+    /**
+     * Cached Teiid
+     */
+    CACHED_TEIID,
 
     /**
      * Vdb
@@ -203,9 +224,59 @@ public enum KomodoType {
     WORKSPACE,
 
     /**
+     * Server manager type
+     */
+    SERVER_MANAGER,
+
+    /**
      * Unknown Type
      */
-    UNKNOWN;
+    UNKNOWN,
+
+    /**
+     * Type for a data service file.
+     */
+    RESOURCE,
+
+    /**
+     * Type for a DDL file.
+     */
+    DDL_FILE,
+
+    /**
+     * Type for a UDF file.
+     */
+    UDF_FILE,
+
+    /**
+     * Type for a data service VDB entry.
+     */
+    VDB_DATA_SERVICE_ENTRY,
+
+    /**
+     * Type for a data service connection entry.
+     */
+    CONNECTION_ENTRY,
+
+    /**
+     * Type for a data service driver file entry.
+     */
+    DRIVER_ENTRY,
+
+    /**
+     * Type for a data service DDL file entry.
+     */
+    DDL_ENTRY,
+
+    /**
+     * Type for a data service resource file entry.
+     */
+    RESOURCE_ENTRY,
+
+    /**
+     * Type for a data service UDF file entry.
+     */
+    UDF_ENTRY;
 
     private Collection<String> aliases;
 

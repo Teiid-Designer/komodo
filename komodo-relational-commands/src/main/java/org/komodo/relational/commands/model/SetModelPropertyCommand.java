@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.model;
 
@@ -57,12 +71,12 @@ public final class SetModelPropertyCommand extends ModelShellCommand {
             } else if ( METADATA_TYPE.equals( name ) ) {
                 model.setMetadataType( transaction, value );
             } else if ( MODEL_TYPE.equals( name ) ) {
-                if ( Model.Type.PHYSICAL.name().equals( value ) ) {
+                if ( Model.Type.PHYSICAL.name().equalsIgnoreCase( value ) ) {
                     model.setModelType( transaction, Model.Type.PHYSICAL );
-                } else if ( Model.Type.VIRTUAL.name().equals( value ) ) {
+                } else if ( Model.Type.VIRTUAL.name().equalsIgnoreCase( value ) ) {
                     model.setModelType( transaction, Model.Type.VIRTUAL );
                 } else {
-                    errorMsg = I18n.bind( ModelCommandsI18n.invalidModelTypePropertyValue, VISIBLE );
+                    errorMsg = I18n.bind( ModelCommandsI18n.invalidModelTypePropertyValue, value );
                 }
             } else if ( VISIBLE.equals( name ) ) {
                 if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {

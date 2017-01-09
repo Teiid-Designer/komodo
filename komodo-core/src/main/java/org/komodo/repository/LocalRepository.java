@@ -27,8 +27,10 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+
 import org.komodo.core.KEngine;
 import org.komodo.repository.internal.ModeshapeEngineThread;
 import org.komodo.repository.internal.ModeshapeEngineThread.Request;
@@ -38,6 +40,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
@@ -254,24 +257,25 @@ public class LocalRepository extends RepositoryImpl {
      *      org.komodo.spi.repository.Repository.UnitOfWorkListener)
      */
     @Override
-    public UnitOfWork createTransaction( final String name,
+    public UnitOfWork createTransaction(final String userName, final String name,
                                          final boolean rollbackOnly,
                                          final UnitOfWorkListener callback ) throws KException {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
         LOGGER.debug("creating transaction {0} with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
         final Session session = createSession();
-        final UnitOfWork uow = new LocalRepositoryTransaction(name, session, rollbackOnly, callback);
+        final UnitOfWork uow = new LocalRepositoryTransaction(userName, name, session, rollbackOnly, callback);
         this.sessions.put(session, uow);
         return uow;
     }
 
     class LocalRepositoryTransaction extends RepositoryImpl.UnitOfWorkImpl {
 
-        LocalRepositoryTransaction( final String uowName,
+        LocalRepositoryTransaction(final String userName,
+                                    final String uowName,
                                     final Session uowSession,
                                     final boolean uowRollbackOnly,
                                     final UnitOfWorkListener listener) {
-            super(uowName, uowSession, uowRollbackOnly, listener);
+            super(userName, uowName, uowSession, uowRollbackOnly, listener);
         }
 
         /**
@@ -303,6 +307,7 @@ public class LocalRepository extends RepositoryImpl {
                         @Override
                         public void errorOccurred( final Throwable error ) {
                             setState( State.ERROR );
+                            setError( error );
 
                             if (getCallback() == null) {
                                 KEngine.getInstance().getErrorHandler().error( error );
@@ -369,6 +374,7 @@ public class LocalRepository extends RepositoryImpl {
                 @Override
                 public void errorOccurred( final Throwable error ) {
                     setState( State.ERROR );
+                    setError( error );
 
                     if (getCallback() == null) {
                         KEngine.getInstance().getErrorHandler().error( error );
@@ -424,11 +430,19 @@ public class LocalRepository extends RepositoryImpl {
 
     }
 
-    private void createEngineThread() {
+    private void createEngineThread() throws Exception {
         if (engineThread != null && engineThread.isAlive()) return;
 
-        if (engineThread != null && !engineThread.isAlive()) throw new RuntimeException(
-                                                                                        Messages.getString(Messages.LocalRepository.EngineThread_Died));
+        if (engineThread != null && !engineThread.isAlive()) {
+            String msg = Messages.getString(Messages.LocalRepository.EngineThread_Died);
+
+            Exception error = engineThread.getError();
+                if (error != null) {
+                    String stackTrace = StringUtils.exceptionToString(error);
+                    msg = msg + NEW_LINE + stackTrace;
+                }
+            throw new Exception(msg);
+        }
 
         engineThread = new ModeshapeEngineThread(getId());
         engineThread.start();
@@ -437,13 +451,18 @@ public class LocalRepository extends RepositoryImpl {
     private void startRepository() {
         if (this.state == State.REACHABLE) return;
 
-        createEngineThread();
+        try {
+            createEngineThread();
+        } catch (Exception e) {
+            errorObservers(e);
+            return;
+        }
 
         RequestCallback callback = new RequestCallback() {
 
             @Override
             public void errorOccurred( final Throwable error ) {
-                throw new RuntimeException(error);
+                errorObservers(error);
             }
 
             @Override
@@ -469,7 +488,7 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void errorOccurred( final Throwable error ) {
-                throw new RuntimeException(error);
+                errorObservers(error);
             }
 
             /**
@@ -479,9 +498,8 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void respond( final Object results ) {
-                if (!engineThread.isRunning()) {
+                if (engineThread != null && !engineThread.isRunning()) {
                     LocalRepository.this.state = State.NOT_REACHABLE;
-                    notifyObservers();
                 }
 
                 //
@@ -489,8 +507,15 @@ public class LocalRepository extends RepositoryImpl {
                 // hence this defunct engineThread must be discarded to ensure a clean restart
                 //
                 engineThread = null;
+
+                notifyObservers();
             }
         };
+
+        if (engineThread == null) {
+            callback.respond(null);
+            return;
+        }
 
         KLog.getLogger().debug("LocalRepository.stopRepository() post stop request"); //$NON-NLS-1$
         this.engineThread.accept(new Request(RequestType.STOP, callback));
@@ -538,7 +563,7 @@ public class LocalRepository extends RepositoryImpl {
              */
             @Override
             public void errorOccurred( final Throwable error ) {
-                throw new RuntimeException(error);
+                errorObservers(error);
             }
 
             /**

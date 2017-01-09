@@ -37,7 +37,7 @@ public final class ImportCommandTest extends AbstractCommandTest {
             "cd myModel"};
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
-        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
+        assertContextIs(RepositoryImpl.komodoWorkspacePath(getTransaction()));
     }
 
 }

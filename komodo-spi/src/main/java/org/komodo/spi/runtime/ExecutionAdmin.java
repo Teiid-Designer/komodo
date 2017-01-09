@@ -28,17 +28,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.Outcome;
 
 /**
  *
  */
-public interface ExecutionAdmin {
+public interface ExecutionAdmin extends StringConstants {
 
     /**
      * VDB name for the ping test
      */
-    String PING_VDB = "ping-vdb.xml"; //$NON-NLS-1$
+    String PING_VDB_NAME = "ping"; //$NON-NLS-1$
+
+    /**
+     * VDB file name for the ping test
+     */
+    String PING_VDB = PING_VDB_NAME + VDB_DEPLOYMENT_SUFFIX;
 
     /**
      * Type of connectivity
@@ -53,6 +59,22 @@ public interface ExecutionAdmin {
          * JDBC connection of the teiid instance
          */
         JDBC;
+
+        /**
+         * @param type
+         * @return the {@link ConnectivityType} for the given type
+         */
+        public static ConnectivityType findType(String type) {
+            if (type == null)
+                return null;
+
+            for (ConnectivityType cType : ConnectivityType.values()) {
+                if (type.equalsIgnoreCase(cType.name()))
+                    return cType;
+            }
+
+            return null;
+        }
     }
     
     /**
@@ -145,6 +167,12 @@ public interface ExecutionAdmin {
      * @throws Exception 
      */
      Collection<TeiidVdb> getVdbs() throws Exception;
+
+     /**
+      * @return an unmodifiable collection of VDB names deployed on the teiid instance
+      * @throws Exception 
+      */
+     Collection<String> getVdbNames() throws Exception;
 
      /**
       * @param name 
@@ -260,11 +288,21 @@ public interface ExecutionAdmin {
      /**
       * Deploys a driver (jar or rar) to the related Teiid Instance
       * 
+      * @param driverName the deployment name to use for the driver
       * @param driverFile the file to deploy
       * 
       * @throws Exception if deployment fails
       */
-     void deployDriver(File driverFile) throws Exception;
+     void deployDriver(String driverName, File driverFile) throws Exception;
+
+     /**
+      * Undeploy the named driver
+      *
+      * @param driver
+      *
+      * @throws Exception if undeployment fails
+      */
+     void undeployDriver(String driver) throws Exception;
 
      /**
       * Get Model Schema DDL from the VDB
@@ -275,7 +313,7 @@ public interface ExecutionAdmin {
       * @return the Schema DDL for the model
       * @throws Exception if deployment fails
       */
-     String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception;
+     String getSchema(String vdbName, String vdbVersion, String modelName) throws Exception;
 
      /**
       * Get Properties for a DataSource

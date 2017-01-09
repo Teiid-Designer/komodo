@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<vdb name="ServiceSource" version="1">
+
+<description>xx</description>
+<property name="dsbServiceSource" value="true"/>
+
+<model name="MySqlStates" type="PHYSICAL">
+<property name="importer.UseFullSchemaName" value="false"/>
+<property name="importer.UseQualifiedName" value="false"/>
+<property name="importer.UseCatalogName" value="false"/>
+<property name="importer.TableTypes" value="TABLE"/>
+<source name="MySqlStates" translator-name="mysql5" connection-jndi-name="java:/MySqlDS"/>
+</model>
+
+</vdb>

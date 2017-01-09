@@ -16,7 +16,9 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -68,13 +70,13 @@ public class ListCommandTest extends AbstractCommandTest {
         String writerOutput = getCommandOutput();
         assertTrue( writerOutput.contains( "no children" ) );
     }
-
+    
     @Test
     public void testTabCompleter()throws Exception{
     	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
        	setup("commandFiles","addChildren.cmd");
        	assertTabCompletion("list invalid", candidates);
-
+       	    
     	candidates.add("myChild1/");
     	candidates.add("myChild2/");
     	assertTabCompletion("list myCh", candidates);

@@ -1,10 +1,24 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.relational.commands.server;
 
 import java.util.ArrayList;
@@ -19,7 +33,6 @@ import org.komodo.spi.KException;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidTranslator;
-import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -143,14 +156,10 @@ public class ServerUtils {
     public static List<String> getVdbNames(TeiidInstance teiidInstance) throws Exception {
         assert( teiidInstance != null );
 
-        Collection< TeiidVdb > vdbs = teiidInstance.getVdbs();
-        if(vdbs.isEmpty()) return Collections.emptyList();
+        Collection< String > vdbNames = teiidInstance.getVdbNames();
+        if(vdbNames.isEmpty()) return Collections.emptyList();
         
-        List< String > existingVdbNames = new ArrayList< String >();
-        for ( TeiidVdb vdb : vdbs ) {
-            existingVdbNames.add( vdb.getName() );
-        }
-        return existingVdbNames;
+        return new ArrayList<String>(vdbNames);
     }
 
     /**

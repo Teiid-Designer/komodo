@@ -44,7 +44,7 @@ public final class DeleteMappedRoleCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
         assertEquals(1, vdbs.length);
 
@@ -69,6 +69,18 @@ public final class DeleteMappedRoleCommandTest extends AbstractCommandTest {
 
     	candidates.add("MyMappedRole3");
         assertTabCompletion("delete-mapped-role ", candidates);
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldFailDeletingMappedRoleThatDoesNotExist() throws Exception {
+        final String[] commands = { "workspace",
+                                    "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-data-role myDataRole",
+                                    "cd myDataRole",
+                                    "add-mapped-role myMappedRole1",
+                                    "delete-mapped-role bogusMappedRole" };
+        execute( commands );
     }
 
 }

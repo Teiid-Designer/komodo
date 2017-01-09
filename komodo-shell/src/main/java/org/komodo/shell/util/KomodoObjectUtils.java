@@ -1,18 +1,32 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.shell.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.ShellI18n;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -20,6 +34,9 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.utils.TextFormat;
+import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
@@ -122,14 +139,18 @@ public class KomodoObjectUtils implements StringConstants {
                     for(String absPath : splitPaths) {
                         if(!absPath.isEmpty()) {
                             if(!first) sb.append(","); //$NON-NLS-1$
-                            sb.append(wsStatus.getObjectLabelProvider(resolvedObj).getDisplayPath(absPath));
+                            sb.append( wsStatus.getObjectLabelProvider( resolvedObj ).getDisplayPath( wsStatus.getTransaction(),
+                                                                                                      absPath,
+                                                                                                      null ) );
                             first = false;
                         }
                     }
                     sb.append("]"); //$NON-NLS-1$
                     return sb.toString();
                 } else {
-                    return wsStatus.getObjectLabelProvider(resolvedObj).getDisplayPath(displayValue);
+                    return wsStatus.getObjectLabelProvider( resolvedObj ).getDisplayPath( wsStatus.getTransaction(),
+                                                                                          displayValue,
+                                                                                          null );
                 }
             }
 
@@ -207,11 +228,14 @@ public class KomodoObjectUtils implements StringConstants {
      *        the workspace status (cannot be <code>null</code>)
      * @param kobject
      *        the object whose short name is being requested (cannot be <code>null</code>)
+     * @param format
+     *        the text format or <code>null</code> if no formatting is desired
      * @return the object's full, qualified path (never empty)
      */
     public static String getShortName( final WorkspaceStatus wsStatus,
-                                      final KomodoObject kobject ) {
-        final String name = wsStatus.getObjectLabelProvider(kobject).getDisplayName( kobject );
+                                       final KomodoObject kobject,
+                                       final TextFormat format ) {
+        final String name = wsStatus.getObjectLabelProvider(kobject).getDisplayName( wsStatus.getTransaction(), kobject, format );
 
         if ( StringUtils.isBlank( name ) ) {
             final String[] segments = kobject.getAbsolutePath().split( FORWARD_SLASH );
@@ -229,18 +253,21 @@ public class KomodoObjectUtils implements StringConstants {
      *        the workspace status (cannot be <code>null</code>)
      * @param kobject
      *        the object whose display name is being requested (cannot be <code>null</code>)
+     * @param format
+     *        the text format or <code>null</code> if no formatting is desired
      * @return the object's full, qualified path (never empty)
      */
     public static String getDisplayName( final WorkspaceStatus wsStatus,
-                                         final KomodoObject kobject ) {
+                                         final KomodoObject kobject,
+                                         final TextFormat format ) {
         ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
         if ( wsStatus.isShowingFullPathInPrompt() ) {
-            return wsStatus.getDisplayPath(kobject );
+            return wsStatus.getDisplayPath( kobject, format );
         }
 
-        return getShortName( wsStatus, kobject );
+        return getShortName( wsStatus, kobject, format );
     }
 
     /**
@@ -256,7 +283,7 @@ public class KomodoObjectUtils implements StringConstants {
         final String contextPath = kObject.getAbsolutePath();
 
         // /tko:komodo
-        if ( KomodoObjectLabelProvider.ROOT_PATH.equals( contextPath ) || KomodoObjectLabelProvider.ROOT_SLASH_PATH.equals( contextPath ) ) {
+        if ( DefaultLabelProvider.ROOT_PATH.equals( contextPath ) || DefaultLabelProvider.ROOT_SLASH_PATH.equals( contextPath ) ) {
             return true;
         }
         return false;
@@ -264,31 +291,17 @@ public class KomodoObjectUtils implements StringConstants {
 
     /**
      * Determine if the supplied KomodoObject is one of the root children (tko:komodo/tko:workspace, tko:komodo/tko:library, tko:komodo/tko:environment)
+     * @param transaction 
      *
      * @param kObject
      *        the KomodoObject (cannot be <code>null</code>)
      * @return 'true' if root child, 'false' if not
      */
-    public static boolean isRootChild( final KomodoObject kObject ) {
+    public static boolean isRootChild( UnitOfWork transaction, final KomodoObject kObject ) {
         ArgCheck.isNotNull( kObject, "kobject" ); //$NON-NLS-1$
 
         final String contextPath = kObject.getAbsolutePath();
-
-        // /tko:komodo/workspace
-        if ( KomodoObjectLabelProvider.WORKSPACE_PATH.equals( contextPath ) || KomodoObjectLabelProvider.WORKSPACE_SLASH_PATH.equals( contextPath ) ) {
-            return true;
-        }
-
-        // /tko:komodo/library
-        if ( KomodoObjectLabelProvider.LIB_PATH.equals( contextPath ) || KomodoObjectLabelProvider.LIB_SLASH_PATH.equals( contextPath ) ) {
-            return true;
-        }
-
-        // /tko:komodo/environment
-        if ( KomodoObjectLabelProvider.ENV_PATH.equals( contextPath ) || KomodoObjectLabelProvider.ENV_SLASH_PATH.equals( contextPath ) ) {
-            return true;
-        }
-        return false;
+        return RepositoryImpl.isReservedPath(contextPath);
     }
 
     /**
@@ -342,7 +355,8 @@ public class KomodoObjectUtils implements StringConstants {
                                                                          property.getRepository(),
                                                                          value.toString() );
                 valueAsText = ( StringUtils.isBlank( path ) ? value.toString()
-                                                            : status.getObjectLabelProvider(context).getDisplayPath( path ) );
+                                                            : status.getObjectLabelProvider( context )
+                                                                    .getDisplayPath( status.getTransaction(), path, null ) );
             } else {
                 valueAsText = value.toString();
 

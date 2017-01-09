@@ -28,10 +28,10 @@ import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
-import org.komodo.osgi.PluginService;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.teiid.TeiidServiceProvider;
 import org.komodo.utils.KLog;
 import org.modeshape.common.annotation.NotThreadSafe;
 import org.modeshape.common.text.ParsingException;
@@ -69,8 +69,7 @@ public class TeiidSqlSequencer extends Sequencer {
         InputStream stream = sqlContent.getStream();
         try {
             String sql = IoUtil.read(stream);
-            PluginService pluginService = PluginService.getInstance();
-            TeiidService teiidService = pluginService.getTeiidService(getTeiidVersion());
+            TeiidService teiidService = TeiidServiceProvider.getInstance().getTeiidService(getTeiidVersion());
             teiidService.nodeConvert(sql, outputNode);
         } catch (ParsingException e) {
             LOGGER.error(Messages.getString(Messages.TeiidSqlSequencer.ErrorParsingContent), e, e.getLocalizedMessage());

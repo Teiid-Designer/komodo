@@ -1168,7 +1168,7 @@ void stringVal() :
 //	{
 		< STRINGVAL >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -1333,7 +1333,7 @@ void nonReserved() :
 		)
 	
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -1348,7 +1348,7 @@ void id() :
 		(
 			< ID >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			nonReserved()
@@ -1390,7 +1390,7 @@ void command(ParseInfo info) :
 
 		< EOF >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 	}
 	catch (ParseException ex)
@@ -1429,7 +1429,7 @@ void designerCommand(ParseInfo info) :
 		< EOF >
 	
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 	}
 	catch (ParseException ex)
@@ -1600,12 +1600,12 @@ void alter(ParseInfo info) :
 					|
 					< ENABLED >
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 					|
 					< DISABLED >
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				)
 			)
@@ -1657,7 +1657,7 @@ void forEachRowTriggerAction(ParseInfo info) :
 
 	   			< END >
 	   			{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 	   		)
 			|
@@ -1893,7 +1893,7 @@ void delimitedStatement(ParseInfo info) :
 
 		< SEMICOLON >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -1951,7 +1951,7 @@ void compoundStatement(ParseInfo info) :
 
 		< END >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -2216,7 +2216,7 @@ void assignStatement(ParseInfo info) :
 
 					< RETURN >
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 			   ]
 
@@ -2286,7 +2286,7 @@ void sqlStatement(ParseInfo info) :
 
    			< RETURN >
    			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 	   	]
 //	}
@@ -2439,7 +2439,7 @@ void dynamicCommand(ParseInfo info) :
 				|
 				< STAR >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		]
@@ -2943,7 +2943,7 @@ void withListElement(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 
 //	}
@@ -3132,7 +3132,7 @@ void queryPrimary(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
    			)
    		)
@@ -3232,7 +3232,7 @@ void select(ParseInfo info) :
 		(
 			< STAR >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			(
@@ -3334,7 +3334,7 @@ void allInGroupSymbol() :
 //	{
 		< ALL_IN_GROUP >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -3382,7 +3382,7 @@ void orderedAgg(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -3480,7 +3480,7 @@ void textAgg(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -3509,7 +3509,7 @@ void aggregateSymbol(ParseInfo info) :
 				}
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -3600,7 +3600,7 @@ void aggregateSymbol(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		)
@@ -3638,7 +3638,7 @@ void analyticAggregateSymbol(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -3672,7 +3672,7 @@ void filterClause(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -3732,7 +3732,7 @@ void tableReference(ParseInfo info) :
 
 				< RBRACE >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -3942,14 +3942,14 @@ void tablePrimary(ParseInfo info) :
 			(
 				< MAKEDEP >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
 			(
 				< MAKENOTDEP >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		]
@@ -4072,7 +4072,7 @@ void xmlSerialize(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -4299,7 +4299,7 @@ void textColumn(ParseInfo info) :
 
 				< ORDINALITY >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 				{
 					requiresVersionAtLeast(Version.TEIID_8_7);
@@ -4346,7 +4346,7 @@ void textColumn(ParseInfo info) :
 
 					intVal()
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				]
 			)
@@ -4438,7 +4438,7 @@ void xmlQuery(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -4694,7 +4694,7 @@ void xmlColumn(ParseInfo info) :
 
 				< ORDINALITY >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -5002,7 +5002,7 @@ void operator() :
 			< GE >
 		)
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -5051,7 +5051,7 @@ void subquery(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -5152,7 +5152,7 @@ void matchCrit(ParseInfo info) :
 
 				< RBRACE >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		]
@@ -5247,7 +5247,7 @@ void isNullCrit(ParseInfo info) :
 
 		< NULL >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -5302,7 +5302,7 @@ void setCrit(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		)
@@ -5460,12 +5460,12 @@ void sortSpecification(ParseInfo info) :
 			(
 				< FIRST >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 				|
 				< LAST >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		]
@@ -5523,7 +5523,7 @@ void limit(ParseInfo info) :
 
 					intParam(info)
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				]
 			)
@@ -5554,7 +5554,7 @@ void limit(ParseInfo info) :
 				[
 					fetchLimit(info)
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				]
 			)
@@ -5562,7 +5562,7 @@ void limit(ParseInfo info) :
 			(
 				fetchLimit(info)
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		)
@@ -5614,7 +5614,7 @@ void fetchLimit(ParseInfo info) :
 
 		< ONLY >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -5830,7 +5830,7 @@ void timesOperator() :
 			< SLASH >
 		)
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -5893,7 +5893,7 @@ void parameterReference(ParseInfo info) :
 //	{
 		< QMARK >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 		|
 		(
@@ -6035,7 +6035,7 @@ void nestedExpression(ParseInfo info) :
 
 			< RPAREN >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 		)
 //	}
@@ -6067,7 +6067,7 @@ void unsignedValueExpressionPrimary(ParseInfo info) :
 
 				< RBRACE >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6156,7 +6156,7 @@ void windowSpecification(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -6214,7 +6214,7 @@ void caseExpression(ParseInfo info) :
 
 		< END >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -6267,7 +6267,7 @@ void searchedCaseExpression(ParseInfo info) :
 
 		< END >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -6337,7 +6337,7 @@ void function(ParseInfo info) :
 				
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6398,7 +6398,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6458,7 +6458,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|   LOOKAHEAD(2)
@@ -6521,7 +6521,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6577,7 +6577,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6627,7 +6627,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6709,7 +6709,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6741,7 +6741,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6795,7 +6795,7 @@ void function(ParseInfo info) :
 
 				< RPAREN >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 			|
@@ -6910,7 +6910,7 @@ void xmlParse(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -6951,7 +6951,7 @@ void queryString(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7028,7 +7028,7 @@ void xmlElement(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7069,7 +7069,7 @@ void xmlAttributes(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7098,7 +7098,7 @@ void jsonObject(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7166,7 +7166,7 @@ void xmlForest(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7207,7 +7207,7 @@ void xmlNamespaces(ParseInfo info) :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7244,7 +7244,7 @@ void namespaceItem() :
 
 			< DEFAULT_KEYWORD >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 		)
 		|
@@ -7291,7 +7291,7 @@ void parseDataTypePrimary() :
 
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7317,7 +7317,7 @@ void parseDataTypePrimary() :
 						
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7325,27 +7325,27 @@ void parseDataTypePrimary() :
 			|
 			< BOOLEAN >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< BYTE >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< TINYINT >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< SHORT >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< SMALLINT >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			(
@@ -7368,7 +7368,7 @@ void parseDataTypePrimary() :
 
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7376,17 +7376,17 @@ void parseDataTypePrimary() :
 			|
 			< INTEGER >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< LONG >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< BIGINT >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			(
@@ -7408,24 +7408,24 @@ void parseDataTypePrimary() :
 
 					< RPAREN >
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				]
 			)
 			|
 			< FLOAT >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< REAL >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< DOUBLE >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			(
@@ -7459,7 +7459,7 @@ void parseDataTypePrimary() :
 
 					< RPAREN >
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				]
 			)
@@ -7495,24 +7495,24 @@ void parseDataTypePrimary() :
 
 					< RPAREN >
 					{
-						ppSet(null);
+						ppSet((String[]) null);
 					}
 				]
 			)
 			|
 			< DATE >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< TIME >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< TIMESTAMP >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			(
@@ -7535,7 +7535,7 @@ void parseDataTypePrimary() :
 
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7561,7 +7561,7 @@ void parseDataTypePrimary() :
 
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7587,7 +7587,7 @@ void parseDataTypePrimary() :
 
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7613,7 +7613,7 @@ void parseDataTypePrimary() :
 
 						< RPAREN >
 						{
-							ppSet(null);
+							ppSet((String[]) null);
 						}
 					]
 				)
@@ -7621,7 +7621,7 @@ void parseDataTypePrimary() :
 			|
 			< XML >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 		)
 //	}
@@ -7685,7 +7685,7 @@ void intervalType() :
 			< SQL_TSI_YEAR >
 		)
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7705,27 +7705,27 @@ void nonNumericLiteral() :
 			|
 			< BINARYSTRINGVAL >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< FALSE >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< TRUE >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< UNKNOWN >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			< NULL >
 			{
-				ppSet(null);
+				ppSet((String[]) null);
 			}
 			|
 			(
@@ -7741,7 +7741,7 @@ void nonNumericLiteral() :
 
 				< RBRACE >
 				{
-					ppSet(null);
+					ppSet((String[]) null);
 				}
 			)
 		)
@@ -7763,7 +7763,7 @@ void unsignedNumericLiteral() :
 			< DECIMALVAL >
 		)
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)
@@ -7799,7 +7799,7 @@ void columnList() :
 
 		< RPAREN >
 		{
-			ppSet(null);
+			ppSet((String[]) null);
 		}
 //	}
 //	catch (ParseException ex)

@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.permission;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Condition;
@@ -44,7 +45,7 @@ public final class AddConditionCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
         assertEquals(1, vdbs.length);
 
@@ -58,6 +59,21 @@ public final class AddConditionCommandTest extends AbstractCommandTest {
         Condition[] conditions = permissions[0].getConditions(getTransaction());
         assertEquals(1, conditions.length);
         assertEquals("myCondition", conditions[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateConditionWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-condition myCondition";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-data-role myDataRole",
+                                    "cd myDataRole",
+                                    "add-permission myPermission",
+                                    "cd myPermission",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

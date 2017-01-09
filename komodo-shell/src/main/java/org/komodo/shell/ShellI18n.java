@@ -155,6 +155,7 @@ public final class ShellI18n extends I18n {
     public static String disabledCommandMethodNotSupported;
     public static String enable_flag_missing;
     public static String engineStarting;
+    public static String engineStartingError;
     public static String errorGettingChild;
     public static String errorLoadingProperties;
     public static String exitCanceled;
@@ -194,7 +195,9 @@ public final class ShellI18n extends I18n {
     public static String invalidCommandForContext;
     public static String invalidExitArg;
     public static String invalidGlobalProperty;
+    public static String invalidGlobalPropertyCannotReset;
     public static String invalidGlobalPropertyName;
+    public static String invalidNumericGlobalPropertyValue;
     public static String invalidPropName;
     public static String invalidPropValue;
     public static String invalidStartupArgs;
@@ -223,8 +226,6 @@ public final class ShellI18n extends I18n {
     public static String onOffArgInvalid;
     public static String playFailure;
     public static String primaryTypeSet;
-    public static String prompt;
-    public static String promptWithType;
     public static String propertiesHeader;
     public static String propertyDefaultValueHeader;
     public static String propertyHeader;

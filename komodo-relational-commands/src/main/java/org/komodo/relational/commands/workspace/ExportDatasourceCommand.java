@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.workspace;
 
@@ -13,13 +27,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
@@ -28,6 +41,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A shell command to export a Datasource from Workspace context.
@@ -84,7 +98,8 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
             // Determine if the Datasource exists
             if ( workspaceContext
-                 && !getWorkspaceManager().hasChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
+                 && !getWorkspaceManager(getTransaction()).hasChild( getTransaction(), datasourceName, DataVirtLexicon.Connection.NODE_TYPE ) ) {
+
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, datasourceName ), null );
             }
 
@@ -102,7 +117,8 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
                 final UnitOfWork uow = getTransaction();
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
-                final String sourceXml = datasourceToExport.export( uow, properties );
+                byte[] xmlBytes = datasourceToExport.export( uow, properties );
+                final String sourceXml = new String(xmlBytes);
 
                 // Write the file
                 try{
@@ -138,7 +154,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
         KomodoObject kobject = null;
 
         if ( workspaceContext ) {
-            kobject = getWorkspaceManager().getChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+            kobject = getWorkspaceManager(getTransaction()).getChild( getTransaction(), datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
         } else {
             kobject = getContext();
         }
@@ -167,8 +183,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
     private boolean isWorkspaceContext() {
         final String path = getContext().getAbsolutePath();
-        return ( KomodoObjectLabelProvider.WORKSPACE_PATH.equals( path )
-                 || KomodoObjectLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
+        return getWorkspaceStatus().getLabelProvider().isWorkspacePath(path);
     }
 
     /**
@@ -213,7 +228,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
         if ( isWorkspaceContext() ) {
             // arg 0 = vdb name, arg 1 = output file name, arg 2 = overwrite
-            final KomodoObject[] datasources = getWorkspaceManager().findDatasources( getTransaction() );
+            final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findDatasources( getTransaction() );
 
             if ( args.isEmpty() && ( datasources.length != 0 ) ) {
                 for ( final KomodoObject datasource : datasources ) {

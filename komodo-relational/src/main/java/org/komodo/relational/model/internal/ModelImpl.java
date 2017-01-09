@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.model.internal;
 
@@ -31,6 +45,7 @@ import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -796,7 +811,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export( final UnitOfWork transaction , Properties exportProperties) throws KException {
+    public byte[] export( final UnitOfWork transaction , Properties exportProperties) throws KException {
         ArgCheck.isNotNull(transaction);
 
         if (LOGGER.isDebugEnabled()) {
@@ -812,10 +827,15 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                              result);
             }
 
-            return result;
+            return result.getBytes();
 
         } catch (final Exception e) {
             throw handleError(e);
         }
+    }
+
+    @Override
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
+        return DocumentType.DDL;
     }
 }

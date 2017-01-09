@@ -1,10 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest;
 
 import java.net.URI;
@@ -108,33 +122,61 @@ public class RestBasicEntity implements KRestEntity {
 
     /**
      * @param baseUri the base uri of the REST request
+     * @throws KException if error occurs
+     */
+    public RestBasicEntity(URI baseUri) throws KException {
+        ArgCheck.isNotNull(baseUri, "baseUri"); //$NON-NLS-1$
+        setBaseUri(baseUri);
+    }
+
+    /**
+     * @param baseUri the base uri of the REST request
+     * @param kObject the kObject
+     * @param uow the transaction
+     * @param createCommonLinks should the self and parent links be created
+     * @throws KException if error occurs
+     */
+    protected RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow, boolean createCommonLinks) throws KException {
+        this(baseUri);
+
+        ArgCheck.isNotNull(kObject, "kObject"); //$NON-NLS-1$
+        ArgCheck.isNotNull(uow, "uow"); //$NON-NLS-1$
+
+        setId(kObject.getName(uow));
+        setDataPath(kObject.getAbsolutePath());
+        setkType(kObject.getTypeIdentifier(uow));
+        setHasChildren(kObject.hasChildren(uow));
+
+        if (createCommonLinks) {
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(SEARCH_PATH_PARAMETER, getDataPath());
+            addLink(new RestLink(LinkType.SELF, getUriBuilder().searchUri(properties)));
+
+            KomodoObject parent = kObject.getParent(uow);
+            ArgCheck.isNotNull(parent);
+            properties = new KomodoProperties();
+            properties.addProperty(SEARCH_PATH_PARAMETER, parent.getAbsolutePath());
+            addLink(new RestLink(LinkType.PARENT, getUriBuilder().searchUri(properties)));
+
+            createChildLink();
+        }
+    }
+
+    protected void createChildLink() {
+        KomodoProperties properties;
+        properties = new KomodoProperties();
+        properties.addProperty(SEARCH_PARENT_PARAMETER, getDataPath());
+        addLink(new RestLink(LinkType.CHILDREN, getUriBuilder().searchUri(properties)));
+    }
+
+    /**
+     * @param baseUri the base uri of the REST request
      * @param kObject the kObject
      * @param uow the transaction
      * @throws KException if error occurs
      */
     public RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow) throws KException {
-        ArgCheck.isNotNull(baseUri, "baseUri"); //$NON-NLS-1$
-        ArgCheck.isNotNull(kObject, "kObject"); //$NON-NLS-1$
-        ArgCheck.isNotNull(uow, "uow"); //$NON-NLS-1$
-
-        setId(kObject.getName(uow));
-        setBaseUri(baseUri);
-        setDataPath(kObject.getAbsolutePath());
-        setkType(kObject.getTypeIdentifier(uow));
-        setHasChildren(kObject.hasChildren(uow));
-
-        KomodoProperties properties = new KomodoProperties();
-        properties.addProperty(SEARCH_PATH_PARAMETER, getDataPath());
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().generateSearchUri(properties)));
-
-        KomodoObject parent = kObject.getParent(uow);
-        properties = new KomodoProperties();
-        properties.addProperty(SEARCH_PATH_PARAMETER, parent.getAbsolutePath());
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateSearchUri(properties)));
-
-        properties = new KomodoProperties();
-        properties.addProperty(SEARCH_PARENT_PARAMETER, getDataPath());
-        addLink(new RestLink(LinkType.CHILDREN, getUriBuilder().generateSearchUri(properties)));
+        this(baseUri, kObject, uow, true);
     }
 
     /**
@@ -143,7 +185,7 @@ public class RestBasicEntity implements KRestEntity {
      * @return the ancestor of the object with the given class
      */
     protected <T extends KomodoObject> T ancestor(KomodoObject kObject, Class<T> parentClass, UnitOfWork uow) throws KException {
-        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository(), uow);
         KomodoObject parent = kObject.getParent(uow);
         while (parent != null) {
             T resolvedParent = wsMgr.resolve(uow, parent, parentClass);
@@ -317,6 +359,17 @@ public class RestBasicEntity implements KRestEntity {
             this.links = new LinkedHashMap<LinkType, RestLink>();
 
         this.links.put(newLink.getRel(), newLink);
+    }
+
+    /**
+     * Removes the link of given type
+     * @param type of link to remove
+     */
+    public final void removeLink(LinkType type) {
+        if (this.links == null || this.links == RestLink.NO_LINKS)
+            return;
+
+        this.links.remove(type);
     }
 
     /**

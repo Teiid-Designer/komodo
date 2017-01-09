@@ -14,29 +14,55 @@
 	<name>Komodo Dynamic Plugins</name>
 	<description>Bundles that can be loaded into Komodo using its OSGI extension framework</description>
 
-	<modules>
-		<module>komodo-plugin-teiid-framework</module>
-		<module>teiid-8.11</module>
-		<module>teiid-8.12</module>
-		<module>komodo-plugin-service</module>
-	</modules>
-
 	<properties>
-		<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
-		<version.arquillian>1.1.9.Final</version.arquillian>
-		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
+		<version.apache.felix>1.0.0</version.apache.felix>
+		<!-- Only import the javax package in jre not any from 3rd-party libs -->
+		<imported.packages>
+			org.komodo.spi.*,
+			org.komodo.plugin.framework,
+			org.komodo.utils.*,
+			javax.jcr,
+			org.modeshape.jcr.api,
+			!javax.binding,
+			!javax.enterprise.*,
+			!javax.interceptor,
+			!javax.persistence,
+			!javax.resource*,
+			!javax.security.auth.message*,
+			!javax.security.jacc,
+			!javax.servlet*,
+			!javax.xml.bind,
+			!javax.xml.ws,
+			javax.*,
+			org.xml.sax.*
+		</imported.packages>
+
 	</properties>
+
+	<modules>
+		<module>komodo-plugin-framework</module>
+		<module>komodo-plugin-service</module>
+		<module>storage-file</module>
+		<module>storage-git</module>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.komodo.plugins.teiid</groupId>
-				<artifactId>teiid-8.11</artifactId>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.osgi.core</artifactId>
+				<version>${version.apache.felix}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.komodo.plugins.storage</groupId>
+				<artifactId>storage-file</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.komodo.plugins.teiid</groupId>
-				<artifactId>teiid-8.12</artifactId>
+				<groupId>org.komodo.plugins.storage</groupId>
+				<artifactId>storage-git</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -50,30 +76,12 @@
 
 			<dependency>
 				<groupId>org.komodo.plugins</groupId>
-				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<artifactId>komodo-plugin-framework</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
 				<scope>test</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>org.jboss.spec</groupId>
-				<artifactId>jboss-javaee-6.0</artifactId>
-				<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.arquillian</groupId>
-				<artifactId>arquillian-bom</artifactId>
-				<version>${version.arquillian}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.as</groupId>
-				<artifactId>jboss-as-arquillian-container-managed</artifactId>
-				<version>${version.arquillian-container}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

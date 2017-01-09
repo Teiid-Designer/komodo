@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -42,7 +43,7 @@ public final class AddPushdownFunctionCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(vdbs.length,1);
@@ -56,6 +57,19 @@ public final class AddPushdownFunctionCommandTest extends AbstractCommandTest {
         assertEquals(true, functions[0] instanceof PushdownFunction);
         assertEquals("myPushdownFunction", functions[0].getName(getTransaction())); //$NON-NLS-1$
 
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreatePushdownFunctionWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-pushdown-function myPushdownFunction";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

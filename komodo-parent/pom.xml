@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jboss.integration-platform</groupId>
 		<artifactId>jboss-integration-platform-parent</artifactId>
-		<version>6.0.1.Final</version>
+		<version>6.0.0.CR30</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -102,9 +102,10 @@
 
 	<properties>
 
-		<version.ip-bom>6.0.1.Final</version.ip-bom>
-		<version.modeshape>3.8.4.GA</version.modeshape>
+		<version.ip-bom>6.0.0.CR30</version.ip-bom>
+		<version.modeshape>3.8.4.GA-redhat-14</version.modeshape>
 		<version.javax.jcr>2.0</version.javax.jcr>
+		<version.commons.io>2.5</version.commons.io>
 
 		<!-- Instruct the build to use only UTF-8 encoding for source code -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -116,206 +117,32 @@
 
 		<!-- PLUGIN BUG: Test dependencies not correctly checked -->
 		<managed-deps.checkProfiles>false</managed-deps.checkProfiles>
+
+		<!-- The version of jgit -->
+		<version.jgit>[4.3.0,4.4.0)</version.jgit>
+
+		<server.platform>release</server.platform>
+
+		<!-- The default version of teiid targeted for development -->
+		<teiid.version.default>8.12.4</teiid.version.default>
+		<teiid.classifier.default>jboss-dist</teiid.classifier.default>
+
+		<!-- The version of server to use with testing -->
+		<test.server.group.id>org.jboss.as</test.server.group.id>
+		<test.server.artifact.id>jboss-as-dist</test.server.artifact.id>
+		<test.server.version>7.5.7.Final-redhat-3</test.server.version>
+		<!-- The test version of server when its unpacked -->
+		<test.server.name>jboss-eap-6.4</test.server.name>
+
+		<version.aesh>0.33.12.redhat-1</version.aesh>
+		<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
+
+		<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
+		<version.arquillian>1.1.9.Final</version.arquillian>
+		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
+		<arquillian.container.name>jbossas-managed</arquillian.container.name>
+
 	</properties>
-
-	<profiles>
-
-		<!-- ################################################################### 
-			Enable remotely debugging on the command line ################################################################### 
-			To use, specify "-Ddebug=true" on the Maven command line (typically used 
-			when running a single test). Then, start remote debugger (on port 1044) and 
-			connect. -->
-		<profile>
-			<id>debug</id>
-			<activation>
-				<property>
-					<name>debug</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<properties>
-				<!-- Useful for remotely debugging the unit tests run by Surefire ... -->
-				<debug.argline>-Xdebug
-					-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044</debug.argline>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>performance</id>
-			<properties>
-				<skipLongRunningTests>false</skipLongRunningTests>
-			</properties>
-		</profile>
-	</profiles>
-
-	<build>
-		<!-- This section defines the default plugin settings inherited by child 
-			projects. -->
-		<pluginManagement>
-			<plugins>
-				<!-- Specify the compiler options and settings -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<showDeprecation>false</showDeprecation>
-						<showWarnings>false</showWarnings>
-					</configuration>
-				</plugin>
-				<!-- Fixes how test resources of a project can be used in projects dependent 
-					on it -->
-				<plugin>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>maven-bundle-plugin</artifactId>
-					<extensions>true</extensions>
-					<configuration>
-						<instructions>
-							<Export-Package>org.komodo.*</Export-Package>
-						</instructions>
-					</configuration>
-				</plugin>
-
-<!-- 				<plugin> -->
-<!-- 					<artifactId>maven-assembly-plugin</artifactId> -->
-<!-- 					<dependencies> -->
-<!-- 						<dependency> -->
-<!-- 							<groupId>org.komodo</groupId> -->
-<!-- 							<artifactId>modeshape-assembly-descriptors</artifactId> -->
-<!-- 							<version>${project.version}</version> -->
-<!-- 						</dependency> -->
-<!-- 					</dependencies> -->
-<!-- 					<executions> -->
-<!-- 						<execution> -->
-<!-- 							<phase>package</phase> -->
-<!-- 							<goals> -->
-<!-- 								<goal>single</goal> -->
-<!-- 							</goals> -->
-<!-- 						</execution> -->
-<!-- 					</executions> -->
-<!-- 				</plugin> -->
-
-				<!-- Inform m2e to ignore build errors. These errors started occurring 
-					after upgrading to Eclipse Indigo (3.7). This issue is discussed/solved here: 
-					http://stackoverflow.com/questions/8706017/maven-dependency-plugin-goals-copy-dependencies-unpack-is-not-supported-b -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<!-- copy-dependency plugin -->
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-dependency-plugin</artifactId>
-										<versionRange>[1.0.0,)</versionRange>
-										<goals>
-											<goal>copy-dependencies</goal>
-											<goal>unpack</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-
-			<!-- Produce source jars during package and test-source jars during the 
-				'verify' phase -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>attach-test-sources</id>
-						<goals>
-							<goal>test-jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<!-- Manually specify the JUnit provider -->
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<!--artifactId>surefire-junit47</artifactId -->
-						<artifactId>surefire-junit4</artifactId>
-						<!--artifactId>surefire-junit3</artifactId -->
-						<version>${version.surefire.plugin}</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-					<systemProperties combine.children="append">
-						<property>
-							<name>java.io.tmpdir</name>
-							<value>${basedir}/target</value>
-						</property>
-						<property>
-							<name>skipLongRunningTests</name>
-							<value>${skipLongRunningTests}</value>
-						</property>
-					</systemProperties>
-					<argLine>-Xmx1524M ${debug.argline} -XX:MaxPermSize=256M
-						-Djava.awt.headless=true</argLine>
-					<useFile>false</useFile>
-					<enableAssertions>true</enableAssertions>
-				</configuration>
-			</plugin>
-
-			<!-- Build a test-jar for each project, so that src/test/* resources and 
-				classes can be used in other projects. Also customize how the jar files are 
-				assembled. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>test-jar</id>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <pushChanges>false</pushChanges>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-		</plugins>
-	</build>
 
 	<!-- This section defines the default dependency settings inherited by child 
 		projects. Note that this section does not add dependencies, but rather provide 
@@ -358,13 +185,23 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-teiid-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.komodo.plugins</groupId>
-				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<artifactId>komodo-plugin-framework</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.komodo</groupId>
 				<artifactId>komodo-plugin-service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -461,6 +298,48 @@
 				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-integration-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss</groupId>
+				<artifactId>jboss-dmr</artifactId>
+				<version>${version.org.jboss.dmr}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-common-core</artifactId>
+				<version>${teiid.version.default}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-api</artifactId>
+				<version>${teiid.version.default}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-engine</artifactId>
+				<version>${teiid.version.default}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-jboss-admin</artifactId>
+				<version>${teiid.version.default}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-admin</artifactId>
+				<version>${teiid.version.default}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-client</artifactId>
+				<version>${teiid.version.default}</version>
+			</dependency>
 
 			<!--Inherited from BOM, but changes the default scope to "test" -->
 			<dependency>
@@ -507,7 +386,247 @@
 				<version>${version.log4j}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${version.commons.io}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.arquillian</groupId>
+				<artifactId>arquillian-bom</artifactId>
+				<version>${version.arquillian}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-cli</artifactId>
+				<version>${test.server.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-controller-client</artifactId>
+				<version>${test.server.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-controller</artifactId>
+				<version>${test.server.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-server</artifactId>
+				<version>${test.server.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-naming</artifactId>
+				<version>${test.server.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.spec</groupId>
+				<artifactId>jboss-javaee-6.0</artifactId>
+				<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-arquillian-container-managed</artifactId>
+				<version>${version.arquillian-container}</version>
+				<scope>test</scope>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<!-- This section defines the default plugin settings inherited by child 
+			projects. -->
+		<pluginManagement>
+			<plugins>
+
+				<!-- Specify the compiler options and settings -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<showDeprecation>false</showDeprecation>
+						<showWarnings>false</showWarnings>
+					</configuration>
+				</plugin>
+				<!-- Fixes how test resources of a project can be used in projects dependent
+					on it -->
+				<plugin>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-bundle-plugin</artifactId>
+					<extensions>true</extensions>
+					<configuration>
+						<instructions>
+							<Export-Package>org.komodo.*</Export-Package>
+						</instructions>
+					</configuration>
+				</plugin>
+
+				<!-- Inform m2e to ignore build errors. These errors started occurring 
+					after upgrading to Eclipse Indigo (3.7). This issue is discussed/solved here: 
+					http://stackoverflow.com/questions/8706017/maven-dependency-plugin-goals-copy-dependencies-unpack-is-not-supported-b -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<!-- copy-dependency plugin -->
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-dependency-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>copy-dependencies</goal>
+											<goal>unpack</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+
+			<!-- Produce source jars during package and test-source jars during the
+				'verify' phase -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>attach-test-sources</id>
+						<goals>
+							<goal>test-jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- Manually specify the JUnit provider -->
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<!--artifactId>surefire-junit47</artifactId -->
+						<artifactId>surefire-junit4</artifactId>
+						<!--artifactId>surefire-junit3</artifactId -->
+						<version>${version.surefire.plugin}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<systemProperties combine.children="append">
+						<property>
+							<name>java.io.tmpdir</name>
+							<value>${basedir}/target</value>
+						</property>
+						<property>
+							<name>skipLongRunningTests</name>
+							<value>${skipLongRunningTests}</value>
+						</property>
+					</systemProperties>
+					<argLine>-Xmx1524M ${debug.argline} -XX:MaxPermSize=256M
+						-Djava.awt.headless=true</argLine>
+					<useFile>false</useFile>
+					<enableAssertions>true</enableAssertions>
+				</configuration>
+			</plugin>
+
+			<!-- Build a test-jar for each project, so that src/test/* resources and
+				classes can be used in other projects. Also customize how the jar files are
+				assembled. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>test-jar</id>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<pushChanges>false</pushChanges>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>redhat-product-repository</id>
+			<name>Red Hat Product Repository</name>
+			<!--<url>http://maven.repository.redhat.com/ga</url>-->
+			<url>http://origin-maven.repository.redhat.com/ga</url>
+			<layout>default</layout>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>

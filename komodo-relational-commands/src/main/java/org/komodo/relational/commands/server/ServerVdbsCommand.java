@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.server;
 
@@ -14,6 +28,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.KException;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -52,12 +67,20 @@ public final class ServerVdbsCommand extends ServerShellCommand {
             print( MESSAGE_INDENT, title );
 
             List< String > vdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
-            Collections.sort(vdbNames);
-            
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), vdbNames, 4, null );
+            if(vdbNames.isEmpty()) {
+                print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.noVdbsMsg ) );
+            } else {
+                Collections.sort(vdbNames);
+                PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), vdbNames, 4, null );
+            }
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), e );
+            try {
+                disconnectWorkspaceServer();
+            } catch (KException kex) {
+                // Do nothing
+            }
         }
 
         return result;

@@ -17,11 +17,13 @@ package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
 import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
+import org.komodo.ui.DefaultLabelProvider;
 
 /**
  * Test Class to test {@link ShowSummaryCommand}.
@@ -43,9 +45,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( KomodoObjectLabelProvider.LIB_DISPLAY_NAME
+        assertThat( writerOutput, writerOutput.contains( DefaultLabelProvider.LIB_DISPLAY_NAME
                                                          + " '"
-                                                         + KomodoObjectLabelProvider.LIB_DISPLAY_PATH
+                                                         + DefaultLabelProvider.LIB_DISPLAY_PATH
                                                          + '\'' ),
                     is( true ) );
     }
@@ -57,9 +59,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( KomodoObjectLabelProvider.ROOT_DISPLAY_NAME
+        assertThat( writerOutput, writerOutput.contains( DefaultLabelProvider.ROOT_DISPLAY_NAME
                                                          + " '"
-                                                         + KomodoObjectLabelProvider.ROOT_DISPLAY_PATH
+                                                         + DefaultLabelProvider.ROOT_DISPLAY_PATH
                                                          + '\'' ),
                     is( true ) );
     }
@@ -72,9 +74,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( KomodoObjectLabelProvider.WORKSPACE_DISPLAY_NAME
+        assertThat( writerOutput, writerOutput.contains( DefaultLabelProvider.workspaceDisplayName(getTransaction())
                                                          + " '"
-                                                         + KomodoObjectLabelProvider.WORKSPACE_DISPLAY_PATH
+                                                         + DefaultLabelProvider.workspaceDisplayPath(getTransaction())
                                                          + '\'' ),
                     is( true ) );
     }

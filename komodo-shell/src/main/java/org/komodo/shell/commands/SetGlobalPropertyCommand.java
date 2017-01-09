@@ -1,12 +1,27 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.shell.commands;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -67,14 +82,27 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
             String propValueArg = requiredArgument(1, I18n.bind(ShellI18n.invalidArgMsgPropertyValue ) );
 
             // validate global property name and value
-            final String errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
+            WorkspaceStatus wsStatus = getWorkspaceStatus();
+            String errorMsg = null;
+            if(wsStatus.isGlobalProperty(propNameArg)) {
+                errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
+            } else if(wsStatus.isProvidedGlobalProperty(propNameArg)) {
+                errorMsg = wsStatus.validateProvidedGlobalPropertyValue(propNameArg, propValueArg);
+            } else {
+                errorMsg = I18n.bind( ShellI18n.invalidGlobalProperty, propNameArg );
+            }
 
             if ( !StringUtils.isEmpty( errorMsg ) ) {
                 return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidGlobalProperty, errorMsg ), null );
             }
 
             // Set the property
-            setGlobalProperty( propNameArg, propValueArg );
+            if( wsStatus.isGlobalProperty(propNameArg) ) {
+                wsStatus.setGlobalProperty(propNameArg, propValueArg);
+            } else {
+                String propType = getWorkspaceStatus().getProvidedGlobalPropertyTypes().get(propNameArg);
+                wsStatus.setProvidedGlobalProperty(propNameArg, propValueArg, propType);
+            }
             return new CommandResultImpl( I18n.bind( ShellI18n.globalPropertySet, propNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
@@ -122,17 +150,6 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
     }
 
     /**
-     * Sets a global workspace property
-     * @param propName the global property name
-     * @param propValue the property value
-     * @throws Exception the exception
-     */
-    private void setGlobalProperty(String propName, String propValue) throws Exception {
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-        wsStatus.setGlobalProperty(propName, propValue);
-    }
-
-    /**
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
@@ -140,7 +157,11 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             // Global property completion options
-            final Set< String > potentials = WorkspaceStatus.GLOBAL_PROPS.keySet();
+            final Set< String > potentials = new HashSet<String>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+            
+            // Add provided globals to potentials
+            Set< String > providedPropNames = getWorkspaceStatus().getProvidedGlobalProperties().stringPropertyNames();
+            potentials.addAll( providedPropNames );
 
             if ( lastArgument == null ) {
                 candidates.addAll( potentials );

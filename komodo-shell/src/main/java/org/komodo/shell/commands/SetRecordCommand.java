@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.shell.commands;
 
@@ -81,7 +95,7 @@ public class SetRecordCommand extends BuiltInShellCommand {
 
             // Set WorkspaceStatus
             WorkspaceStatus wsStatus = getWorkspaceStatus();
-            String recordingFileStr = getWorkspaceStatus().getGlobalProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+            String recordingFileStr = getWorkspaceStatus().getGlobalProperties(false).getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
             if(onOffArg.equalsIgnoreCase(ON)) {
                 wsStatus.setRecordingStatus(true);
 
@@ -179,7 +193,7 @@ public class SetRecordCommand extends BuiltInShellCommand {
                 recordingWriter.write(message+StringConstants.NEW_LINE);
                 recordingWriter.flush();
             } catch (IOException ex) {
-                String filePath = wsStatus.getGlobalProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+                String filePath = wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
                 print(MESSAGE_INDENT, I18n.bind(ShellI18n.recordingFileOutputError, filePath));
             }
         // Print error message if the recording file was not defined

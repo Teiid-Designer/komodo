@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.server;
 
@@ -56,7 +70,20 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            Collection<TeiidPropertyDefinition> propDefns = getWorkspaceTeiidInstance().getTemplatePropertyDefns(sourceTypeName);
+            Collection<TeiidPropertyDefinition> propDefns = null;
+            try {
+                // Check the data source type names to make sure its valid
+                Set< String > typeNames = getWorkspaceTeiidInstance().getDataSourceTypeNames();
+                if(!typeNames.contains(sourceTypeName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceTypeNotFound, sourceTypeName ), null);
+                }
+                // Get the source type properties
+                propDefns = getWorkspaceTeiidInstance().getTemplatePropertyDefns(sourceTypeName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(propDefns==null) {
                 return new CommandResultImpl( false,
                                               I18n.bind( ServerCommandsI18n.serverDatasourceTypeNotFound, sourceTypeName ),
@@ -143,21 +170,27 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Teiid teiid = getWorkspaceServer();
-        Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
-        List< String > existingTypes = new ArrayList< String >(types);
-        Collections.sort(existingTypes);
+        try {
+            Teiid teiid = getWorkspaceServer();
+            Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
+            List< String > existingTypes = new ArrayList< String >(types);
+            Collections.sort(existingTypes);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingTypes );
-            } else {
-                for ( final String item : existingTypes ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingTypes );
+                } else {
+                    for ( final String item : existingTypes ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

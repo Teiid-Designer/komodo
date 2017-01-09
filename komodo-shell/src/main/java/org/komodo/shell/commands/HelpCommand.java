@@ -27,8 +27,8 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.TabCompletionModifier;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.i18n.I18n;
 
@@ -80,6 +80,7 @@ public class HelpCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
     		String commandName = optionalArgument(0);
+    		getWorkspaceStatus().updateAvailableCommands();
     		if (commandName == null) {
     			printHelpAll();
     		} else {

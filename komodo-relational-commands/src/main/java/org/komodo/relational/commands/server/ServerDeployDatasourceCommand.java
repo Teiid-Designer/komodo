@@ -1,19 +1,34 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
+
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -24,6 +39,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * A shell command to deploy a workspace Datasource to the connected server.
@@ -62,8 +78,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             // Make sure datasource object exists in repo
-            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
-            if(datasourceObj==null) {
+            if(!getWorkspaceManager(getTransaction()).hasChild(getTransaction(), sourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceDatasourceNotFound, sourceName ), null );
             }
 
@@ -74,6 +89,10 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             final TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
+            final KomodoObject datasourceObj = getWorkspaceManager(getTransaction()).getChild( getTransaction(),
+                                                                               sourceName,
+                                                                               DataVirtLexicon.Connection.NODE_TYPE );
+
             final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
 
             // Make sure that the sourceType is OK for the connected server.
@@ -84,25 +103,42 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                                                          sourceType ),
                                               null );
             }
-            
+
             // Determine if the server already has a deployed Datasource with this name
-            boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceName);
-            if(serverHasDatasource && !overwrite) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ServerCommandsI18n.datasourceDeploymentOverwriteDisabled,
-                                                         sourceName ),
-                                              null );
+            try {
+                boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceName);
+                if(serverHasDatasource && !overwrite) {
+                    return new CommandResultImpl( false,
+                                                  I18n.bind( ServerCommandsI18n.datasourceDeploymentOverwriteDisabled,
+                                                             sourceName ),
+                                                  null );
+                }
+
+                // Get the properties necessary for deployment to server
+                Properties sourceProps = null;
+                try {
+                    sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.datasourcePropertiesError, ex.getLocalizedMessage() ), null );
+                    return result;
+                }
+
+                try {
+                    // If overwriting, delete the existing source first
+                    if(serverHasDatasource) {
+                        teiidInstance.deleteDataSource(sourceName);
+                    }
+                    // Create the source
+                    teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.datasourceDeploymentError, ex.getLocalizedMessage() ), null );
+                    return result;
+                }
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
             }
-            
-            // Get the properties necessary for deployment to server
-            Properties sourceProps = sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
-            
-            // If overwriting, delete the existing source first
-            if(serverHasDatasource) {
-                teiidInstance.deleteDataSource(sourceName);
-            }
-            // Create the source
-            teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceDeployFinished) );
             result = CommandResult.SUCCESS;
@@ -112,7 +148,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
 
         return result;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -173,7 +209,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        final KomodoObject[] datasources = getWorkspaceManager().findDatasources(getTransaction());
+        final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findDatasources(getTransaction());
         List<String> existingDatasourceNames = new ArrayList<String>(datasources.length);
         for(KomodoObject datasource : datasources) {
             existingDatasourceNames.add(datasource.getName(getTransaction()));

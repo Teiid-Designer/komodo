@@ -16,8 +16,10 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
@@ -36,8 +38,6 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
                                     "cd jdbcSource",
                                     "set-property jndiName java:/jdbcSource",
                                     "set-property driverName oracle",
-                                    "set-property profileName designerProfile",
-                                    "set-property preview false",
                                     "set-custom-property myProp1 prop1Value",
                                     "set-custom-property myProp2 prop2Value",
                                     "workspace",
@@ -46,15 +46,13 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
                                     "set-property jndiName java:/raSource",
                                     "set-property className org.something.classname",
                                     "set-property driverName salesforce",
-                                    "set-property profileName designerProfile",
-                                    "set-property preview true",
                                     "set-custom-property myProp1 prop1Value",
                                     "set-custom-property myProp2 prop2Value",
                                     "workspace"};
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
     }
-    
+
     @Test
     public void shouldExportJdbcSourceFromDatasourceContext() throws Exception {
         // Create the export destination file, ensuring it does not already exist
@@ -64,7 +62,7 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
         final String[] commands = { "commit",
                                     "cd jdbcSource",
                                     "export-datasource " + exportDest.getAbsolutePath() };
-        
+
 
         testExportJdbcSource( exportDest, commands );
     }
@@ -77,7 +75,7 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
         // The test commands
         final String[] commands = { "commit",
                                     "export-datasource jdbcSource " + exportDest.getAbsolutePath() };
-        
+
 
         testExportJdbcSource( exportDest, commands );
     }
@@ -91,7 +89,7 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
         final String[] commands = { "commit",
                                     "cd raSource",
                                     "export-datasource " + exportDest.getAbsolutePath() };
-        
+
 
         testExportRASource( exportDest, commands );
     }
@@ -104,7 +102,7 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
         // The test commands
         final String[] commands = { "commit",
                                     "export-datasource raSource " + exportDest.getAbsolutePath() };
-        
+
 
         testExportRASource( exportDest, commands );
     }
@@ -117,12 +115,11 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
         // Verify the exported XML content
         String exportedXml = FileUtils.readSafe(exportDest);
 
-        assertTrue( exportedXml.contains("<dataSource name=\"jdbcSource\" jdbc=\"true\">") );
-        assertTrue( exportedXml.contains("<property name=\"jndiName\">java:/jdbcSource</property>") );
-        assertTrue( exportedXml.contains("<property name=\"driverName\">oracle</property>") );
+        assertTrue( exportedXml.contains("<jdbc-connection name=\"jdbcSource\">") );
+        assertTrue( exportedXml.contains("<jndi-name>java:/jdbcSource</jndi-name>") );
+        assertTrue( exportedXml.contains("<driver-name>oracle</driver-name>") );
         assertTrue( exportedXml.contains("<property name=\"myProp1\">prop1Value</property>") );
         assertTrue( exportedXml.contains("<property name=\"myProp2\">prop2Value</property>") );
-        assertTrue( exportedXml.contains("<property name=\"preview\">false</property>") );
     }
 
     private void testExportRASource( final File exportDest, final String[] commands ) throws Exception {
@@ -133,16 +130,14 @@ public class ExportDatasourceCommandTest extends AbstractCommandTest {
         // Verify the exported XML content
         String exportedXml = FileUtils.readSafe(exportDest);
 
-        assertTrue( exportedXml.contains("<dataSource name=\"raSource\" jdbc=\"false\">") );
-        assertTrue( exportedXml.contains("<property name=\"profileName\">designerProfile</property>") );
-        assertTrue( exportedXml.contains("<property name=\"jndiName\">java:/raSource</property>") );
-        assertTrue( exportedXml.contains("<property name=\"driverName\">salesforce</property>") );
-        assertTrue( exportedXml.contains("<property name=\"className\">org.something.classname</property>") );
+        assertTrue( exportedXml.contains("<resource-connection name=\"raSource\">") );
+        assertTrue( exportedXml.contains("<jndi-name>java:/raSource</jndi-name>") );
+        assertTrue( exportedXml.contains("<driver-name>salesforce</driver-name>") );
         assertTrue( exportedXml.contains("<property name=\"myProp1\">prop1Value</property>") );
         assertTrue( exportedXml.contains("<property name=\"myProp2\">prop2Value</property>") );
-        assertTrue( exportedXml.contains("<property name=\"preview\">true</property>") );
+        assertTrue( exportedXml.contains("<driver-class>org.something.classname</driver-class>") );
     }
-    
+
     private File createExportFile() {
         File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt"); //$NON-NLS-1$  //$NON-NLS-2$
         exportDest.deleteOnExit();

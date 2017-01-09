@@ -45,10 +45,12 @@ public class Messages implements StringConstants {
         vdbOnlySupportsVDB,
         nodeExistsReturn,
         nodeExistCreateNew,
+        noNameFailure,
         newNameFailure,
         nodeCreated,
         nodeCreationFailed,
-        teiidParserException;
+        teiidParserException,
+        dataSourceImported;
 
         @Override
         public String toString() {

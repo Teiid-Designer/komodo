@@ -15,8 +15,12 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -41,7 +45,7 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -65,6 +69,46 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
     	candidates.add(ModelShellCommand.METADATA_TYPE);
     	assertTabCompletion("set-property m", candidates);
     	assertTabCompletion("set-property M", candidates);
+    }
+
+    @Test
+    public void shouldSetModelTypeToPhyscalIgnoringTextCase() throws Exception {
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "set-property modelType pHySiCal" };
+
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
+        final Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );
+        assertThat( vdbs.length, is( 1 ) );
+
+        final Model[] models = vdbs[ 0 ].getModels( getTransaction() );
+        assertThat( models.length, is( 1 ) );
+        assertThat( models[ 0 ].getModelType( getTransaction() ), is( Model.Type.PHYSICAL ) );
+    }
+
+    @Test
+    public void shouldSetModelTypeToVirtualIgnoringTextCase() throws Exception {
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "set-property modelType ViRtUaL" };
+
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
+        final Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );
+        assertThat( vdbs.length, is( 1 ) );
+
+        final Model[] models = vdbs[ 0 ].getModels( getTransaction() );
+        assertThat( models.length, is( 1 ) );
+        assertThat( models[ 0 ].getModelType( getTransaction() ), is( Model.Type.VIRTUAL ) );
     }
 
 }
