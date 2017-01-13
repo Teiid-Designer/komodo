@@ -40,13 +40,13 @@ import java.security.Principal;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.BasicUserPrincipal;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -391,7 +391,8 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         // Add this to enable BASIC authorization
         //
         String credentials = USER_NAME + COLON + PASSWORD;
-        byte[] encCredentials = Base64.getEncoder().encode(credentials.getBytes());
+        byte[] encCredentials = Base64.encodeBase64(credentials.getBytes());
+
         String value = "Basic " + new String(encCredentials);
         request.header("Authorization", value);
     }

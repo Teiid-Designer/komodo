@@ -26,11 +26,11 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Base64;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.codec.binary.Base64;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -73,7 +73,7 @@ public final class IT_KomodoTeiidServiceDriverTests extends AbstractKomodoTeiidS
         assertNotNull(driverStream);
 
         byte[] driverBytes = TestUtilities.streamToBytes(driverStream);
-        String content = Base64.getEncoder().encodeToString(driverBytes);
+        String content = Base64.encodeBase64String(driverBytes);
         fileAttr.setContent(content);
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

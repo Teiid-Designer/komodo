@@ -37,7 +37,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -46,6 +45,7 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -399,7 +399,7 @@ public abstract class AbstractKomodoTeiidServiceTest implements StringConstants 
     
         InputStream usStatesDSStream = TestUtilities.usStatesDataserviceExample();
         byte[] sampleBytes = TestUtilities.streamToBytes(usStatesDSStream);
-        String content = Base64.getEncoder().encodeToString(sampleBytes);
+        String content = Base64.encodeBase64String(sampleBytes);
         storageAttr.setContent(content);
     
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

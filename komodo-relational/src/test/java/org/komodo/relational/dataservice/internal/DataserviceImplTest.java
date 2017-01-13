@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -140,7 +139,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
     @Test
     public void shouldSetLastModified() throws Exception {
         final Calendar date = Calendar.getInstance();
-        date.setTimeZone(TimeZone.getTimeZone(ZoneId.of("Europe/London")));
+        date.setTimeZone(TimeZone.getTimeZone("Europe/London"));
         date.set( 2016, 8, 23, 13, 48, 33 );
         this.dataservice.setLastModified( getTransaction(), date );
         assertThat( this.dataservice.getLastModified( getTransaction() ), is( date ) );
