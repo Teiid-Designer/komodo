@@ -272,7 +272,17 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI path segment for a setting a dataservice's service vdb for join view
          */
         String SERVICE_VDB_FOR_JOIN_TABLES = "ServiceVdbForJoinTables"; //$NON-NLS-1$
+        
+        /**
+         * The name of the URI path segment for getting the DDL for single table view
+         */
+        String SERVICE_VIEW_DDL_FOR_SINGLE_TABLE = "ServiceViewDdlForSingleTable"; //$NON-NLS-1$
 
+        /**
+         * The name of the URI path segment for getting the DDL for join view
+         */
+        String SERVICE_VIEW_DDL_FOR_JOIN_TABLES = "ServiceViewDdlForJoinTables"; //$NON-NLS-1$
+        
         /**
          * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
          */

@@ -261,13 +261,14 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
 
     @Test
-    public void shouldNotSetServiceVdbMissingParameter() throws Exception {
+    public void shouldNotSetServiceVdbForSingleTableMissingParameter() throws Exception {
         createDataservice(DATASERVICE_NAME);
 
-        // get
         URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
         URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VDB_FOR_SINGLE_TABLE).build();
 
+        // Required parms (dataserviceName, modelSourcePath, tablePath).
+        // fails due to missing modelSourcePath
         KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
         updateAttr.setDataserviceName(DATASERVICE_NAME);
         updateAttr.setTablePath("/path/to/table");
@@ -283,13 +284,14 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
 
     @Test
-    public void shouldNotSetServiceVdbBadTablePath() throws Exception {
+    public void shouldNotSetServiceVdbForSingleTableBadTablePath() throws Exception {
         createDataservice(DATASERVICE_NAME);
 
-        // get
         URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
         URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VDB_FOR_SINGLE_TABLE).build();
 
+        // Required parms (dataserviceName, modelSourcePath, tablePath).
+        // fails due to bad table path - (doesnt resolve to a table)
         KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
         updateAttr.setDataserviceName(DATASERVICE_NAME);
         updateAttr.setTablePath("/path/to/table");
@@ -303,6 +305,30 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String entity = response.getEntity();
         assertTrue(entity.contains("specified Table does not exist"));
+    }
+
+    @Test
+    public void shouldNotSetServiceVdbForSingleTableBadDdl() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+        
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VDB_FOR_SINGLE_TABLE).build();
+
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+        updateAttr.setModelSourcePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/Accounts/vdb:sources/h2-connector");
+        updateAttr.setViewDdl("CREATE VIEW blah blah");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("DDL Parsing encountered a problem"));
     }
 
     @Test
@@ -327,5 +353,234 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         final String entity = response.getEntity();
         assertTrue(entity.contains("Successfully updated"));
     }
-   
+    
+    @Test
+    public void shouldNotSetServiceVdbForJoinTablesMissingParameter() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VDB_FOR_JOIN_TABLES).build();
+
+        // Required parms (dataserviceName, modelSourcePath, rhModelSourcePath, tablePath, rhTablePath).
+        // fails due to missing rhModelSourcePath
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("/path/to/lhTable");
+        updateAttr.setRhTablePath("/path/to/rhTable");
+        updateAttr.setModelSourcePath("/path/to/lhModelSource");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("missing one or more required parameters"));
+    }
+
+    @Test
+    public void shouldNotSetServiceVdbForJoinTablesBadTablePath() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VDB_FOR_JOIN_TABLES).build();
+
+        // Required parms (dataserviceName, modelSourcePath, rhModelSourcePath, tablePath, rhTablePath).
+        // Must also have 'viewDdl' OR 
+        // fails due to bad table path
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("/path/to/lhTable");
+        updateAttr.setRhTablePath("/path/to/rhTable");
+        updateAttr.setModelSourcePath("/path/to/lhModelSource");
+        updateAttr.setRhModelSourcePath("/path/to/rhModelSource");
+        updateAttr.setViewDdl("CREATE VIEW blah blah");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("specified Table does not exist"));
+    }
+
+    @Test
+    public void shouldNotSetServiceVdbForJoinTablesBadDdl() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+        
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VDB_FOR_JOIN_TABLES).build();
+
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+        updateAttr.setRhTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+        updateAttr.setModelSourcePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/Accounts/vdb:sources/h2-connector");
+        updateAttr.setRhModelSourcePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/Accounts/vdb:sources/h2-connector");
+        updateAttr.setViewDdl("CREATE VIEW blah blah");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        // Bogus DDL results in an error
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("DDL Parsing encountered a problem"));
+    }
+    
+    @Test
+    public void shouldNotGenerateViewDdlForSingleTableMissingParameter() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+        
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VIEW_DDL_FOR_SINGLE_TABLE).build();
+
+        // Required parms (dataserviceName, tablePath).
+        // fails due to missing table path
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        // Bogus DDL results in an error
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("missing one or more required parameters"));
+    }
+    
+    @Test
+    public void shouldNotGenerateViewDdlForSingleTableBadTablePath() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+        
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VIEW_DDL_FOR_SINGLE_TABLE).build();
+
+        // Required parms (dataserviceName, tablePath).
+        // fails due to bad table path (does not resolve to table)
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("/path/to/table");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        // Bogus DDL results in an error
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("specified Table does not exist"));
+    }
+    
+    @Test
+    public void shouldGenerateViewDdlForSingleTable() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+        
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VIEW_DDL_FOR_SINGLE_TABLE).build();
+
+        // Required parms (dataserviceName, tablePath).
+        // Valid entries - should generate DDL
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("infoType"));
+        assertTrue(entity.contains("CREATE VIEW MyDataServiceView"));
+    }
+    
+    @Test
+    public void shouldNotGenerateViewDdlForJoinTablesMissingParameter() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VIEW_DDL_FOR_JOIN_TABLES).build();
+
+        // Required parms (dataserviceName, tablePath, rhTablePath, joinType).
+        // fails due to missing joinType
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("/path/to/lhTable");
+        updateAttr.setRhTablePath("/path/to/rhTable");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("missing one or more required parameters"));
+    }
+
+    @Test
+    public void shouldNotGenerateViewDdlForJoinTablesBadTablePath() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VIEW_DDL_FOR_JOIN_TABLES).build();
+
+        // Required parms (dataserviceName, tablePath, rhTablePath, joinType).
+        // fails due to bad table path (does not resolve to a Table)
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("/path/to/lhTable");
+        updateAttr.setRhTablePath("/path/to/rhTable");
+        updateAttr.setJoinType("INNER");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("specified Table does not exist"));
+    }
+    
+    @Test
+    public void shouldGenerateViewDdlForJoinTables() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.SERVICE_VIEW_DDL_FOR_JOIN_TABLES).build();
+
+        // Required parms (dataserviceName, tablePath, rhTablePath, joinType).
+        // Valid entries - should generate DDL
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setDataserviceName(DATASERVICE_NAME);
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+        updateAttr.setRhTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/Portfolio/PersonalValuations/Sheet1");
+        updateAttr.setJoinType("INNER");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("infoType"));
+        assertTrue(entity.contains("CREATE VIEW MyDataServiceView"));
+    }
+
 }

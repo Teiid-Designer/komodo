@@ -86,6 +86,9 @@ public final class DataserviceUpdateAttributesSerializer extends TypeAdapter< Ko
                 case KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_RH_COLUMN_LABEL:
                     updateAttrs.setRhJoinColumn(in.nextString());
                     break;
+                case KomodoDataserviceUpdateAttributes.DATASERVICE_VIEW_DDL_LABEL:
+                    updateAttrs.setViewDdl(in.nextString());
+                    break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
@@ -140,6 +143,9 @@ public final class DataserviceUpdateAttributesSerializer extends TypeAdapter< Ko
         
         out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_RH_COLUMN_LABEL);
         out.value(value.getRhJoinColumn());
+
+        out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_VIEW_DDL_LABEL);
+        out.value(value.getViewDdl());
 
         out.endObject();
     }

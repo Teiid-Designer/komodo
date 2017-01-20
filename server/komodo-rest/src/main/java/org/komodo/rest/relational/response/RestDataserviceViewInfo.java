@@ -33,6 +33,7 @@ import org.komodo.rest.KRestEntity;
  */
 public final class RestDataserviceViewInfo implements KRestEntity {
 
+    public static final String DDL_INFO = "DDL";
     public static final String LH_TABLE_INFO = "LHTABLE";
     public static final String RH_TABLE_INFO = "RHTABLE";
     public static final String CRITERIA_INFO = "CRITERIA";
@@ -50,6 +51,8 @@ public final class RestDataserviceViewInfo implements KRestEntity {
     private String lhCriteriaCol;
     private String rhCriteriaCol;
     private String criteria;
+    private String viewDdl;
+    private boolean viewEditable;
     
     /**
      * Constructor for use when deserializing
@@ -80,6 +83,34 @@ public final class RestDataserviceViewInfo implements KRestEntity {
      */
     public void setInfoType(String type) {
         this.infoType = type;
+    }
+    
+    /**
+     * @return the view ddl
+     */
+    public String getViewDdl() {
+        return viewDdl;
+    }
+
+    /**
+     * @param ddl the View DDL
+     */
+    public void setViewDdl(String ddl) {
+        this.viewDdl = ddl;
+    }
+    
+    /**
+     * @return 'true' if editor can recognize view
+     */
+    public boolean isViewEditable() {
+        return viewEditable;
+    }
+
+    /**
+     * @param canEdit 'true' if the editor can recognize the view
+     */
+    public void setViewEditable(boolean canEdit) {
+        this.viewEditable = canEdit;
     }
     
     /**
