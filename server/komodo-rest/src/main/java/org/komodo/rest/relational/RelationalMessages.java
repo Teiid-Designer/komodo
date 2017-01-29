@@ -363,6 +363,11 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_RH_COLUMN,
         
         /**
+         * An error indicating set attempt failed because the expected view ddl was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_VIEWDDL,
+        
+        /**
          * An error indicating set attempt failed
          */
         DATASERVICE_SERVICE_SET_SERVICE_ERROR,

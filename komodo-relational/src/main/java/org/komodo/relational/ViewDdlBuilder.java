@@ -252,10 +252,12 @@ public class ViewDdlBuilder {
         } else {
             sb.append("\nINNER JOIN \n").append(rhTableNameAliased+StringConstants.SPACE); //$NON-NLS-1$
         }
-        sb.append("\nON \n"); //$NON-NLS-1$
-        sb.append(lhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,lhCriteriaCol))
-        .append(StringConstants.SPACE+StringConstants.EQUALS+StringConstants.SPACE)
-        .append(rhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,rhCriteriaCol));
+        if(!StringUtils.isBlank(lhCriteriaCol) && !StringUtils.isBlank(rhCriteriaCol)) {
+            sb.append("\nON \n"); //$NON-NLS-1$
+            sb.append(lhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,lhCriteriaCol))
+            .append(StringConstants.SPACE+StringConstants.EQUALS+StringConstants.SPACE)
+            .append(rhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,rhCriteriaCol));
+        }
         sb.append(StringConstants.SEMI_COLON);
 
         return sb.toString();

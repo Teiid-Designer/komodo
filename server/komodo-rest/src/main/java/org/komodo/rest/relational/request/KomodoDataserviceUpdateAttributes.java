@@ -88,6 +88,11 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
      */
     public static final String DATASERVICE_JOIN_RH_COLUMN_LABEL = "rhJoinColumn"; //$NON-NLS-1$
 
+    /**
+     * Label for the service view ddl
+     */
+    public static final String DATASERVICE_VIEW_DDL_LABEL = "viewDdl"; //$NON-NLS-1$
+
     @JsonProperty(DATASERVICE_NAME_LABEL)
     private String dataserviceName;
 
@@ -117,6 +122,9 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
 
     @JsonProperty(DATASERVICE_JOIN_RH_COLUMN_LABEL)
     private String rhJoinColumn;
+
+    @JsonProperty(DATASERVICE_VIEW_DDL_LABEL)
+    private String viewDdl;
 
     /**
      * Default constructor for deserialization
@@ -291,6 +299,20 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
         this.rhJoinColumn = joinCol;
     }
 
+    /**
+     * @return view ddl
+     */
+    public String getViewDdl() {
+        return viewDdl;
+    }
+
+    /**
+     * @param ddl the view ddl
+     */
+    public void setViewDdl(String ddl) {
+        this.viewDdl = ddl;
+    }
+
 
     @Override
     public int hashCode() {
@@ -306,6 +328,7 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
         result = prime * result + ((joinType == null) ? 0 : joinType.hashCode());
         result = prime * result + ((lhJoinColumn == null) ? 0 : lhJoinColumn.hashCode());
         result = prime * result + ((rhJoinColumn == null) ? 0 : rhJoinColumn.hashCode());
+        result = prime * result + ((viewDdl == null) ? 0 : viewDdl.hashCode());
         return result;
     }
 
@@ -368,6 +391,11 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
                 return false;
         } else if (!rhJoinColumn.equals(other.rhJoinColumn))
             return false;
+        if (viewDdl == null) {
+            if (other.viewDdl != null)
+                return false;
+        } else if (!viewDdl.equals(other.viewDdl))
+            return false;
         return true;
     }
 
@@ -394,6 +422,9 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
         }
         if(rhJoinColumn!=null) {
             sb.append(", rhJoinColumn =" + rhJoinColumn);
+        }
+        if(viewDdl!=null) {
+            sb.append(", viewDdl =" + viewDdl);
         }
         sb.append("]");
         return sb.toString();
