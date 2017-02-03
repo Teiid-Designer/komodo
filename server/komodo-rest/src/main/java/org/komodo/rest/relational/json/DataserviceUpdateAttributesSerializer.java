@@ -26,6 +26,7 @@ import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import com.google.gson.TypeAdapter;
@@ -39,6 +40,7 @@ import com.google.gson.stream.JsonWriter;
 public final class DataserviceUpdateAttributesSerializer extends TypeAdapter< KomodoDataserviceUpdateAttributes > {
 
     private static final Type STRING_LIST_TYPE = new TypeToken< List< String > >() {/* nothing to do */}.getType();
+    private static final Type MAP_LIST_TYPE = new TypeToken< List< Map<String,String> > >() {/* nothing to do */}.getType();
 
     /**
      * {@inheritDoc}
@@ -80,11 +82,9 @@ public final class DataserviceUpdateAttributesSerializer extends TypeAdapter< Ko
                 case KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_TYPE_LABEL:
                     updateAttrs.setJoinType(in.nextString());
                     break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_LH_COLUMN_LABEL:
-                    updateAttrs.setLhJoinColumn(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_RH_COLUMN_LABEL:
-                    updateAttrs.setRhJoinColumn(in.nextString());
+                case KomodoDataserviceUpdateAttributes.DATASERVICE_CRITERIA_PREDICATES_LABEL:
+                    List<Map<String,String>> predicates = BUILDER.fromJson(in, List.class);
+                    updateAttrs.setCriteriaPredicates(predicates);
                     break;
                 case KomodoDataserviceUpdateAttributes.DATASERVICE_VIEW_DDL_LABEL:
                     updateAttrs.setViewDdl(in.nextString());
@@ -138,11 +138,10 @@ public final class DataserviceUpdateAttributesSerializer extends TypeAdapter< Ko
         out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_TYPE_LABEL);
         out.value(value.getJoinType());
 
-        out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_LH_COLUMN_LABEL);
-        out.value(value.getLhJoinColumn());
-        
-        out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_RH_COLUMN_LABEL);
-        out.value(value.getRhJoinColumn());
+        if (! value.getCriteriaPredicates().isEmpty()) {
+            out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_CRITERIA_PREDICATES_LABEL);
+            BUILDER.toJson(value.getCriteriaPredicates(), MAP_LIST_TYPE, out);
+        }
 
         out.name(KomodoDataserviceUpdateAttributes.DATASERVICE_VIEW_DDL_LABEL);
         out.value(value.getViewDdl());

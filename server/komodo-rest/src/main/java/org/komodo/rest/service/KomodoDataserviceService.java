@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -53,6 +54,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
+import org.komodo.relational.ViewBuilderCriteriaPredicate;
 import org.komodo.relational.ViewDdlBuilder;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
@@ -116,6 +118,14 @@ public final class KomodoDataserviceService extends KomodoService {
     private static final String LEFT_OUTER_JOIN = "LEFT OUTER JOIN"; //$NON-NLS-1$
     private static final String RIGHT_OUTER_JOIN = "RIGHT OUTER JOIN"; //$NON-NLS-1$
     private static final String FULL_OUTER_JOIN = "FULL OUTER JOIN"; //$NON-NLS-1$
+    private static final String OR = "OR"; //$NON-NLS-1$
+    private static final String AND = "AND"; //$NON-NLS-1$
+    private static final String EQ = "="; //$NON-NLS-1$
+    private static final String NE = "<>"; //$NON-NLS-1$
+    private static final String LT = "<"; //$NON-NLS-1$
+    private static final String GT = ">"; //$NON-NLS-1$
+    private static final String LE = "<="; //$NON-NLS-1$
+    private static final String GE = ">="; //$NON-NLS-1$
     
     /**
      * @param engine
@@ -765,7 +775,7 @@ public final class KomodoDataserviceService extends KomodoService {
                              "tablePath='path/to/table', modelSourcePath='path/to/modelSource', " +
                              "rhTablePath='path/to/rhTable', rhModelSourcePath='path/to/modelSource', " +
                              "colNames='columnNames', rhColNames='rhColumnNames', joinType='joinType', " +
-                             "lhJoinColumn='lhColName', rhJoinColumn='rhColName', viewDdl='viewddl' }" )
+                             "criteriaPredicates='[]', viewDdl='viewddl' }" )
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
@@ -832,18 +842,10 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_TYPE, dataserviceName);
         }
 
-        // LH Join criteria column
-        String lhJoinColumn = attr.getLhJoinColumn();
-        // Error if the LH join column is missing
-        if (!viewDdlSupplied && StringUtils.isBlank( lhJoinColumn )) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_LH_COLUMN, dataserviceName);
-        }
-
-        // RH Join criteria column
-        String rhJoinColumn = attr.getRhJoinColumn();
-        // Error if the RH join column is missing
-        if (!viewDdlSupplied && StringUtils.isBlank( rhJoinColumn )) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_RH_COLUMN, dataserviceName);
+        List<Map<String,String>> predicateMaps = attr.getCriteriaPredicates();
+        List<ViewBuilderCriteriaPredicate> criteriaPredicates = new ArrayList<ViewBuilderCriteriaPredicate>(predicateMaps.size());
+        for(Map<String,String> predicateMap : predicateMaps) {
+            criteriaPredicates.add(new ViewBuilderCriteriaPredicate(predicateMap));
         }
 
         // Desired column names for the service (may be empty)
@@ -928,7 +930,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 viewDdl = ViewDdlBuilder.getODataViewJoinDdl(uow, dataserviceName+SERVICE_VDB_VIEW_SUFFIX, 
                                                                   lhSourceTable, LH_TABLE_ALIAS, lhColumnNames, 
                                                                   rhSourceTable, RH_TABLE_ALIAS, rhColumnNames, 
-                                                                  lhJoinColumn, rhJoinColumn, joinType);
+                                                                  joinType, criteriaPredicates);
             }
             viewModel.setModelDefinition(uow, viewDdl);
 
@@ -1031,7 +1033,7 @@ public final class KomodoDataserviceService extends KomodoService {
                           "{ dataserviceName='serviceName', "+ 
                              "tablePath='path/to/table', rhTablePath='path/to/rhTable', " +
                              "colNames='columnNames', rhColNames='rhColumnNames', " +
-                             "joinType='joinType', lhJoinColumn='lhColName', rhJoinColumn='rhColName' }" )
+                             "joinType='joinType', criteriaPredicates='[]' }" )
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
@@ -1081,11 +1083,11 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_TYPE, dataserviceName);
         }
 
-        // LH Join criteria column
-        String lhJoinColumn = attr.getLhJoinColumn();
-
-        // RH Join criteria column
-        String rhJoinColumn = attr.getRhJoinColumn();
+        List<Map<String,String>> predicateMaps = attr.getCriteriaPredicates();
+        List<ViewBuilderCriteriaPredicate> criteriaPredicates = new ArrayList<ViewBuilderCriteriaPredicate>(predicateMaps.size());
+        for(Map<String,String> predicateMap : predicateMaps) {
+            criteriaPredicates.add(new ViewBuilderCriteriaPredicate(predicateMap));
+        }
 
         // Desired column names for the service (may be empty)
         List<String> lhColumnNames = attr.getColumnNames();
@@ -1126,7 +1128,7 @@ public final class KomodoDataserviceService extends KomodoService {
             String viewDdl = ViewDdlBuilder.getODataViewJoinDdl(uow, dataserviceName+SERVICE_VDB_VIEW_SUFFIX, 
                                                                 lhSourceTable, LH_TABLE_ALIAS, lhColumnNames, 
                                                                 rhSourceTable, RH_TABLE_ALIAS, rhColumnNames, 
-                                                                lhJoinColumn, rhJoinColumn, joinType);
+                                                                joinType, criteriaPredicates);
 
             // Add info for the raw view ddl
             RestDataserviceViewInfo viewInfo = new RestDataserviceViewInfo();
@@ -1389,8 +1391,7 @@ public final class KomodoDataserviceService extends KomodoService {
         
         // Either the join tables and info must be non null, or the view Ddl must be supplied
         if( ( attr.getJoinType() == null || 
-              attr.getLhJoinColumn() == null || 
-              attr.getRhJoinColumn() == null ) && (attr.getViewDdl() == null) ) {
+              attr.getCriteriaPredicates() == null ) && (attr.getViewDdl() == null) ) {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
         }
 
@@ -1698,16 +1699,50 @@ public final class KomodoDataserviceService extends KomodoService {
             final List< RestDataserviceViewInfo > viewInfos = new ArrayList<RestDataserviceViewInfo>();
             Map<String, List<String>> tableColumnMap = getTableColumnNameMap(viewSql);
             
+            // Determine LHS vs RHS for SQL tables (the map keys are aliased for joins)
+            Set<String> sqlTables = tableColumnMap.keySet();
+            String leftTableName = StringConstants.EMPTY_STRING;
+            String rightTableName = StringConstants.EMPTY_STRING;
+            boolean leftTableAliased = false;
+            boolean rightTableAliased = false;
+            for(String sqlTable : sqlTables) {
+                // Left aliased
+                if(sqlTable.endsWith(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS)) {
+                    int aliasIndx = sqlTable.indexOf(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS);
+                    leftTableName = sqlTable.substring(0,aliasIndx);
+                    leftTableAliased = true;
+                // Right aliased
+                } else if(sqlTable.endsWith(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS)) {
+                    int aliasIndx = sqlTable.indexOf(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS);
+                    rightTableName = sqlTable.substring(0,aliasIndx);
+                    rightTableAliased = true;
+                // No alias - left
+                } else {
+                    leftTableName = sqlTable;
+                }
+            }
+            
+            // Create the view infos for the left and right tables
             for (String viewTable : tableSourceVdbMap.keySet()) {
                 RestDataserviceViewInfo viewInfo = new RestDataserviceViewInfo();
-                if(viewInfos.size()==0) {
+                
+                // Set LH vs RH on info
+                if(viewTable.equals(leftTableName)) {
                     viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
-                } else {
+                } else if(viewTable.equals(rightTableName)){
                     viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
                 }
+                // Source VDB and table
                 viewInfo.setSourceVdbName(tableSourceVdbMap.get(viewTable));
                 viewInfo.setTableName(viewTable);
-                List<String> colsForTable = tableColumnMap.get(viewTable);
+                
+                String mapKey = viewTable;
+                if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.LH_TABLE_INFO) && leftTableAliased) {
+                    mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS;
+                } else if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.RH_TABLE_INFO) && rightTableAliased) {
+                    mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS;
+                } 
+                List<String> colsForTable = tableColumnMap.get(mapKey);
                 if(colsForTable!=null && !colsForTable.isEmpty()) {
                     viewInfo.setColumnNames(colsForTable);
                 }
@@ -1715,10 +1750,10 @@ public final class KomodoDataserviceService extends KomodoService {
             }
             
             // Get criteria info for the view - if two tables were found
-            List<RestDataserviceViewInfo> criteriaInfos = getCriteriaInfo(viewSql);
+            RestDataserviceViewInfo criteriaInfo = getCriteriaInfo(viewSql);
             if(viewInfos.size()==2) {
-                if( !criteriaInfos.isEmpty() ) {
-                    viewInfos.addAll(criteriaInfos);
+                if( criteriaInfo != null ) {
+                    viewInfos.add(criteriaInfo);
                 }
             }
             
@@ -1735,7 +1770,7 @@ public final class KomodoDataserviceService extends KomodoService {
             } else if ( tableSourceVdbMap.size() != tableColumnMap.size() ) {
                 viewInfo.setViewEditable(false);
             // Problem if 2 tables (join) and there were no criteria found
-            } else if ( tableColumnMap.size() == 2 && criteriaInfos.isEmpty() ) {
+            } else if ( tableColumnMap.size() == 2 && criteriaInfo == null ) {
                 viewInfo.setViewEditable(false);
             } else {
                 viewInfo.setViewEditable(true);
@@ -1758,9 +1793,9 @@ public final class KomodoDataserviceService extends KomodoService {
     }
     
     /*
-     * Generate a mapping of tableName to columnName list from the DDL.  
-     *    - if the DDL cannot be fully parsed, an empty map is returned.
-     *    - TODO: replace the current string parsing with an appropriate DDL parser when available
+     * Generate a mapping of tableName to columnName list from the SQL.  
+     *    - if the SQL cannot be fully parsed, an empty map is returned.
+     *    - TODO: replace the current string parsing with an appropriate SQL parser when available
      */
     private Map<String,List<String>> getTableColumnNameMap(String viewSql) {
         Map<String,List<String>> tableColumnMap = new HashMap<String,List<String>>();
@@ -1821,9 +1856,10 @@ public final class KomodoDataserviceService extends KomodoService {
                     }
                 }
                 // If either of the tables is blank, there was a problem - leave the map empty
+                // For joins the table alias is included to determine left and right
                 if(!StringUtils.isBlank(lhTable) && !StringUtils.isBlank(rhTable)) {
-                    tableColumnMap.put(lhTable, lhCols);
-                    tableColumnMap.put(rhTable, rhCols);
+                    tableColumnMap.put(lhTable+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS, lhCols);
+                    tableColumnMap.put(rhTable+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS, rhCols);
                 }
             } else {
                 String tableName = fromStr.trim();
@@ -1838,18 +1874,17 @@ public final class KomodoDataserviceService extends KomodoService {
     }
     
     /*
-     * create the list of criteria info
+     * create the criteria info
      */
-    private List<RestDataserviceViewInfo> getCriteriaInfo(String viewSql) {
-        List<RestDataserviceViewInfo> criteriaInfos = new ArrayList<RestDataserviceViewInfo>();
-        
-        // If sql does not have a join, return empty list
+    private RestDataserviceViewInfo getCriteriaInfo(String viewSql) {
+        // If sql does not have a join, return null info
         if(!hasJoin(viewSql)) {
-            return criteriaInfos;
+            return null;
         }
+        RestDataserviceViewInfo criteriaInfo = new RestDataserviceViewInfo();
+        criteriaInfo.setInfoType(RestDataserviceViewInfo.CRITERIA_INFO);
         
         if(!StringUtils.isEmpty(viewSql)) {
-            RestDataserviceViewInfo criteriaInfo = new RestDataserviceViewInfo();
             if(viewSql.indexOf(INNER_JOIN) != -1) {
                 criteriaInfo.setJoinType(RestDataserviceViewInfo.JOIN_INNER);
             } else if(viewSql.indexOf(LEFT_OUTER_JOIN) != -1) {
@@ -1868,28 +1903,108 @@ public final class KomodoDataserviceService extends KomodoService {
                 criteriaStr = viewSql.substring(startIndex+(asRhAliasOn).length());
             }
             
+            List<ViewBuilderCriteriaPredicate> predicates = new ArrayList<ViewBuilderCriteriaPredicate>();
             if(!StringUtils.isEmpty(criteriaStr)) {
-                criteriaInfo.setCriteria(StringConstants.EQUALS);
-                criteriaInfo.setInfoType(RestDataserviceViewInfo.CRITERIA_INFO);
-                String[] criteriaCols = criteriaStr.split(StringConstants.EQUALS);
-                for(int i=0; i<criteriaCols.length; i++ ) {
-                    String cCol = criteriaCols[i].trim();
-                    if(!StringUtils.isBlank(cCol)) {
-                        if(cCol.startsWith(LH_TABLE_ALIAS_DOT)) {
-                            criteriaInfo.setLHCriteriaColumn(cCol.substring(LH_TABLE_ALIAS_DOT.length()));
-                        } else if(cCol.startsWith(RH_TABLE_ALIAS_DOT)) {
-                            criteriaInfo.setRHCriteriaColumn(cCol.substring(RH_TABLE_ALIAS_DOT.length()));
+                // Process the criteriaStr predicates
+                while ( !StringUtils.isEmpty(criteriaStr) ) {
+                    int orIndex = criteriaStr.indexOf(StringConstants.SPACE+OR+StringConstants.SPACE);
+                    int andIndex = criteriaStr.indexOf(StringConstants.SPACE+AND+StringConstants.SPACE);
+                    // No OR or AND.  Either a single predicate or the last predicate
+                    if( orIndex == -1 && andIndex == -1 ) {
+                        ViewBuilderCriteriaPredicate predicate = parsePredicate(criteriaStr, AND);
+                        if(predicate.isComplete()) {
+                            predicates.add(predicate);
                         }
+                        criteriaStr = StringConstants.EMPTY_STRING;
+                    // Has OR but no AND.
+                    } else if( orIndex > -1 && andIndex == -1 ) {
+                        String predicateStr = criteriaStr.substring(0, orIndex);
+                        ViewBuilderCriteriaPredicate predicate = parsePredicate(predicateStr, OR);
+                        if(predicate.isComplete()) {
+                            predicates.add(predicate);
+                        }
+                        criteriaStr = criteriaStr.substring(orIndex + (StringConstants.SPACE+OR+StringConstants.SPACE).length());
+                    // Has AND but no OR.
+                    } else if( orIndex == -1 && andIndex > -1 ) {
+                        String predicateStr = criteriaStr.substring(0, andIndex);
+                        ViewBuilderCriteriaPredicate predicate = parsePredicate(predicateStr, AND);
+                        if(predicate.isComplete()) {
+                            predicates.add(predicate);
+                        }
+                        criteriaStr = criteriaStr.substring(andIndex + (StringConstants.SPACE+AND+StringConstants.SPACE).length());
+                    // Has both - OR is first.
+                    } else if( orIndex < andIndex ) {
+                        String predicateStr = criteriaStr.substring(0, orIndex);
+                        ViewBuilderCriteriaPredicate predicate = parsePredicate(predicateStr, OR);
+                        if(predicate.isComplete()) {
+                            predicates.add(predicate);
+                        }
+                        criteriaStr = criteriaStr.substring(orIndex + (StringConstants.SPACE+OR+StringConstants.SPACE).length());
+                    // Has both - AND is first.
+                    } else {
+                        String predicateStr = criteriaStr.substring(0, andIndex);
+                        ViewBuilderCriteriaPredicate predicate = parsePredicate(predicateStr, AND);
+                        if(predicate.isComplete()) {
+                            predicates.add(predicate);
+                        }
+                        criteriaStr = criteriaStr.substring(andIndex + (StringConstants.SPACE+AND+StringConstants.SPACE).length());
+                    }
+                }
+                criteriaInfo.setCriteriaPredicates(predicates);                
+            }
+            // Check that at least one predicate was found, and it is complete
+            if( predicates.size() == 0 ) {
+                criteriaInfo = null;
+            } else {
+                for(ViewBuilderCriteriaPredicate predicate : predicates) {
+                    if(!predicate.isComplete()) {
+                        criteriaInfo = null;
+                        break;
                     }
                 }
             }
-            // Check that both sides of the criteria were determined
-            if( !StringUtils.isBlank(criteriaInfo.getLHCriteriaColumn()) && !StringUtils.isBlank(criteriaInfo.getRHCriteriaColumn()) ) {
-                criteriaInfos.add(criteriaInfo);
-            }
         }
         
-        return criteriaInfos;
+        return criteriaInfo;
+    }
+    
+    private ViewBuilderCriteriaPredicate parsePredicate(String predicateStr, String combineKeyword) {
+        ViewBuilderCriteriaPredicate predicate = new ViewBuilderCriteriaPredicate();
+        predicate.setCombineKeyword(combineKeyword);
+
+        String[] criteriaCols = null;
+        if( predicateStr.indexOf(StringConstants.SPACE+EQ+StringConstants.SPACE) > -1 ) {
+            predicate.setOperator(EQ);
+            criteriaCols = predicateStr.split(EQ);
+        } else if( predicateStr.indexOf(StringConstants.SPACE+LT+StringConstants.SPACE) > -1) {
+            predicate.setOperator(LT);
+            criteriaCols = predicateStr.split(LT);
+        } else if( predicateStr.indexOf(StringConstants.SPACE+GT+StringConstants.SPACE) > -1) {
+            predicate.setOperator(GT);
+            criteriaCols = predicateStr.split(GT);
+        } else if( predicateStr.indexOf(StringConstants.SPACE+NE+StringConstants.SPACE) > -1) {
+            predicate.setOperator(NE);
+            criteriaCols = predicateStr.split(NE);
+        } else if( predicateStr.indexOf(StringConstants.SPACE+LE+StringConstants.SPACE) > -1) {
+            predicate.setOperator(LE);
+            criteriaCols = predicateStr.split(LE);
+        } else if( predicateStr.indexOf(StringConstants.SPACE+GE+StringConstants.SPACE) > -1) {
+            predicate.setOperator(GE);
+            criteriaCols = predicateStr.split(GE);
+        }
+        if(criteriaCols!=null) {
+            for(int i=0; i<criteriaCols.length; i++ ) {
+                String cCol = criteriaCols[i].trim();
+                if(!StringUtils.isBlank(cCol)) {
+                    if(cCol.startsWith(LH_TABLE_ALIAS_DOT)) {
+                        predicate.setLhColumn(cCol.substring(LH_TABLE_ALIAS_DOT.length()));
+                    } else if(cCol.startsWith(RH_TABLE_ALIAS_DOT)) {
+                        predicate.setRhColumn(cCol.substring(RH_TABLE_ALIAS_DOT.length()));
+                    }
+                }
+            }
+        }
+        return predicate;
     }
     
     /*

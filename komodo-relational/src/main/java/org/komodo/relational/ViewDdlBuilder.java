@@ -166,12 +166,10 @@ public class ViewDdlBuilder {
      *        the alias to use for the right table
      * @param rhColNames 
      *        the right side column names
-     * @param lhCriteriaCol 
-     *        the left side criteria column
-     * @param rhCriteriaCol 
-     *        the right side criteria column
      * @param joinType 
      *        the join type
+     * @param criteriaPredicates 
+     *        the list of predicates to use for the join criteria
      * @return the View DDL
      * @throws KException
      *         if problem occurs
@@ -179,7 +177,7 @@ public class ViewDdlBuilder {
     public static String getODataViewJoinDdl(UnitOfWork uow, String viewName, 
                                              Table lhTable, String lhTableAlias, List<String> lhColNames, 
                                              Table rhTable, String rhTableAlias, List<String> rhColNames, 
-                                             String lhCriteriaCol, String rhCriteriaCol, String joinType) throws KException {
+                                             String joinType, List<ViewBuilderCriteriaPredicate> criteriaPredicates) throws KException {
 
         StringBuilder sb = new StringBuilder();
         TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
@@ -252,11 +250,23 @@ public class ViewDdlBuilder {
         } else {
             sb.append("\nINNER JOIN \n").append(rhTableNameAliased+StringConstants.SPACE); //$NON-NLS-1$
         }
-        if(!StringUtils.isBlank(lhCriteriaCol) && !StringUtils.isBlank(rhCriteriaCol)) {
+        if(criteriaPredicates!=null && criteriaPredicates.size()>0) {
             sb.append("\nON \n"); //$NON-NLS-1$
-            sb.append(lhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,lhCriteriaCol))
-            .append(StringConstants.SPACE+StringConstants.EQUALS+StringConstants.SPACE)
-            .append(rhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,rhCriteriaCol));
+            int nPredicates = criteriaPredicates.size();
+            for(int i=0; i < nPredicates; i++) {
+                String lhCol = criteriaPredicates.get(i).getLhColumn();
+                String rhCol = criteriaPredicates.get(i).getRhColumn();
+                String oper = criteriaPredicates.get(i).getOperator();
+                String keyword = criteriaPredicates.get(i).getCombineKeyword();
+                
+                sb.append(lhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,lhCol))
+                .append(StringConstants.SPACE+oper+StringConstants.SPACE)
+                .append(rhTableAlias+StringConstants.DOT).append(escapeSQLName(teiidVersion,rhCol));
+                
+                if( i != nPredicates-1 ) {
+                    sb.append(StringConstants.SPACE+keyword+StringConstants.SPACE);
+                }
+            }
         }
         sb.append(StringConstants.SEMI_COLON);
 
