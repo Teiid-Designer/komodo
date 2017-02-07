@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
+import org.komodo.relational.ViewBuilderCriteriaPredicate;
 import org.komodo.rest.KRestEntity;
 
 /**
@@ -48,9 +49,7 @@ public final class RestDataserviceViewInfo implements KRestEntity {
     private String tableName;
     private List<String> columnNames;
     private String joinType;
-    private String lhCriteriaCol;
-    private String rhCriteriaCol;
-    private String criteria;
+    private List<ViewBuilderCriteriaPredicate> criteriaPredicates = new ArrayList<ViewBuilderCriteriaPredicate>();
     private String viewDdl;
     private boolean viewEditable;
     
@@ -169,52 +168,25 @@ public final class RestDataserviceViewInfo implements KRestEntity {
     }
 
     /**
-     * @param type the join type
+     * @param joinType the join type
      */
     public void setJoinType(String joinType) {
         this.joinType = joinType;
     }
     
     /**
-     * @return the lh criteria column name
+     * @return the criteria predicates
      */
-    public String getLHCriteriaColumn() {
-        return lhCriteriaCol;
+    public List<ViewBuilderCriteriaPredicate> getCriteriaPredicates() {
+        return this.criteriaPredicates;
     }
 
     /**
-     * @param colName the lh criteria column name
+     * @param predicates the criteria predicates
      */
-    public void setLHCriteriaColumn(String colName) {
-        this.lhCriteriaCol = colName;
-    }
-
-    /**
-     * @return the rh criteria column name
-     */
-    public String getRHCriteriaColumn() {
-        return rhCriteriaCol;
-    }
-
-    /**
-     * @param colName the rh criteria column name
-     */
-    public void setRHCriteriaColumn(String colName) {
-        this.rhCriteriaCol = colName;
+    public void setCriteriaPredicates(List<ViewBuilderCriteriaPredicate> predicates) {
+        this.criteriaPredicates = predicates;
     }
     
-    /**
-     * @return the criteria
-     */
-    public String getCriteria() {
-        return criteria;
-    }
-
-    /**
-     * @param criteria the criteria
-     */
-    public void setCriteria(String criteria) {
-        this.criteria = criteria;
-    }
     
 }

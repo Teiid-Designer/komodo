@@ -24,6 +24,7 @@ package org.komodo.rest.relational.request;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -79,14 +80,9 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
     public static final String DATASERVICE_JOIN_TYPE_LABEL = "joinType"; //$NON-NLS-1$
 
     /**
-     * Label for the service view lh join column
+     * Label for the criteria predicates for the service join
      */
-    public static final String DATASERVICE_JOIN_LH_COLUMN_LABEL = "lhJoinColumn"; //$NON-NLS-1$
-
-    /**
-     * Label for the service view rh join column
-     */
-    public static final String DATASERVICE_JOIN_RH_COLUMN_LABEL = "rhJoinColumn"; //$NON-NLS-1$
+    public static final String DATASERVICE_CRITERIA_PREDICATES_LABEL = "criteriaPredicates"; //$NON-NLS-1$
 
     /**
      * Label for the service view ddl
@@ -117,11 +113,8 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
     @JsonProperty(DATASERVICE_JOIN_TYPE_LABEL)
     private String joinType;
     
-    @JsonProperty(DATASERVICE_JOIN_LH_COLUMN_LABEL)
-    private String lhJoinColumn;
-
-    @JsonProperty(DATASERVICE_JOIN_RH_COLUMN_LABEL)
-    private String rhJoinColumn;
+    @JsonProperty(DATASERVICE_CRITERIA_PREDICATES_LABEL)
+    private List<Map<String,String>> criteriaPredicates;
 
     @JsonProperty(DATASERVICE_VIEW_DDL_LABEL)
     private String viewDdl;
@@ -272,33 +265,26 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
     }
 
     /**
-     * @return left join column
+     * @return the criteria predicates
      */
-    public String getLhJoinColumn() {
-        return lhJoinColumn;
+    public List<Map<String,String>> getCriteriaPredicates() {
+        if (criteriaPredicates == null)
+            return Collections.emptyList();
+
+        return Collections.unmodifiableList(this.criteriaPredicates);
     }
 
     /**
-     * @param joinCol the join column
+     * set the criteria predicates
+     * @param predicates the predicates
      */
-    public void setLhJoinColumn(String joinCol) {
-        this.lhJoinColumn = joinCol;
-    }
+    public void setCriteriaPredicates(List<Map<String,String>> predicates) {
+        if (this.criteriaPredicates == null)
+            this.criteriaPredicates = new ArrayList<>();
 
-    /**
-     * @return right join column
-     */
-    public String getRhJoinColumn() {
-        return rhJoinColumn;
+        this.criteriaPredicates.addAll(predicates);
     }
-
-    /**
-     * @param joinCol the join column
-     */
-    public void setRhJoinColumn(String joinCol) {
-        this.rhJoinColumn = joinCol;
-    }
-
+    
     /**
      * @return view ddl
      */
@@ -326,8 +312,7 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
         result = prime * result + ((rhModelSourcePath == null) ? 0 : rhModelSourcePath.hashCode());
         result = prime * result + ((rhColumnNames == null) ? 0 : rhColumnNames.hashCode());
         result = prime * result + ((joinType == null) ? 0 : joinType.hashCode());
-        result = prime * result + ((lhJoinColumn == null) ? 0 : lhJoinColumn.hashCode());
-        result = prime * result + ((rhJoinColumn == null) ? 0 : rhJoinColumn.hashCode());
+        result = prime * result + ((criteriaPredicates == null) ? 0 : criteriaPredicates.hashCode());
         result = prime * result + ((viewDdl == null) ? 0 : viewDdl.hashCode());
         return result;
     }
@@ -381,15 +366,10 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
                 return false;
         } else if (!joinType.equals(other.joinType))
             return false;
-        if (lhJoinColumn == null) {
-            if (other.lhJoinColumn != null)
+        if (criteriaPredicates == null) {
+            if (other.criteriaPredicates != null)
                 return false;
-        } else if (!lhJoinColumn.equals(other.lhJoinColumn))
-            return false;
-        if (rhJoinColumn == null) {
-            if (other.rhJoinColumn != null)
-                return false;
-        } else if (!rhJoinColumn.equals(other.rhJoinColumn))
+        } else if (!criteriaPredicates.equals(other.criteriaPredicates))
             return false;
         if (viewDdl == null) {
             if (other.viewDdl != null)
@@ -417,11 +397,8 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
         if(joinType!=null) {
             sb.append(", joinType =" + joinType);
         }
-        if(lhJoinColumn!=null) {
-            sb.append(", lhJoinColumn =" + lhJoinColumn);
-        }
-        if(rhJoinColumn!=null) {
-            sb.append(", rhJoinColumn =" + rhJoinColumn);
+        if(criteriaPredicates!=null) {
+            sb.append(", criteriaPredicates length =" + criteriaPredicates.size());
         }
         if(viewDdl!=null) {
             sb.append(", viewDdl =" + viewDdl);
