@@ -112,6 +112,10 @@
 
 		<debug.argline />
 
+                <!-- overriding the BOM 1.6 source/target -->
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.source>1.8</maven.compiler.source>
+
 		<!--Skip long running tests by default -->
 		<skipLongRunningTests>true</skipLongRunningTests>
 
