@@ -2634,7 +2634,15 @@ public class KomodoTeiidService extends KomodoService {
                         try {
                             rs2 = connection.getMetaData().getSchemas(catlg,null);
                         } catch (Exception ex) {
-                            continue;
+                            if(allCats.size()==1) {
+                                try {
+                                    rs2 = connection.getMetaData().getSchemas();
+                                } catch (Exception ex1) {
+                                    continue;
+                                }
+                            } else {
+                                continue;
+                            }
                         }
                         List<String> schemaList = new ArrayList<String>();
                         while (rs2.next()) {
