@@ -22,11 +22,14 @@
 package org.komodo.rest.relational.dataservice;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Table;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
@@ -78,6 +81,11 @@ public final class RestDataservice extends RestBasicEntity {
     public static final String DATASERVICE_CONNECTION_TOTAL_LABEL = "connections"; //$NON-NLS-1$
 
     /**
+     * Label used to describe service view table names
+     */
+    public static final String DATASERVICE_VIEW_TABLES_LABEL = "serviceViewTables"; //$NON-NLS-1$
+
+    /**
      * Constructor for use when deserializing
      */
     public RestDataservice() {
@@ -110,6 +118,21 @@ public final class RestDataservice extends RestBasicEntity {
             setServiceVdbVersion(Integer.toString(serviceVdb.getVersion( uow )));
             setServiceViewModel(dataService.getServiceViewModelName(uow));
             setServiceViewName(dataService.getServiceViewName(uow));
+            
+            // Get the current tables from source models
+            List<String> tableNames = new ArrayList<String>();
+            Model[] models = serviceVdb.getModels(uow);
+            if(models!=null) {
+                for(Model model : models) {
+                    if(model.getModelType(uow) == Model.Type.PHYSICAL) {
+                        Table[] tables = model.getTables(uow);
+                        for(Table table : tables) {
+                            tableNames.add(model.getName(uow)+"."+table.getName(uow)); //$NON-NLS-1$
+                        }
+                    }
+                }
+            }
+            setServiceViewTables(tableNames.toArray(new String[0]));
         }
 
         Datasource[] connections = dataService.getConnections(uow);
@@ -209,7 +232,7 @@ public final class RestDataservice extends RestBasicEntity {
     }
 
     /**
-     * @param set the number of connections
+     * @param total the number of connections
      */
     public void setConnectionTotal(int total) {
         tuples.put(DATASERVICE_CONNECTION_TOTAL_LABEL, total);
@@ -224,9 +247,25 @@ public final class RestDataservice extends RestBasicEntity {
     }
 
     /**
-     * @param set the number of drivers
+     * @param total the number of drivers
      */
     public void setDriverTotal(int total) {
         tuples.put(DATASERVICE_DRIVER_TOTAL_LABEL, total);
     }
+    
+    /**
+     * @return the view table names (can be <code>null</code>)
+     */
+    public String[] getServiceViewTables( ) {
+        return (String[])tuples.get(DATASERVICE_VIEW_TABLES_LABEL);
+    }
+    
+    /**
+     * @param tableNames
+     *        the view table names (can be <code>null</code>)
+     */
+    public void setServiceViewTables( final String[] tableNames ) {
+        tuples.put(DATASERVICE_VIEW_TABLES_LABEL, tableNames);
+    }
+    
 }
