@@ -371,7 +371,17 @@ public final class RelationalMessages {
          * An error indicating set attempt failed
          */
         DATASERVICE_SERVICE_SET_SERVICE_ERROR,
-        
+
+        /**
+         * A message indicating that a data service with the given name already exists.
+         */
+        DATASERVICE_SERVICE_NAME_EXISTS,
+
+        /**
+         * A message indicating an unexpected error occurred during name validation.
+         */
+        DATASERVICE_SERVICE_NAME_VALIDATION_ERROR,
+
         /**
          * An error indicating a JSON document representing the Datasources in the workspace could not be retrieved.
          */
@@ -461,6 +471,16 @@ public final class RelationalMessages {
          * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.
          */
         DRIVER_SERVICE_GET_DRIVERS_ERROR,
+
+        /**
+         * A message indicating that a VDB with the given name already exists.
+         */
+        VDB_NAME_EXISTS,
+
+        /**
+         * A message indicating an unexpected error occurred during name validation.
+         */
+        VDB_NAME_VALIDATION_ERROR,
 
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.

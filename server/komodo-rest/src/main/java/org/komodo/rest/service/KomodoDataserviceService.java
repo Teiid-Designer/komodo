@@ -29,6 +29,8 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DRIVERS_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_NAME_EXISTS;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_NAME_VALIDATION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SET_SERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
@@ -87,6 +89,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.language.SQLConstants;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
@@ -128,7 +131,8 @@ public final class KomodoDataserviceService extends KomodoService {
     private static final String GT = ">"; //$NON-NLS-1$
     private static final String LE = "<="; //$NON-NLS-1$
     private static final String GE = ">="; //$NON-NLS-1$
-    
+    private static final StringNameValidator VALIDATOR = new StringNameValidator();
+
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
@@ -2162,5 +2166,80 @@ public final class KomodoDataserviceService extends KomodoService {
         }
         return false;
     }
-    
+
+	/**
+	 * @param headers
+	 *            the request headers (never <code>null</code>)
+	 * @param uriInfo
+	 *            the request URI information (never <code>null</code>)
+	 * @param dataserviceName
+	 *            the data service name being validated (cannot be empty)
+	 * @return the response (never <code>null</code>) with an entity that is
+	 *         either an empty string, when the name is valid, or an error
+	 *         message
+	 * @throws KomodoRestException
+	 *             if there is a problem validating the data service name or
+	 *             constructing the response
+	 */
+    @GET
+    @Path( V1Constants.NAME_VALIDATION_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
+    @Produces( { MediaType.TEXT_PLAIN } )
+    @ApiOperation( value = "Returns an error message if the data service name is invalid" )
+    @ApiResponses( value = {
+            @ApiResponse( code = 400, message = "The URI cannot contain encoded slashes or backslashes." ),
+            @ApiResponse( code = 403, message = "An unexpected error has occurred." ),
+            @ApiResponse( code = 500, message = "The dataservice name cannot be empty." )
+    } )
+    public Response validateDataserviceName( final @Context HttpHeaders headers,
+                                             final @Context UriInfo uriInfo,
+                                             @ApiParam( value = "The dataservice name being checked", required = true )
+                                             final @PathParam( "dataserviceName" ) String dataserviceName ) throws KomodoRestException {
+
+        final SecurityPrincipal principal = checkSecurityContext( headers );
+
+        if ( principal.hasErrorResponse() ) {
+            return principal.getErrorResponse();
+        }
+
+        final String errorMsg = VALIDATOR.checkValidName( dataserviceName );
+        
+        // a name validation error occurred
+        if ( errorMsg != null ) {
+        	final Response response = Response.ok().entity( errorMsg ).build();
+            return response;
+        }
+
+        // check for duplicate name
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( principal, "validateDataserviceName", true ); //$NON-NLS-1$
+            final Dataservice[] dataServices = getWorkspaceManager( uow ).findDataservices( uow );
+
+            if ( dataServices.length != 0 ) {
+                for ( final Dataservice ds : dataServices ) {
+                    if ( dataserviceName.equals( ds.getName( uow ) ) ) {
+                        return Response.ok()
+                                       .entity( RelationalMessages.getString( DATASERVICE_SERVICE_NAME_EXISTS ) )
+                                       .build();
+                    }
+                }
+            }
+
+            // name is valid
+            return Response.ok().build();
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden( headers.getAcceptableMediaTypes(), 
+                                                     e, 
+                                                     DATASERVICE_SERVICE_NAME_VALIDATION_ERROR );
+        }
+    }
 }

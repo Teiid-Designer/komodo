@@ -90,7 +90,7 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 /**
  *
  */
-@SuppressWarnings( {"nls", "javadoc", "deprecation"} )
+@SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractKomodoServiceTest implements V1Constants {
 
     private static final int TEST_PORT = 8443;
