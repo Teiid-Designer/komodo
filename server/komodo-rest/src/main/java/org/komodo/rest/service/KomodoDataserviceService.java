@@ -1723,6 +1723,7 @@ public final class KomodoDataserviceService extends KomodoService {
             }
             
             // Create the view infos for the left and right tables
+            int nTable = 0;
             for (String viewTable : tableSourceVdbMap.keySet()) {
                 RestDataserviceViewInfo viewInfo = new RestDataserviceViewInfo();
                 
@@ -1731,22 +1732,29 @@ public final class KomodoDataserviceService extends KomodoService {
                     viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
                 } else if(viewTable.equals(rightTableName)){
                     viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
+                } else if(leftTableName.equals(StringConstants.EMPTY_STRING) && nTable==0) {
+                    viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
+                } else if(rightTableName.equals(StringConstants.EMPTY_STRING) && nTable==1) {
+                    viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
                 }
                 // Source VDB and table
                 viewInfo.setSourceVdbName(tableSourceVdbMap.get(viewTable));
                 viewInfo.setTableName(viewTable);
                 
                 String mapKey = viewTable;
-                if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.LH_TABLE_INFO) && leftTableAliased) {
-                    mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS;
-                } else if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.RH_TABLE_INFO) && rightTableAliased) {
-                    mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS;
-                } 
+                if(viewInfo.getInfoType()!=null) {
+                    if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.LH_TABLE_INFO) && leftTableAliased) {
+                        mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS;
+                    } else if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.RH_TABLE_INFO) && rightTableAliased) {
+                        mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS;
+                    } 
+                }
                 List<String> colsForTable = tableColumnMap.get(mapKey);
                 if(colsForTable!=null && !colsForTable.isEmpty()) {
                     viewInfo.setColumnNames(colsForTable);
                 }
                 viewInfos.add(viewInfo);
+                nTable++;
             }
             
             // Get criteria info for the view - if two tables were found

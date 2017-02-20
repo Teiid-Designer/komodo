@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -2628,6 +2629,7 @@ public class KomodoTeiidService extends KomodoService {
                     rs.close();
 
                     // Create mapping of catalog to schema list
+                    Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
                     Map<String,List<String>> catalogSchemaMap = new HashMap<String, List<String>>();
                     for(String catlg : allCats) {
                         ResultSet rs2;
@@ -2649,12 +2651,15 @@ public class KomodoTeiidService extends KomodoService {
                             String schemaName = rs2.getString(1);
                             schemaList.add(schemaName);
                         }
+                        Collections.sort(schemaList, String.CASE_INSENSITIVE_ORDER);
                         catalogSchemaMap.put(catlg, schemaList);
                         rs2.close();
                     }
 
                     // Generate the infos
-                    for(String catName : catalogSchemaMap.keySet()) {
+                    List<String> catNames = new ArrayList<String>(catalogSchemaMap.keySet());
+                    Collections.sort(catNames, String.CASE_INSENSITIVE_ORDER);
+                    for(String catName : catNames) {
                         RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
                         info.setItemName(catName);
                         info.setItemType(CATALOG);
@@ -2670,6 +2675,7 @@ public class KomodoTeiidService extends KomodoService {
                         allCats.add(catalog);
                     }
                     resultSet.close();
+                    Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
                     // Create infos
                     for(String cat : allCats) {
                         RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
@@ -2687,6 +2693,7 @@ public class KomodoTeiidService extends KomodoService {
                     }
                     resultSet.close();
 
+                    Collections.sort(allSchemas, String.CASE_INSENSITIVE_ORDER);
                     for(String sch : allSchemas) {
                         RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
                         info.setItemName(sch);
