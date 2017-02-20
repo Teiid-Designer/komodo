@@ -27,7 +27,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
+import javax.jcr.AccessDeniedException;
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
@@ -37,7 +38,6 @@ import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.Messages;
 import org.komodo.repository.KSequencerController;
@@ -138,12 +138,11 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         return this.identifier;
     }
 
-    private boolean isVdbSequenceable(Property property) {
+    private boolean isVdbSequenceable(Node node, String propertyName) {
         try {
-            if (! property.getName().equals(JcrConstants.JCR_DATA))
+            if (! propertyName.equals(JcrConstants.JCR_DATA))
                 return false;
 
-            Node node = property.getParent();
             if (! node.getName().equals(JcrConstants.JCR_CONTENT))
                 return false;
 
@@ -158,13 +157,19 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         return true;
     }
 
-    private boolean isConnectionSequenceable( final Property property ) {
+    private boolean isVdbSequenceable(Property property) {
         try {
-            if ( !property.getName().equals( JcrConstants.JCR_DATA ) ) {
+            return isVdbSequenceable(property.getParent(), property.getName());
+        } catch (RepositoryException ex) {
+            return false;
+        }
+    }
+
+    private boolean isConnectionSequenceable(Node node, String propertyName) {
+        try {
+            if ( !propertyName.equals( JcrConstants.JCR_DATA ) ) {
                 return false;
             }
-
-            final Node node = property.getParent();
 
             if ( !node.getName().equals( JcrConstants.JCR_CONTENT ) ) {
                 return false;
@@ -181,13 +186,19 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         }
     }
 
-    private boolean isDataServiceSequenceable( final Property property ) {
+    private boolean isConnectionSequenceable( final Property property ) {
         try {
-            if ( !property.getName().equals( JcrConstants.JCR_DATA ) ) {
+            return isConnectionSequenceable(property.getParent(), property.getName());
+        } catch (RepositoryException ex) {
+            return false;
+        }
+    }
+
+    private boolean isDataServiceSequenceable( Node node, String propertyName ) {
+        try {
+            if ( !propertyName.equals( JcrConstants.JCR_DATA ) ) {
                 return false;
             }
-
-            final Node node = property.getParent();
 
             if ( !node.getName().equals( JcrConstants.JCR_CONTENT ) ) {
                 return false;
@@ -204,10 +215,16 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         }
     }
 
-    private boolean isDdlSequenceable(Property property) {
+    private boolean isDataServiceSequenceable( final Property property ) {
         try {
-            String propertyName = property.getName();
-            Node node = property.getParent();
+            return isDataServiceSequenceable(property.getParent(), property.getName());
+        } catch (RepositoryException ex) {
+            return false;
+        }
+    }
+
+    private boolean isDdlSequenceable(Node node, String propertyName) {
+        try {
             List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
 
             if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION) &&
@@ -224,10 +241,16 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         return false;
     }
 
-    private boolean isTsqlSequenceable(Property property) {
+    private boolean isDdlSequenceable(Property property) {
         try {
-            String propertyName = property.getName();
-            Node node = property.getParent();
+            return isDdlSequenceable(property.getParent(), property.getName());
+        } catch (RepositoryException ex) {
+            return false;
+        }
+    }
+
+    private boolean isTsqlSequenceable(Node node, String propertyName) {
+        try {
             List<String> nodeTypeNames = ModeshapeUtils.getAllNodeTypeNames(node);
 
             if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION) &&
@@ -243,6 +266,35 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         }
 
         return false;
+    }
+
+    private boolean isTsqlSequenceable(Property property) {
+        try {
+            return isTsqlSequenceable(property.getParent(), property.getName());
+        } catch (RepositoryException ex) {
+            return false;
+        }
+    }
+
+    private SequencerType isSequenceable(Node node, String propertyName) {
+        if (isVdbSequenceable(node, propertyName))
+            return SequencerType.VDB;
+
+        if (isDdlSequenceable(node, propertyName))
+            return SequencerType.DDL;
+
+        if (isTsqlSequenceable(node, propertyName))
+            return SequencerType.TSQL;
+
+        if (isDataServiceSequenceable(node, propertyName)) {
+            return SequencerType.DATA_SERVICE;
+        }
+
+        if (isConnectionSequenceable(node, propertyName)) {
+            return SequencerType.CONNECTION;
+        }
+
+        return null;
     }
 
     /**
@@ -443,11 +495,8 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         return eventId + HYPHEN + sequencerType.name() + HYPHEN + property.getPath();
     }
 
-    private void sequence(SequencerType sequencerType, Property property, String eventId) throws Exception {
-        sequencingActive = true;
-
-        Node outputNode = property.getParent();
-
+    private Node sequencedOutput(SequencerType sequencerType, Node outputNode)
+        throws ItemNotFoundException, AccessDeniedException, RepositoryException {
         switch (sequencerType) {
             case VDB:
             case CONNECTION:
@@ -457,6 +506,15 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
             default:
                 break;
         }
+        return outputNode;
+    }
+
+    private void sequence(SequencerType sequencerType, Property property, String eventId) throws Exception {
+        sequencingActive = true;
+
+        Node outputNode = property.getParent();
+
+        outputNode = sequencedOutput(sequencerType, outputNode);
 
         sequence(sequencerType, property, outputNode, eventId);
     }
@@ -512,7 +570,6 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
                     case Event.NODE_ADDED:
                     case Event.NODE_MOVED:
                     case Event.NODE_REMOVED:
-                    case Event.PROPERTY_REMOVED:
                         //
                         // Even though we do nothing with these events the
                         // sequencer still must fire on them in order to ensure the
@@ -521,6 +578,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
                         continue;
                     case Event.PROPERTY_ADDED:
                     case Event.PROPERTY_CHANGED:
+                    {
                         KLog.getLogger().debug("KSequencers: processing event " + eventUserData + " for path " + eventPath); //$NON-NLS-1$ //$NON-NLS-2$
 
                         if (! session.propertyExists(eventPath)) {
@@ -535,6 +593,36 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
                             continue;
 
                         sequence(sequencerType, property, eventUserData);
+                        continue;
+                    }
+                    case Event.PROPERTY_REMOVED:
+                    {
+                        KLog.getLogger().debug("KSequencers: processing property removal event " + eventUserData + " for path " + eventPath); //$NON-NLS-1$ //$NON-NLS-2$
+                        int lastSlash = eventPath.lastIndexOf(FORWARD_SLASH);
+                        if (lastSlash == -1)
+                            continue; // Not going to be a sequenceable item if path contains no slashes
+
+                        String propertyName = eventPath.substring(lastSlash + 1);
+                        String nodePath = eventPath.substring(0, lastSlash);
+
+                        if (! session.nodeExists(nodePath))
+                            continue; // Parent node has been removed as well so not worth worrying about removing children
+
+                        Node node = session.getNode(nodePath);
+                        SequencerType sequencerType = isSequenceable(node, propertyName);
+                        if (sequencerType == null)
+                            continue; // Not a sequenceable property so no need to worry about cleanup
+
+                        //
+                        // Sequencers used different ouput node
+                        //
+                        node = sequencedOutput(sequencerType, node);
+
+                        //
+                        // Clean all the children that the sequencer was responsible for creating
+                        //
+                        preSequenceClean(sequencerType, node);
+                    }
                 }
             }
 
