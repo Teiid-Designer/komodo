@@ -661,4 +661,16 @@ public interface Dataservice extends Exportable, RelationalObject, VdbEntryConta
     void setModifiedBy( final UnitOfWork transaction,
                         final String newModifiedBy ) throws KException;
 
+    /**
+     * Copies the {@link Dataservice}'s properties to the given {@link Dataservice}
+     *
+     * @param transaction
+     *          the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param dataservice
+     *          the destination data service
+     * @throws KException
+     *          if an error occurs
+     */
+    void clone(UnitOfWork transaction, Dataservice dataservice) throws KException;
+
 }

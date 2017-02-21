@@ -22,6 +22,7 @@
 package org.komodo.repository;
 
 import java.io.PrintStream;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
@@ -311,6 +312,27 @@ public class RepositoryTools implements StringConstants {
                 children[i].accept(transaction, this);
 
             return buffer.toString();
+        }
+    }
+
+    /**
+     * Copy the properties of the source to the target
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param source the source object
+     * @param target the target object
+     * @throws KException if error occurs
+     */
+    public static void copyProperties(UnitOfWork transaction, KomodoObject source, final KomodoObject target) throws KException {
+        String[] propertyNames = source.getPropertyNames(transaction);
+        for (String propName : propertyNames) {
+            Property property = source.getProperty(transaction, propName);
+            if (! property.isMultiple(transaction))
+                target.setProperty(transaction, propName, property.getValue(transaction));
+            else
+                target.setProperty(transaction, propName, property.getValues(transaction));
         }
     }
 }
