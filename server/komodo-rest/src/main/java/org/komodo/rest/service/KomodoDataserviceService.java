@@ -464,11 +464,9 @@ public final class KomodoDataserviceService extends KomodoService {
             // must be an update
             final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
             final Dataservice oldDataservice = getWorkspaceManager(uow).resolve( uow, kobject, Dataservice.class );
-            final RestDataservice oldEntity = entityFactory.create(oldDataservice, uriInfo.getBaseUri(), uow );
             
             final Dataservice dataservice = getWorkspaceManager(uow).createDataservice( uow, null, newDataserviceName);
-
-            setProperties( uow, dataservice, oldEntity );
+            oldDataservice.clone(uow, dataservice);
 
             final RestDataservice entity = entityFactory.create(dataservice, uriInfo.getBaseUri(), uow );
             final Response response = commit( uow, mediaTypes, entity );
