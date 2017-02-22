@@ -36,6 +36,8 @@
     <translator driver="osisoft-pi">osisoft-pi</translator>
     <translator driver="mysql">mysql</translator>
     <translator driver="mysql5">mysql5</translator>
+    <translator driver="teiid">teiid</translator>
+    <translator driver="teiid-local">teiid</translator>
     
     <!-- TODO RA-->
     <!--
