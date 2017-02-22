@@ -176,7 +176,7 @@ public final class RestVdbModel extends RestBasicEntity {
      */
     public String getDdl() {
         Object ddl = tuples.get(JsonConstants.DDL_ATTRIBUTE);
-        return ddl != null ? ddl.toString() : null;
+        return ddl != null ? ddl.toString() : EMPTY_STRING;
     }
 
     /**
