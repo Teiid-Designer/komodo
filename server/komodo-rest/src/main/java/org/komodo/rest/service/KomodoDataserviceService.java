@@ -92,6 +92,8 @@ import org.teiid.language.SQLConstants;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -149,11 +151,36 @@ public final class KomodoDataserviceService extends KomodoService {
      */
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Display the collection of data services",
-                            response = RestDataservice[].class)
-    @ApiResponses(value = {
-        @ApiResponse(code = 403, message = "An error has occurred.")
-    })
+    @ApiOperation(
+                  value = "Return the collection of data services",
+                  response = RestDataservice[].class)
+    @ApiImplicitParams({
+        @ApiImplicitParam(
+                          name = QueryParamKeys.PATTERN,
+                          value = "A regex expression used when searching. If not present, all objects are returned.",
+                          required = false,
+                          dataType = "string",
+                          paramType = "query"),
+        @ApiImplicitParam(
+                          name = QueryParamKeys.SIZE,
+                          value = "The number of objects to return. If not present, all objects are returned",
+                          required = false,
+                          dataType = "integer",
+                          paramType = "query"),
+        @ApiImplicitParam(
+                          name = QueryParamKeys.START,
+                          value = "Index of the first dataservice to return",
+                          required = false,
+                          dataType = "integer",
+                          paramType = "query")
+      })
+    @ApiResponses(
+                  value = {
+                      @ApiResponse(
+                                   code = 403,
+                                   message = "An error has occurred.")
+                  }
+    )
     public Response getDataservices( final @Context HttpHeaders headers,
                                      final @Context UriInfo uriInfo ) throws KomodoRestException {
 
@@ -277,7 +304,9 @@ public final class KomodoDataserviceService extends KomodoService {
     @GET
     @Path( V1Constants.DATA_SERVICE_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Find dataservice by name", response = RestDataservice.class)
+    @ApiOperation(
+                  value = "Find dataservice by name",
+                  response = RestDataservice.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
@@ -285,7 +314,10 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response getDataservice( final @Context HttpHeaders headers,
                                     final @Context UriInfo uriInfo,
-                                    @ApiParam(value = "Id of the dataservice to be fetched", required = true)
+                                    @ApiParam(
+                                              value = "Id of the dataservice to be fetched, ie. the value of the 'keng__id' property",
+                                              required = true
+                                    )
                                     final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -337,14 +369,33 @@ public final class KomodoDataserviceService extends KomodoService {
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Create a dataservice in the workspace")
+    @ApiOperation(
+                  value = "Create a dataservice in the workspace",
+                  consumes=MediaType.APPLICATION_JSON
+    )
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response createDataservice( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the data service",
+                                                 required = true
+                                       )
                                        final @PathParam( "dataserviceName" ) String dataserviceName,
+                                       @ApiParam(
+                                                 value = "" + 
+                                                         "JSON of the properties of the new data service:<br>" +
+                                                         OPEN_PRE_TAG +
+                                                         OPEN_BRACE + BR +
+                                                         NBSP + "keng\\_\\_id: \"id of the data service\"" + BR +
+                                                         NBSP + OPEN_PRE_CMT + "(identical to dataserviceName parameter)" + CLOSE_PRE_CMT + BR + BR +
+                                                         NBSP + "tko__description: \"the description\"" + BR +
+                                                         CLOSE_BRACE +
+                                                         CLOSE_PRE_TAG,
+                                                 required = true
+                                       )
                                        final String dataserviceJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -423,7 +474,15 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response cloneDataservice( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the data service",
+                                                 required = true
+                                       )
                                        final @PathParam( "dataserviceName" ) String dataserviceName,
+                                       @ApiParam(
+                                                 value = "Name of the cloned data service",
+                                                 required = true
+                                       )
                                        final String newDataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -501,15 +560,27 @@ public final class KomodoDataserviceService extends KomodoService {
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VDB_FOR_SINGLE_TABLE )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Sets the dataservice vdb using parameters provided in the request body",
-                  notes = "Syntax of the json request body is of the form " +
-                          "{ dataserviceName='serviceName', tablePath='path/to/table', modelSourcePath='path/to/modelSource' }")
+    @ApiOperation(value = "Sets the data service's service vdb")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response setServiceVdbForSingleTable( final @Context HttpHeaders headers,
     		final @Context UriInfo uriInfo,
+    		@ApiParam(
+                      value = "" + 
+                              "JSON specifying the service vdb:<br>" +
+                              OPEN_PRE_TAG +
+                              OPEN_BRACE + BR +
+                              NBSP + "dataserviceName: \"name of the data service\"" + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + BR +
+                              NBSP + "modelSourcePath: \"/path/to/modelSource\"" + BR +
+                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                              NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + BR +
+                              CLOSE_BRACE +
+                              CLOSE_PRE_TAG,
+                      required = true
+            )
     		final String dataserviceUpdateAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -667,15 +738,27 @@ public final class KomodoDataserviceService extends KomodoService {
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VIEW_DDL_FOR_SINGLE_TABLE )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Gets generated View DDL using parameters provided in the request body",
-                  notes = "Syntax of the json request body is of the form " +
-                          "{ dataserviceName='serviceName', tablePath='path/to/table', modelSourcePath='path/to/modelSource', colNames='columnNames' }")
+    @ApiOperation(value = "Gets generated View DDL using parameters provided in the request body")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getServiceViewDdlForSingleTable( final @Context HttpHeaders headers,
                                                      final @Context UriInfo uriInfo,
+                                                     @ApiParam(
+                                                               value = "" + 
+                                                                       "JSON parameters:<br>" +
+                                                                       OPEN_PRE_TAG +
+                                                                       OPEN_BRACE + BR +
+                                                                       NBSP + "dataserviceName: \"name of the data service\"" + BR +
+                                                                       NBSP + "tablePath: \"/path/to/table\"" + BR +
+                                                                       NBSP + "modelSourcePath: \"/path/to/modelSource\"" + BR +
+                                                                       NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                                                                       NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + BR +
+                                                                       CLOSE_BRACE +
+                                                                       CLOSE_PRE_TAG,
+                                                               required = true
+                                                     )
                                                      final String dataserviceUpdateAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -767,19 +850,32 @@ public final class KomodoDataserviceService extends KomodoService {
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VDB_FOR_JOIN_TABLES )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Sets the dataservice vdb using parameters provided in the request body",
-                  notes = "Syntax of the json request body is of the form " +
-                          "{ dataserviceName='serviceName', "+ 
-                             "tablePath='path/to/table', modelSourcePath='path/to/modelSource', " +
-                             "rhTablePath='path/to/rhTable', rhModelSourcePath='path/to/modelSource', " +
-                             "colNames='columnNames', rhColNames='rhColumnNames', joinType='joinType', " +
-                             "criteriaPredicates='[]', viewDdl='viewddl' }" )
+    @ApiOperation(value = "Sets the dataservice vdb using parameters provided in the request body")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response setServiceVdbForTwoTables( final @Context HttpHeaders headers,
             final @Context UriInfo uriInfo,
+            @ApiParam(
+                      value = "" + 
+                              "JSON parameters:<br>" +
+                              OPEN_PRE_TAG +
+                              OPEN_BRACE + BR +
+                              NBSP + "dataserviceName: \"name of the data service\"" + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + BR +
+                              NBSP + "rhTablePath: \"/path/to/table\"" + BR +
+                              NBSP + "modelSourcePath: \"/path/to/modelSource\"" + BR +
+                              NBSP + "rhModelSourcePath: \"/path/to/modelSource\"" + BR +
+                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                              NBSP + "rhColumnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                              NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + BR +
+                              NBSP + "joinType: \"Type of join\"" + BR +
+                              NBSP + "criteriaPredicates: []" + BR +
+                              CLOSE_BRACE +
+                              CLOSE_PRE_TAG,
+                      required = true
+            )
             final String dataserviceUpdateAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1026,18 +1122,29 @@ public final class KomodoDataserviceService extends KomodoService {
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.SERVICE_VIEW_DDL_FOR_JOIN_TABLES )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Gets generated View DDL using parameters provided in the request body",
-                  notes = "Syntax of the json request body is of the form " +
-                          "{ dataserviceName='serviceName', "+ 
-                             "tablePath='path/to/table', rhTablePath='path/to/rhTable', " +
-                             "colNames='columnNames', rhColNames='rhColumnNames', " +
-                             "joinType='joinType', criteriaPredicates='[]' }" )
+    @ApiOperation(value = "Gets generated View DDL using parameters provided in the request body")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getServiceViewDdlForTwoTables( final @Context HttpHeaders headers,
             final @Context UriInfo uriInfo,
+            @ApiParam(
+                      value = "" + 
+                              "JSON parameters:<br>" +
+                              OPEN_PRE_TAG +
+                              OPEN_BRACE + BR +
+                              NBSP + "dataserviceName: \"name of the data service\"" + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + BR +
+                              NBSP + "rhTablePath: \"/path/to/table\"" + BR +
+                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                              NBSP + "rhColumnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                              NBSP + "joinType: \"Type of join\"" + BR +
+                              NBSP + "criteriaPredicates: []" + BR +
+                              CLOSE_BRACE +
+                              CLOSE_PRE_TAG,
+                      required = true
+            )
             final String dataserviceUpdateAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1171,7 +1278,23 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response updateDataservice( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the data service to be updated",
+                                                 required = true
+                                       )
                                        final @PathParam( "dataserviceName" ) String dataserviceName,
+                                       @ApiParam(
+                                                 value = "" + 
+                                                         "JSON of the data service properties to update:<br>" +
+                                                         OPEN_PRE_TAG +
+                                                         OPEN_BRACE + BR +
+                                                         NBSP + "keng\\_\\_id: \"id of the data service\"" + BR +
+                                                         NBSP + OPEN_PRE_CMT + "(identical to dataserviceName parameter)" + CLOSE_PRE_CMT + BR + BR +
+                                                         NBSP + "tko__description: \"the description\"" + BR +
+                                                         CLOSE_BRACE +
+                                                         CLOSE_PRE_TAG,
+                                                 required = true
+                                       )
                                        final String dataserviceJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1303,6 +1426,10 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response deleteDataservice( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the data service to be deleted",
+                                                 required = true
+                                       )
                                        final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1436,7 +1563,10 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response getConnections( final @Context HttpHeaders headers,
                                     final @Context UriInfo uriInfo,
-                                    @ApiParam(value = "Id of the dataservice connections to be fetched", required = true)
+                                    @ApiParam(
+                                              value = "Name of the data service containing the required connections",
+                                              required = true
+                                    )
                                     final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1500,7 +1630,10 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response getDrivers( final @Context HttpHeaders headers,
                                     final @Context UriInfo uriInfo,
-                                    @ApiParam(value = "Id of the dataservice drivers to be fetched", required = true)
+                                    @ApiParam(
+                                              value = "Name of the data service containing the required drivers",
+                                              required = true
+                                    )
                                     final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1564,7 +1697,10 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response getSourceVdbsForDataService( final @Context HttpHeaders headers,
                                                  final @Context UriInfo uriInfo,
-                                                 @ApiParam(value = "Id of the dataservice", required = true)
+                                                 @ApiParam(
+                                                           value = "Name of the data service containing the required source vdbs",
+                                                           required = true
+                                                 )
                                                  final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1649,7 +1785,10 @@ public final class KomodoDataserviceService extends KomodoService {
     })
     public Response getServiceViewInfoForDataService( final @Context HttpHeaders headers,
                                                       final @Context UriInfo uriInfo,
-                                                      @ApiParam(value = "Id of the dataservice", required = true)
+                                                      @ApiParam(
+                                                                value = "Name of the required data service",
+                                                                required = true
+                                                      )
                                                       final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);

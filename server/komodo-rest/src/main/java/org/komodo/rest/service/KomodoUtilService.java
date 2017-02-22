@@ -302,13 +302,15 @@ public final class KomodoUtilService extends KomodoService {
     })
     public Response getSchema( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
-                             @ApiParam(value = "Type of schema element to be returned",
-                                                allowableValues = "Vdb, VdbImport, DataSource," +
+                             @ApiParam(
+                                       value = "Type of schema element to be returned",
+                                       allowableValues = "Vdb, VdbImport, DataSource," +
                                                                              "VdbTranslator, Model, " +
                                                                              "VdbModelSource, VdbDataRole, " +
                                                                              "VdbPermission, VdbCondition, VdbMask",
-                                                required = false,
-                                                allowMultiple = false)
+                                       required = false,
+                                       allowMultiple = false
+                             )
                              @QueryParam(value = "ktype") String ktype) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);

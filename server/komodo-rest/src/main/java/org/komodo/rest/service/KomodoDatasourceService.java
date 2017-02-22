@@ -94,7 +94,7 @@ public final class KomodoDatasourceService extends KomodoService {
      */
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Display the collection of data sources",
+    @ApiOperation(value = "Return the collection of data sources",
                             response = RestDataSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
@@ -230,7 +230,10 @@ public final class KomodoDatasourceService extends KomodoService {
     })
     public Response getDatasource( final @Context HttpHeaders headers,
                                     final @Context UriInfo uriInfo,
-                                    @ApiParam(value = "Id of the datasource to be fetched", required = true)
+                                    @ApiParam(
+                                              value = "Name of the datasource",
+                                              required = true
+                                    )
                                     final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -289,7 +292,24 @@ public final class KomodoDatasourceService extends KomodoService {
     })
     public Response createDatasource( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the datasource",
+                                                 required = true
+                                       )
                                        final @PathParam( "datasourceName" ) String datasourceName,
+                                       @ApiParam(
+                                                 value = "" + 
+                                                         "JSON of the properties of the new data source:<br>" +
+                                                         OPEN_PRE_TAG +
+                                                         OPEN_BRACE + BR +
+                                                         NBSP + "keng\\_\\_id: \"id of the data source\"" + BR +
+                                                         NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
+                                                         NBSP + "dv\\_\\_jndiName: \"the jndi name of the data source\"" + BR +
+                                                         NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
+                                                         CLOSE_BRACE +
+                                                         CLOSE_PRE_TAG,
+                                                 required = true
+                                       )
                                        final String datasourceJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -368,7 +388,15 @@ public final class KomodoDatasourceService extends KomodoService {
     })
     public Response cloneDatasource( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the datasource",
+                                                 required = true
+                                       )
                                        final @PathParam( "datasourceName" ) String datasourceName,
+                                       @ApiParam(
+                                                 value = "The new name of the datasource",
+                                                 required = true
+                                       )
                                        final String newDatasourceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -455,7 +483,24 @@ public final class KomodoDatasourceService extends KomodoService {
     })
     public Response updateDatasource( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the datasource",
+                                                 required = true
+                                       )
                                        final @PathParam( "datasourceName" ) String datasourceName,
+                                       @ApiParam(
+                                                 value = "" + 
+                                                         "JSON of the properties of the data source:<br>" +
+                                                         OPEN_PRE_TAG +
+                                                         OPEN_BRACE + BR +
+                                                         NBSP + "keng\\_\\_id: \"id of the data source\"" + BR +
+                                                         NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
+                                                         NBSP + "dv\\_\\_jndiName: \"the jndi name of the data source\"" + BR +
+                                                         NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
+                                                         CLOSE_BRACE +
+                                                         CLOSE_PRE_TAG,
+                                                 required = true
+                                       )
                                        final String datasourceJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -598,6 +643,10 @@ public final class KomodoDatasourceService extends KomodoService {
     })
     public Response deleteDatasource( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
+                                       @ApiParam(
+                                                 value = "Name of the datasource",
+                                                 required = true
+                                       )
                                        final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())

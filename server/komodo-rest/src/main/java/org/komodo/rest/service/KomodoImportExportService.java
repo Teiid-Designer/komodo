@@ -65,6 +65,7 @@ import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
@@ -148,8 +149,6 @@ public class KomodoImportExportService extends KomodoService {
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Exports an artifact using parameters provided in the request body",
-                             notes = "Syntax of the json request body is of the form " +
-                                          "{ storageType='file|git|...', parameters { prop1='z', prop2='z' } }",
                              response = ImportExportStatus.class)
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
@@ -157,6 +156,34 @@ public class KomodoImportExportService extends KomodoService {
     })
     public Response exportArtifact( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
+                             @ApiParam(
+                                       value = "" + 
+                                               "JSON of the possible storage attributes:<br>" +
+                                               OPEN_PRE_TAG +
+                                               OPEN_BRACE + BR +
+                                               NBSP + "storageType: \"Either 'file' or 'git'\"" + BR +
+                                               NBSP + "dataPath: \"Path of the object to be exported\"" + BR +
+                                               NBSP + "documentType: \"Expected destination export file type\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(Used to help determine the expected file type, " + 
+                                               "eg. zip, xml, directory)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "parameters: " + OPEN_BRACE + BR +
+                                               NBSP + NBSP +  "files-home-path-property: \"Path to the parent " +
+                                               "directory of the export files\"" + BR +
+                                               NBSP + NBSP + "file-path-property: \"Relative path, inc. name, " +
+                                               "of the destination exported file\"" + BR +
+                                               NBSP + OPEN_PRE_CMT +  "(Optional if documentType specified)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + NBSP + "downloadable-path-property: \"Should a file be " +
+                                               "downloadable once exported\"" + BR +
+                                               NBSP + NBSP + "useTabs: \"Should tabs be used in exporting xml\"" + BR +
+                                               NBSP + NBSP + "excludeTableConstraints: \"Should table constraints " +
+                                               "be excluded when exporting DDL\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(Further parameters are specific to storage type. " +
+                                               "see /importexport/availableStorageType REST link)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + CLOSE_BRACE + BR +
+                                               CLOSE_BRACE +
+                                               CLOSE_PRE_TAG,
+                                       required = true
+                             )
                              final String storageAttributes) throws KomodoRestException {
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -272,11 +299,6 @@ public class KomodoImportExportService extends KomodoService {
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Imports an artifact using parameters provided in the request body",
-                             notes = "Syntax of the json request body is of the form " +
-                                          "{ storageType='file|git|...', documentType='xml|ddl'" +
-                                          "parameters { file-path-property='file.txt', prop2='z', content=\"base64-string\" } }." +
-                                          "If content is populated then the artifact has been transmitted from the client and will " +
-                                          "be converted to a temporary file on the server.",
                              response = ImportExportStatus.class)
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
@@ -284,6 +306,30 @@ public class KomodoImportExportService extends KomodoService {
     })
     public Response importArtifact( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
+                             @ApiParam(
+                                       value = "" + 
+                                               "JSON of the possible storage attributes:<br>" +
+                                               OPEN_PRE_TAG +
+                                               OPEN_BRACE + BR +
+                                               NBSP + "storageType: \"Either 'file' or 'git'\"" + BR +
+                                               NBSP + "content: \"Base64-encoded byte data of the file to import\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(If defined then this overrides 'files-home' & 'file-path' properties)" + BR +
+                                               NBSP + "dataPath: \"Destination object path\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(If not specified then located under the workspace)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "documentType: \"Type of the file being imported\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(Required for content type, eg. zip, xml, directory)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "parameters: " + OPEN_BRACE + BR +
+                                               NBSP + NBSP +  "files-home-path-property: \"Path to the parent " +
+                                               "location of the file to import\"" + BR +
+                                               NBSP + NBSP + "file-path-property: \"Relative path, inc. name, " + 
+                                               "of the file to import\"" + BR +
+                                               NBSP + OPEN_PRE_CMT +  "(Further parameters are specific to storage type. " +
+                                               "see /importexport/availableStorageType REST link)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + CLOSE_BRACE + BR +
+                                               CLOSE_BRACE +
+                                               CLOSE_PRE_TAG,
+                                       required = true
+                             )
                              final String storageAttributes) throws KomodoRestException {
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())

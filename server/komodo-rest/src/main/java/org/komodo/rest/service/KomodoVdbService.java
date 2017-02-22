@@ -160,6 +160,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response createVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
+                               @ApiParam(
+                                         value = "Id of the vdb to be fetched",
+                                         required = true
+                               )
                                final @PathParam( "vdbName" ) String vdbName,
                                final String vdbJson) throws KomodoRestException {
 
@@ -270,6 +274,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response updateVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
+                               @ApiParam(
+                                         value = "Id of the vdb to be fetched",
+                                         required = true
+                               )
                                final @PathParam( "vdbName" ) String vdbName,
                                final String vdbJson) throws KomodoRestException {
 
@@ -360,6 +368,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response cloneVdb( final @Context HttpHeaders headers,
                               final @Context UriInfo uriInfo,
+                              @ApiParam(
+                                        value = "Id of the vdb to be fetched",
+                                        required = true
+                              )
                               final @PathParam( "vdbName" ) String vdbName,
                               final String newVdbName) throws KomodoRestException {
 
@@ -624,7 +636,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the vdb to remove (cannot be <code>null</code>)
+     *        the Id of the vdb to be fetched to remove (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
      * @throws KomodoRestException
      *         if there is a problem performing the delete
@@ -639,6 +651,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response deleteVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
+                               @ApiParam(
+                                         value = "Id of the vdb to be fetched",
+                                         required = true
+                               )
                                final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1033,7 +1049,15 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response createModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
+                                 @ApiParam(
+                                           value = "Id of the vdb to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "vdbName" ) String vdbName,
+                                 @ApiParam(
+                                           value = "Name of the Model",
+                                           required = true
+                                 )
                                  final @PathParam( "modelName" ) String modelName,
                                  final String modelJson) throws KomodoRestException {
 
@@ -1165,7 +1189,15 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response updateModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
+                                 @ApiParam(
+                                           value = "Id of the vdb to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "vdbName" ) String vdbName,
+                                 @ApiParam(
+                                           value = "Id of the model to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "modelName" ) String modelName,
                                  final String modelJson) throws KomodoRestException {
 
@@ -1240,7 +1272,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the vdb (cannot be <code>null</code>)
+     *        the Id of the vdb to be fetched (cannot be <code>null</code>)
      * @param modelName
      *        the name of the model to remove (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
@@ -1261,7 +1293,15 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response deleteModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
+                                 @ApiParam(
+                                           value = "Id of the vdb to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "vdbName" ) String vdbName,
+                                 @ApiParam(
+                                           value = "Name of the model",
+                                           required = true
+                                 )
                                  final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
