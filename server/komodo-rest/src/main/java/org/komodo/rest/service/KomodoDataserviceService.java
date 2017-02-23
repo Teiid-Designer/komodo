@@ -88,8 +88,16 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.utils.StringUtils;
+import org.modeshape.common.text.ParsingException;
 import org.teiid.language.SQLConstants;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
+import org.teiid.modeshape.sequencer.ddl.DdlParser;
+import org.teiid.modeshape.sequencer.ddl.DdlParserProblem;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlParser;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlParser;
+import org.teiid.modeshape.sequencer.ddl.node.AstNode;
+import org.teiid.modeshape.sequencer.ddl.node.AstNodeFactory;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -1539,6 +1547,20 @@ public final class KomodoDataserviceService extends KomodoService {
         return Response.ok().build();
     }
 
+    /*
+     * Checks the supplied attributes for viewDdl
+     *  - view ddl is required
+     */
+    private Response checkDataserviceUpdateAttributesDdlValidation(KomodoDataserviceUpdateAttributes attr,
+                                                                   List<MediaType> mediaTypes) throws Exception {
+
+        if (attr == null || attr.getViewDdl() == null) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
+        }
+
+        return Response.ok().build();
+    }
+
     /**
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -1671,6 +1693,112 @@ public final class KomodoDataserviceService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_GET_DRIVERS_ERROR, dataserviceName);
+        }
+    }
+    
+    /**
+     * Validate the supplied DDL.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceUpdateAttributes
+     *        the attributes for the update (cannot be empty)
+     * @return a JSON representation of the status (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error getting the validation result
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.VALIDATE_DDL )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Validate the viewDdl provided in the request body",
+                  notes = "Syntax of the json request body is of the form " +
+                          "{ viewDdl='viewddl' }" )
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDdlValidStatus( final @Context HttpHeaders headers,
+                                       final @Context UriInfo uriInfo,
+                                       final String dataserviceUpdateAttributes) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Get the attributes for doing the DDL validation
+        KomodoDataserviceUpdateAttributes attr;
+        try {
+            attr = KomodoJsonMarshaller.unmarshall(dataserviceUpdateAttributes, KomodoDataserviceUpdateAttributes.class);
+            Response response = checkDataserviceUpdateAttributesDdlValidation(attr, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.DATASERVICE_SERVICE_REQUEST_PARSING_ERROR);
+        }
+        
+        // Get the supplied viewDdl.
+        String viewDdl = attr.getViewDdl();
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "validateDdl", false ); //$NON-NLS-1$
+
+            String parseErrorMsg = null;
+            boolean ddlValid = false;
+            if(!StringUtils.isBlank(viewDdl)) {
+                final DdlParser teiidParser = new TeiidDdlParser();
+                AstNodeFactory nodeFactory = new AstNodeFactory();
+                final AstNode tempNode = nodeFactory.node(StandardDdlLexicon.STATEMENTS_CONTAINER);
+
+                // Attempt to parse the supplied DDL
+                try {
+                    teiidParser.parse(viewDdl, tempNode, null);
+                    
+                    // determine if any problems
+                    List<DdlParserProblem> problems = ((StandardDdlParser)teiidParser).getProblems();
+                    if(problems.size() == 0) {
+                        ddlValid = true;
+                    } else {
+                        parseErrorMsg = problems.get(0).getMessage();
+                    }
+                } catch (ParsingException e) {
+                    parseErrorMsg = "Failed to validate DDL: " + e.getLocalizedMessage();  //$NON-NLS-1$
+                } catch (Exception e) {
+                    parseErrorMsg = "Failed to validate DDL: unknown issue";  //$NON-NLS-1$
+                }
+            } else {
+                parseErrorMsg = "No DDL to validate"; //$NON-NLS-1$
+            }
+            
+            // Return the status and message
+            KomodoStatusObject kso = new KomodoStatusObject("DDL Validation"); //$NON-NLS-1$
+            if(ddlValid) 
+                kso.addAttribute("validationResult", "Success"); //$NON-NLS-1$ //$NON-NLS-2$
+            else {
+                if(parseErrorMsg!=null) {
+                    kso.addAttribute("validationResult", parseErrorMsg); //$NON-NLS-1$
+                } else {
+                    kso.addAttribute("validationResult", "Error"); //$NON-NLS-1$ //$NON-NLS-2$
+                }
+            }
+
+            return commit(uow, mediaTypes, kso);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_SET_SERVICE_ERROR);
         }
     }
     

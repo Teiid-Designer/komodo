@@ -582,5 +582,66 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         assertTrue(entity.contains("infoType"));
         assertTrue(entity.contains("CREATE VIEW MyDataServiceView"));
     }
+    
+    @Test
+    public void shouldFailDdlValidationNoDDL() throws Exception {
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.VALIDATE_DDL).build();
+
+        // Required param (viewDdl).
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setViewDdl("");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("No DDL to validate"));
+    }
+    
+    @Test
+    public void shouldFailDdlValidationUnknownToken() throws Exception {
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.VALIDATE_DDL).build();
+
+        // Required param (viewDdl).
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setViewDdl("CRE");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("Check your DDL for completeness"));
+    }
+    
+    @Test
+    public void shouldValidateDdl() throws Exception {
+        String VALID_DDL = "CREATE VIEW MyView (RowId integer PRIMARY KEY, Col1 string, Col2 string) AS \n"
+        + "SELECT ROW_NUMBER() OVER (ORDER BY Col1), Col1, Col2 \n"
+        + "FROM MyTable;";
+        
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.VALIDATE_DDL).build();
+
+        // Required param (viewDdl).
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setViewDdl(VALID_DDL);
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("Success"));
+    }
 
 }

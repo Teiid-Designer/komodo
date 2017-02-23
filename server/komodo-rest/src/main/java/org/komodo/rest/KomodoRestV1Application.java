@@ -249,6 +249,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for determining ddl valid status
+         */
+        String VALIDATE_DDL = "validateDdl"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for finding source vdb matches for a DataService
          */
         String SOURCE_VDB_MATCHES = "sourceVdbMatches"; //$NON-NLS-1$
