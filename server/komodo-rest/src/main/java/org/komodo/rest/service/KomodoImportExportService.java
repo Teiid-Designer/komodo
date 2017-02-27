@@ -171,13 +171,13 @@ public class KomodoImportExportService extends KomodoService {
                                                "directory of the export files\"" + BR +
                                                NBSP + NBSP + "file-path-property: \"Relative path, inc. name, " +
                                                "of the destination exported file\"" + BR +
-                                               NBSP + OPEN_PRE_CMT +  "(Optional if documentType specified)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + NBSP + OPEN_PRE_CMT +  "(Optional if documentType specified)" + CLOSE_PRE_CMT + BR +
                                                NBSP + NBSP + "downloadable-path-property: \"Should a file be " +
                                                "downloadable once exported\"" + BR +
                                                NBSP + NBSP + "useTabs: \"Should tabs be used in exporting xml\"" + BR +
                                                NBSP + NBSP + "excludeTableConstraints: \"Should table constraints " +
                                                "be excluded when exporting DDL\"" + BR +
-                                               NBSP + OPEN_PRE_CMT + "(Further parameters are specific to storage type. " +
+                                               NBSP + NBSP + OPEN_PRE_CMT + "(Further parameters are specific to storage type. " +
                                                "see /importexport/availableStorageType REST link)" + CLOSE_PRE_CMT + BR +
                                                NBSP + CLOSE_BRACE + BR +
                                                CLOSE_BRACE +
@@ -313,7 +313,7 @@ public class KomodoImportExportService extends KomodoService {
                                                OPEN_BRACE + BR +
                                                NBSP + "storageType: \"Either 'file' or 'git'\"" + BR +
                                                NBSP + "content: \"Base64-encoded byte data of the file to import\"" + BR +
-                                               NBSP + OPEN_PRE_CMT + "(If defined then this overrides 'files-home' & 'file-path' properties)" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(If defined then this overrides 'files-home' & 'file-path' properties)" + CLOSE_PRE_CMT + BR +
                                                NBSP + "dataPath: \"Destination object path\"" + BR +
                                                NBSP + OPEN_PRE_CMT + "(If not specified then located under the workspace)" + CLOSE_PRE_CMT + BR +
                                                NBSP + "documentType: \"Type of the file being imported\"" + BR +
@@ -323,7 +323,7 @@ public class KomodoImportExportService extends KomodoService {
                                                "location of the file to import\"" + BR +
                                                NBSP + NBSP + "file-path-property: \"Relative path, inc. name, " + 
                                                "of the file to import\"" + BR +
-                                               NBSP + OPEN_PRE_CMT +  "(Further parameters are specific to storage type. " +
+                                               NBSP + NBSP + OPEN_PRE_CMT +  "(Further parameters are specific to storage type. " +
                                                "see /importexport/availableStorageType REST link)" + CLOSE_PRE_CMT + BR +
                                                NBSP + CLOSE_BRACE + BR +
                                                CLOSE_BRACE +
