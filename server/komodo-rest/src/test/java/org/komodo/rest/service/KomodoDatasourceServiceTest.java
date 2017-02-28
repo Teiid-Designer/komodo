@@ -42,7 +42,7 @@ import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 
-@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
+@SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoDatasourceServiceTest extends AbstractKomodoServiceTest {
 
     public static final String DATASOURCE_NAME = "MyDataSource"; 
@@ -116,5 +116,5 @@ public final class KomodoDatasourceServiceTest extends AbstractKomodoServiceTest
         
         assertEquals(datasource.getId(), DATASOURCE_NAME);
     }
-   
+
 }
