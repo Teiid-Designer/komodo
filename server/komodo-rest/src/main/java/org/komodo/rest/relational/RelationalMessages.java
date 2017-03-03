@@ -223,6 +223,11 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR,
 
         /**
+         * An error indicating an error due to missing tablePath
+         */
+        DATASERVICE_SERVICE_GET_JOIN_MISSING_TABLEPATH,
+        
+        /**
          * An error indicating an error occurred trying to obtain a dataservice's drivers
          */
         DATASERVICE_SERVICE_GET_DRIVERS_ERROR,

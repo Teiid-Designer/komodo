@@ -49,6 +49,7 @@ import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestDataserviceViewInfo;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.test.utils.TestUtilities;
@@ -706,6 +707,114 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( "" ) ); // no error message since name was valid
+    }
+
+    @Test
+    public void shouldNotGenerateJoinCriteriaMissingParameter() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.CRITERIA_FOR_JOIN_TABLES).build();
+
+        // Required parms (tablePath, rhTablePath).
+        // fails due to missing joinType
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setTablePath("/path/to/lhTable");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("missing one or more required parameters"));
+    }
+
+    @Test
+    public void shouldNotGenerateJoinCriteriaBadTablePath() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.CRITERIA_FOR_JOIN_TABLES).build();
+
+        // Required parms (tablePath, rhTablePath).
+        // fails due to bad table path (does not resolve to a Table)
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setTablePath("/path/to/lhTable");
+        updateAttr.setRhTablePath("/path/to/rhTable");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("specified Table does not exist"));
+    }
+    
+    @Test
+    public void shouldGenerateJoinCriteriaEmpty() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.CRITERIA_FOR_JOIN_TABLES).build();
+
+        // Required parms (tablePath, rhTablePath).
+        // Valid entries - should generate join criteria (empty)
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/MyPartsVDB_Dynamic/PartsSS/PARTS");
+        updateAttr.setRhTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/MyPartsVDB_Dynamic/PartsSS/STATUS");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        
+        // Info is returned but the criteria is empty, since there are no table pk-fk relationships
+        assertThat(entity, is(notNullValue()));
+        RestDataserviceViewInfo viewInfo = KomodoJsonMarshaller.unmarshall(entity, RestDataserviceViewInfo.class);
+        
+        assertTrue("CRITERIA".equals(viewInfo.getInfoType()));
+        assertEquals(viewInfo.getCriteriaPredicates().size(), 0);
+    }
+    
+    @Test
+    public void shouldGenerateJoinCriteria() throws Exception {
+        loadVdbs();
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        URI uri = UriBuilder.fromUri(dataservicesUri).path(V1Constants.CRITERIA_FOR_JOIN_TABLES).build();
+
+        // Required parms (tablePath, rhTablePath).
+        // Valid entries - should generate join criteria (empty)
+        KomodoDataserviceUpdateAttributes updateAttr = new KomodoDataserviceUpdateAttributes();
+        updateAttr.setTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/MyPartsVDB_Dynamic/PartsSS/PARTS");
+        updateAttr.setRhTablePath("tko:komodo/tko:workspace/"+USER_NAME+"/MyPartsVDB_Dynamic/PartsSS/SUPPLIER_PARTS");
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, updateAttr);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        
+        // Info returned.  Should contain a single criteria predicate (PART_ID = PART_ID).
+        assertThat(entity, is(notNullValue()));
+        RestDataserviceViewInfo viewInfo = KomodoJsonMarshaller.unmarshall(entity, RestDataserviceViewInfo.class);
+
+        assertTrue("CRITERIA".equals(viewInfo.getInfoType()));
+        assertEquals(1, viewInfo.getCriteriaPredicates().size());
+        assertEquals("PART_ID", viewInfo.getCriteriaPredicates().get(0).getLhColumn());
+        assertEquals("PART_ID", viewInfo.getCriteriaPredicates().get(0).getRhColumn());
+        assertEquals("=", viewInfo.getCriteriaPredicates().get(0).getOperator());
     }
 
 }
