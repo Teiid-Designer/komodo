@@ -289,6 +289,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SERVICE_VIEW_DDL_FOR_JOIN_TABLES = "ServiceViewDdlForJoinTables"; //$NON-NLS-1$
         
         /**
+         * The name of the URI path segment for getting the join criteria given two tables
+         */
+        String CRITERIA_FOR_JOIN_TABLES = "CriteriaForJoinTables"; //$NON-NLS-1$
+        
+        /**
          * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
          */
         String DATA_SOURCES_SEGMENT = "datasources"; //$NON-NLS-1$

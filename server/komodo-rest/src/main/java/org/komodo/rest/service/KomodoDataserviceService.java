@@ -36,6 +36,8 @@ import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SE
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +62,11 @@ import org.komodo.relational.ViewBuilderCriteriaPredicate;
 import org.komodo.relational.ViewDdlBuilder;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.model.Column;
+import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
+import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.View;
 import org.komodo.relational.resource.Driver;
@@ -1259,6 +1264,109 @@ public final class KomodoDataserviceService extends KomodoService {
     }
     
     /**
+     * Get the criteria predicates for the supplied tables
+     * The supplied tables are examined for PK-FK relationships.  If a relationship is found, it is used to generate criteria.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceUpdateAttributes
+     *        the attributes for generating the criteria predicates (cannot be empty)
+     * @return a JSON representation of the generated criteria predicates (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error generating the criteria
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CRITERIA_FOR_JOIN_TABLES )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Generates join criteria using table parameters provided in the request body")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getJoinCriteriaForTables( final @Context HttpHeaders headers,
+            final @Context UriInfo uriInfo,
+            @ApiParam(
+                      value = "" + 
+                              "JSON parameters:<br>" +
+                              OPEN_PRE_TAG +
+                              OPEN_BRACE + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + BR +
+                              NBSP + "rhTablePath: \"/path/to/table\"" + BR +
+                              CLOSE_BRACE +
+                              CLOSE_PRE_TAG,
+                      required = true
+            )
+            final String dataserviceUpdateAttributes) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Get the attributes for doing the service update
+        KomodoDataserviceUpdateAttributes attr;
+        try {
+            attr = KomodoJsonMarshaller.unmarshall(dataserviceUpdateAttributes, KomodoDataserviceUpdateAttributes.class);
+            Response response = checkDataserviceUpdateAttributesGetJoinCriteria(attr, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.DATASERVICE_SERVICE_REQUEST_PARSING_ERROR);
+        }
+        
+        String absLhTablePath = attr.getTablePath();
+        String absRhTablePath = attr.getRhTablePath();
+        // Error if the either tablePath is missing 
+        if (StringUtils.isBlank( absLhTablePath ) || StringUtils.isBlank( absRhTablePath )) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_GET_JOIN_MISSING_TABLEPATH);
+        }
+        
+        UnitOfWork uow = null;
+        try {
+            uow = createTransaction(principal, "getJoinCriteria", true ); //$NON-NLS-1$
+
+            // -------------------------------------------------------------------------------------
+            // Check for existence of necessary objects
+            // -------------------------------------------------------------------------------------
+            WorkspaceManager wkspMgr = getWorkspaceManager(uow);
+            
+            // Check for existence of LH Table
+            List<KomodoObject> tableObjs = wkspMgr.getRepository().searchByPath(uow, absLhTablePath);
+            if( tableObjs.isEmpty() || !Table.RESOLVER.resolvable(uow, tableObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SOURCE_TABLE_DNE, absLhTablePath);
+            }
+            Table lhSourceTable = Table.RESOLVER.resolve(uow, tableObjs.get(0));
+
+            // Check for existence of RH Table
+            tableObjs = wkspMgr.getRepository().searchByPath(uow, absRhTablePath);
+            if( tableObjs.isEmpty() || !Table.RESOLVER.resolvable(uow, tableObjs.get(0)) ) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SOURCE_TABLE_DNE, absRhTablePath);
+            }
+            Table rhSourceTable = Table.RESOLVER.resolve(uow, tableObjs.get(0));
+
+            // Generate join criteria predicates given the left and right source tables.  (Examines the tables for PK-FK relationships).
+            RestDataserviceViewInfo viewInfo = buildJoinCriteria(uow, lhSourceTable, rhSourceTable);
+
+            return commit(uow, mediaTypes, viewInfo);
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, DATASERVICE_SERVICE_SET_SERVICE_ERROR);
+        }
+    }
+    
+    /**
      * Update a Dataservice in the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -1543,6 +1651,20 @@ public final class KomodoDataserviceService extends KomodoService {
         return Response.ok().build();
     }
 
+    /*
+     * Checks the supplied attributes for getting the join criteria for two tables.
+     *  - tablePath, rhTablePath are required
+     */
+    private Response checkDataserviceUpdateAttributesGetJoinCriteria(KomodoDataserviceUpdateAttributes attr,
+                                                                     List<MediaType> mediaTypes) throws Exception {
+
+        if (attr == null || attr.getTablePath() == null || attr.getRhTablePath() == null ) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_MISSING_PARAMETER_ERROR);
+        }
+
+        return Response.ok().build();
+    }
+    
     /**
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -2020,6 +2142,98 @@ public final class KomodoDataserviceService extends KomodoService {
         }
 
         return tableColumnMap;
+    }
+    
+    /*
+     * Generates join criteria, given a left and right table.
+     * The tables are examined for PK-FK relationship.  
+     *   - If a relationship is found, returns criteria info with predicates.
+     *   - If no relationships are found, returns criteria info with no predicates.
+     */
+    private RestDataserviceViewInfo buildJoinCriteria(UnitOfWork uow, Table lhTable, Table rhTable) throws KException {
+        // Use left table PK.  Look for FK match on the right table
+        PrimaryKey pk = lhTable.getPrimaryKey(uow);
+        ForeignKey fk = null;
+        if(pk != null) {
+            fk = findFkMatch(uow, pk, rhTable);
+        }
+        
+        // If a FK match was not found, use the right table PK.  Look for FK match on the left table.
+        if(fk==null) {
+            pk = rhTable.getPrimaryKey(uow);
+            if(pk != null) {
+                fk = findFkMatch(uow, pk, lhTable);
+            }
+        }
+
+        RestDataserviceViewInfo criteriaInfo = new RestDataserviceViewInfo();
+        criteriaInfo.setInfoType(RestDataserviceViewInfo.CRITERIA_INFO);
+        // If PK-FK match was found, generate join predicates.
+        if(pk!=null && fk!=null) {
+            // Create the predicates based on pk and fk columns.
+            List<ViewBuilderCriteriaPredicate> predicates = new ArrayList<ViewBuilderCriteriaPredicate>();
+            
+            Column[] pkColumns = pk.getColumns(uow);
+            Column[] fkColumns = fk.getColumns(uow);
+            
+            for(int i=0; i<pkColumns.length; i++) {
+                ViewBuilderCriteriaPredicate predicate = new ViewBuilderCriteriaPredicate();
+                predicate.setOperator(EQ);
+                predicate.setCombineKeyword(AND); 
+                predicate.setLhColumn(pkColumns[i].getName(uow));
+                predicate.setRhColumn(fkColumns[i].getName(uow));
+                predicates.add(predicate);
+            }
+
+            criteriaInfo.setCriteriaPredicates(predicates);
+        } else {
+            criteriaInfo.setCriteriaPredicates(Collections.emptyList());
+        }
+        
+        return criteriaInfo;
+    }
+    
+    /*
+     * Find a ForeignKey in the supplied table that matches the supplied PrimaryKey.
+     *   - The FK references the PK table
+     *   - The FK referenced columns are the same as the PK columns
+     */
+    private ForeignKey findFkMatch(UnitOfWork uow, PrimaryKey pk, Table table) throws KException {
+        Table pkTable = pk.getTable(uow);
+        ForeignKey matchingFK = null;
+        
+        // Get the primary key columns
+        Column[] pkColumns = pk.getColumns(uow);
+        List<Column> pkColumnList = Arrays.asList(pkColumns);
+        
+        // Examine FKs on the supplied table.
+        ForeignKey[] fks = table.getForeignKeys(uow);
+        for(ForeignKey fk : fks) {
+            // Get table referenced by the FK - if references the PK table, examine columns
+            Table fkTableRef = fk.getReferencesTable(uow);
+            if(fkTableRef!=null && fkTableRef.equals(pkTable)) {
+                // Get FK referenced columns.
+                Column[] fkRefColumns = fk.getReferencesColumns(uow);
+                if(fkRefColumns.length != pkColumns.length) {
+                    continue;
+                } else {
+                    // make sure all fk columns exist in the pk column list
+                    boolean columnsMatch = true;
+                    for(Column fkRefColumn : fkRefColumns) {
+                        if(!pkColumnList.contains(fkRefColumn)) {
+                            columnsMatch = false;
+                            break;
+                        }
+                    }
+                    // stop if fk match found
+                    if(columnsMatch) {
+                        matchingFK = fk;
+                        break;
+                    }
+                }
+            }
+        }
+        return matchingFK;
     }
     
     /*

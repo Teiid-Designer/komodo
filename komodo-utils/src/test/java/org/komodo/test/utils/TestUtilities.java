@@ -193,6 +193,11 @@ public class TestUtilities implements StringConstants {
     public static final String PARTS_VDB_FILE = "parts_dynamic-vdb.xml";
 
     /**
+     * Parts vdb
+     */
+    public static final String PARTS_WITHKEYS_VDB_FILE = "parts_dynamic_withkeys-vdb.xml";
+
+    /**
      * Service Source vdb for usstates
      */
     public static final String USSTATES_SOURCE_VDB_FILE = "USStates-source-vdb.xml";
@@ -1176,6 +1181,16 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    PARTS_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of parts example xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream partsWithKeysExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   PARTS_WITHKEYS_VDB_FILE);
     }
 
     /**

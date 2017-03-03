@@ -122,6 +122,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         /**
          * Rest 2 version of method (no @Override to ensure compilation)
          */
+        @Override
         public boolean isUserInRoll(Principal aUsername, String aRole) {
             // No role based checks so return true
             return true;
@@ -248,7 +249,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
     protected void loadVdbs() throws Exception {
         _restApp.importVdb(TestUtilities.allElementsExample(), USER_NAME);
         _restApp.importVdb(TestUtilities.portfolioExample(), USER_NAME);
-        _restApp.importVdb(TestUtilities.partsExample(), USER_NAME);
+        _restApp.importVdb(TestUtilities.partsWithKeysExample(), USER_NAME);
         _restApp.importVdb(TestUtilities.tweetExample(), USER_NAME);
 
         Assert.assertEquals(4, _restApp.getVdbs(USER_NAME).length);
