@@ -1494,11 +1494,12 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
+            refreshCachedDataSources(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            // find data sources
             uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
 
+            // Get teiid datasources
             Datasource[] dataSources = cachedTeiid.getDataSources(uow);
             LOGGER.debug("getDataSources:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
 
