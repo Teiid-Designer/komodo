@@ -20,6 +20,7 @@
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>vdb-builder</web-resource-name>
+			<!--url-pattern>/v1/*</url-pattern-->
 			<url-pattern>/*</url-pattern>
 			<http-method>DELETE</http-method>
 			<http-method>PUT</http-method>
@@ -37,12 +38,29 @@
 		</auth-constraint>
 	</security-constraint>
 
+	<!--
+		Swagger Configuration
+	-->
+	<!--
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>vdb-builder</web-resource-name>
+			<url-pattern>/api-docs/*</url-pattern>
+		</web-resource-collection>
+
+		<user-data-constraint>
+			<description>Require SSL</description>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+	-->
+
 	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>ApplicationRealm</realm-name>
+		<auth-method>KEYCLOAK</auth-method>
 	</login-config>
 
 	<security-role>
 		<role-name>user</role-name>
 	</security-role>
+
 </web-app>

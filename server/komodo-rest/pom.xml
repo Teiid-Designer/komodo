@@ -27,6 +27,9 @@
 		<!-- To be injected into swagger index.html -->
 		<rest-context>vdb-builder</rest-context>
 		<rest-version>v1</rest-version>
+		<keycloak-url>https://goshawk.birds-of-prey.phantomjinx.org.uk:8543/auth</keycloak-url>
+		<keycloak-realm>vdb</keycloak-realm>
+		<keycloak-client-id>swagger</keycloak-client-id>
 
 		<app.rest.name>${rest-context}</app.rest.name>
 		<app.rest.title>Vdb Builder</app.rest.title>
