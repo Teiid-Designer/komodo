@@ -1314,7 +1314,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
     @Test
     public void shouldFailNameValidationWhenNameIsEmpty() throws Exception {
-        final URI vdbUri = _uriBuilder.workspaceDatasourcesUri();
+        final URI vdbUri = _uriBuilder.workspaceConnectionsUri();
         final URI uri = UriBuilder.fromUri( vdbUri )
                                   .path( V1Constants.NAME_VALIDATION_SEGMENT )
                                   .path( "" )

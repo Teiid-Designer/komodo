@@ -40,7 +40,7 @@ import org.komodo.rest.relational.json.VdbPermissionSerializerTest;
 import org.komodo.rest.relational.json.VdbSerializerTest;
 import org.komodo.rest.relational.json.VdbTranslatorSerializerTest;
 import org.komodo.rest.service.KomodoDataserviceServiceTest;
-import org.komodo.rest.service.KomodoDatasourceServiceTest;
+import org.komodo.rest.service.KomodoConnectionServiceTest;
 import org.komodo.rest.service.KomodoDriverServiceTest;
 import org.komodo.rest.service.KomodoImportExportServiceTest;
 import org.komodo.rest.service.KomodoSearchServiceTest;
@@ -70,7 +70,7 @@ import org.komodo.rest.service.KomodoVdbServiceTest;
         VdbTranslatorSerializerTest.class,
 
         KomodoDataserviceServiceTest.class,
-        KomodoDatasourceServiceTest.class,
+        KomodoConnectionServiceTest.class,
         KomodoDriverServiceTest.class,
         KomodoImportExportServiceTest.class,
         KomodoSearchServiceTest.class,

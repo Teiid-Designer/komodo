@@ -302,12 +302,12 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
-     * @return the URI to use when requesting a collection of Datasources in the workspace (never <code>null</code>)
+     * @return the URI to use when requesting a collection of Connections in the workspace (never <code>null</code>)
      */
-    public URI workspaceDatasourcesUri() {
+    public URI workspaceConnectionsUri() {
         return UriBuilder.fromUri(this.baseUri)
                                    .path(WORKSPACE_SEGMENT)
-                                   .path(DATA_SOURCES_SEGMENT).build();
+                                   .path(CONNECTIONS_SEGMENT).build();
     }
 
     /**
@@ -902,7 +902,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             return cachedTeiidUri(parent.getName(uow));
         }
 
-        return workspaceDatasourcesUri();
+        return workspaceConnectionsUri();
     }
 
     /**
