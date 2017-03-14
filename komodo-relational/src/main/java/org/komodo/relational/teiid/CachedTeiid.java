@@ -52,9 +52,9 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      */
     String VDBS_FOLDER = "vdbs";  //$NON-NLS-1$
     /**
-     * The folder under which all cached dataSources will be placed
+     * The folder under which all cached datasources will be placed
      */
-    String DATA_SOURCES_FOLDER = "dataSources";  //$NON-NLS-1$
+    String DATA_SOURCES_FOLDER = "datasources";  //$NON-NLS-1$
     /**
      * The folder under which all cached translators will be placed
      */
