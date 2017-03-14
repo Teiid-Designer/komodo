@@ -28,14 +28,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import javax.ws.rs.core.UriBuilder;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -203,7 +200,7 @@ public final class RestDataSourceTest implements V1Constants {
         Folder dataSourceFolder = mock(Folder.class);
         when(cachedTeiid.getName(transaction)).thenReturn(TEIID_SERVER);
         when(cachedTeiid.getPrimaryType(transaction)).thenReturn(cachedTeiidType);
-        when(dataSourceFolder.getName(transaction)).thenReturn(TEIID_SERVER + FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER);
+        when(dataSourceFolder.getName(transaction)).thenReturn(CachedTeiid.DATA_SOURCES_FOLDER);
         when(dataSourceFolder.getPrimaryType(transaction)).thenReturn(folderType);
         
         Datasource dataSource = mock(Datasource.class);
@@ -230,14 +227,12 @@ public final class RestDataSourceTest implements V1Constants {
                 linkCounter++;
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
-                                         FORWARD_SLASH + TEIID_SERVER +
                                          FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER +
                                          FORWARD_SLASH + name, href);
             } else if (LinkType.PARENT.equals(link.getRel())) {
                 linkCounter++;
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
-                                         FORWARD_SLASH + TEIID_SERVER +
                                          FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER, href);
             } else if (LinkType.CHILDREN.equals(link.getRel())) {
                 linkCounter++;
