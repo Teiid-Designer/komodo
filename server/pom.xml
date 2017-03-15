@@ -15,6 +15,7 @@
     
     <modules>
        <module>komodo-rest</module>
+       <module>komodo-rest-doc</module>
     </modules>
 
 </project>

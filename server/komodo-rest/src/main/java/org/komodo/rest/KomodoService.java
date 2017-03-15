@@ -199,8 +199,8 @@ public abstract class KomodoService implements V1Constants {
             if (securityContext == null)
                 throw new Exception("No security context available");
 
-//            if (!securityContext.isSecure())
-//                throw new Exception("Access to REST service should ONLY be via a secure channel");
+            if (!securityContext.isSecure())
+                throw new Exception("Access to REST service should ONLY be via a secure channel");
 
             Principal userPrincipal = securityContext.getUserPrincipal();
             if (userPrincipal == null)

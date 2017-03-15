@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app PUBLIC
+	"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+	"http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:web="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	<display-name>VDB-Builder Documentation and API</display-name>
+
+	<context-param>
+		<param-name>webmaster</param-name>
+		<param-value>teiid-designer-dev@lists.jboss.org</param-value>
+		<description>
+			The email address of the mailing list to which questions
+			and comments about this application should be addressed.
+		</description>
+	</context-param>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>vdb-builder-doc</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+
+		<user-data-constraint>
+			<description>Require SSL</description>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+
+		<!-- Only users with vdb-builder-doc role can view the API -->
+		<auth-constraint>
+			<role-name>vdb-builder-doc</role-name>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<login-config>
+		<auth-method>KEYCLOAK</auth-method>
+	</login-config>
+
+	<security-role>
+		<role-name>admin</role-name>
+	</security-role>
+	<security-role>
+		<role-name>vdb-builder-doc</role-name>
+	</security-role>
+
+	<!--
+		Servlet for serving the dynamically generated keycloak.json file used
+		by SwaggerUI for obtaining a bearer token for trying out the REST API
+	-->
+	<servlet>
+		<servlet-name>KeycloakProxy</servlet-name>
+		<servlet-class>org.komodo.keycloak.KeycloakProxy</servlet-class>
+	</servlet>
+
+	<!--
+		Location where the proxy is obtained from. This location is directly
+		accessed from the swagger-ui index.html page
+	-->
+	<servlet-mapping>
+		<servlet-name>KeycloakProxy</servlet-name>
+		<url-pattern>/api/keycloak-client-config</url-pattern>
+	</servlet-mapping>
+
+</web-app>

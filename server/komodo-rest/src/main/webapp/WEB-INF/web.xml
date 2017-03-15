@@ -17,14 +17,52 @@
 		</description>
 	</context-param>
 
+	<!-- Swagger API Document -->
 	<security-constraint>
 		<web-resource-collection>
-			<web-resource-name>vdb-builder</web-resource-name>
-			<!--url-pattern>/v1/*</url-pattern-->
+			<web-resource-name>vdb-builder documentation</web-resource-name>
+			<url-pattern>/v1/swagger.json</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+
+		<user-data-constraint>
+			<description>Require SSL</description>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+
+		<auth-constraint>
+			<role-name>vdb-builder-doc</role-name>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<!-- GET operations -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>vdb-builder auditor</web-resource-name>
 			<url-pattern>/*</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+
+		<user-data-constraint>
+			<description>Require SSL</description>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+
+		<auth-constraint>
+			<role-name>vdb-builder-auditor</role-name>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<!-- WRITE operations -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>vdb-builder editor</web-resource-name>
+			<url-pattern>/*</url-pattern>
+			<http-method>GET</http-method>
 			<http-method>DELETE</http-method>
 			<http-method>PUT</http-method>
-			<http-method>GET</http-method>
 			<http-method>POST</http-method>
 		</web-resource-collection>
 
@@ -34,33 +72,25 @@
 		</user-data-constraint>
 
 		<auth-constraint>
-			<role-name>user</role-name>
+			<role-name>vdb-builder-editor</role-name>
+			<role-name>admin</role-name>
 		</auth-constraint>
 	</security-constraint>
-
-	<!--
-		Swagger Configuration
-	-->
-	<!--
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>vdb-builder</web-resource-name>
-			<url-pattern>/api-docs/*</url-pattern>
-		</web-resource-collection>
-
-		<user-data-constraint>
-			<description>Require SSL</description>
-			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
-		</user-data-constraint>
-	</security-constraint>
-	-->
 
 	<login-config>
 		<auth-method>KEYCLOAK</auth-method>
 	</login-config>
 
 	<security-role>
-		<role-name>user</role-name>
+		<role-name>admin</role-name>
 	</security-role>
-
+	<security-role>
+		<role-name>vdb-builder-doc</role-name>
+	</security-role>
+	<security-role>
+		<role-name>vdb-builder-auditor</role-name>
+	</security-role>
+	<security-role>
+		<role-name>vdb-builder-editor</role-name>
+	</security-role>
 </web-app>

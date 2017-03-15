@@ -1,0 +1,92 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo-server</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>komodo-rest-doc</artifactId>
+	<name>Komodo REST API Documentation</name>
+	<description>Provides Documentation for the REST API of the Komodo engine</description>
+	<packaging>war</packaging>
+
+	<properties>
+		<webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
+		<webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
+
+		<version.javax.servlet>2.5</version.javax.servlet>
+		<version.gson>2.2.4</version.gson>
+
+		<war-name>vdb-builder-doc</war-name>
+
+		<!--
+			To be injected into swagger index.html,
+			pointing to the vdb-builder application
+		-->		
+		<rest-context>vdb-builder</rest-context>
+		<rest-version>v1</rest-version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>${version.javax.servlet}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${version.gson}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<!-- Set the name of the war, used as the context root when the app is deployed -->
+		<finalName>${war-name}</finalName>
+
+		<plugins>
+			<!-- Creates the war for deployment -->
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warName>${war-name}</warName>
+					<failOnMissingWebXml>true</failOnMissingWebXml>
+					<webXml>src\main\webapp\WEB-INF\web.xml</webXml>
+
+					<!-- Avoid filtering certain types of file -->
+					<nonFilteredFileExtensions>
+						<!-- default value contains jpg,jpeg,gif,bmp,png -->
+						<nonFilteredFileExtension>jpg,jpeg,gif,bmp,png,ttf,svg,woff,woff2,eot,map</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+
+					<!-- Adds the swagger ui files to war, filtering them to include the 
+						context -->
+					<webResources>
+						<resource>
+							<directory>api</directory>
+							<filtering>true</filtering>
+							<targetPath>api</targetPath>
+						</resource>
+					</webResources>
+
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

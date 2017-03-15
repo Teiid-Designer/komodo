@@ -27,32 +27,46 @@
   <!-- <script src='lang/ru.js' type='text/javascript'></script> -->
   <!-- <script src='lang/en.js' type='text/javascript'></script> -->
 
-  <script src="lib/keycloak.min.js"></script>
+  <!-- keycloak library for handling authentication -->
+  <script src="lib/keycloak.js"></script>
+
+  <!--
+  		On document load, authenticate with keycloak. To get to this
+  		part, the keyclock login page should already have displayed so
+  		login should be successful.
+   -->
   <script>
     $("document").ready(function () {
-      var keycloak = Keycloak({
-        url: '${keycloak-url}',
-        realm: '${keycloak-realm}',
-        clientId: '${keycloak-client-id}'
-       });
+    	/*
+    	 * Fetches the parameters from $HOST/api/keycloak-client-config
+    	 * which is a servlet-generated json resource allowing for system
+    	 * properties to be inserted by the host app server, eg. wildfly -D vars
+    	 */
+      var keycloak = Keycloak("keycloak-client-config");
 
        keycloak.init({ onLoad: 'login-required' })
          .success(function (authenticated) {
            console.log('Login Successful');
-           var keycloakKeyAuth = new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer " + keycloak.token, "header");
-           window.swaggerUi.api.clientAuthorizations.add("oauth2", keycloakKeyAuth);
+
+           /**
+            * Only init swagger on successful authentication by keycloak
+            */
+           initSwaggerUI(keycloak); 
+
          }).error(function () {
            console.error('Login Failed');
          });
     });
-  </script>
 
-  <script type="text/javascript">
-    $(function () {
+    function initSwaggerUI(keycloak) {
       var url = window.location.search.match(/url=([^&]+)/);
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
+    	  /**
+    	   * context and version will have been sustituted in by
+    	   * the maven build process
+    	   */
         url = "/${rest-context}/${rest-version}/swagger.json";
       }
 
@@ -60,8 +74,23 @@
       if(window.SwaggerTranslator) {
         window.SwaggerTranslator.translate();
       }
+
+      /**
+       * Creates the Bearer token authorization using the keycloak provided token
+       */
+      var value = "Bearer " + keycloak.token;
+      var authKeyHeader = new SwaggerClient.ApiKeyAuthorization("Authorization", value, "header");
+
+      /**
+       * Turns out authorizations is exactly the same object as taken by SwaggerClient
+       * so can put authKeyHeader directy in it
+       */
       window.swaggerUi = new SwaggerUi({
+		validatorUrl: null,
         url: url,
+        authorizations: {
+        	"Authorization" : authKeyHeader
+        },
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function(swaggerApi, swaggerUi){
@@ -90,7 +119,7 @@
         },
         docExpansion: "none",
         apisSorter: "alpha",
-        showRequestHeaders: false
+        showRequestHeaders: true
       });
 
       function addApiKeyAuthorization(){
@@ -100,7 +129,9 @@
             window.swaggerUi.api.clientAuthorizations.add("api_key", apiKeyAuth);
             console.log("added key " + key);
 
-            /* Add Authorization key for all subsequent resource calls */
+            /**
+             * Adds Authorization header and token for all subsequent 'Try it out' operations
+             */
             var value = "Bearer " + keycloak.token;
             var authKeyHeader = new SwaggerClient.ApiKeyAuthorization("Authorization", value, "header");
             window.swaggerUi.api.clientAuthorizations.add("Authorization", authKeyHeader);
@@ -116,7 +147,8 @@
       */
 
       window.swaggerUi.load();
-  });
+  }
+
   </script>
 </head>
 
