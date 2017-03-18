@@ -45,6 +45,7 @@ import org.komodo.repository.KSequencerListener;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.utils.KLog;
+import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
@@ -561,10 +562,25 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
 
         String eventUserData = null;
         try {
+            int eventNo = 0;
+            int systemEvents = 0;
             while (events.hasNext()) {
+                eventNo++;
+
+                KLog.getLogger().debug("KSequencers: Event in loop - " + eventNo); //$NON-NLS-1$
                 Event event = events.nextEvent();
                 String eventPath = event.getPath();
                 eventUserData = event.getUserData();
+
+                //
+                // Ignore any event from jcr:system since they are internal system events
+                // An example would be when namespaces are saved into modeshape's
+                // internal namespace store under /system/namespaces
+                //
+                if(eventPath.startsWith(FORWARD_SLASH + JcrLexicon.SYSTEM.getString())) {
+                    systemEvents++;
+                    continue;
+                }
 
                 switch (event.getType()) {
                     case Event.NODE_ADDED:
@@ -629,6 +645,16 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
             //
             // Event looping has completed.
             //
+            if (systemEvents == eventNo) {
+                //
+                // This set of events was wholly internal to modeshape and
+                // should not be reported out to any listeners. This can cause
+                // listeners to prematurely complete despite the 'next' event
+                // being the sequencing event that those listeners are actually
+                // awaiting.
+                //
+                return;
+            }
 
             if (! sequencingActive) {
                 notifySequencerCompletion(eventUserData);
