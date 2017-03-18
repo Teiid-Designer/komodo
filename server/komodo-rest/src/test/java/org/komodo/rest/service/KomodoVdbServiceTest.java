@@ -23,6 +23,7 @@ package org.komodo.rest.service;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -51,6 +52,7 @@ import org.junit.rules.TestName;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
+import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
@@ -69,7 +71,7 @@ import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 
-@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
+@SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
     @Rule
@@ -1275,5 +1277,97 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
         Collection<RestLink> links = mask.getLinks();
         assertEquals(3, links.size());
+    }
+
+    @Test
+    public void shouldFailNameValidationWhenNameAlreadyExists() throws Exception {
+        _restApp.importVdb( TestUtilities.partsExample(), USER_NAME );
+
+        // try and validate the same name of an existing VDB
+        final URI vdbUri = _uriBuilder.workspaceVdbsUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( "MyPartsVDB_Dynamic" )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( notNullValue() ) );
+    }
+
+    @Test
+    public void shouldFailNameValidationWhenNameHasInvalidCharacters() throws Exception {
+        final URI vdbUri = _uriBuilder.workspaceVdbsUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( "InvalidN@me" )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( notNullValue() ) );
+    }
+
+    @Test
+    public void shouldFailNameValidationWhenNameIsEmpty() throws Exception {
+        final URI vdbUri = _uriBuilder.workspaceDatasourcesUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( "" )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, startsWith( "RESTEASY001530" ) );
+    }
+
+    @Test
+    public void shouldFailNameValidationWhenNameHasSpaces() throws Exception {
+        final URI vdbUri = _uriBuilder.workspaceVdbsUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( "a b c" )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( notNullValue() ) );
+    }
+
+    @Test
+    public void shouldFailNameValidationWhenMissingNameSegment() throws Exception {
+        final URI vdbUri = _uriBuilder.workspaceVdbsUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, startsWith( "RESTEASY001530" ) );
+    }
+
+    @Test
+    public void shouldValidateName() throws Exception {
+        final URI vdbUri = _uriBuilder.workspaceVdbsUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( "ValidName" )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( "" ) ); // no error message since name was valid
     }
 }

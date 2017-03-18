@@ -38,6 +38,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.KomodoService.QueryParamKeys;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.response.RestDataSourceDriver;
@@ -48,6 +49,8 @@ import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -83,8 +86,28 @@ public final class KomodoDriverService extends KomodoService {
      */
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Display the collection of drivers",
+    @ApiOperation(value = "Return the collection of installed drivers",
                             response = RestDataSourceDriver[].class)
+    @ApiImplicitParams({
+        @ApiImplicitParam(
+                          name = QueryParamKeys.PATTERN,
+                          value = "A regex expression used when searching. If not present, all objects are returned.",
+                          required = false,
+                          dataType = "string",
+                          paramType = "query"),
+        @ApiImplicitParam(
+                          name = QueryParamKeys.SIZE,
+                          value = "The number of objects to return. If not present, all objects are returned",
+                          required = false,
+                          dataType = "integer",
+                          paramType = "query"),
+        @ApiImplicitParam(
+                          name = QueryParamKeys.START,
+                          value = "Index of the first dataservice to return",
+                          required = false,
+                          dataType = "integer",
+                          paramType = "query")
+    })
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })

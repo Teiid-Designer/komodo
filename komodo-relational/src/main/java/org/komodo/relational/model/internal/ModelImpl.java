@@ -24,9 +24,7 @@ package org.komodo.relational.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
-import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -76,11 +74,6 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                                                                       VirtualProcedure.IDENTIFIER };
 
     /**
-     * A filter to exclude specific properties.
-     */
-    private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( KomodoLexicon.VdbModel.MODEL_DEFINITION );
-
-    /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
@@ -94,12 +87,6 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super( uow, repository, workspacePath );
-
-        // add in filter to hide the model definition type
-        final Filter[] updatedFilters = new Filter[ DEFAULT_FILTERS.length + 1 ];
-        System.arraycopy( DEFAULT_FILTERS, 0, updatedFilters, 0, DEFAULT_FILTERS.length );
-        updatedFilters[ DEFAULT_FILTERS.length ] = PROPS_FILTER;
-        setFilters( updatedFilters );
     }
 
     @Override

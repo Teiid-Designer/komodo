@@ -22,6 +22,8 @@
 package org.komodo.rest.service;
 
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_NAME_EXISTS;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_NAME_VALIDATION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_COLUMNS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITIONS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITION_ERROR;
@@ -106,6 +108,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import com.google.common.base.Objects;
@@ -125,6 +128,7 @@ public final class KomodoVdbService extends KomodoService {
 
     private static final int ALL_AVAILABLE = -1;
     private static final String VDB_PATH_DEFAULT = "defaultPath";  //$NON-NLS-1$
+    private static final StringNameValidator VALIDATOR = new StringNameValidator();
 
     /**
      * @param engine
@@ -160,6 +164,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response createVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
+                               @ApiParam(
+                                         value = "Id of the vdb to be fetched",
+                                         required = true
+                               )
                                final @PathParam( "vdbName" ) String vdbName,
                                final String vdbJson) throws KomodoRestException {
 
@@ -270,6 +278,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response updateVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
+                               @ApiParam(
+                                         value = "Id of the vdb to be fetched",
+                                         required = true
+                               )
                                final @PathParam( "vdbName" ) String vdbName,
                                final String vdbJson) throws KomodoRestException {
 
@@ -360,6 +372,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response cloneVdb( final @Context HttpHeaders headers,
                               final @Context UriInfo uriInfo,
+                              @ApiParam(
+                                        value = "Id of the vdb to be fetched",
+                                        required = true
+                              )
                               final @PathParam( "vdbName" ) String vdbName,
                               final String newVdbName) throws KomodoRestException {
 
@@ -624,7 +640,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the vdb to remove (cannot be <code>null</code>)
+     *        the Id of the vdb to be fetched to remove (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
      * @throws KomodoRestException
      *         if there is a problem performing the delete
@@ -639,6 +655,10 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response deleteVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
+                               @ApiParam(
+                                         value = "Id of the vdb to be fetched",
+                                         required = true
+                               )
                                final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1033,7 +1053,15 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response createModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
+                                 @ApiParam(
+                                           value = "Id of the vdb to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "vdbName" ) String vdbName,
+                                 @ApiParam(
+                                           value = "Name of the Model",
+                                           required = true
+                                 )
                                  final @PathParam( "modelName" ) String modelName,
                                  final String modelJson) throws KomodoRestException {
 
@@ -1165,7 +1193,15 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response updateModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
+                                 @ApiParam(
+                                           value = "Id of the vdb to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "vdbName" ) String vdbName,
+                                 @ApiParam(
+                                           value = "Id of the model to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "modelName" ) String modelName,
                                  final String modelJson) throws KomodoRestException {
 
@@ -1240,7 +1276,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the vdb (cannot be <code>null</code>)
+     *        the Id of the vdb to be fetched (cannot be <code>null</code>)
      * @param modelName
      *        the name of the model to remove (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
@@ -1261,7 +1297,15 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response deleteModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
+                                 @ApiParam(
+                                           value = "Id of the vdb to be fetched",
+                                           required = true
+                                 )
                                  final @PathParam( "vdbName" ) String vdbName,
+                                 @ApiParam(
+                                           value = "Name of the model",
+                                           required = true
+                                 )
                                  final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -3023,6 +3067,81 @@ public final class KomodoVdbService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_MASK_ERROR, maskId, permissionId, dataRoleId, vdbName);
+        }
+    }
+
+	/**
+	 * @param headers
+	 *            the request headers (never <code>null</code>)
+	 * @param uriInfo
+	 *            the request URI information (never <code>null</code>)
+	 * @param vdbName
+	 *            the VDB name being validated (cannot be empty)
+	 * @return the response (never <code>null</code>) with an entity that is
+	 *         either an empty string, when the name is valid, or an error
+	 *         message
+	 * @throws KomodoRestException
+	 *             if there is a problem validating the VDB name or constructing
+	 *             the response
+	 */
+    @GET
+    @Path( V1Constants.NAME_VALIDATION_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VDB_PLACEHOLDER )
+    @Produces( { MediaType.TEXT_PLAIN } )
+    @ApiOperation( value = "Returns an error message if the VDB name is invalid" )
+    @ApiResponses( value = {
+            @ApiResponse( code = 400, message = "The URI cannot contain encoded slashes or backslashes." ),
+            @ApiResponse( code = 403, message = "An unexpected error has occurred." ),
+            @ApiResponse( code = 500, message = "The VDB name cannot be empty." )
+    } )
+    public Response validateVdbName( final @Context HttpHeaders headers,
+                                     final @Context UriInfo uriInfo,
+                                     @ApiParam( value = "The VDB name being checked", required = true )
+                                     final @PathParam( "vdbName" ) String vdbName ) throws KomodoRestException {
+
+        final SecurityPrincipal principal = checkSecurityContext( headers );
+
+        if ( principal.hasErrorResponse() ) {
+            return principal.getErrorResponse();
+        }
+
+        final String errorMsg = VALIDATOR.checkValidName( vdbName );
+        
+        // a name validation error occurred
+        if ( errorMsg != null ) {
+            return Response.ok().entity( errorMsg ).build();
+        }
+
+        // check for duplicate name
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( principal, "validateVdbName", true ); //$NON-NLS-1$
+            final Vdb[] vdbs = getWorkspaceManager( uow ).findVdbs( uow );
+
+            if ( vdbs.length != 0 ) {
+                for ( final Vdb vdb : vdbs ) {
+                    if ( vdbName.equals( vdb.getName( uow ) ) ) {
+                        return Response.ok()
+                                       .entity( RelationalMessages.getString( VDB_NAME_EXISTS ) )
+                                       .build();
+                    }
+                }
+            }
+
+            // name is valid
+            return Response.ok().build();
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden( headers.getAcceptableMediaTypes(), 
+                                                     e, 
+                                                     VDB_NAME_VALIDATION_ERROR );
         }
     }
 }

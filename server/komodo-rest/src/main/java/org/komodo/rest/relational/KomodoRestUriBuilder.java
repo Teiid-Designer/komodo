@@ -873,7 +873,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 break;
             }
             case SOURCE_VDB_MATCHES:
-            case SERVICE_VIEW_TABLES:
+            case SERVICE_VIEW_INFO:
             case CONNECTIONS:
             case DRIVERS:
             case VDBS:

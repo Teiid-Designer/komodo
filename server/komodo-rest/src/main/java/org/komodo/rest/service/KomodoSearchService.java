@@ -304,11 +304,6 @@ public final class KomodoSearchService extends KomodoService {
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Advanced search of the workspace where the criteria is encapsulated in the request body",
-                             notes = "Syntax of the json request body is of the form " +
-                                          "{ searchName='x', type, parent='z', ancestor='z', path='a', contain='b', objectName='c' }" +
-                                          " where at least 1 property has been defined; " +
-                                          " parent and ancestor are mutually exclusive;" +
-                                          " search parameters can be added as key=value properties, eg. {param1}=people",
                              response = RestBasicEntity[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
@@ -316,6 +311,29 @@ public final class KomodoSearchService extends KomodoService {
     })
     public Response searchWorkspace( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
+                             @ApiParam(
+                                       value = "" + 
+                                               "JSON of the possible search attributes:<br>" +
+                                               OPEN_PRE_TAG +
+                                               OPEN_BRACE + BR +
+                                               NBSP + "searchName: \"If specified, use the saved search of this name\"" + BR +
+                                               NBSP + "type: \"The type of object to search for (FROM type)\"" + BR +
+                                               NBSP + "parent: \"Limits search to directly beneath this object path\"" + BR +
+                                               NBSP + "ancestor: \"Limits search to descendents of this object path\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(parent and ancestor are mutually exclusive)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "path: \"Specifies path of the target object" + BR +
+                                               NBSP + "contain: \"Value that result properties will contain\"" + BR +
+                                               NBSP + "objectName: \"Value that result names will match\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(Can be a wildcard using '%' symbol)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "Search parameters can be added to above keys" + BR +
+                                               NBSP + "by specifying them in braces {param1}." + BR +
+                                               NBSP + "Values of parameters can be included using" + BR +
+                                               NBSP + "key:value properties." + BR +
+                                               NBSP + CLOSE_BRACE + BR +
+                                               CLOSE_BRACE +
+                                               CLOSE_PRE_TAG,
+                                       required = true
+                             )
                              final String searchAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -485,6 +503,27 @@ public final class KomodoSearchService extends KomodoService {
     })
     public Response saveSearch( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
+                             @ApiParam(
+                                       value = "" + 
+                                               "JSON of the search attributes:<br>" +
+                                               OPEN_PRE_TAG +
+                                               OPEN_BRACE + BR +
+                                               NBSP + "searchName: \"The name to save the search to\"" + BR +
+                                               NBSP + "type: \"The type of object to search for (FROM type)\"" + BR +
+                                               NBSP + "parent: \"Limits search to directly beneath this object path\"" + BR +
+                                               NBSP + "ancestor: \"Limits search to descendents of this object path\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(parent and ancestor are mutually exclusive)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "path: \"Specifies path of the target object" + BR +
+                                               NBSP + "contain: \"Value that result properties will contain\"" + BR +
+                                               NBSP + "objectName: \"Value that result names will match\"" + BR +
+                                               NBSP + OPEN_PRE_CMT + "(Can be a wildcard using '%' symbol)" + CLOSE_PRE_CMT + BR +
+                                               NBSP + "Search parameters can be added to above keys" + BR +
+                                               NBSP + "by specifying them in braces {param1}." + BR +
+                                               NBSP + CLOSE_BRACE + BR +
+                                               CLOSE_BRACE +
+                                               CLOSE_PRE_TAG,
+                                       required = true
+                             )
                              final String searchAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -545,6 +584,10 @@ public final class KomodoSearchService extends KomodoService {
     })
     public Response deleteSavedSearch( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
+                             @ApiParam(
+                                       value = "Name of the saved search to be deleted",
+                                       required = true
+                             )
                              final @PathParam( "searchName" ) String searchName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);

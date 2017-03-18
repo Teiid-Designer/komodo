@@ -634,6 +634,15 @@ public final class ModelImplTest extends RelationalModelTest {
         this.model.setModelDefinition( getTransaction(), "blah blah blah" );
         assertThat( this.model.getMetadataType( getTransaction() ), is( Model.DEFAULT_METADATA_TYPE ) );
     }
+    
+    @Test
+    public void shouldSetModelDefinition() throws Exception {
+        this.model.setModelDefinition( getTransaction(), "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;" );
+        commit();
+        
+        String mDefn = this.model.getModelDefinition(getTransaction());
+        assertThat( mDefn, is( "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;" ) );
+    }
 
     @Test
     public void shouldSetModelType() throws Exception {

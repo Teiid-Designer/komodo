@@ -223,6 +223,11 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_GET_CONNECTIONS_ERROR,
 
         /**
+         * An error indicating an error due to missing tablePath
+         */
+        DATASERVICE_SERVICE_GET_JOIN_MISSING_TABLEPATH,
+        
+        /**
          * An error indicating an error occurred trying to obtain a dataservice's drivers
          */
         DATASERVICE_SERVICE_GET_DRIVERS_ERROR,
@@ -268,9 +273,9 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR,
         
         /**
-         * An error indicating an error occurred trying to find a service source table
+         * An error indicating an error occurred trying to find a service view info
          */
-        DATASERVICE_SERVICE_FIND_SOURCE_TABLE_ERROR,
+        DATASERVICE_SERVICE_FIND_VIEW_INFO_ERROR,
 
         /**
          * An error indicating an error occurred trying to find a matching source VDB
@@ -348,10 +353,40 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_SET_SERVICE_MISSING_MODELSOURCE_PATH,
         
         /**
+         * An error indicating set attempt failed because the Join type was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_TYPE,
+        
+        /**
+         * An error indicating set attempt failed because the Join criteria lh column was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_LH_COLUMN,
+        
+        /**
+         * An error indicating set attempt failed because the Join criteria rh column was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_JOIN_RH_COLUMN,
+        
+        /**
+         * An error indicating set attempt failed because the expected view ddl was missing
+         */
+        DATASERVICE_SERVICE_SET_SERVICE_MISSING_VIEWDDL,
+        
+        /**
          * An error indicating set attempt failed
          */
         DATASERVICE_SERVICE_SET_SERVICE_ERROR,
-        
+
+        /**
+         * A message indicating that a data service with the given name already exists.
+         */
+        DATASERVICE_SERVICE_NAME_EXISTS,
+
+        /**
+         * A message indicating an unexpected error occurred during name validation.
+         */
+        DATASERVICE_SERVICE_NAME_VALIDATION_ERROR,
+
         /**
          * An error indicating a JSON document representing the Datasources in the workspace could not be retrieved.
          */
@@ -441,6 +476,16 @@ public final class RelationalMessages {
          * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.
          */
         DRIVER_SERVICE_GET_DRIVERS_ERROR,
+
+        /**
+         * A message indicating that a VDB with the given name already exists.
+         */
+        VDB_NAME_EXISTS,
+
+        /**
+         * A message indicating an unexpected error occurred during name validation.
+         */
+        VDB_NAME_VALIDATION_ERROR,
 
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.

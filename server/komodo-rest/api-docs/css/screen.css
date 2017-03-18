@@ -165,6 +165,8 @@
 .swagger-section .swagger-ui-wrap table {
   border-collapse: collapse;
   border-spacing: 0;
+  table-layout: fixed;
+  width: 100%;
 }
 .swagger-section .swagger-ui-wrap table thead tr th {
   padding: 5px;
@@ -589,6 +591,12 @@
   border: 1px solid #e5e0c6;
   padding: 10px;
   margin: 0 0 10px 0;
+
+  /* Stop <pre></pre> text overflowing */
+  overflow-x: auto;
+  max-width: 35em;
+  width: 35em;
+  font-weight: normal;
 }
 .swagger-section .swagger-ui-wrap .markdown pre code {
   line-height: 1.6em;
@@ -1280,3 +1288,10 @@
   text-align: center;
   padding-top: 10px;
 }
+
+/* Display comments differently to the json surrounding them */
+.json-comment {
+  color: green;
+  font-style: italic;
+}
+

@@ -26,7 +26,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
-
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
@@ -52,6 +51,7 @@ import org.komodo.relational.resource.UdfFile;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.DocumentType;
@@ -1262,6 +1262,68 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         }
 
         return oldServiceVdb;
+    }
+
+    @Override
+    public void clone(UnitOfWork transaction, Dataservice dataservice) throws KException {
+        dataservice.setDescription(transaction, getDescription(transaction));
+        dataservice.setModifiedBy(transaction, getModifiedBy(transaction));
+        dataservice.setLastModified(transaction, getLastModified(transaction));
+
+        for (VdbEntry vdbEntry : getVdbEntries(transaction)) {
+            VdbEntry entry = RelationalModelFactory.createVdbEntry(transaction,
+                                                                          getRepository(),
+                                                                          dataservice,
+                                                                           vdbEntry.getName(transaction));
+            RepositoryTools.copyProperties(transaction, vdbEntry, entry);
+        }
+
+        for (UdfEntry udfEntry : getUdfEntries(transaction)) {
+            UdfEntry entry = RelationalModelFactory.createUdfEntry(transaction,
+                                                                          getRepository(),
+                                                                          dataservice,
+                                                                          udfEntry.getName(transaction));
+            RepositoryTools.copyProperties(transaction, udfEntry, entry);
+        }
+
+        for (ConnectionEntry connEntry : getConnectionEntries(transaction)) {
+            ConnectionEntry entry = RelationalModelFactory.createConnectionEntry(transaction,
+                                                                          getRepository(),
+                                                                          dataservice,
+                                                                          connEntry.getName(transaction));
+            RepositoryTools.copyProperties(transaction, connEntry, entry);
+        }
+
+        for (DdlEntry ddlEntry : getDdlEntries(transaction)) {
+            DdlEntry entry = RelationalModelFactory.createDdlEntry(transaction,
+                                                                          getRepository(),
+                                                                          dataservice,
+                                                                          ddlEntry.getName(transaction));
+            RepositoryTools.copyProperties(transaction, ddlEntry, entry);
+        }
+
+        for (ResourceEntry resourceEntry : getResourceEntries(transaction)) {
+            ResourceEntry entry = RelationalModelFactory.createResourceEntry(transaction,
+                                                                          getRepository(),
+                                                                          dataservice,
+                                                                          resourceEntry.getName(transaction));
+            RepositoryTools.copyProperties(transaction, resourceEntry, entry);
+        }
+
+        for (DriverEntry driverEntry : getDriverEntries(transaction)) {
+            DriverEntry entry = RelationalModelFactory.createDriverEntry(transaction,
+                                                                          getRepository(),
+                                                                          dataservice,
+                                                                          driverEntry.getName(transaction));
+            RepositoryTools.copyProperties(transaction, driverEntry, entry);
+        }
+
+        ServiceVdbEntry serviceVdbEntry = getServiceVdbEntry(transaction);
+        ServiceVdbEntry entry = RelationalModelFactory.createServiceVdbEntry(transaction,
+                                                                                    getRepository(),
+                                                                                    dataservice,
+                                                                                    serviceVdbEntry.getName(transaction));
+        RepositoryTools.copyProperties(transaction, serviceVdbEntry, entry);
     }
 
 }

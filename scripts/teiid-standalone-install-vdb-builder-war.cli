@@ -1,0 +1,2 @@
+/deployment=vdb-builder.war:add(runtime-name=vdb-builder.war,content=[{path=dataVirtualization/dataServiceBuilder/komodo-rest.war/,archive=false,relative-to=jboss.home.dir}],enabled=true)
+

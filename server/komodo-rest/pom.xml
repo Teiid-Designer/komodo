@@ -17,7 +17,7 @@
 		<version.gson>2.2.4</version.gson>
 		<version.guava>12.0</version.guava>
 		<version.swagger>1.5.0</version.swagger>
-		<version.jaxrs>2.13</version.jaxrs>
+		<version.jaxrs>2.3.10.Final</version.jaxrs>
 		<version.xsom>20130531</version.xsom>
 		<version.relaxngDatatype>20020414</version.relaxngDatatype>
 
@@ -44,6 +44,7 @@
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>jaxrs-api</artifactId>
+				<version>${version.jaxrs}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>

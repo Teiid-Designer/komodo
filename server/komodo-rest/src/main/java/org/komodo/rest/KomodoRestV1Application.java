@@ -249,14 +249,19 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for validating a data service or data source name.
+         */
+        String NAME_VALIDATION_SEGMENT = "nameValidation"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for finding source vdb matches for a DataService
          */
         String SOURCE_VDB_MATCHES = "sourceVdbMatches"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for finding the service view table names for a DataService
+         * The name of the URI path segment for finding service view info for a DataService
          */
-        String SERVICE_VIEW_TABLES = "serviceViewTables"; //$NON-NLS-1$
+        String SERVICE_VIEW_INFO = "serviceViewInfo"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for a Dataservice's connections in the Komodo workspace.
@@ -264,10 +269,30 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String CONNECTIONS_SEGMENT = "connections"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for a setting a dataservice's service vdb
+         * The name of the URI path segment for a setting a dataservice's service vdb for single table view
          */
         String SERVICE_VDB_FOR_SINGLE_TABLE = "ServiceVdbForSingleTable"; //$NON-NLS-1$
 
+        /**
+         * The name of the URI path segment for a setting a dataservice's service vdb for join view
+         */
+        String SERVICE_VDB_FOR_JOIN_TABLES = "ServiceVdbForJoinTables"; //$NON-NLS-1$
+        
+        /**
+         * The name of the URI path segment for getting the DDL for single table view
+         */
+        String SERVICE_VIEW_DDL_FOR_SINGLE_TABLE = "ServiceViewDdlForSingleTable"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for getting the DDL for join view
+         */
+        String SERVICE_VIEW_DDL_FOR_JOIN_TABLES = "ServiceViewDdlForJoinTables"; //$NON-NLS-1$
+        
+        /**
+         * The name of the URI path segment for getting the join criteria given two tables
+         */
+        String CRITERIA_FOR_JOIN_TABLES = "CriteriaForJoinTables"; //$NON-NLS-1$
+        
         /**
          * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
          */

@@ -259,6 +259,36 @@ public interface StringConstants {
      */
     String PIPE = "|"; //$NON-NLS-1$
 
+    /**
+     * Breaking tag
+     */
+    String BR = "<br>"; //$NON-NLS-1$
+
+    /**
+     * Opening pre tag
+     */
+    String OPEN_PRE_TAG = "<pre>"; //$NON-NLS-1$
+
+    /**
+     * Closing pre tag
+     */
+    String CLOSE_PRE_TAG = "</pre>"; //$NON-NLS-1$
+
+    /**
+     * Non-breaking HTML space
+     */
+    String NBSP = "&nbsp;"; //$NON-NLS-1$
+
+    /**
+     * Open pre-cmt tag with class
+     */
+    String OPEN_PRE_CMT = "<pre-cmt class=\"json-comment\">";
+
+    /**
+     * Close pre-cmt tag
+     */
+    String CLOSE_PRE_CMT = "</pre-cmt>";
+
 	/**
    * komodo
    */

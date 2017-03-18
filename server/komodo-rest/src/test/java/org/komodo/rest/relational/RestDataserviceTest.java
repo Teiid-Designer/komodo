@@ -55,6 +55,8 @@ public final class RestDataserviceTest {
     private static final String SERVICE_VDB_VERSION = "1";
     private static final String SERVICE_VIEW_MODEL = "serviceViewModel";
     private static final String SERVICE_VIEW = "serviceView";
+    private static final String SERVICE_VIEW_SRCTABLE1 = "sourceTable1";
+    private static final String SERVICE_VIEW_SRCTABLE2 = "sourceTable2";
 
     private RestDataservice dataservice;
 
@@ -73,6 +75,7 @@ public final class RestDataserviceTest {
         copy.setServiceVdbVersion(this.dataservice.getServiceVdbVersion());
         copy.setServiceViewModel(this.dataservice.getServiceViewModel());
         copy.setServiceViewName(this.dataservice.getServiceViewName());
+        copy.setServiceViewTables(this.dataservice.getServiceViewTables());
         copy.setDriverTotal(this.dataservice.getDriverTotal());
         copy.setConnectionTotal(this.dataservice.getConnectionTotal());
 
@@ -113,6 +116,10 @@ public final class RestDataserviceTest {
         this.dataservice.setServiceVdbVersion(SERVICE_VDB_VERSION);
         this.dataservice.setServiceViewModel(SERVICE_VIEW_MODEL);
         this.dataservice.setServiceViewName(SERVICE_VIEW);
+        String[] viewTables = new String[2];
+        viewTables[0] = SERVICE_VIEW_SRCTABLE1;
+        viewTables[1] = SERVICE_VIEW_SRCTABLE2;
+        this.dataservice.setServiceViewTables(viewTables);
     }
 
     @Test

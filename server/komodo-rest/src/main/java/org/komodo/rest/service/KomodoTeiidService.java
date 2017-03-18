@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -603,6 +604,21 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response setCredentials(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
+                                   @ApiParam(
+                                             value = "" + 
+                                                     "JSON of credentials:" + BR +
+                                                     OPEN_PRE_TAG +
+                                                     OPEN_BRACE + BR +
+                                                     NBSP + "adminUser: \"admin user name\"" + BR +
+                                                     NBSP + "adminPasswd: \"admin password\"" + BR +
+                                                     NBSP + "adminSecure: \"true if admin uses secure connection\"" + BR +
+                                                     NBSP + "jdbcUser: \"jdbc user name\"" + BR +
+                                                     NBSP + "jdbcPasswd: \"jdbc password\"" + BR +
+                                                     NBSP + "jdbcSecure: \"true if jdbc uses secure connection\"" + BR +
+                                                     CLOSE_BRACE +
+                                                     CLOSE_PRE_TAG,
+                                             required = true
+                                   )
                                    final String credentialAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1033,15 +1049,27 @@ public class KomodoTeiidService extends KomodoService {
     @POST
     @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.MODEL_FROM_TEIID_DDL )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Creates or updates a workspace vdb model using teiid model ddl",
-                  notes = "Syntax of the json request body is of the form " +
-                          "{ vdbName='workspace Vdb', modelName='workspace Model', teiidVdb='teiid VDB', teiidModel='teiid Model' }")
+    @ApiOperation(value = "Creates or updates a workspace vdb model using teiid model ddl")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response updateModelFromDdl( final @Context HttpHeaders headers,
             final @Context UriInfo uriInfo,
+            @ApiParam(
+                      value = "" + 
+                              "JSON of update attributes:" + BR +
+                              OPEN_PRE_TAG +
+                              OPEN_BRACE + BR +
+                              NBSP + "vdbName: \"The destination workspace vdb name\"" + BR +
+                              NBSP + "modelName: \"The destination model name\"" + BR +
+                              NBSP + "teiidVdb: \"The source teiid vdb name\"" + BR +
+                              NBSP + "teiidModel: \"The source teiid model name containing required ddl\"" + BR +
+                              NBSP + CLOSE_BRACE + BR +
+                              CLOSE_BRACE +
+                              CLOSE_PRE_TAG,
+                      required = true
+            )
             final String vdbUpdateAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1117,13 +1145,16 @@ public class KomodoTeiidService extends KomodoService {
                 vdb = wkspMgr.resolve( uow, kobject, Vdb.class );
             }
 
-            // Check for existence of Model and replace if found
+            // Check for existence of Model.  If it exists, reset its modelDefinition.  If doesnt exist, create a new model.
             Model[] models = vdb.getModels(uow, modelName);
-            for(Model model : models) {
-                model.remove(uow);
+            Model modelToUpdate = null;
+            if(models.length>0) {
+                modelToUpdate = models[0];
             }
-            Model newModel = vdb.addModel(uow, modelName);
-            newModel.setModelDefinition(uow, modelDdl);
+            if(modelToUpdate==null) {
+                modelToUpdate = vdb.addModel(uow, modelName);
+            }
+            modelToUpdate.setModelDefinition(uow, modelDdl);
 
             KomodoStatusObject kso = new KomodoStatusObject("Update Vdb Status"); //$NON-NLS-1$
             kso.addAttribute(vdbName, "Successfully updated"); //$NON-NLS-1$
@@ -1255,7 +1286,7 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response removeDataSource(final @Context HttpHeaders headers,
                                      final @Context UriInfo uriInfo,
-                                     @ApiParam(value = "Name of the DataSource to be removed", required = true)
+                                     @ApiParam(value = "Name of the data source to be removed", required = true)
                                      final @PathParam( "dataSourceName" ) String dataSourceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1333,9 +1364,9 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response getVdbModelSchema( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
-                                       @ApiParam(value = "Id of the vdb", required = true)
+                                       @ApiParam(value = "Name of the vdb", required = true)
                                        final @PathParam( "vdbName" ) String vdbName,
-                                       @ApiParam(value = "Id of the model", required = true)
+                                       @ApiParam(value = "Name of the model", required = true)
                                        final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1463,11 +1494,12 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
+            refreshCachedDataSources(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            // find data sources
             uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
 
+            // Get teiid datasources
             Datasource[] dataSources = cachedTeiid.getDataSources(uow);
             LOGGER.debug("getDataSources:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
 
@@ -1519,7 +1551,7 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response getDataSource( final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
-                                   @ApiParam(value = "Id of the data source to be fetched", required = true)
+                                   @ApiParam(value = "Name of the data source", required = true)
                                    final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1642,7 +1674,7 @@ public class KomodoTeiidService extends KomodoService {
     @GET
     @Path(V1Constants.DRIVERS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Display the collection of drivers",
+    @ApiOperation(value = "Display the collection of drivers available in teiid",
                             response = RestDataSourceDriver[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
@@ -1714,6 +1746,18 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response addDriver(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
+                                   @ApiParam(
+                                             value = "" + 
+                                                     "JSON of the properties of the driver to add:<br>" +
+                                                     OPEN_PRE_TAG +
+                                                     OPEN_BRACE + BR +
+                                                     NBSP + "name: \"name of the driver\"" + BR +
+                                                     NBSP + "content: \"Base64-encoded byte data of the" + BR +
+                                                     NBSP + "driver file\"" + BR +
+                                                     CLOSE_BRACE +
+                                                     CLOSE_PRE_TAG,
+                                             required = true
+                                   )
                                    final String fileAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1878,6 +1922,16 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response addDataservice(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
+                                   @ApiParam(
+                                             value = "" + 
+                                                     "JSON of the properties of the data service:<br>" +
+                                                     OPEN_PRE_TAG +
+                                                     OPEN_BRACE + BR +
+                                                     NBSP + "path: \"location of the data service in the workspace\"" + BR +
+                                                     CLOSE_BRACE +
+                                                     CLOSE_PRE_TAG,
+                                             required = true
+                                   )
                                    final String pathAttribute)
                                    throws KomodoRestException {
 
@@ -1996,6 +2050,16 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response addDatasource(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
+                                   @ApiParam(
+                                             value = "" + 
+                                                     "JSON of the properties of the data source:<br>" +
+                                                     OPEN_PRE_TAG +
+                                                     OPEN_BRACE + BR +
+                                                     NBSP + "path: \"location of the data source in the workspace\"" + BR +
+                                                     CLOSE_BRACE +
+                                                     CLOSE_PRE_TAG,
+                                             required = true
+                                   )
                                    final String pathAttribute)
                                    throws KomodoRestException {
 
@@ -2110,6 +2174,16 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response addVdb(final @Context HttpHeaders headers,
                            final @Context UriInfo uriInfo,
+                           @ApiParam(
+                                     value = "" + 
+                                             "JSON of the properties of the vdb:<br>" +
+                                             OPEN_PRE_TAG +
+                                             OPEN_BRACE + BR +
+                                             NBSP + "path: \"location of the data service in the workspace\"" + BR +
+                                             CLOSE_BRACE +
+                                             CLOSE_PRE_TAG,
+                                     required = true
+                           )
                            final String pathAttribute)
                            throws KomodoRestException {
 
@@ -2233,16 +2307,29 @@ public class KomodoTeiidService extends KomodoService {
     @Path(V1Constants.QUERY_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Pass a query to the teiid server",
-                                notes = "Syntax of the json request body is of the form " +
-                                "{ query : 'SELECT * ...', target : vdb name on teiid | dataservice path in the workspace, " +
-                                "limit : the limit on records to be returned, offset : the record number to begin with }")
+    @ApiOperation(value = "Pass a query to the teiid server")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response query(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
+                                   @ApiParam(
+                                             value = "" + 
+                                                     "JSON of the properties of the query:<br>" +
+                                                     OPEN_PRE_TAG +
+                                                     OPEN_BRACE + BR +
+                                                     NBSP + "query: \"SQL formatted query to interrogate the target\"" + BR +
+                                                     NBSP + "target: \"The name of the target to be queried\"" + BR +
+                                                     NBSP + OPEN_PRE_CMT + "(The target can be a vdb or data service. If the latter " +
+                                                     NBSP + "then the name of the service vdb is extracted and " +
+                                                     NBSP + "replaces the data service)" + CLOSE_PRE_CMT + BR +
+                                                     NBSP + "limit: Add a limit on number of results to be returned" + BR +
+                                                     NBSP + "offset: The index of the result to begin the results with" + BR +
+                                                     CLOSE_BRACE +
+                                                     CLOSE_PRE_TAG,
+                                             required = true
+                                   )
                                    final String queryAttribute)
                                    throws KomodoRestException {
 
@@ -2343,7 +2430,10 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response ping(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
-                                   @ApiParam(value = "Execute either an admin or jdbc ping request", required = true)
+                                   @ApiParam(
+                                             value = "Ping request of type 'admin' or 'jdbc'",
+                                             required = true
+                                   )
                                     @QueryParam(value = PING_TYPE_PARAMETER) String pingType)
                                    throws KomodoRestException {
 
@@ -2419,9 +2509,7 @@ public class KomodoTeiidService extends KomodoService {
     @POST
     @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.TABLES_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Get table names for a jdbc source",
-                  notes = "Syntax of the json request body is of the form " +
-                          "{ dataSourceName='Data Source name', catalogFilter='catalog filter', schemaFilter='schema filter', tableFilter='table filter' }")
+    @ApiOperation(value = "Get table names for a jdbc source")
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No Datasource could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
@@ -2429,6 +2517,19 @@ public class KomodoTeiidService extends KomodoService {
     })
     public Response getDatasourceJdbcTables( final @Context HttpHeaders headers,
                                              final @Context UriInfo uriInfo,
+                                             @ApiParam(
+                                                       value = "" + 
+                                                               "JSON of the properties of the data source jdbc tables:<br>" +
+                                                               OPEN_PRE_TAG +
+                                                               OPEN_BRACE + BR +
+                                                               NBSP + "dataSourceName: \"data source name\"" + BR +
+                                                               NBSP + "catalogFilter: \"catalog filter\"" + BR +
+                                                               NBSP + "schemaFilter: \"schema filter\"" + BR +
+                                                               NBSP + "tableFilter: \"table filter\"" + BR +
+                                                               CLOSE_BRACE +
+                                                               CLOSE_PRE_TAG,
+                                                       required = true
+                                             )
                                              final String jdbcTableAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2628,25 +2729,37 @@ public class KomodoTeiidService extends KomodoService {
                     rs.close();
 
                     // Create mapping of catalog to schema list
+                    Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
                     Map<String,List<String>> catalogSchemaMap = new HashMap<String, List<String>>();
                     for(String catlg : allCats) {
                         ResultSet rs2;
                         try {
                             rs2 = connection.getMetaData().getSchemas(catlg,null);
                         } catch (Exception ex) {
-                            continue;
+                            if(allCats.size()==1) {
+                                try {
+                                    rs2 = connection.getMetaData().getSchemas();
+                                } catch (Exception ex1) {
+                                    continue;
+                                }
+                            } else {
+                                continue;
+                            }
                         }
                         List<String> schemaList = new ArrayList<String>();
                         while (rs2.next()) {
                             String schemaName = rs2.getString(1);
                             schemaList.add(schemaName);
                         }
+                        Collections.sort(schemaList, String.CASE_INSENSITIVE_ORDER);
                         catalogSchemaMap.put(catlg, schemaList);
                         rs2.close();
                     }
 
                     // Generate the infos
-                    for(String catName : catalogSchemaMap.keySet()) {
+                    List<String> catNames = new ArrayList<String>(catalogSchemaMap.keySet());
+                    Collections.sort(catNames, String.CASE_INSENSITIVE_ORDER);
+                    for(String catName : catNames) {
                         RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
                         info.setItemName(catName);
                         info.setItemType(CATALOG);
@@ -2662,6 +2775,7 @@ public class KomodoTeiidService extends KomodoService {
                         allCats.add(catalog);
                     }
                     resultSet.close();
+                    Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
                     // Create infos
                     for(String cat : allCats) {
                         RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
@@ -2679,6 +2793,7 @@ public class KomodoTeiidService extends KomodoService {
                     }
                     resultSet.close();
 
+                    Collections.sort(allSchemas, String.CASE_INSENSITIVE_ORDER);
                     for(String sch : allSchemas) {
                         RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
                         info.setItemName(sch);

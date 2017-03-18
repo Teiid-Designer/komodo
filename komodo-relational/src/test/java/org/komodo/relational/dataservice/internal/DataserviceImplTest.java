@@ -49,6 +49,7 @@ import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.dataservice.ConnectionEntry;
+import org.komodo.relational.dataservice.DataServiceEntry;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.DataserviceManifest;
 import org.komodo.relational.dataservice.DdlEntry;
@@ -67,6 +68,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
 import org.komodo.test.utils.TestUtilities;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -826,6 +828,52 @@ public final class DataserviceImplTest extends RelationalModelTest {
             final KomodoObject ref = _repo.getUsingId( getTransaction(), refId );
             assertThat( ref, is( notNullValue() ) );
             assertThat( ref.getPrimaryType( getTransaction() ).getName(), is( referenceNodeType ) );
+        }
+    }
+
+    @Test
+    public void shouldCloneDataservice() throws Exception {
+        InputStream importStream = TestUtilities.sampleDataserviceExample();
+        assertThat( importStream, is( notNullValue() ) );
+
+        ImportMessages importMessages = new ImportMessages();
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption( OptionKeys.NAME, "MyDataService" );
+
+        DataserviceConveyor conveyor = new DataserviceConveyor( _repo );
+        KomodoObject parent = _repo.komodoWorkspace( getTransaction() );
+        conveyor.dsImport( getTransaction(), importStream, parent, importOptions, importMessages );
+        assertThat( importMessages.hasError(), is( false ) );
+        commit();
+
+        final String dataServiceName = "MyDataService";
+        assertThat( parent.hasChild( getTransaction(), dataServiceName ), is( true ) );
+        KomodoObject dsObject = parent.getChild( getTransaction(), dataServiceName );
+        Dataservice theDataService = mgr.resolve(getTransaction(), dsObject, Dataservice.class);
+
+        Dataservice copy = this.mgr.createDataservice(getTransaction(), null, SERVICE_NAME + "Copy");
+        theDataService.clone(getTransaction(), copy);
+
+        assertEquals(theDataService.getDescription(getTransaction()), copy.getDescription(getTransaction()));
+        assertEquals(theDataService.getLastModified(getTransaction()), copy.getLastModified(getTransaction()));
+        assertEquals(theDataService.getModifiedBy(getTransaction()), copy.getModifiedBy(getTransaction()));
+
+        DataServiceEntry<?>[] srcChildren = theDataService.getChildren(getTransaction());
+        DataServiceEntry<?>[] tgtChildren = copy.getChildren(getTransaction());
+        assertEquals(srcChildren.length, tgtChildren.length);
+
+        for (DataServiceEntry<?> srcChild : srcChildren) {
+            String childName = srcChild.getName(getTransaction());
+            assertTrue(copy.hasChild(getTransaction(), childName));
+            DataServiceEntry<?> tgtChild = copy.getChild(getTransaction(), childName);
+
+            String[] propNames = srcChild.getPropertyNames(getTransaction());
+            for (String propName : propNames) {
+                Property srcProperty = srcChild.getProperty(getTransaction(), propName);
+                assertTrue(tgtChild.hasProperty(getTransaction(), propName));
+                Property tgtProperty = tgtChild.getProperty(getTransaction(), propName);
+                assertEquals(srcProperty.getValue(getTransaction()), tgtProperty.getValue(getTransaction()));
+            }
         }
     }
 }

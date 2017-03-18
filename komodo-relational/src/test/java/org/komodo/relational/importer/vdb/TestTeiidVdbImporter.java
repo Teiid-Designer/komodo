@@ -25,7 +25,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -59,6 +57,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.KLog;
+import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.CoreLexicon;
@@ -1350,6 +1349,94 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Ddl Sequenced
         verify(model, "stockPricesMatView", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+    }
+
+    @Test
+    public void testRemoveModelDefinition() throws Exception {
+        InputStream vdbStream = TestUtilities.portfolioExample();
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        executeImporter(vdbStream, workspace, importOptions, importMessages);
+
+        // Commit the transaction, handling any import message
+        commitHandleErrors(importMessages);
+
+        // Test that a vdb was created
+        KomodoObject vdbNode = workspace.getChild(getTransaction(),TestUtilities.PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
+        Vdb vdb = manager.resolve(getTransaction(), vdbNode, Vdb.class);
+
+        Model[] models = vdb.getModels(getTransaction(), "PersonalValuations");
+        assertTrue(models != null && models.length == 1);
+
+        Model personValue = models[0];
+        personValue.setModelDefinition(getTransaction(), EMPTY_STRING);
+
+        commit();
+
+        //
+        // Setting model defn to "" removes the property from the model
+        //
+        assertFalse(personValue.hasProperty(getTransaction(), VdbLexicon.Model.MODEL_DEFINITION));
+
+        //
+        // Calling the relational API returns "" regardless of whether the property exists or not
+        // TODO this does not make a lot of sense!!
+        //
+        assertEquals(EMPTY_STRING, personValue.getModelDefinition(getTransaction()));
+
+        //
+        // The sequenced DDL items should have been removed
+        //
+        assertFalse(personValue.hasRawChild(getTransaction(), "teiid_excel"));
+        assertFalse(personValue.hasRawChild(getTransaction(), "Sheet1"));
+    }
+
+    @Test
+    public void testRemoveVdbContent() throws Exception {
+        InputStream vdbStream = TestUtilities.portfolioExample();
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        executeImporter(vdbStream, workspace, importOptions, importMessages);
+
+        // Commit the transaction, handling any import message
+        commitHandleErrors(importMessages);
+
+        // Test that a vdb was created
+        KomodoObject vdbNode = workspace.getChild(getTransaction(),TestUtilities.PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
+        Vdb vdb = manager.resolve(getTransaction(), vdbNode, Vdb.class);
+
+        KomodoObject[] jcrContent = vdb.getRawChildren(getTransaction(), JcrLexicon.CONTENT.getString());
+        assertTrue(jcrContent != null && jcrContent.length == 1);
+
+        //
+        // Setting data property should remove all the vdb properties
+        //
+        jcrContent[0].setProperty(getTransaction(), JcrLexicon.DATA.getString(), EMPTY_STRING);
+
+        commit();
+
+        //
+        // All children of the vdb node removed
+        //
+        assertFalse(vdb.hasChildren(getTransaction()));
     }
 
     /**
