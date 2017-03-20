@@ -22,6 +22,7 @@
 package org.komodo.rest.service;
 
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_DATA_SOURCE_NAME_EXISTS;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_NAME_EXISTS;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_NAME_VALIDATION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_COLUMNS_ERROR;
@@ -66,6 +67,7 @@ import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
@@ -3111,25 +3113,33 @@ public final class KomodoVdbService extends KomodoService {
             return Response.ok().entity( errorMsg ).build();
         }
 
-        // check for duplicate name
         UnitOfWork uow = null;
 
         try {
             uow = createTransaction( principal, "validateVdbName", true ); //$NON-NLS-1$
-            final Vdb[] vdbs = getWorkspaceManager( uow ).findVdbs( uow );
 
-            if ( vdbs.length != 0 ) {
-                for ( final Vdb vdb : vdbs ) {
-                    if ( vdbName.equals( vdb.getName( uow ) ) ) {
-                        return Response.ok()
-                                       .entity( RelationalMessages.getString( VDB_NAME_EXISTS ) )
-                                       .build();
-                    }
+            // make sure an existing VDB does not have that name
+            final Vdb vdb = findVdb( uow, vdbName );
+
+            if ( vdb == null ) {
+                // make sure an existing connection does not have the same name
+                final Datasource ds = findDatasource( uow, vdbName );
+
+                if ( ds == null ) {
+                    // name is valid
+                    return Response.ok().build();
                 }
+
+                // name is the same as an existing data source
+                return Response.ok()
+                               .entity( RelationalMessages.getString( VDB_DATA_SOURCE_NAME_EXISTS ) )
+                               .build();
             }
 
-            // name is valid
-            return Response.ok().build();
+            // name is the same as an existing VDB
+            return Response.ok()
+                           .entity( RelationalMessages.getString( VDB_NAME_EXISTS ) )
+                           .build();
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
                 uow.rollback();
