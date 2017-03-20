@@ -2428,20 +2428,17 @@ public final class KomodoDataserviceService extends KomodoService {
 
         try {
             uow = createTransaction( principal, "validateDataserviceName", true ); //$NON-NLS-1$
-            final Dataservice[] dataServices = getWorkspaceManager( uow ).findDataservices( uow );
+            final Dataservice service = findDataservice( uow, dataserviceName );
 
-            if ( dataServices.length != 0 ) {
-                for ( final Dataservice ds : dataServices ) {
-                    if ( dataserviceName.equals( ds.getName( uow ) ) ) {
-                        return Response.ok()
-                                       .entity( RelationalMessages.getString( DATASERVICE_SERVICE_NAME_EXISTS ) )
-                                       .build();
-                    }
-                }
+            if ( service == null ) {
+                // name is valid
+                return Response.ok().build();
             }
 
-            // name is valid
-            return Response.ok().build();
+            // name is a duplicate
+            return Response.ok()
+                           .entity( RelationalMessages.getString( DATASERVICE_SERVICE_NAME_EXISTS ) )
+                           .build();
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
                 uow.rollback();
