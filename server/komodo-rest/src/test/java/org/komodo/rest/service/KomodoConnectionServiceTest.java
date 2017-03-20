@@ -43,7 +43,7 @@ import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class KomodoDatasourceServiceTest extends AbstractKomodoServiceTest {
+public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest {
 
     public static final String DATASOURCE_NAME = "MyDataSource"; 
     
@@ -52,11 +52,11 @@ public final class KomodoDatasourceServiceTest extends AbstractKomodoServiceTest
 
     @Test
     @Ignore
-    public void shouldGetDatasources() throws Exception {
+    public void shouldGetConnections() throws Exception {
         createDatasource(DATASOURCE_NAME);
 
         // get
-        URI uri = _uriBuilder.workspaceDatasourcesUri();
+        URI uri = _uriBuilder.workspaceConnectionsUri();
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
         ClientResponse<String> response = request.get(String.class);
 
@@ -95,12 +95,12 @@ public final class KomodoDatasourceServiceTest extends AbstractKomodoServiceTest
     
     @Test
     @Ignore
-    public void shouldGetDatasource() throws Exception {
+    public void shouldGetConnection() throws Exception {
         createDatasource(DATASOURCE_NAME);
 
         // get
         Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SOURCE_NAME, DATASOURCE_NAME);
-        _uriBuilder.addSetting(settings, SettingNames.DATA_SOURCE_PARENT_PATH, _uriBuilder.workspaceDatasourcesUri());
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SOURCE_PARENT_PATH, _uriBuilder.workspaceConnectionsUri());
 
         URI uri = _uriBuilder.dataSourceUri(LinkType.SELF, settings);
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

@@ -1266,28 +1266,28 @@ public class KomodoTeiidService extends KomodoService {
     }
     
     /**
-     * Remove a DataSource from the server
+     * Remove a Connection from the server
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param dataSourceName
-     *        the DataSource name (never <code>null</code>)
+     * @param connectionName
+     *        the Connection name (never <code>null</code>)
      * @return a JSON representation of the status (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error removing the DataSource
+     *         if there is an error removing the Connection
      */
     @DELETE
-    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Removes a DataSource from the teiid server")
+    @ApiOperation(value = "Removes a Connection from the teiid server")
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response removeDataSource(final @Context HttpHeaders headers,
+    public Response removeConnection(final @Context HttpHeaders headers,
                                      final @Context UriInfo uriInfo,
-                                     @ApiParam(value = "Name of the data source to be removed", required = true)
-                                     final @PathParam( "dataSourceName" ) String dataSourceName) throws KomodoRestException {
+                                     @ApiParam(value = "Name of the connection to be removed", required = true)
+                                     final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1302,24 +1302,24 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiidNode = getDefaultTeiid();
 
-            uow = createTransaction(principal, "removeDataSource", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "removeConnection", false); //$NON-NLS-1$
 
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
-            teiidInstance.deleteDataSource(dataSourceName);
+            teiidInstance.deleteDataSource(connectionName);
 
             // Await the undeployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (! hasDataSource(dataSourceName, teiidNode)) {
+            if (! hasDataSource(connectionName, teiidNode)) {
                 // Make sure DataSource state is current in cachedTeiid
-                refreshCachedDataSources(teiidNode, dataSourceName);
+                refreshCachedDataSources(teiidNode, connectionName);
 
-                status.addAttribute(dataSourceName,
+                status.addAttribute(connectionName,
                                     RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_UNDEPLOYED));
             } else
-                status.addAttribute(dataSourceName,
+                status.addAttribute(connectionName,
                                     RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_UNDEPLOYMENT_REQUEST_SENT));
 
            return commit(uow, mediaTypes, status);
@@ -1333,7 +1333,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, dataSourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, connectionName);
         }
     }
     
@@ -1470,19 +1470,19 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON document representing all the data sources deployed to teiid (never <code>null</code>)
+     * @return a JSON document representing all the connections deployed to teiid (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem constructing the JSON document
      */
     @GET
-    @Path(V1Constants.DATA_SOURCES_SEGMENT)
+    @Path(V1Constants.CONNECTIONS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Display the collection of data sources",
+    @ApiOperation(value = "Display the collection of connections",
                             response = RestDataSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDataSources(final @Context HttpHeaders headers,
+    public Response getConnections(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1497,11 +1497,11 @@ public class KomodoTeiidService extends KomodoService {
             refreshCachedDataSources(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConnections", true); //$NON-NLS-1$
 
             // Get teiid datasources
             Datasource[] dataSources = cachedTeiid.getDataSources(uow);
-            LOGGER.debug("getDataSources:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
+            LOGGER.debug("getConnections:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
 
             final List<RestDataSource> entities = new ArrayList<>();
 
@@ -1509,7 +1509,7 @@ public class KomodoTeiidService extends KomodoService {
             for (final Datasource dataSource : dataSources) {
                 RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
                 entities.add(entity);
-                LOGGER.debug("getDataSources:Data Source '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
+                LOGGER.debug("getConnections:Data Source '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
             }
 
             // create response
@@ -1534,25 +1534,25 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the id of the DataSource being retrieved (cannot be empty)
-     * @return the JSON representation of the DataSource (never <code>null</code>)
+     * @param connectionName
+     *        the id of the Connection being retrieved (cannot be empty)
+     * @return the JSON representation of the Connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace DataSource or constructing the JSON representation
+     *         if there is a problem finding the specified connection or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Find dataSource by name", response = RestDataSource.class)
+    @ApiOperation(value = "Find connection by name", response = RestDataSource.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "No dataSource could be found with name"),
+        @ApiResponse(code = 404, message = "No connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDataSource( final @Context HttpHeaders headers,
+    public Response getConnection( final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
-                                   @ApiParam(value = "Name of the data source", required = true)
-                                   final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+                                   @ApiParam(value = "Name of the connection", required = true)
+                                   final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1566,14 +1566,14 @@ public class KomodoTeiidService extends KomodoService {
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find DataSource
-            uow = createTransaction(principal, "getDataSource-" + datasourceName, true); //$NON-NLS-1$
-            Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
+            uow = createTransaction(principal, "getConnection-" + connectionName, true); //$NON-NLS-1$
+            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
 
             KomodoProperties properties = new KomodoProperties();
             final RestDataSource restDataSource = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("getDataSource:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
+            LOGGER.debug("getConnection:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
             return commit( uow, mediaTypes, restDataSource );
 
         } catch (CallbackTimeoutException ex) {
@@ -1587,36 +1587,36 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_ERROR, connectionName);
         }
     }
     
     /**
-     * Return the default translator to be used for a Datasource
+     * Return the default translator to be used for a Connection
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the id of the Datasource being retrieved (cannot be empty)
-     * @return the translator for the datasource (never <code>null</code>)
+     * @param connectionName
+     *        the id of the Connection being retrieved (cannot be empty)
+     * @return the translator for the connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace Datasource 
+     *         if there is a problem finding the specified connection 
      */
     @GET
-    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER 
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER 
            + StringConstants.FORWARD_SLASH + V1Constants.TRANSLATOR_DEFAULT_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Get the default translator recommended for a data source")
+    @ApiOperation(value = "Get the default translator recommended for a connection")
     @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "No Datasource could be found with name"),
+        @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDatasourceDefaultTranslator( final @Context HttpHeaders headers,
+    public Response getConnectionDefaultTranslator( final @Context HttpHeaders headers,
                                                     final @Context UriInfo uriInfo,
-                                                    @ApiParam(value = "Id of the datasource", required = true)
-                                                    final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+                                                    @ApiParam(value = "Id of the connection", required = true)
+                                                    final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1629,11 +1629,11 @@ public class KomodoTeiidService extends KomodoService {
             Teiid teiidNode = getDefaultTeiid();
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            // find DataSource
-            uow = createTransaction(principal, "getDataSourceDefaultTranslator-" + datasourceName, true); //$NON-NLS-1$
-            Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
+            // find Connection
+            uow = createTransaction(principal, "getConnectionDefaultTranslator-" + connectionName, true); //$NON-NLS-1$
+            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
 
             // Get the driver name for the source
             String driverName = dataSource.getDriverName(uow);
@@ -1658,7 +1658,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_TRANSLATOR_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_TRANSLATOR_ERROR, connectionName);
         }
     }
 
@@ -2027,7 +2027,7 @@ public class KomodoTeiidService extends KomodoService {
     }
 
     /**
-     * Adds (deploys) a DataSource to the server
+     * Adds (deploys) a Connection to the server
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
@@ -2036,26 +2036,26 @@ public class KomodoTeiidService extends KomodoService {
      *        the path (never <code>null</code>)
      * @return a JSON representation of the status (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error adding the DataSource
+     *         if there is an error adding the Connection
      */
     @SuppressWarnings( "nls" )
     @POST
-    @Path(V1Constants.DATA_SOURCE_SEGMENT)
+    @Path(V1Constants.CONNECTION_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Deploy the data source to the teiid server")
+    @ApiOperation(value = "Deploy the connection to the teiid server")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response addDatasource(final @Context HttpHeaders headers,
+    public Response addConnection( final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
                                    @ApiParam(
                                              value = "" + 
-                                                     "JSON of the properties of the data source:<br>" +
+                                                     "JSON of the properties of the connection:<br>" +
                                                      OPEN_PRE_TAG +
                                                      OPEN_BRACE + BR +
-                                                     NBSP + "path: \"location of the data source in the workspace\"" + BR +
+                                                     NBSP + "path: \"location of the connection in the workspace\"" + BR +
                                                      CLOSE_BRACE +
                                                      CLOSE_PRE_TAG,
                                              required = true
@@ -2089,7 +2089,7 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiidNode = getDefaultTeiid();
 
-            uow = createTransaction(principal, "deployTeiidDatasource", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "deployTeiidConnection", false); //$NON-NLS-1$
 
             List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
             if (dataSources.size() == 0) {
@@ -2495,27 +2495,27 @@ public class KomodoTeiidService extends KomodoService {
     }
     
     /**
-     * Return the table names for a JDBC Datasource from JDBC connection
+     * Return the table names for a teiid JDBC connection 
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param jdbcTableAttributes
      *        the attributes for fetching the tables (cannot be empty)
-     * @return the JDBC table names for the Datasource (never <code>null</code>)
+     * @return the JDBC table names for the Connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace Datasource 
+     *         if there is a problem finding the specified connection 
      */
     @POST
-    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.TABLES_SEGMENT)
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.TABLES_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Get table names for a jdbc source")
+    @ApiOperation(value = "Get table names for a jdbc connection")
     @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "No Datasource could be found with name"),
+        @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDatasourceJdbcTables( final @Context HttpHeaders headers,
+    public Response getConnectionJdbcTables( final @Context HttpHeaders headers,
                                              final @Context UriInfo uriInfo,
                                              @ApiParam(
                                                        value = "" + 
@@ -2556,9 +2556,9 @@ public class KomodoTeiidService extends KomodoService {
             Teiid teiidNode = getDefaultTeiid();
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            uow = createTransaction(principal, "getDatasourceJdbcTables", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConnectionJdbcTables", true); //$NON-NLS-1$
 
-            // Get the data source
+            // Get the data source (connection) from teiid
             Datasource dataSource = cachedTeiid.getDataSource(uow, attr.getDataSourceName());
             if (dataSource == null)
                 return commitNoDatasourceFound(uow, mediaTypes, attr.getDataSourceName());
@@ -2616,32 +2616,32 @@ public class KomodoTeiidService extends KomodoService {
     }
         
     /**
-     * Return the catalog and schema info for a JDBC Datasource from JDBC connection
+     * Return the catalog and schema info for a teiid JDBC connection
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the id of the Datasource being retrieved (cannot be empty)
-     * @return the JDBC catalog names for the Datasource (never <code>null</code>)
+     * @param connectionName
+     *        the id of the Connection being retrieved (cannot be empty)
+     * @return the JDBC catalog names for the Connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace Datasource 
+     *         if there is a problem finding the specified workspace Connection 
      */
     @GET
-    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER 
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER 
            + StringConstants.FORWARD_SLASH + V1Constants.JDBC_CATALOG_SCHEMA_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Get catalog and schema info for a jdbc source",
+    @ApiOperation(value = "Get catalog and schema info for a jdbc connection",
                   response = RestTeiidDataSourceJdbcCatalogSchemaInfo[].class)
     @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "No Datasource could be found with name"),
+        @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getDatasourceJdbcCatalogSchemaInfo( final @Context HttpHeaders headers,
                                                         final @Context UriInfo uriInfo,
-                                                        @ApiParam(value = "Id of the datasource", required = true)
-                                                        final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+                                                        @ApiParam(value = "Id of the connection", required = true)
+                                                        final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -2655,12 +2655,12 @@ public class KomodoTeiidService extends KomodoService {
             Teiid teiidNode = getDefaultTeiid();
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            uow = createTransaction(principal, "getDatasourceJdbcTables", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConnectionJdbcTables", true); //$NON-NLS-1$
 
-            // Get the data source
-            Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
+            // Get the data source (connection) from teiid
+            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
 
             // Ensure the datasource is jdbc
             if(!dataSource.isJdbc(uow)) {
@@ -2810,31 +2810,31 @@ public class KomodoTeiidService extends KomodoService {
     }
 
     /**
-     * Return JDBC capabilities and info for a JDBC Datasource
+     * Return JDBC capabilities and info for a JDBC Connection
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the id of the Datasource being retrieved (cannot be empty)
-     * @return the JDBC table names for the Datasource (never <code>null</code>)
+     * @param connectionName
+     *        the id of the Connection being retrieved (cannot be empty)
+     * @return the JDBC table names for the Connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace Datasource 
+     *         if there is a problem finding the specified workspace Connection 
      */
     @GET
-    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER 
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER 
            + StringConstants.FORWARD_SLASH + V1Constants.JDBC_INFO_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
     @ApiOperation(value = "Get info for a jdbc source", response = RestDataSourceJdbcInfo.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "No Datasource could be found with name"),
+        @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDatasourceJdbcInfo( final @Context HttpHeaders headers,
+    public Response getConnectionJdbcInfo( final @Context HttpHeaders headers,
                                            final @Context UriInfo uriInfo,
-                                           @ApiParam(value = "Id of the datasource", required = true)
-                                           final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+                                           @ApiParam(value = "Id of the connection", required = true)
+                                           final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -2848,12 +2848,12 @@ public class KomodoTeiidService extends KomodoService {
             Teiid teiidNode = getDefaultTeiid();
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
-            uow = createTransaction(principal, "getDatasourceJdbcTables", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConnectionJdbcTables", true); //$NON-NLS-1$
 
-            // Get the data source
-            Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
+            // Get the data source from teiid
+            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
 
             // Ensure the datasource is jdbc
             if(!dataSource.isJdbc(uow)) {
@@ -2945,7 +2945,7 @@ public class KomodoTeiidService extends KomodoService {
         List<String> tableNameList = new ArrayList<String>();
         if(connection!=null) {
             try {
-                ResultSet resultSet = connection.getMetaData().getTables(catalogName, schemaName, tableFilter, new String[]{"DOCUMENT", "TABLE", "VIEW"});
+                ResultSet resultSet = connection.getMetaData().getTables(catalogName, schemaName, tableFilter, new String[]{"DOCUMENT", "TABLE", "VIEW"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 int columnCount = resultSet.getMetaData().getColumnCount();
                 while (resultSet.next()) {
                     String tableName = null;

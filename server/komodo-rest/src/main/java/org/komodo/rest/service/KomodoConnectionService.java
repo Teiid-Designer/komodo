@@ -63,12 +63,12 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * A Komodo REST service for obtaining Datasource information from the workspace.
+ * A Komodo REST service for obtaining Connection information from the workspace.
  */
 @Path(V1Constants.WORKSPACE_SEGMENT + StringConstants.FORWARD_SLASH +
-           V1Constants.DATA_SOURCES_SEGMENT)
-@Api(tags = {V1Constants.DATA_SOURCES_SEGMENT})
-public final class KomodoDatasourceService extends KomodoService {
+           V1Constants.CONNECTIONS_SEGMENT)
+@Api(tags = {V1Constants.CONNECTIONS_SEGMENT})
+public final class KomodoConnectionService extends KomodoService {
 
     private static final int ALL_AVAILABLE = -1;
 
@@ -78,28 +78,28 @@ public final class KomodoDatasourceService extends KomodoService {
      * @throws WebApplicationException
      *         if there is a problem obtaining the {@link WorkspaceManager workspace manager}
      */
-    public KomodoDatasourceService( final KEngine engine ) throws WebApplicationException {
+    public KomodoConnectionService( final KEngine engine ) throws WebApplicationException {
         super( engine );
     }
 
     /**
-     * Get the Datasources from the komodo repository
+     * Get the Connections from the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON document representing all the Datasources in the Komodo workspace (never <code>null</code>)
+     * @return a JSON document representing all the Connections in the Komodo workspace (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem constructing the Datasource JSON document
+     *         if there is a problem constructing the Connection JSON document
      */
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Return the collection of data sources",
+    @ApiOperation(value = "Return the collection of connections",
                             response = RestDataSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDatasources( final @Context HttpHeaders headers,
+    public Response getConnections( final @Context HttpHeaders headers,
                                     final @Context UriInfo uriInfo ) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -113,12 +113,12 @@ public final class KomodoDatasourceService extends KomodoService {
             final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParamKeys.PATTERN );
 
             // find Data sources
-            uow = createTransaction(principal, "getDatasources", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConnections", true ); //$NON-NLS-1$
             Datasource[] dataSources = null;
 
             if ( StringUtils.isBlank( searchPattern ) ) {
                 dataSources = getWorkspaceManager(uow).findDatasources( uow );
-                LOGGER.debug( "getDatasources:found '{0}' Datasources", dataSources.length ); //$NON-NLS-1$
+                LOGGER.debug( "getConnections:found '{0}' Datasources", dataSources.length ); //$NON-NLS-1$
             } else {
                 final String[] datasourcePaths = getWorkspaceManager(uow).findByType( uow, DataVirtLexicon.Connection.NODE_TYPE, null, searchPattern, false );
 
@@ -132,7 +132,7 @@ public final class KomodoDatasourceService extends KomodoService {
                         dataSources[ i++ ] = getWorkspaceManager(uow).resolve( uow, new ObjectImpl( getWorkspaceManager(uow).getRepository(), path, 0 ), Datasource.class );
                     }
 
-                    LOGGER.debug( "getDatasources:found '{0}' DataSources using pattern '{1}'", dataSources.length, searchPattern ); //$NON-NLS-1$
+                    LOGGER.debug( "getConnections:found '{0}' DataSources using pattern '{1}'", dataSources.length, searchPattern ); //$NON-NLS-1$
                 }
             }
 
@@ -183,7 +183,7 @@ public final class KomodoDatasourceService extends KomodoService {
                     if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {                        
                         RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
                         entities.add(entity);
-                        LOGGER.debug("getDatasources:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
+                        LOGGER.debug("getConnections:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
                     } else {
                         break;
                     }
@@ -213,28 +213,28 @@ public final class KomodoDatasourceService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the id of the Datasource being retrieved (cannot be empty)
-     * @return the JSON representation of the Datasource (never <code>null</code>)
+     * @param connectionName
+     *        the id of the Connection being retrieved (cannot be empty)
+     * @return the JSON representation of the Connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem finding the specified workspace Datasource or constructing the JSON representation
+     *         if there is a problem finding the specified workspace Connection or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Find datasource by name", response = RestDataSource.class)
+    @ApiOperation(value = "Find connection by name", response = RestDataSource.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "No Datasource could be found with name"),
+        @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response getDatasource( final @Context HttpHeaders headers,
-                                    final @Context UriInfo uriInfo,
-                                    @ApiParam(
-                                              value = "Name of the datasource",
-                                              required = true
-                                    )
-                                    final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+    public Response getConnection( final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   @ApiParam(
+                                             value = "Name of the connection",
+                                             required = true
+                                   )
+                                   final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -244,15 +244,15 @@ public final class KomodoDatasourceService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction(principal, "getDatasource", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConnection", true ); //$NON-NLS-1$
 
-            Datasource datasource = findDatasource(uow, datasourceName);
+            Datasource datasource = findDatasource(uow, connectionName);
             if (datasource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
 
             KomodoProperties properties = new KomodoProperties();
             final RestDataSource restDatasource = entityFactory.create(datasource, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("getVdb:VDB '{0}' entity was constructed", datasource.getName(uow)); //$NON-NLS-1$
+            LOGGER.debug("getConnection:Datasource '{0}' entity was constructed", datasource.getName(uow)); //$NON-NLS-1$
             return commit( uow, mediaTypes, restDatasource );
 
         } catch ( final Exception e ) {
@@ -264,53 +264,53 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCE_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCE_ERROR, connectionName);
         }
     }
 
     /**
-     * Create a new DataSource in the komodo repository
+     * Create a new Connection in the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the datasource name (cannot be empty)
-     * @param datasourceJson
-     *        the datasource JSON representation (cannot be <code>null</code>)
-     * @return a JSON representation of the new datasource (never <code>null</code>)
+     * @param connectionName
+     *        the connection name (cannot be empty)
+     * @param connectionJson
+     *        the connection JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the new connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error creating the DataSource
+     *         if there is an error creating the Connection
      */
     @POST
-    @Path( StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Create a datasource in the workspace")
+    @ApiOperation(value = "Create a connection in the workspace")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response createDatasource( final @Context HttpHeaders headers,
-                                       final @Context UriInfo uriInfo,
-                                       @ApiParam(
-                                                 value = "Name of the datasource",
-                                                 required = true
-                                       )
-                                       final @PathParam( "datasourceName" ) String datasourceName,
-                                       @ApiParam(
-                                                 value = "" + 
-                                                         "JSON of the properties of the new data source:<br>" +
-                                                         OPEN_PRE_TAG +
-                                                         OPEN_BRACE + BR +
-                                                         NBSP + "keng\\_\\_id: \"id of the data source\"" + BR +
-                                                         NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
-                                                         NBSP + "dv\\_\\_jndiName: \"the jndi name of the data source\"" + BR +
-                                                         NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
-                                                         CLOSE_BRACE +
-                                                         CLOSE_PRE_TAG,
-                                                 required = true
-                                       )
-                                       final String datasourceJson) throws KomodoRestException {
+    public Response createConnection( final @Context HttpHeaders headers,
+                                      final @Context UriInfo uriInfo,
+                                      @ApiParam(
+                                                value = "Name of the connection",
+                                                required = true
+                                      )
+                                      final @PathParam( "connectionName" ) String connectionName,
+                                      @ApiParam(
+                                                value = "" + 
+                                                        "JSON of the properties of the new connection:<br>" +
+                                                        OPEN_PRE_TAG +
+                                                        OPEN_BRACE + BR +
+                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + BR +
+                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
+                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + BR +
+                                                        NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
+                                                        CLOSE_BRACE +
+                                                        CLOSE_PRE_TAG,
+                                                required = true
+                                      )
+                                      final String connectionJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -320,12 +320,12 @@ public final class KomodoDatasourceService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        // Error if the datasource name is missing
-        if (StringUtils.isBlank( datasourceName )) {
+        // Error if the connection name is missing
+        if (StringUtils.isBlank( connectionName )) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_MISSING_NAME);
         }
 
-        final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( datasourceJson, RestDataSource.class );
+        final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( connectionJson, RestDataSource.class );
         final String jsonDatasourceName = restDatasource.getId();
         // Error if the name is missing from the supplied json body
         if ( StringUtils.isBlank( jsonDatasourceName ) ) {
@@ -333,18 +333,18 @@ public final class KomodoDatasourceService extends KomodoService {
         }
 
         // Error if the name parameter is different than JSON name
-        final boolean namesMatch = datasourceName.equals( jsonDatasourceName );
+        final boolean namesMatch = connectionName.equals( jsonDatasourceName );
         if ( !namesMatch ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_SOURCE_NAME_ERROR, datasourceName, jsonDatasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_SOURCE_NAME_ERROR, connectionName, jsonDatasourceName);
         }
 
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction(principal, "createDatasource", false ); //$NON-NLS-1$
+            uow = createTransaction(principal, "createConnection", false ); //$NON-NLS-1$
 
-            // Error if the repo already contains a datasource with the supplied name.
-            if ( getWorkspaceManager(uow).hasChild( uow, datasourceName ) ) {
+            // Error if the repo already contains a connection with the supplied name.
+            if ( getWorkspaceManager(uow).hasChild( uow, connectionName ) ) {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS);
             }
 
@@ -360,44 +360,44 @@ public final class KomodoDatasourceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, datasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, connectionName);
         }
     }
 
     /**
-     * Clone a DataSource in the komodo repository
+     * Clone a Connection in the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the datasource name (cannot be empty)
-     * @param newDatasourceName
-     *        the new datasource name (cannot be empty)
-     * @return a JSON representation of the new datasource (never <code>null</code>)
+     * @param connectionName
+     *        the connection name (cannot be empty)
+     * @param newConnectionName
+     *        the new connection name (cannot be empty)
+     * @return a JSON representation of the new connection (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error creating the DataSource
+     *         if there is an error creating the Connection
      */
     @POST
-    @Path( StringConstants.FORWARD_SLASH + V1Constants.CLONE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CLONE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Clone a datasource in the workspace")
+    @ApiOperation(value = "Clone a connection in the workspace")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response cloneDatasource( final @Context HttpHeaders headers,
-                                       final @Context UriInfo uriInfo,
-                                       @ApiParam(
-                                                 value = "Name of the datasource",
-                                                 required = true
-                                       )
-                                       final @PathParam( "datasourceName" ) String datasourceName,
-                                       @ApiParam(
-                                                 value = "The new name of the datasource",
-                                                 required = true
-                                       )
-                                       final String newDatasourceName) throws KomodoRestException {
+    public Response cloneConnection( final @Context HttpHeaders headers,
+                                     final @Context UriInfo uriInfo,
+                                     @ApiParam(
+                                               value = "Name of the connection",
+                                               required = true
+                                     )
+                                     final @PathParam( "connectionName" ) String connectionName,
+                                     @ApiParam(
+                                               value = "The new name of the connection",
+                                               required = true
+                                     )
+                                     final String newConnectionName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -407,39 +407,39 @@ public final class KomodoDatasourceService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        // Error if the datasource name is missing
-        if (StringUtils.isBlank( datasourceName )) {
+        // Error if the connection name is missing
+        if (StringUtils.isBlank( connectionName )) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NAME);
         }
 
-        // Error if the new datasource name is missing
-        if ( StringUtils.isBlank( newDatasourceName ) ) {
+        // Error if the new connection name is missing
+        if ( StringUtils.isBlank( newConnectionName ) ) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NEW_NAME);
         }
 
         // Error if the name parameter and new name are the same
-        final boolean namesMatch = datasourceName.equals( newDatasourceName );
+        final boolean namesMatch = connectionName.equals( newConnectionName );
         if ( namesMatch ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR, newDatasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR, newConnectionName);
         }
 
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction(principal, "cloneDatasource", false ); //$NON-NLS-1$
+            uow = createTransaction(principal, "cloneConnection", false ); //$NON-NLS-1$
 
-            // Error if the repo already contains a datasource with the supplied name.
-            if ( getWorkspaceManager(uow).hasChild( uow, newDatasourceName ) ) {
+            // Error if the repo already contains a connection with the supplied name.
+            if ( getWorkspaceManager(uow).hasChild( uow, newConnectionName ) ) {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS);
             }
 
-            // create new Datasource
+            // create new Connection
             // must be an update
-            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
+            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
             final Datasource oldDatasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
             final RestDataSource oldEntity = entityFactory.create(oldDatasource, uriInfo.getBaseUri(), uow );
             
-            final Datasource datasource = getWorkspaceManager(uow).createDatasource( uow, null, newDatasourceName);
+            final Datasource datasource = getWorkspaceManager(uow).createDatasource( uow, null, newConnectionName);
 
             setProperties( uow, datasource, oldEntity );
 
@@ -460,48 +460,48 @@ public final class KomodoDatasourceService extends KomodoService {
     }
 
     /**
-     * Update a Datasource in the komodo repository
+     * Update a Connection in the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the datasource name (cannot be empty)
-     * @param datasourceJson
-     *        the datasource JSON representation (cannot be <code>null</code>)
-     * @return a JSON representation of the updated datasource (never <code>null</code>)
+     * @param connectionName
+     *        the connection name (cannot be empty)
+     * @param connectionJson
+     *        the connection JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the updated connection (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is an error updating the VDB
      */
     @PUT
-    @Path( StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Update a datasource in the workspace")
+    @ApiOperation(value = "Update a connection in the workspace")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response updateDatasource( final @Context HttpHeaders headers,
-                                       final @Context UriInfo uriInfo,
-                                       @ApiParam(
-                                                 value = "Name of the datasource",
-                                                 required = true
-                                       )
-                                       final @PathParam( "datasourceName" ) String datasourceName,
-                                       @ApiParam(
-                                                 value = "" + 
-                                                         "JSON of the properties of the data source:<br>" +
-                                                         OPEN_PRE_TAG +
-                                                         OPEN_BRACE + BR +
-                                                         NBSP + "keng\\_\\_id: \"id of the data source\"" + BR +
-                                                         NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
-                                                         NBSP + "dv\\_\\_jndiName: \"the jndi name of the data source\"" + BR +
-                                                         NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
-                                                         CLOSE_BRACE +
-                                                         CLOSE_PRE_TAG,
-                                                 required = true
-                                       )
-                                       final String datasourceJson) throws KomodoRestException {
+    public Response updateConnection( final @Context HttpHeaders headers,
+                                      final @Context UriInfo uriInfo,
+                                      @ApiParam(
+                                                value = "Name of the connection",
+                                                required = true
+                                      )
+                                      final @PathParam( "connectionName" ) String connectionName,
+                                      @ApiParam(
+                                                value = "" + 
+                                                        "JSON of the properties of the connection:<br>" +
+                                                        OPEN_PRE_TAG +
+                                                        OPEN_BRACE + BR +
+                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + BR +
+                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
+                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + BR +
+                                                        NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
+                                                        CLOSE_BRACE +
+                                                        CLOSE_PRE_TAG,
+                                                required = true
+                                      )
+                                      final String connectionJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -511,12 +511,12 @@ public final class KomodoDatasourceService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        // Error if the datasource name is missing
-        if (StringUtils.isBlank( datasourceName )) {
+        // Error if the connection name is missing
+        if (StringUtils.isBlank( connectionName )) {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_MISSING_NAME);
         }
 
-        final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( datasourceJson, RestDataSource.class );
+        final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( connectionJson, RestDataSource.class );
         final String jsonDatasourceName = restDatasource.getId();
         // Error if the name is missing from the supplied json body
         if ( StringUtils.isBlank( jsonDatasourceName ) ) {
@@ -525,30 +525,30 @@ public final class KomodoDatasourceService extends KomodoService {
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction(principal, "updateDatasource", false ); //$NON-NLS-1$
+            uow = createTransaction(principal, "updateConnection", false ); //$NON-NLS-1$
 
-            final boolean exists = getWorkspaceManager(uow).hasChild( uow, datasourceName );
+            final boolean exists = getWorkspaceManager(uow).hasChild( uow, connectionName );
             // Error if the specified service does not exist
             if ( !exists ) {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_SOURCE_DNE);
             }
 
             // must be an update
-            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
+            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
             final Datasource datasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
 
             // Transfers the properties from the rest object to the created komodo service.
             setProperties(uow, datasource, restDatasource);
 
             // rename if names did not match
-            final boolean namesMatch = datasourceName.equals( jsonDatasourceName );
+            final boolean namesMatch = connectionName.equals( jsonDatasourceName );
             if ( !namesMatch ) {
                 datasource.rename( uow, jsonDatasourceName );
             }
 
             KomodoProperties properties = new KomodoProperties();
             final RestDataSource entity = entityFactory.create(datasource, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("updateDatasource: datasource '{0}' entity was updated", datasource.getName(uow)); //$NON-NLS-1$
+            LOGGER.debug("updateConnection: datasource '{0}' entity was updated", datasource.getName(uow)); //$NON-NLS-1$
             final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
             return response;
         } catch (final Exception e) {
@@ -565,9 +565,9 @@ public final class KomodoDatasourceService extends KomodoService {
     }
 
     private Response doAddDatasource( final UnitOfWork uow,
-                                       final URI baseUri,
-                                       final List<MediaType> mediaTypes,
-                                       final RestDataSource restDatasource ) throws KomodoRestException {
+                                      final URI baseUri,
+                                      final List<MediaType> mediaTypes,
+                                      final RestDataSource restDatasource ) throws KomodoRestException {
         assert( !uow.isRollbackOnly() );
         assert( uow.getState() == State.NOT_STARTED );
         assert( restDatasource != null );
@@ -622,32 +622,32 @@ public final class KomodoDatasourceService extends KomodoService {
     }
 
     /**
-     * Delete the specified Datasource from the komodo repository
+     * Delete the specified Connection from the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param datasourceName
-     *        the name of the datasource to remove (cannot be <code>null</code>)
+     * @param connectionName
+     *        the name of the connection to remove (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
      * @throws KomodoRestException
      *         if there is a problem performing the delete
      */
     @DELETE
-    @Path("{datasourceName}")
+    @Path("{connectionName}")
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Delete a datasource from the workspace")
+    @ApiOperation(value = "Delete a connection from the workspace")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
-    public Response deleteDatasource( final @Context HttpHeaders headers,
-                                       final @Context UriInfo uriInfo,
-                                       @ApiParam(
-                                                 value = "Name of the datasource",
-                                                 required = true
-                                       )
-                                       final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+    public Response deleteConnection( final @Context HttpHeaders headers,
+                                      final @Context UriInfo uriInfo,
+                                      @ApiParam(
+                                                value = "Name of the connection",
+                                                required = true
+                                      )
+                                      final @PathParam( "connectionName" ) String connectionName) throws KomodoRestException {
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
             return principal.getErrorResponse();
@@ -656,10 +656,10 @@ public final class KomodoDatasourceService extends KomodoService {
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction(principal, "removeDatasourceFromWorkspace", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "removeConnectionFromWorkspace", false); //$NON-NLS-1$
 
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repo, uow );
-            KomodoObject datasource = mgr.getChild(uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE);
+            KomodoObject datasource = mgr.getChild(uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE);
 
             if (datasource == null)
                 return Response.noContent().build();
@@ -667,10 +667,10 @@ public final class KomodoDatasourceService extends KomodoService {
             mgr.delete(uow, datasource);
 
             KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
-            if (mgr.hasChild(uow, datasourceName))
-                kso.addAttribute(datasourceName, "Deletion failure"); //$NON-NLS-1$
+            if (mgr.hasChild(uow, connectionName))
+                kso.addAttribute(connectionName, "Deletion failure"); //$NON-NLS-1$
             else
-                kso.addAttribute(datasourceName, "Successfully deleted"); //$NON-NLS-1$
+                kso.addAttribute(connectionName, "Successfully deleted"); //$NON-NLS-1$
 
             return commit(uow, mediaTypes, kso);
         } catch (final Exception e) {
