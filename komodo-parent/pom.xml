@@ -9,7 +9,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.komodo</groupId>
 	<artifactId>komodo-parent</artifactId>
-	<version>0.0.4</version>
+	<version>1.0</version>
 	<name>Komodo Parent</name>
 
 	<url>http://www.jboss.org/teiiddesigner</url>

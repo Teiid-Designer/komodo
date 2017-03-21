@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.komodo</groupId>
         <artifactId>komodo</artifactId>
-        <version>0.0.4</version>
+        <version>1.0</version>
     </parent>
 
     <!-- ================================================================== -->
