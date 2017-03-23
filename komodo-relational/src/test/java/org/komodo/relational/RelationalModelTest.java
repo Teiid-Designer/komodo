@@ -25,8 +25,8 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
@@ -155,18 +155,18 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         return ds;
     }
 
-    protected Datasource createDatasource() throws Exception {
-        return createDatasource( getDefaultDatasourceName() );
+    protected Connection createConnection() throws Exception {
+        return createConnection( getDefaultConnectionName() );
     }
 
-    protected Datasource createDatasource( final String dsName ) throws Exception {
-        return createDatasource( dsName, null );
+    protected Connection createConnection( final String dsName ) throws Exception {
+        return createConnection( dsName, null );
     }
 
-    protected Datasource createDatasource( final String dsName,
+    protected Connection createConnection( final String dsName,
                                            final KomodoObject parent ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance(_repo, getTransaction());
-        final Datasource ds = mgr.createDatasource( getTransaction(), parent, dsName );
+        final Connection ds = mgr.createConnection( getTransaction(), parent, dsName );
 
         assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( DataVirtLexicon.Connection.NODE_TYPE ) );
         assertThat( ds.getName( getTransaction() ), is( dsName ) );
@@ -232,8 +232,8 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         return ( this.name.getMethodName() + "-Dataservice" );
     }
 
-    protected String getDefaultDatasourceName() {
-        return ( this.name.getMethodName() + "-Datasource" );
+    protected String getDefaultConnectionName() {
+        return ( this.name.getMethodName() + "-Connection" );
     }
 
     protected String getDefaultFolderName() {

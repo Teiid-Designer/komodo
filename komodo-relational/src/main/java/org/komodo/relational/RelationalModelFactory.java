@@ -22,6 +22,8 @@
 package org.komodo.relational;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.connection.Connection;
+import org.komodo.relational.connection.internal.ConnectionImpl;
 import org.komodo.relational.dataservice.ConnectionEntry;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.DdlEntry;
@@ -39,8 +41,6 @@ import org.komodo.relational.dataservice.internal.ResourceEntryImpl;
 import org.komodo.relational.dataservice.internal.ServiceVdbEntryImpl;
 import org.komodo.relational.dataservice.internal.UdfEntryImpl;
 import org.komodo.relational.dataservice.internal.VdbEntryImpl;
-import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.folder.internal.FolderImpl;
 import org.komodo.relational.model.AbstractProcedure;
@@ -363,20 +363,20 @@ public final class RelationalModelFactory {
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentWorkspacePath
      *        the parent path (can be empty)
-     * @param sourceName
-     *        the name of the datasource fragment to create (cannot be empty)
-     * @return the Datasource model object (never <code>null</code>)
+     * @param connectionName
+     *        the name of the connection fragment to create (cannot be empty)
+     * @return the connection model object (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    public static Datasource createDatasource( final UnitOfWork transaction,
+    public static Connection createConnection( final UnitOfWork transaction,
                                                final Repository repository,
                                                final String parentWorkspacePath,
-                                               final String sourceName ) throws KException {
+                                               final String connectionName ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( sourceName, "sourceName" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( connectionName, "connectionName" ); //$NON-NLS-1$
 
         // make sure path is in the library
         String parentPath = parentWorkspacePath;
@@ -388,8 +388,8 @@ public final class RelationalModelFactory {
             parentPath = ( workspacePath + parentPath );
         }
 
-        final KomodoObject kobject = repository.add( transaction, parentPath, sourceName, DataVirtLexicon.Connection.NODE_TYPE );
-        final Datasource result = new DatasourceImpl( transaction, repository, kobject.getAbsolutePath() );
+        final KomodoObject kobject = repository.add( transaction, parentPath, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
+        final Connection result = new ConnectionImpl( transaction, repository, kobject.getAbsolutePath() );
         return result;
     }
 

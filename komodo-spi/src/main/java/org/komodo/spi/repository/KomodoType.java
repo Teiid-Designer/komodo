@@ -39,9 +39,9 @@ public enum KomodoType {
     DATASERVICE("dataservice"), //$NON-NLS-1$
 
     /**
-     * Datasource
+     * Connection
      */
-    DATASOURCE("datasource"), //$NON-NLS-1$
+    CONNECTION("connection"), //$NON-NLS-1$
 
     /**
      * Driver

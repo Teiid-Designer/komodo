@@ -40,6 +40,7 @@ import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.ConnectionEntry;
 import org.komodo.relational.dataservice.DataServiceEntry;
 import org.komodo.relational.dataservice.Dataservice;
@@ -47,7 +48,6 @@ import org.komodo.relational.dataservice.DataserviceManifest;
 import org.komodo.relational.dataservice.DriverEntry;
 import org.komodo.relational.dataservice.ServiceVdbEntry;
 import org.komodo.relational.dataservice.VdbEntry;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
@@ -343,7 +343,7 @@ public class DataserviceConveyor implements StringConstants {
                                    final ConnectionEntry entry,
                                    final TeiidInstance teiidInstance,
                                    final DeployStatus status ) throws Exception {
-        final Datasource connection = entry.getReference( uow );
+        final Connection connection = entry.getReference( uow );
         final String connectionName = connection.getName( uow );
         status.addProgressMessage( Messages.getString( Messages.DataserviceConveyor.DATA_SERVICE_CONNECTION_START_DEPLOY,
                                                        connectionName ) );

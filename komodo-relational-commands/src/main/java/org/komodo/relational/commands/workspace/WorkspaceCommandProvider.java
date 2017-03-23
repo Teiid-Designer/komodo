@@ -52,17 +52,17 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     public Set< Class< ? extends ShellCommand > > provideCommands() {
         final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.add( CreateDatasourceCommand.class );
+        result.add( CreateConnectionCommand.class );
         result.add( CreateSchemaCommand.class );
         result.add( CreateVdbCommand.class );
-        result.add( DeleteDatasourceCommand.class );
+        result.add( DeleteConnectionCommand.class );
         result.add( DeleteSchemaCommand.class );
         result.add( DeleteVdbCommand.class );
         result.add( ImportVdbCommand.class );
         result.add( UploadVdbCommand.class );
         result.add( ExportVdbCommand.class );
-        result.add( UploadDatasourceCommand.class );
-        result.add( ExportDatasourceCommand.class );
+        result.add( UploadConnectionCommand.class );
+        result.add( ExportConnectionCommand.class );
         result.add( WorkspaceSetPropertyCommand.class );
         result.add( WorkspaceUnsetPropertyCommand.class );
 

@@ -50,7 +50,7 @@ public class Messages implements StringConstants {
         nodeCreated,
         nodeCreationFailed,
         teiidParserException,
-        dataSourceImported;
+        connectionImported;
 
         @Override
         public String toString() {

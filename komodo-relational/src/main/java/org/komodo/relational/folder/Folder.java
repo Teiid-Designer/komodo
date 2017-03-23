@@ -24,8 +24,8 @@ package org.komodo.relational.folder;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.folder.internal.FolderImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.resource.Driver;
@@ -127,14 +127,14 @@ public interface Folder extends RelationalObject {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param sourceName
-     *        the name of the datasource to create (cannot be empty)
-     * @return the Datasource object (never <code>null</code>)
+     * @param connectionName
+     *        the name of the connection to create (cannot be empty)
+     * @return the connection object (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    Datasource addDatasource( final UnitOfWork uow,
-                              final String sourceName ) throws KException;
+    Connection addConnection( final UnitOfWork uow,
+                              final String connectionName ) throws KException;
 
     /**
      * @param uow
@@ -184,11 +184,11 @@ public interface Folder extends RelationalObject {
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param namePatterns
      *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
-     * @return the data sources (never <code>null</code> but can be empty)
+     * @return the connections (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Datasource[] getDatasources( final UnitOfWork uow,
+    Connection[] getConnections( final UnitOfWork uow,
                                  final String... namePatterns ) throws KException;
     /**
      * @param uow

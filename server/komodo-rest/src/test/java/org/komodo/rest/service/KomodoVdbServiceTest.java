@@ -1298,9 +1298,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
     }
 
     @Test
-    public void shouldFailNameValidationWhenDataSourceWithSameNameExists() throws Exception {
+    public void shouldFailNameValidationWhenConnectionWithSameNameExists() throws Exception {
     	final String sourceName = "elvis";
-        _restApp.createDatasource( sourceName, USER_NAME );
+        _restApp.createConnection( sourceName, USER_NAME );
 
         // try and validate the same name of an existing VDB
         final URI vdbUri = _uriBuilder.workspaceVdbsUri();

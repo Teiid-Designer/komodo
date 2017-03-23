@@ -25,7 +25,7 @@ package org.komodo.rest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.rest.json.LinkSerializerTest;
-import org.komodo.rest.relational.RestDataSourceTest;
+import org.komodo.rest.relational.RestConnectionTest;
 import org.komodo.rest.relational.RestDataserviceTest;
 import org.komodo.rest.relational.RestVdbDataRoleTest;
 import org.komodo.rest.relational.RestVdbImportTest;
@@ -54,7 +54,7 @@ import org.komodo.rest.service.KomodoVdbServiceTest;
         LinkSerializerTest.class,
 
         RestDataserviceTest.class,
-        RestDataSourceTest.class,
+        RestConnectionTest.class,
         RestVdbDataRoleTest.class,
         RestVdbImportTest.class,
         RestVdbPermissionTest.class,

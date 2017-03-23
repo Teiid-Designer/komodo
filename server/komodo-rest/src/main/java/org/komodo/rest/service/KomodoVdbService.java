@@ -67,7 +67,7 @@ import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
@@ -154,7 +154,7 @@ public final class KomodoVdbService extends KomodoService {
      *        the Vdb JSON representation (cannot be <code>null</code>)
      * @return a JSON representation of the new vdb (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error creating the DataSource
+     *         if there is an error creating the VDB
      */
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.VDB_PLACEHOLDER )
@@ -3123,14 +3123,14 @@ public final class KomodoVdbService extends KomodoService {
 
             if ( vdb == null ) {
                 // make sure an existing connection does not have the same name
-                final Datasource ds = findDatasource( uow, vdbName );
+                final Connection ds = findConnection( uow, vdbName );
 
                 if ( ds == null ) {
                     // name is valid
                     return Response.ok().build();
                 }
 
-                // name is the same as an existing data source
+                // name is the same as an existing connection
                 return Response.ok()
                                .entity( RelationalMessages.getString( VDB_DATA_SOURCE_NAME_EXISTS ) )
                                .build();

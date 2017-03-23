@@ -39,7 +39,7 @@ import java.util.Properties;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.HostProvider;
@@ -490,7 +490,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         return getDataSource(name).getProperties();
     }
 
-    public abstract Collection<DataSourceDriver> getDataSourceDrivers() throws Exception;
+    public abstract Collection<ConnectionDriver> getDataSourceDrivers() throws Exception;
 
     /**
      * Look for an installed driver that has the driverClass which matches the supplied driverClass name.
@@ -506,8 +506,8 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
             return null;
 
         try {
-            Collection<DataSourceDriver> dataSourceDrivers = getDataSourceDrivers();
-            for (DataSourceDriver driver : dataSourceDrivers) {
+            Collection<ConnectionDriver> dataSourceDrivers = getDataSourceDrivers();
+            for (ConnectionDriver driver : dataSourceDrivers) {
                 String driverClassName = driver.getClassName();
                 String driverName = driver.getName();
 

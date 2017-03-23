@@ -270,10 +270,10 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         Assert.assertEquals(1, _restApp.getDataservices(USER_NAME).length);
     }
 
-    protected void createDatasource( String sourceName ) throws Exception {
-        _restApp.createDatasource(sourceName, USER_NAME);
+    protected void createConnection( String connectionName ) throws Exception {
+        _restApp.createConnection(connectionName, USER_NAME);
 
-        Assert.assertEquals(1, _restApp.getDatasources(USER_NAME).length);
+        Assert.assertEquals(1, _restApp.getConnections(USER_NAME).length);
     }
 
     protected void createDriver( String driverName ) throws Exception {

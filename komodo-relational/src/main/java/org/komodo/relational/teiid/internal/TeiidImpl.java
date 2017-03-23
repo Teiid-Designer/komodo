@@ -867,8 +867,8 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         try {
             // VDBs
             cachedTeiid.refreshVdbs(transaction, teiidInstance);
-            // DataSources
-            cachedTeiid.refreshDataSources(transaction, teiidInstance);
+            // Connections
+            cachedTeiid.refreshConnections(transaction, teiidInstance);
             // Translators
             cachedTeiid.refreshTranslators(transaction, teiidInstance);
             // Drivers

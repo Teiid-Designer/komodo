@@ -298,7 +298,7 @@ public final class TeiidImplTest extends RelationalModelTest {
         assertEquals(this.teiid.getJdbcUsername(getTransaction()), cachedTeiid.getJdbcUsername(getTransaction()));
         assertEquals(this.teiid.getVersion(getTransaction()), cachedTeiid.getVersion(getTransaction()));
 
-        KomodoObject[] cDataSrcs = cachedTeiid.getDataSources(getTransaction());
+        KomodoObject[] cDataSrcs = cachedTeiid.getConnections(getTransaction());
         
         assertNotNull(cDataSrcs);
         assertEquals(1, cDataSrcs.length);

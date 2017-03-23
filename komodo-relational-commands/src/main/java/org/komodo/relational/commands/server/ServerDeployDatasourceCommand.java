@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -93,7 +93,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                                                                                sourceName,
                                                                                DataVirtLexicon.Connection.NODE_TYPE );
 
-            final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
+            final Connection sourceToDeploy = Connection.RESOLVER.resolve(getTransaction(), datasourceObj);
 
             // Make sure that the sourceType is OK for the connected server.
             String sourceType = sourceToDeploy.getDriverName(getTransaction());
@@ -209,7 +209,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findDatasources(getTransaction());
+        final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findConnections(getTransaction());
         List<String> existingDatasourceNames = new ArrayList<>(datasources.length);
         for(KomodoObject datasource : datasources) {
             existingDatasourceNames.add(datasource.getName(getTransaction()));

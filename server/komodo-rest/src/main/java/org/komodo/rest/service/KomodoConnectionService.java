@@ -38,7 +38,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
@@ -46,7 +46,7 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
-import org.komodo.rest.relational.datasource.RestDataSource;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.spi.KException;
@@ -95,7 +95,7 @@ public final class KomodoConnectionService extends KomodoService {
     @GET
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Return the collection of connections",
-                            response = RestDataSource[].class)
+                            response = RestConnection[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
@@ -112,27 +112,27 @@ public final class KomodoConnectionService extends KomodoService {
         try {
             final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParamKeys.PATTERN );
 
-            // find Data sources
+            // find connections
             uow = createTransaction(principal, "getConnections", true ); //$NON-NLS-1$
-            Datasource[] dataSources = null;
+            Connection[] connections = null;
 
             if ( StringUtils.isBlank( searchPattern ) ) {
-                dataSources = getWorkspaceManager(uow).findDatasources( uow );
-                LOGGER.debug( "getConnections:found '{0}' Datasources", dataSources.length ); //$NON-NLS-1$
+                connections = getWorkspaceManager(uow).findConnections( uow );
+                LOGGER.debug( "getConnections:found '{0}' Connections", connections.length ); //$NON-NLS-1$
             } else {
-                final String[] datasourcePaths = getWorkspaceManager(uow).findByType( uow, DataVirtLexicon.Connection.NODE_TYPE, null, searchPattern, false );
+                final String[] connectionPaths = getWorkspaceManager(uow).findByType( uow, DataVirtLexicon.Connection.NODE_TYPE, null, searchPattern, false );
 
-                if ( datasourcePaths.length == 0 ) {
-                    dataSources = Datasource.NO_DATASOURCES;
+                if ( connectionPaths.length == 0 ) {
+                    connections = Connection.NO_CONNECTIONS;
                 } else {
-                    dataSources = new Datasource[ datasourcePaths.length ];
+                    connections = new Connection[ connectionPaths.length ];
                     int i = 0;
 
-                    for ( final String path : datasourcePaths ) {
-                        dataSources[ i++ ] = getWorkspaceManager(uow).resolve( uow, new ObjectImpl( getWorkspaceManager(uow).getRepository(), path, 0 ), Datasource.class );
+                    for ( final String path : connectionPaths ) {
+                        connections[ i++ ] = getWorkspaceManager(uow).resolve( uow, new ObjectImpl( getWorkspaceManager(uow).getRepository(), path, 0 ), Connection.class );
                     }
 
-                    LOGGER.debug( "getConnections:found '{0}' DataSources using pattern '{1}'", dataSources.length, searchPattern ); //$NON-NLS-1$
+                    LOGGER.debug( "getConnections:found '{0}' Connections using pattern '{1}'", connections.length, searchPattern ); //$NON-NLS-1$
                 }
             }
 
@@ -174,16 +174,16 @@ public final class KomodoConnectionService extends KomodoService {
                 }
             }
 
-            final List< RestDataSource > entities = new ArrayList< >();
+            final List< RestConnection > entities = new ArrayList< >();
             int i = 0;
 
             KomodoProperties properties = new KomodoProperties();
-            for ( final Datasource dataSource : dataSources ) {
+            for ( final Connection connection : connections ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
                     if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {                        
-                        RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
+                        RestConnection entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow, properties);
                         entities.add(entity);
-                        LOGGER.debug("getConnections:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
+                        LOGGER.debug("getConnections:Connection '{0}' entity was constructed", connection.getName(uow)); //$NON-NLS-1$
                     } else {
                         break;
                     }
@@ -204,7 +204,7 @@ public final class KomodoConnectionService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCES_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_SERVICE_GET_CONNECTIONS_ERROR);
         }
     }
 
@@ -222,7 +222,7 @@ public final class KomodoConnectionService extends KomodoService {
     @GET
     @Path( V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Find connection by name", response = RestDataSource.class)
+    @ApiOperation(value = "Find connection by name", response = RestConnection.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
@@ -246,14 +246,14 @@ public final class KomodoConnectionService extends KomodoService {
         try {
             uow = createTransaction(principal, "getConnection", true ); //$NON-NLS-1$
 
-            Datasource datasource = findDatasource(uow, connectionName);
-            if (datasource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
+            Connection connection = findConnection(uow, connectionName);
+            if (connection == null)
+                return commitNoConnectionFound(uow, mediaTypes, connectionName);
 
             KomodoProperties properties = new KomodoProperties();
-            final RestDataSource restDatasource = entityFactory.create(datasource, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("getConnection:Datasource '{0}' entity was constructed", datasource.getName(uow)); //$NON-NLS-1$
-            return commit( uow, mediaTypes, restDatasource );
+            final RestConnection restConnection = entityFactory.create(connection, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("getConnection:Connection '{0}' entity was constructed", connection.getName(uow)); //$NON-NLS-1$
+            return commit( uow, mediaTypes, restConnection );
 
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
@@ -264,7 +264,7 @@ public final class KomodoConnectionService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_GET_DATASOURCE_ERROR, connectionName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_SERVICE_GET_CONNECTION_ERROR, connectionName);
         }
     }
 
@@ -322,20 +322,20 @@ public final class KomodoConnectionService extends KomodoService {
 
         // Error if the connection name is missing
         if (StringUtils.isBlank( connectionName )) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_MISSING_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CREATE_MISSING_NAME);
         }
 
-        final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( connectionJson, RestDataSource.class );
-        final String jsonDatasourceName = restDatasource.getId();
+        final RestConnection restConnection = KomodoJsonMarshaller.unmarshall( connectionJson, RestConnection.class );
+        final String jsonConnectionName = restConnection.getId();
         // Error if the name is missing from the supplied json body
-        if ( StringUtils.isBlank( jsonDatasourceName ) ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_JSON_MISSING_NAME);
+        if ( StringUtils.isBlank( jsonConnectionName ) ) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_JSON_MISSING_NAME);
         }
 
         // Error if the name parameter is different than JSON name
-        final boolean namesMatch = connectionName.equals( jsonDatasourceName );
+        final boolean namesMatch = connectionName.equals( jsonConnectionName );
         if ( !namesMatch ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_SOURCE_NAME_ERROR, connectionName, jsonDatasourceName);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_SOURCE_NAME_ERROR, connectionName, jsonConnectionName);
         }
 
         UnitOfWork uow = null;
@@ -345,11 +345,11 @@ public final class KomodoConnectionService extends KomodoService {
 
             // Error if the repo already contains a connection with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, connectionName ) ) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CREATE_ALREADY_EXISTS);
             }
 
-            // create new Datasource
-            return doAddDatasource( uow, uriInfo.getBaseUri(), mediaTypes, restDatasource );
+            // create new Connection
+            return doAddConnection( uow, uriInfo.getBaseUri(), mediaTypes, restConnection );
 
         } catch (final Exception e) {
             if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
@@ -360,7 +360,7 @@ public final class KomodoConnectionService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, connectionName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_SERVICE_CREATE_CONNECTION_ERROR, connectionName);
         }
     }
 
@@ -409,18 +409,18 @@ public final class KomodoConnectionService extends KomodoService {
 
         // Error if the connection name is missing
         if (StringUtils.isBlank( connectionName )) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CLONE_MISSING_NAME);
         }
 
         // Error if the new connection name is missing
         if ( StringUtils.isBlank( newConnectionName ) ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_MISSING_NEW_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CLONE_MISSING_NEW_NAME);
         }
 
         // Error if the name parameter and new name are the same
         final boolean namesMatch = connectionName.equals( newConnectionName );
         if ( namesMatch ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR, newConnectionName);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CLONE_SAME_NAME_ERROR, newConnectionName);
         }
 
         UnitOfWork uow = null;
@@ -430,20 +430,20 @@ public final class KomodoConnectionService extends KomodoService {
 
             // Error if the repo already contains a connection with the supplied name.
             if ( getWorkspaceManager(uow).hasChild( uow, newConnectionName ) ) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CLONE_ALREADY_EXISTS);
             }
 
             // create new Connection
             // must be an update
             final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
-            final Datasource oldDatasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
-            final RestDataSource oldEntity = entityFactory.create(oldDatasource, uriInfo.getBaseUri(), uow );
+            final Connection oldConnection = getWorkspaceManager(uow).resolve( uow, kobject, Connection.class );
+            final RestConnection oldEntity = entityFactory.create(oldConnection, uriInfo.getBaseUri(), uow );
             
-            final Datasource datasource = getWorkspaceManager(uow).createDatasource( uow, null, newConnectionName);
+            final Connection connection = getWorkspaceManager(uow).createConnection( uow, null, newConnectionName);
 
-            setProperties( uow, datasource, oldEntity );
+            setProperties( uow, connection, oldEntity );
 
-            final RestDataSource entity = entityFactory.create(datasource, uriInfo.getBaseUri(), uow );
+            final RestConnection entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow );
             final Response response = commit( uow, mediaTypes, entity );
             return response;
         } catch (final Exception e) {
@@ -455,7 +455,7 @@ public final class KomodoConnectionService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_CLONE_DATASOURCE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_SERVICE_CLONE_CONNECTION_ERROR);
         }
     }
 
@@ -513,14 +513,14 @@ public final class KomodoConnectionService extends KomodoService {
 
         // Error if the connection name is missing
         if (StringUtils.isBlank( connectionName )) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_MISSING_NAME);
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_UPDATE_MISSING_NAME);
         }
 
-        final RestDataSource restDatasource = KomodoJsonMarshaller.unmarshall( connectionJson, RestDataSource.class );
-        final String jsonDatasourceName = restDatasource.getId();
+        final RestConnection restConnection = KomodoJsonMarshaller.unmarshall( connectionJson, RestConnection.class );
+        final String jsonConnectionName = restConnection.getId();
         // Error if the name is missing from the supplied json body
-        if ( StringUtils.isBlank( jsonDatasourceName ) ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_JSON_MISSING_NAME);
+        if ( StringUtils.isBlank( jsonConnectionName ) ) {
+            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_JSON_MISSING_NAME);
         }
 
         UnitOfWork uow = null;
@@ -530,25 +530,25 @@ public final class KomodoConnectionService extends KomodoService {
             final boolean exists = getWorkspaceManager(uow).hasChild( uow, connectionName );
             // Error if the specified service does not exist
             if ( !exists ) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_SOURCE_DNE);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_UPDATE_SOURCE_DNE);
             }
 
             // must be an update
             final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
-            final Datasource datasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
+            final Connection connection = getWorkspaceManager(uow).resolve( uow, kobject, Connection.class );
 
             // Transfers the properties from the rest object to the created komodo service.
-            setProperties(uow, datasource, restDatasource);
+            setProperties(uow, connection, restConnection);
 
             // rename if names did not match
-            final boolean namesMatch = connectionName.equals( jsonDatasourceName );
+            final boolean namesMatch = connectionName.equals( jsonConnectionName );
             if ( !namesMatch ) {
-                datasource.rename( uow, jsonDatasourceName );
+                connection.rename( uow, jsonConnectionName );
             }
 
             KomodoProperties properties = new KomodoProperties();
-            final RestDataSource entity = entityFactory.create(datasource, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("updateConnection: datasource '{0}' entity was updated", datasource.getName(uow)); //$NON-NLS-1$
+            final RestConnection entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("updateConnection: connection '{0}' entity was updated", connection.getName(uow)); //$NON-NLS-1$
             final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
             return response;
         } catch (final Exception e) {
@@ -560,26 +560,26 @@ public final class KomodoConnectionService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_UPDATE_DATASOURCE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_SERVICE_UPDATE_CONNECTION_ERROR);
         }
     }
 
-    private Response doAddDatasource( final UnitOfWork uow,
+    private Response doAddConnection( final UnitOfWork uow,
                                       final URI baseUri,
                                       final List<MediaType> mediaTypes,
-                                      final RestDataSource restDatasource ) throws KomodoRestException {
+                                      final RestConnection restConnection ) throws KomodoRestException {
         assert( !uow.isRollbackOnly() );
         assert( uow.getState() == State.NOT_STARTED );
-        assert( restDatasource != null );
+        assert( restConnection != null );
 
-        final String datasourceName = restDatasource.getId();
+        final String connectionName = restConnection.getId();
         try {
-            final Datasource datasource = getWorkspaceManager(uow).createDatasource( uow, null, datasourceName);
+            final Connection connection = getWorkspaceManager(uow).createConnection( uow, null, connectionName);
 
             // Transfers the properties from the rest object to the created komodo service.
-            setProperties(uow, datasource, restDatasource);
+            setProperties(uow, connection, restConnection);
 
-            final RestDataSource entity = entityFactory.create(datasource, baseUri, uow );
+            final RestConnection entity = entityFactory.create(connection, baseUri, uow );
             final Response response = commit( uow, mediaTypes, entity );
             return response;
         } catch ( final Exception e ) {
@@ -591,33 +591,33 @@ public final class KomodoConnectionService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR, datasourceName ), e );
+            throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.CONNECTION_SERVICE_CREATE_CONNECTION_ERROR, connectionName ), e );
         }
     }
 
-    // Sets Datasource properties using the supplied RestDatasource object
-    private void setProperties(final UnitOfWork uow, Datasource dataService, RestDataSource restDataSource) throws KException {
-        // 'New' = requested RestDatasource properties
-        String newJndiName = restDataSource.getJndiName();
-        String newDriverName = restDataSource.getDriverName();
-        boolean newJdbc = restDataSource.isJdbc();
+    // Sets Connection properties using the supplied RestConnection object
+    private void setProperties(final UnitOfWork uow, Connection connection, RestConnection restConnection) throws KException {
+        // 'New' = requested RestConnection properties
+        String newJndiName = restConnection.getJndiName();
+        String newDriverName = restConnection.getDriverName();
+        boolean newJdbc = restConnection.isJdbc();
         
-        // 'Old' = current Datasource properties
-        String oldJndiName = dataService.getJndiName(uow);
-        String oldDriverName = dataService.getDriverName(uow);
-        boolean oldJdbc = dataService.isJdbc(uow);
+        // 'Old' = current Connection properties
+        String oldJndiName = connection.getJndiName(uow);
+        String oldDriverName = connection.getDriverName(uow);
+        boolean oldJdbc = connection.isJdbc(uow);
         
         // JndiName
         if ( !StringUtils.equals(newJndiName, oldJndiName) ) {
-            dataService.setJndiName( uow, newJndiName );
+            connection.setJndiName( uow, newJndiName );
         } 
         // DriverName
         if ( !StringUtils.equals(newDriverName, oldDriverName) ) {
-            dataService.setDriverName( uow, newDriverName );
+            connection.setDriverName( uow, newDriverName );
         } 
         // jdbc
         if ( newJdbc != oldJdbc ) {
-            dataService.setJdbc( uow, newJdbc );
+            connection.setJdbc( uow, newJdbc );
         }
     }
 
@@ -659,12 +659,12 @@ public final class KomodoConnectionService extends KomodoService {
             uow = createTransaction(principal, "removeConnectionFromWorkspace", false); //$NON-NLS-1$
 
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repo, uow );
-            KomodoObject datasource = mgr.getChild(uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE);
+            KomodoObject connection = mgr.getChild(uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE);
 
-            if (datasource == null)
+            if (connection == null)
                 return Response.noContent().build();
 
-            mgr.delete(uow, datasource);
+            mgr.delete(uow, connection);
 
             KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
             if (mgr.hasChild(uow, connectionName))
@@ -682,7 +682,7 @@ public final class KomodoConnectionService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.DATASOURCE_SERVICE_DELETE_DATASOURCE_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_SERVICE_DELETE_CONNECTION_ERROR);
         }
     }
 

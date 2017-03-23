@@ -171,7 +171,7 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * @return the collection of data source drivers resident on the server
      * @throws Exception
      */
-    Collection<DataSourceDriver> getDataSourceDrivers() throws Exception;
+    Collection<ConnectionDriver> getDataSourceDrivers() throws Exception;
 
     /**
      * @return whether this teiid instance is still valid to be used

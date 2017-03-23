@@ -43,7 +43,7 @@ import org.komodo.relational.workspace.ServerManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.cors.CorsHeaders;
-import org.komodo.rest.relational.datasource.RestDataSource;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
@@ -66,7 +66,7 @@ import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 @RunWith(Arquillian.class)
-@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
+@SuppressWarnings( {"javadoc", "nls"} )
 public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServiceTest implements StringConstants {
 
     private void testTranslators(RestTeiidStatus status) {
@@ -381,12 +381,12 @@ public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServ
         System.out.println("Response:\n" + entity);
         assertEquals(200, response.getStatus());
 
-        RestDataSource[] dataSources = KomodoJsonMarshaller.unmarshallArray(entity, RestDataSource[].class);
-        assertTrue(dataSources.length > 0);
+        RestConnection[] connections = KomodoJsonMarshaller.unmarshallArray(entity, RestConnection[].class);
+        assertTrue(connections.length > 0);
 
-        for (RestDataSource dataSource : dataSources) {
-            assertNotNull(dataSource.getId());
-            assertEquals(3, dataSource.getLinks().size());
+        for (RestConnection connection : connections) {
+            assertNotNull(connection.getId());
+            assertEquals(3, connection.getLinks().size());
         }
     }
 

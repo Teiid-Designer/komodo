@@ -34,8 +34,8 @@ import java.util.Set;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.relational.Messages;
-import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.connection.Connection;
+import org.komodo.relational.connection.internal.ConnectionImpl;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.resource.internal.DriverImpl;
@@ -504,30 +504,30 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
 
     @Override
-    public Datasource[] getDataSources(final UnitOfWork transaction, final String... namePatterns) throws KException {
+    public Connection[] getConnections(final UnitOfWork transaction, final String... namePatterns) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
         if(!super.hasChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
-            return new Datasource[0];
+            return new Connection[0];
         }
         KomodoObject folderNode = super.getChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
-        final List<Datasource> result = new ArrayList<Datasource>();
+        final List<Connection> result = new ArrayList<Connection>();
         for (final KomodoObject kobject : folderNode.getChildrenOfType(transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns)) {
-            Datasource dataSource = new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
-            result.add(dataSource);
+            Connection connection = new ConnectionImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(connection);
         }
 
         if (result.isEmpty()) {
-            return new Datasource[0];
+            return new Connection[0];
         }
 
-        return result.toArray(new Datasource[result.size()]);
+        return result.toArray(new Connection[result.size()]);
     }
 
     @Override
-    public Datasource getDataSource(UnitOfWork transaction, String name) throws KException {
+    public Connection getConnection(UnitOfWork transaction, String name) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
@@ -538,7 +538,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
 
         if (folderNode.hasChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE)) {
             KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE);
-            return new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            return new ConnectionImpl(transaction, getRepository(), kobject.getAbsolutePath());
         }
 
         return null;
@@ -669,12 +669,12 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
 
     /* (non-Javadoc)
-     * @see org.komodo.relational.teiid.CachedTeiid#refreshDataSources(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.runtime.TeiidInstance, java.lang.String[])
+     * @see org.komodo.relational.teiid.CachedTeiid#refreshConnections(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.runtime.TeiidInstance, java.lang.String[])
      */
     @Override
-    public void refreshDataSources(UnitOfWork transaction,
+    public void refreshConnections(UnitOfWork transaction,
                                    TeiidInstance teiidInstance,
-                                   String... dataSourceNames) throws KException {
+                                   String... connectionNames) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
         ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
@@ -694,7 +694,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         KomodoObject folderNode = super.getChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
         // No names supplied, remove all from the cache then refresh all
-        if( dataSourceNames==null || dataSourceNames.length==0 ) {
+        if( connectionNames==null || connectionNames.length==0 ) {
             KomodoObject[] kobjs = folderNode.getChildren(transaction);
             for(KomodoObject kobj : kobjs) {
                 kobj.remove(transaction);
@@ -708,29 +708,29 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
                 throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCES_ERROR));
             }
             for(TeiidDataSource teiidDataSource : teiidDataSources) {
-                updateDataSource(transaction, folderNode, teiidDataSource);
+                updateConnection(transaction, folderNode, teiidDataSource);
             }
         }
         
-        // Names supplied, update only the specified DataSources.
-        for(String dataSourceName : dataSourceNames) {
-            dataSourceName = removeJavaContext(dataSourceName);
+        // Names supplied, update only the specified Connections.
+        for(String connectionName : connectionNames) {
+            connectionName = removeJavaContext(connectionName);
 
             TeiidDataSource teiidDataSource;
             try {
-                teiidDataSource = teiidInstance.getDataSource(dataSourceName);
+                teiidDataSource = teiidInstance.getDataSource(connectionName);
             } catch (Exception ex) {
-                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCE_ERROR,dataSourceName, ex.getLocalizedMessage()));
+                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCE_ERROR,connectionName, ex.getLocalizedMessage()));
             }
-            // No server datasource found, remove the cached datasource
+            // No server datasource found, remove the cached connector
             if(teiidDataSource==null) {
-                if(folderNode.hasChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
-                    KomodoObject existingObj = folderNode.getChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE);
+                if(folderNode.hasChild(transaction, connectionName, DataVirtLexicon.Connection.NODE_TYPE)) {
+                    KomodoObject existingObj = folderNode.getChild(transaction, connectionName, DataVirtLexicon.Connection.NODE_TYPE);
                     existingObj.remove(transaction);
                 }
             // Update the cached source
             } else { 
-                updateDataSource(transaction, folderNode, teiidDataSource);
+                updateConnection(transaction, folderNode, teiidDataSource);
             }
         }
     }
@@ -779,7 +779,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             }
         }
         
-        // Names supplied, update only the specified DataSources.
+        // Names supplied, update only the specified Translators.
         for(String translatorName : translatorNames) {
             TeiidTranslator teiidTranslator;
             try {
@@ -898,22 +898,22 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
     
     /*
-     * Update cached DataSource with the supplied TeiidDataSource.
+     * Update cached Connection with the supplied TeiidDataSource.
      */
-    private void updateDataSource(UnitOfWork transaction, KomodoObject dataSourcesFolder, TeiidDataSource teiidDS) throws KException {
+    private void updateConnection(UnitOfWork transaction, KomodoObject connectionsFolder, TeiidDataSource teiidDS) throws KException {
         String dataSourceName = teiidDS.getName();
         
         // Removes currently cached object, if it exists
-        if(dataSourcesFolder.hasChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
-            KomodoObject existingObj = dataSourcesFolder.getChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE);
+        if(connectionsFolder.hasChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE)) {
+            KomodoObject existingObj = connectionsFolder.getChild(transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE);
             existingObj.remove(transaction);
         }
 
-        KomodoObject kobject = dataSourcesFolder.addChild( transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE );
-        Datasource dataSrc = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+        KomodoObject kobject = connectionsFolder.addChild( transaction, dataSourceName, DataVirtLexicon.Connection.NODE_TYPE );
+        Connection connection = new ConnectionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
 
-        dataSrc.setDriverName(transaction, teiidDS.getType());
-        dataSrc.setJndiName(transaction, teiidDS.getJndiName());
+        connection.setDriverName(transaction, teiidDS.getType());
+        connection.setJndiName(transaction, teiidDS.getJndiName());
 
         for (Entry<Object, Object> property : teiidDS.getProperties().entrySet()) {
             String key = property.getKey().toString();
@@ -921,7 +921,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
                     TeiidInstance.DATASOURCE_JNDINAME.equals(key))
                 continue; // Already set as explicit fields
 
-            dataSrc.setProperty(transaction, key, property.getValue());
+            connection.setProperty(transaction, key, property.getValue());
         }
     }
 

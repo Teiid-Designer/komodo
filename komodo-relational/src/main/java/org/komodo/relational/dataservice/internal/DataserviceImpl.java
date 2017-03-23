@@ -30,6 +30,7 @@ import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.ConnectionEntry;
 import org.komodo.relational.dataservice.DataServiceEntry;
 import org.komodo.relational.dataservice.Dataservice;
@@ -39,7 +40,6 @@ import org.komodo.relational.dataservice.ResourceEntry;
 import org.komodo.relational.dataservice.ServiceVdbEntry;
 import org.komodo.relational.dataservice.UdfEntry;
 import org.komodo.relational.dataservice.VdbEntry;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
@@ -283,7 +283,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
 
         final ServiceVdbEntry serviceVdb = getServiceVdbEntry( transaction );
         final VdbEntry[] vdbs = getVdbEntries( transaction, namePatterns );
-        final ConnectionEntry[] datasources = getConnectionEntries( transaction, namePatterns );
+        final ConnectionEntry[] connections = getConnectionEntries( transaction, namePatterns );
         final DriverEntry[] drivers = getDriverEntries( transaction, namePatterns );
         final DdlEntry[] ddls = getDdlEntries( transaction, namePatterns );
         final ResourceEntry[] resources = getResourceEntries( transaction, namePatterns );
@@ -291,24 +291,24 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
 
         final DataServiceEntry< ? >[] result = new DataServiceEntry< ? >[ ( ( serviceVdb == null ) ? 0 : 1 )
                                                                           + vdbs.length
-                                                                          + datasources.length
+                                                                          + connections.length
                                                                           + drivers.length
                                                                           + ddls.length
                                                                           + resources.length
                                                                           + udfs.length ];
         System.arraycopy( vdbs, 0, result, 0, vdbs.length );
-        System.arraycopy( datasources, 0, result, vdbs.length, datasources.length );
-        System.arraycopy( drivers, 0, result, vdbs.length + datasources.length, drivers.length );
-        System.arraycopy( ddls, 0, result, vdbs.length + datasources.length + drivers.length, ddls.length );
+        System.arraycopy( connections, 0, result, vdbs.length, connections.length );
+        System.arraycopy( drivers, 0, result, vdbs.length + connections.length, drivers.length );
+        System.arraycopy( ddls, 0, result, vdbs.length + connections.length + drivers.length, ddls.length );
         System.arraycopy( resources,
                           0,
                           result,
-                          vdbs.length + datasources.length + drivers.length + ddls.length,
+                          vdbs.length + connections.length + drivers.length + ddls.length,
                           resources.length );
         System.arraycopy( udfs,
                           0,
                           result,
-                          vdbs.length + datasources.length + drivers.length + ddls.length + resources.length,
+                          vdbs.length + connections.length + drivers.length + ddls.length + resources.length,
                           udfs.length );
 
         if ( serviceVdb != null ) {
@@ -533,11 +533,11 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
      * {@inheritDoc}
      *
      * @see org.komodo.relational.dataservice.Dataservice#addConnection(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.relational.datasource.Datasource)
+     *      org.komodo.relational.connection.Connection)
      */
     @Override
     public ConnectionEntry addConnection( final UnitOfWork uow,
-                                          final Datasource connection ) throws KException {
+                                          final Connection connection ) throws KException {
         final ConnectionEntry entry = RelationalModelFactory.createConnectionEntry( uow,
                                                                                     getRepository(),
                                                                                     this,
@@ -747,25 +747,25 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
      *      java.lang.String[])
      */
     @Override
-    public Datasource[] getConnections( final UnitOfWork transaction,
+    public Connection[] getConnections( final UnitOfWork transaction,
                                         final String... namePatterns ) throws KException {
         final ConnectionEntry[] entries = getConnectionEntries( transaction, namePatterns );
 
         if ( entries.length == 0 ) {
-            return Datasource.NO_DATASOURCES;
+            return Connection.NO_CONNECTIONS;
         }
 
-        final List< Datasource > connections = new ArrayList<>( entries.length );
+        final List< Connection > connections = new ArrayList<>( entries.length );
 
         for ( final ConnectionEntry entry : entries ) {
-            Datasource ref = null;
+            Connection ref = null;
 
             if ( ( ref = entry.getReference( transaction ) ) != null ) {
                 connections.add( ref );
             }
         }
 
-        return connections.toArray( new Datasource[ connections.size() ] );
+        return connections.toArray( new Connection[ connections.size() ] );
     }
 
     /**

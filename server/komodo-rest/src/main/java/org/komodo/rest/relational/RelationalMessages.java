@@ -122,14 +122,14 @@ public final class RelationalMessages {
         VDB_SUCCESSFULLY_UNDEPLOYED,
 
         /**
-         * DataSource undeployment request sent but not yet undeployed
+         * Connection undeployment request sent but not yet undeployed
          */
-        DATA_SOURCE_UNDEPLOYMENT_REQUEST_SENT,
+        CONNECTION_UNDEPLOYMENT_REQUEST_SENT,
 
         /**
-         * DataSource successfully deployed
+         * Connection successfully deployed
          */
-        DATA_SOURCE_SUCCESSFULLY_UNDEPLOYED,
+        CONNECTION_SUCCESSFULLY_UNDEPLOYED,
         
         /**
          * Data service status title
@@ -388,89 +388,89 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_NAME_VALIDATION_ERROR,
 
         /**
-         * An error indicating a JSON document representing the Datasources in the workspace could not be retrieved.
+         * An error indicating a JSON document representing the Connections in the workspace could not be retrieved.
          */
-        DATASOURCE_SERVICE_GET_DATASOURCES_ERROR,
+        CONNECTION_SERVICE_GET_CONNECTIONS_ERROR,
 
         /**
-         * An error indicating an error occurred trying to obtain the specified Datasource.
+         * An error indicating an error occurred trying to obtain the specified Connection.
          */
-        DATASOURCE_SERVICE_GET_DATASOURCE_ERROR,
+        CONNECTION_SERVICE_GET_CONNECTION_ERROR,
 
         /**
-         * An error indicating a request to create a datasource failed
+         * An error indicating a request to create a connection failed
          */
-        DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR,
+        CONNECTION_SERVICE_CREATE_CONNECTION_ERROR,
 
         /**
-         * An error indicating a request to clone a datasource failed
+         * An error indicating a request to clone a connection failed
          */
-        DATASOURCE_SERVICE_CLONE_DATASOURCE_ERROR,
+        CONNECTION_SERVICE_CLONE_CONNECTION_ERROR,
 
         /**
-         * An error indicating a request to delete a datasource failed
+         * An error indicating a request to delete a connection failed
          */
-        DATASOURCE_SERVICE_DELETE_DATASOURCE_ERROR,
+        CONNECTION_SERVICE_DELETE_CONNECTION_ERROR,
         
         /**
-         * An error indicating a request to update a datasource failed
+         * An error indicating a request to update a connection failed
          */
-        DATASOURCE_SERVICE_UPDATE_DATASOURCE_ERROR,
+        CONNECTION_SERVICE_UPDATE_CONNECTION_ERROR,
 
         /**
          * An error indicating create attempt was missing a name
          */
-        DATASOURCE_SERVICE_CREATE_MISSING_NAME,
+        CONNECTION_SERVICE_CREATE_MISSING_NAME,
  
         /**
          * An error indicating clone attempt was missing a name
          */
-        DATASOURCE_SERVICE_CLONE_MISSING_NAME,
+        CONNECTION_SERVICE_CLONE_MISSING_NAME,
  
         /**
-         * An error indicating clone attempt was missing a new datasource name
+         * An error indicating clone attempt was missing a new connection name
          */
-        DATASOURCE_SERVICE_CLONE_MISSING_NEW_NAME,
+        CONNECTION_SERVICE_CLONE_MISSING_NEW_NAME,
  
         /**
-         * An error indicating the desired new clone name is same as datasource being cloned
+         * An error indicating the desired new clone name is same as connection being cloned
          */
-        DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR,
+        CONNECTION_SERVICE_CLONE_SAME_NAME_ERROR,
         
         /**
          * An error indicating update attempt was missing a name
          */
-        DATASOURCE_SERVICE_UPDATE_MISSING_NAME,
+        CONNECTION_SERVICE_UPDATE_MISSING_NAME,
         
         /**
-         * An error indicating that the datasource does not exist
+         * An error indicating that the connection does not exist
          */
-        DATASOURCE_SERVICE_UPDATE_SOURCE_DNE,
+        CONNECTION_SERVICE_UPDATE_SOURCE_DNE,
         
         /**
          * An error indicating update attempt was missing json arg
          */
-        DATASOURCE_SERVICE_UPDATE_MISSING_JSON,
+        CONNECTION_SERVICE_UPDATE_MISSING_JSON,
  
         /**
-         * An error indicating the datasource name is missing from the input JSON document.
+         * An error indicating the connection name is missing from the input JSON document.
          */
-        DATASOURCE_SERVICE_JSON_MISSING_NAME,
+        CONNECTION_SERVICE_JSON_MISSING_NAME,
 
         /**
-         * An error indicating the parameter and JSON datasource name does not match for a datasource being created.
+         * An error indicating the parameter and JSON connection name does not match for a connection being created.
          */
-        DATASOURCE_SERVICE_SOURCE_NAME_ERROR,
+        CONNECTION_SERVICE_SOURCE_NAME_ERROR,
 
         /**
          * An error indicating create attempt failed because same name already exists
          */
-        DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS,
+        CONNECTION_SERVICE_CREATE_ALREADY_EXISTS,
         
         /**
          * An error indicating clone attempt failed because same name already exists
          */
-        DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS,
+        CONNECTION_SERVICE_CLONE_ALREADY_EXISTS,
         
         /**
          * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.

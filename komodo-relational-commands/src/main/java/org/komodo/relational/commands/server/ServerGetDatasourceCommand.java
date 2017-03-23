@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -117,7 +117,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                 getWorkspaceManager(getTransaction()).delete(getTransaction(), datasourceToDelete);
             }
             // Create the Data Source and set properties
-            Datasource newDatasource = getWorkspaceManager(getTransaction()).createDatasource( getTransaction(), null, datasourceName );
+            Connection newDatasource = getWorkspaceManager(getTransaction()).createConnection( getTransaction(), null, datasourceName );
             setRepoDatasourceProperties(newDatasource, serverDS.getProperties());
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceCopyToRepoFinished) );
@@ -217,7 +217,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
     /*
      * Transfer the server Datasource properties to the repo object
      */
-    private void setRepoDatasourceProperties(Datasource repoSource, Properties serverDsProperties) throws Exception {
+    private void setRepoDatasourceProperties(Connection repoSource, Properties serverDsProperties) throws Exception {
         for(String key : serverDsProperties.stringPropertyNames()) {
             String value = serverDsProperties.getProperty(key);
             if(key.equals(TeiidInstance.DATASOURCE_JNDINAME)) {
