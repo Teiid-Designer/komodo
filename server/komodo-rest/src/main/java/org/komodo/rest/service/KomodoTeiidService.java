@@ -1965,12 +1965,16 @@ public class KomodoTeiidService extends KomodoService {
 
             List<KomodoObject> dataServices = this.repo.searchByPath(uow, kpa.getPath());
             if (dataServices.size() == 0) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes,
+                                                        RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND,
+                                                        StringUtils.getLastToken(kpa.getPath(), FORWARD_SLASH));
             }
 
             Dataservice dataService = getWorkspaceManager(uow).resolve(uow, dataServices.get(0), Dataservice.class);
             if (dataService == null) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+                return createErrorResponseWithForbidden(mediaTypes,
+                                                        RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND,
+                                                        StringUtils.getLastToken(kpa.getPath(), FORWARD_SLASH));
             }
 
             //
