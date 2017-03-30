@@ -58,8 +58,8 @@ import org.komodo.rest.cors.KCorsFactory;
 import org.komodo.rest.cors.KCorsHandler;
 import org.komodo.rest.cors.OptionsExceptionMapper;
 import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.service.KomodoConnectionService;
 import org.komodo.rest.service.KomodoDataserviceService;
-import org.komodo.rest.service.KomodoDatasourceService;
 import org.komodo.rest.service.KomodoDriverService;
 import org.komodo.rest.service.KomodoImportExportService;
 import org.komodo.rest.service.KomodoSearchService;
@@ -264,9 +264,19 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SERVICE_VIEW_INFO = "serviceViewInfo"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for a Dataservice's connections in the Komodo workspace.
+         * The name of the URI path segment for connections.
          */
         String CONNECTIONS_SEGMENT = "connections"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a connection.
+         */
+        String CONNECTION_SEGMENT = "connection"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific connection id
+         */
+        String CONNECTION_PLACEHOLDER = "{connectionName}"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for a setting a dataservice's service vdb for single table view
@@ -293,21 +303,6 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          */
         String CRITERIA_FOR_JOIN_TABLES = "CriteriaForJoinTables"; //$NON-NLS-1$
         
-        /**
-         * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
-         */
-        String DATA_SOURCES_SEGMENT = "datasources"; //$NON-NLS-1$
-
-        /**
-         * The name of the URI path segment for a Datasource in the Komodo workspace.
-         */
-        String DATA_SOURCE_SEGMENT = "datasource"; //$NON-NLS-1$
-
-        /**
-         * Placeholder added to an URI to allow a specific data source id
-         */
-        String DATA_SOURCE_PLACEHOLDER = "{datasourceName}"; //$NON-NLS-1$
-
         /**
          * The name of the URI path segment for the collection of Drivers in the Komodo workspace.
          */
@@ -589,7 +584,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoDataserviceService( this.kengine ) );
-        objs.add( new KomodoDatasourceService( this.kengine ) );
+        objs.add( new KomodoConnectionService( this.kengine ) );
         objs.add( new KomodoDriverService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));

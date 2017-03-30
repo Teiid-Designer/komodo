@@ -200,7 +200,7 @@ public final class RestDataSourceTest implements V1Constants {
         Folder dataSourceFolder = mock(Folder.class);
         when(cachedTeiid.getName(transaction)).thenReturn(TEIID_SERVER);
         when(cachedTeiid.getPrimaryType(transaction)).thenReturn(cachedTeiidType);
-        when(dataSourceFolder.getName(transaction)).thenReturn(CachedTeiid.DATA_SOURCES_FOLDER);
+        when(dataSourceFolder.getName(transaction)).thenReturn(CachedTeiid.CONNECTIONS_FOLDER);
         when(dataSourceFolder.getPrimaryType(transaction)).thenReturn(folderType);
         
         Datasource dataSource = mock(Datasource.class);
@@ -227,13 +227,13 @@ public final class RestDataSourceTest implements V1Constants {
                 linkCounter++;
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
-                                         FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER +
+                                         FORWARD_SLASH + CachedTeiid.CONNECTIONS_FOLDER +
                                          FORWARD_SLASH + name, href);
             } else if (LinkType.PARENT.equals(link.getRel())) {
                 linkCounter++;
                 assertEquals(BASE_URI_PREFIX +
                                          FORWARD_SLASH + TEIID_SEGMENT +
-                                         FORWARD_SLASH + CachedTeiid.DATA_SOURCES_FOLDER, href);
+                                         FORWARD_SLASH + CachedTeiid.CONNECTIONS_FOLDER, href);
             } else if (LinkType.CHILDREN.equals(link.getRel())) {
                 linkCounter++;
             }

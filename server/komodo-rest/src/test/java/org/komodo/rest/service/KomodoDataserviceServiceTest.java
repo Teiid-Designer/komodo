@@ -161,7 +161,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
             assertTrue(LinkType.SELF.equals(rel) || LinkType.PARENT.equals(rel) || LinkType.CHILDREN.equals(rel));
 
             if (LinkType.SELF.equals(rel)) {
-                String href = _uriBuilder.workspaceDatasourcesUri() + FORWARD_SLASH + dataSource.getId();
+                String href = _uriBuilder.workspaceConnectionsUri() + FORWARD_SLASH + dataSource.getId();
                 assertEquals(href, link.getHref().toString());
             }
         }

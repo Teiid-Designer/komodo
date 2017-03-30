@@ -478,6 +478,11 @@ public final class RelationalMessages {
         DRIVER_SERVICE_GET_DRIVERS_ERROR,
 
         /**
+         * A message indicating the VDB is invalid since a data source with the given name already exists.
+         */
+        VDB_DATA_SOURCE_NAME_EXISTS,
+
+        /**
          * A message indicating that a VDB with the given name already exists.
          */
         VDB_NAME_EXISTS,

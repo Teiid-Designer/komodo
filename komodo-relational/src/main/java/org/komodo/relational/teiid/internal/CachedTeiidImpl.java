@@ -121,7 +121,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         
         // Add child folders which will contain the various types
         this.addChild(transaction, CachedTeiid.VDBS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
-        this.addChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        this.addChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
         this.addChild(transaction, CachedTeiid.TRANSLATORS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
         this.addChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
     }
@@ -508,10 +508,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        if(!super.hasChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
+        if(!super.hasChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
             return new Datasource[0];
         }
-        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
         final List<Datasource> result = new ArrayList<Datasource>();
         for (final KomodoObject kobject : folderNode.getChildrenOfType(transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns)) {
@@ -531,10 +531,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
-        if(!super.hasChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
+        if(!super.hasChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
             return null;
         }
-        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
         if (folderNode.hasChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE)) {
             KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.Connection.NODE_TYPE);
@@ -688,10 +688,10 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             throw new KException(ex);
         }
         
-        if(!super.hasChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
+        if(!super.hasChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
             return;
         }
-        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.DATA_SOURCES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
         // No names supplied, remove all from the cache then refresh all
         if( dataSourceNames==null || dataSourceNames.length==0 ) {

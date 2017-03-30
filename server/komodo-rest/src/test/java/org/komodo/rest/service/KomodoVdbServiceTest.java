@@ -1298,6 +1298,25 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
     }
 
     @Test
+    public void shouldFailNameValidationWhenDataSourceWithSameNameExists() throws Exception {
+    	final String sourceName = "elvis";
+        _restApp.createDatasource( sourceName, USER_NAME );
+
+        // try and validate the same name of an existing VDB
+        final URI vdbUri = _uriBuilder.workspaceVdbsUri();
+        final URI uri = UriBuilder.fromUri( vdbUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( sourceName )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( notNullValue() ) );
+    }
+
+    @Test
     public void shouldFailNameValidationWhenNameHasInvalidCharacters() throws Exception {
         final URI vdbUri = _uriBuilder.workspaceVdbsUri();
         final URI uri = UriBuilder.fromUri( vdbUri )
@@ -1314,7 +1333,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
     @Test
     public void shouldFailNameValidationWhenNameIsEmpty() throws Exception {
-        final URI vdbUri = _uriBuilder.workspaceDatasourcesUri();
+        final URI vdbUri = _uriBuilder.workspaceConnectionsUri();
         final URI uri = UriBuilder.fromUri( vdbUri )
                                   .path( V1Constants.NAME_VALIDATION_SEGMENT )
                                   .path( "" )

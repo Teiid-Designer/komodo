@@ -368,10 +368,10 @@ public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServ
     }
 
     @Test
-    public void shouldGetDataSources() throws Exception {
+    public void shouldGetConnections() throws Exception {
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                           .path(V1Constants.TEIID_SEGMENT)
-                                          .path(V1Constants.DATA_SOURCES_SEGMENT)
+                                          .path(V1Constants.CONNECTIONS_SEGMENT)
                                           .build();
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

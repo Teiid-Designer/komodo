@@ -405,25 +405,25 @@ public final class StringUtils implements StringConstants {
 //        return num;
 //    }
 //
-//    /**
-//     * Return the last token in the string.
-//     *
-//     * @param str String to be tokenized
-//     * @param delimiter Characters which are delimit tokens
-//     * @return the last token contained in the tokenized string
-//     */
-//    public static String getLastToken( String str,
-//                                       String delimiter ) {
-//        if (str == null) {
-//            return EMPTY_STRING;
-//        }
-//        int beginIndex = 0;
-//        if (str.lastIndexOf(delimiter) > 0) {
-//            beginIndex = str.lastIndexOf(delimiter) + 1;
-//        }
-//        return str.substring(beginIndex, str.length());
-//    }
-//
+    /**
+     * Return the last token in the string.
+     *
+     * @param str String to be tokenized
+     * @param delimiter Characters which are delimit tokens
+     * @return the last token contained in the tokenized string
+     */
+    public static String getLastToken( String str,
+                                       String delimiter ) {
+        if (str == null) {
+            return EMPTY_STRING;
+        }
+        int beginIndex = 0;
+        if (str.lastIndexOf(delimiter) > 0) {
+            beginIndex = str.lastIndexOf(delimiter) + 1;
+        }
+        return str.substring(beginIndex, str.length());
+    }
+
 //    /**
 //     * Return the first token in the string.
 //     *
