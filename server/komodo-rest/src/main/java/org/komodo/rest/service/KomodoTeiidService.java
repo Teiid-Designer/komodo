@@ -858,13 +858,26 @@ public class KomodoTeiidService extends KomodoService {
             
             boolean importError = false;
             if(serverVdbs.length>0) {
-                // Get current list of workspace Vdb names
-                Vdb[] workspaceVdbs = getWorkspaceManager(uow).findVdbs( uow );
+                // Get current list of workspace Vdbs
+                final WorkspaceManager mgr = getWorkspaceManager(uow);
+                Vdb[] workspaceVdbs = mgr.findVdbs( uow );
                 List<String> workspaceVdbNames = new ArrayList<String>(workspaceVdbs.length);
+                
+                // Remove any service source vdbs that dont belong to user.  Compile list of remaining workspace vdbs
                 for(Vdb workspaceVdb : workspaceVdbs) {
-                    workspaceVdbNames.add(workspaceVdb.getName(uow));
+                    // Source VDB not belonging to user are removed
+                    if(workspaceVdb.hasProperty(uow, DSB_PROP_SERVICE_SOURCE)) {
+                        String owner = workspaceVdb.getProperty(uow, DSB_PROP_SERVICE_SOURCE).getStringValue(uow);
+                        if(!uow.getUserName().equals(owner)) {
+                            mgr.delete(uow, workspaceVdb);
+                        } else {
+                            workspaceVdbNames.add(workspaceVdb.getName(uow));
+                        }
+                    } else {
+                        workspaceVdbNames.add(workspaceVdb.getName(uow));
+                    }
                 }
-
+                
                 // Copy the server VDB into the workspace, if no workspace VDB with the same name
                 for(Vdb serverVdb : serverVdbs) {
                     if(!workspaceVdbNames.contains(serverVdb.getName(uow))) {
