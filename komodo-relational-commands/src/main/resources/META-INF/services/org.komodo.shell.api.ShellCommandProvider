@@ -1,7 +1,7 @@
 org.komodo.relational.commands.RelationalCommandProvider
 org.komodo.relational.commands.column.ColumnCommandProvider
 org.komodo.relational.commands.condition.ConditionCommandProvider
-org.komodo.relational.commands.datasource.DatasourceCommandProvider
+org.komodo.relational.commands.connection.ConnectionCommandProvider
 org.komodo.relational.commands.datarole.DataRoleCommandProvider
 org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommandProvider
 org.komodo.relational.commands.entry.EntryCommandProvider

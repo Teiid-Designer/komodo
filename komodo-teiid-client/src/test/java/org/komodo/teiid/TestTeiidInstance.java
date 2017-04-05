@@ -41,7 +41,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
@@ -263,7 +263,7 @@ public class TestTeiidInstance {
     public void testDataSourceDrivers() throws Exception {
         getTeiidInstance().connect();
         assertTrue(getTeiidInstance().isConnected());
-        Collection<DataSourceDriver> dataSourceDrivers = getTeiidInstance().getDataSourceDrivers();
+        Collection<ConnectionDriver> dataSourceDrivers = getTeiidInstance().getDataSourceDrivers();
         assertTrue(dataSourceDrivers.size() > 0);
 
         String[] driverNamesArr = {"h2", "teiid-local", "teiid"};
@@ -271,9 +271,9 @@ public class TestTeiidInstance {
         String[] classNamesArr = {"org.teiid.jdbc.TeiidDriver", "org.h2.Driver"};
         List<String> classNames = Arrays.asList(classNamesArr);
 
-        Iterator<DataSourceDriver> iter = dataSourceDrivers.iterator();
+        Iterator<ConnectionDriver> iter = dataSourceDrivers.iterator();
         while (iter.hasNext()) {
-            DataSourceDriver driver = iter.next();
+            ConnectionDriver driver = iter.next();
             assertTrue(driverNames.contains(driver.getName()));
             assertTrue(classNames.contains(driver.getClassName()));
         }

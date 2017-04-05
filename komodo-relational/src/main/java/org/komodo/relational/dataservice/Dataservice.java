@@ -25,8 +25,8 @@ import java.util.Calendar;
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.resource.DdlFile;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.resource.ResourceFile;
@@ -268,7 +268,7 @@ public interface Dataservice extends Exportable, RelationalObject, VdbEntryConta
      *         if an error occurs
      */
     ConnectionEntry addConnection( final UnitOfWork transaction,
-                                   final Datasource connection ) throws KException;
+                                   final Connection connection ) throws KException;
 
     /**
      * @param transaction
@@ -451,7 +451,7 @@ public interface Dataservice extends Exportable, RelationalObject, VdbEntryConta
      * @throws KException
      *         if an error occurs
      */
-    Datasource[] getConnections( final UnitOfWork transaction,
+    Connection[] getConnections( final UnitOfWork transaction,
                                  final String... namePatterns ) throws KException;
 
     /**

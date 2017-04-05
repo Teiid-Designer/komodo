@@ -29,17 +29,17 @@ import org.komodo.rest.RestLink;
 import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.LinkSerializer;
 import org.komodo.rest.json.RestPropertySerializer;
+import org.komodo.rest.relational.connection.ConnectionSchemaPairProperty;
+import org.komodo.rest.relational.connection.ConnectionSchema;
+import org.komodo.rest.relational.connection.ConnectionSchemaProperty;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.dataservice.DataServiceSchema;
 import org.komodo.rest.relational.dataservice.RestDataservice;
-import org.komodo.rest.relational.datasource.DSSPropertyPairProperty;
-import org.komodo.rest.relational.datasource.DataSourceSchema;
-import org.komodo.rest.relational.datasource.DataSourceSchemaProperty;
-import org.komodo.rest.relational.datasource.RestDataSource;
-import org.komodo.rest.relational.json.datasource.DSSPropertyListSerializer;
-import org.komodo.rest.relational.json.datasource.DSSPropertyPairPropertySerializer;
-import org.komodo.rest.relational.json.datasource.DSSPropertySerializer;
-import org.komodo.rest.relational.json.datasource.DSSSerializer;
-import org.komodo.rest.relational.json.datasource.DataSourceSerializer;
+import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertyListSerializer;
+import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertyPairPropertySerializer;
+import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertySerializer;
+import org.komodo.rest.relational.json.connection.ConnectionSchemaSerializer;
+import org.komodo.rest.relational.json.connection.ConnectionSerializer;
 import org.komodo.rest.relational.request.KomodoDataSourceJdbcTableAttributes;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.request.KomodoFileAttributes;
@@ -119,16 +119,16 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter(RestVdbMask.class, new VdbMaskSerializer())
                                                   .registerTypeAdapter(RestVdbTranslator.class, new VdbTranslatorSerializer())
                                                   .registerTypeAdapter(RestDataservice.class, new DataserviceSerializer())
-                                                  .registerTypeAdapter(RestDataSource.class, new DataSourceSerializer())
+                                                  .registerTypeAdapter(RestConnection.class, new ConnectionSerializer())
                                                   .registerTypeAdapter(RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>())
                                                   .registerTypeAdapter(RestTeiid.class, new TeiidSerializer())
                                                   .registerTypeAdapter(RestTeiidStatus.class, new TeiidStatusSerializer())
                                                   .registerTypeAdapter(RestTeiidVdbStatus.class, new TeiidVdbStatusSerializer())
                                                   .registerTypeAdapter(RestTeiidVdbStatusVdb.class, new TeiidVdbStatusVdbSerializer())
-                                                  .registerTypeAdapter(DataSourceSchema.class, new DSSSerializer())
-                                                  .registerTypeAdapter(DSSPropertyListSerializer.class, new DSSPropertyListSerializer())
-                                                  .registerTypeAdapter(DSSPropertyPairProperty.class, new DSSPropertyPairPropertySerializer())
-                                                  .registerTypeAdapter(DataSourceSchemaProperty.class, new DSSPropertySerializer())
+                                                  .registerTypeAdapter(ConnectionSchema.class, new ConnectionSchemaSerializer())
+                                                  .registerTypeAdapter(ConnectionSchemaPropertyListSerializer.class, new ConnectionSchemaPropertyListSerializer())
+                                                  .registerTypeAdapter(ConnectionSchemaPairProperty.class, new ConnectionSchemaPropertyPairPropertySerializer())
+                                                  .registerTypeAdapter(ConnectionSchemaProperty.class, new ConnectionSchemaPropertySerializer())
                                                   .registerTypeAdapter(KomodoStorageAttributes.class, new StorageAttributesSerializer())
                                                   .registerTypeAdapter(KomodoFileAttributes.class, new FileAttributesSerializer())
                                                   .registerTypeAdapter(ImportExportStatus.class, new ImportExportStatusSerializer())
@@ -177,16 +177,16 @@ public final class KomodoJsonMarshaller {
             JsonElement schema1Element = shell.get("schema-1");
             JsonObject schema1 = schema1Element.getAsJsonObject();
 
-            DataSourceSchema dsSchema = new DataSourceSchema();
-            schema1.add(DataSourceSchema.NAME_LABEL, BUILDER.toJsonTree(dsSchema));
+            ConnectionSchema dsSchema = new ConnectionSchema();
+            schema1.add(ConnectionSchema.NAME_LABEL, BUILDER.toJsonTree(dsSchema));
 
             schema = PRETTY_BUILDER.toJson(shell);
 
-        } else if (KomodoType.DATASOURCE.equals(kType)) {
+        } else if (KomodoType.CONNECTION.equals(kType)) {
             // Data sources do not have a mandated schema set out in the vdb-deployer.xsd
             // so need to construct our own. At this point should be pretty simple
 
-            DataSourceSchema dsSchema = new DataSourceSchema();
+            ConnectionSchema dsSchema = new ConnectionSchema();
             schema = marshall(dsSchema);
 
         } else if (KomodoType.DATASERVICE.equals(kType)) {

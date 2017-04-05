@@ -23,7 +23,7 @@ package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestConnectionDriver;
 import org.komodo.rest.relational.response.RestTeiidStatus;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -38,7 +38,7 @@ public class TeiidStatusSerializer extends BasicEntitySerializer<RestTeiidStatus
     @Override
     protected String readExtension(String name, RestTeiidStatus status, JsonReader in) {
         if (RestTeiidStatus.TEIID_DATA_SOURCE_DRIVERS_LABEL.equals(name)) {
-            RestDataSourceDriver[] drivers = BUILDER.fromJson(in, RestDataSourceDriver[].class);
+            RestConnectionDriver[] drivers = BUILDER.fromJson(in, RestConnectionDriver[].class);
             status.setDataSourceDrivers(drivers);
             return name;
         }
@@ -49,6 +49,6 @@ public class TeiidStatusSerializer extends BasicEntitySerializer<RestTeiidStatus
     @Override
     protected void writeExtensions(JsonWriter out, RestTeiidStatus entity) throws IOException {
         out.name(RestTeiidStatus.TEIID_DATA_SOURCE_DRIVERS_LABEL);
-        BUILDER.toJson(entity.getDataSourceDrivers().toArray(new RestDataSourceDriver[0]), RestDataSourceDriver[].class, out);
+        BUILDER.toJson(entity.getDataSourceDrivers().toArray(new RestConnectionDriver[0]), RestConnectionDriver[].class, out);
     }
 }

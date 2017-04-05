@@ -36,7 +36,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.TeiidConnectionInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
@@ -222,7 +222,7 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
     }
 
     @Override
-    public Collection<DataSourceDriver> getDataSourceDrivers() throws Exception {
+    public Collection<ConnectionDriver> getDataSourceDrivers() throws Exception {
         return ext.getDataSourceDrivers(admin);
     }
 

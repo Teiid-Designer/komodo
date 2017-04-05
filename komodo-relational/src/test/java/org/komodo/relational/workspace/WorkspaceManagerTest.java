@@ -41,8 +41,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -110,10 +110,10 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldCreateDatasource() throws Exception {
-        final Datasource datasource = this.wsMgr.createDatasource( getTransaction(), null, "ds" );
-        assertThat( datasource, is( notNullValue() ) );
-        assertThat( _repo.getFromWorkspace( getTransaction(), datasource.getAbsolutePath() ), is( ( KomodoObject )datasource ) );
+    public void shouldCreateConnection() throws Exception {
+        final Connection connection = this.wsMgr.createConnection( getTransaction(), null, "ds" );
+        assertThat( connection, is( notNullValue() ) );
+        assertThat( _repo.getFromWorkspace( getTransaction(), connection.getAbsolutePath() ), is( ( KomodoObject )connection ) );
     }
 
     @Test
@@ -313,7 +313,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectChildTypes() {
-        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Folder.IDENTIFIER, Datasource.IDENTIFIER, Dataservice.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
+        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Folder.IDENTIFIER, Connection.IDENTIFIER, Dataservice.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
         assertThat( this.wsMgr.getChildTypes().length, is( 6 ) );
     }
 
@@ -416,10 +416,10 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldResolveDatasource() throws Exception {
-        final Datasource ds = this.wsMgr.createDatasource(getTransaction(), null, "source");
-        final KomodoObject kobject = new ObjectImpl(_repo, ds.getAbsolutePath(), ds.getIndex());
-        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Datasource.class), is(instanceOf(Datasource.class)));
+    public void shouldResolveConnection() throws Exception {
+        final Connection connection = this.wsMgr.createConnection(getTransaction(), null, "source");
+        final KomodoObject kobject = new ObjectImpl(_repo, connection.getAbsolutePath(), connection.getIndex());
+        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Connection.class), is(instanceOf(Connection.class)));
     }
 
     @Test

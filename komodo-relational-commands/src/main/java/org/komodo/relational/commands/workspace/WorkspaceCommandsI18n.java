@@ -29,9 +29,9 @@ import org.komodo.utils.i18n.I18n;
 @SuppressWarnings( "javadoc" )
 public final class WorkspaceCommandsI18n extends I18n {
 
-    public static String createDatasourceExamples;
-    public static String createDatasourceHelp;
-    public static String createDatasourceUsage;
+    public static String createConnectionExamples;
+    public static String createConnectionHelp;
+    public static String createConnectionUsage;
 
     public static String createSchemaExamples;
     public static String createSchemaHelp;
@@ -45,9 +45,9 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String createVdbHelp;
     public static String createVdbUsage;
 
-    public static String deleteDatasourceExamples;
-    public static String deleteDatasourceHelp;
-    public static String deleteDatasourceUsage;
+    public static String deleteConnectionExamples;
+    public static String deleteConnectionHelp;
+    public static String deleteConnectionUsage;
 
     public static String deleteSchemaExamples;
     public static String deleteSchemaHelp;
@@ -61,9 +61,9 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String deleteVdbHelp;
     public static String deleteVdbUsage;
 
-    public static String exportDatasourceExamples;
-    public static String exportDatasourceHelp;
-    public static String exportDatasourceUsage;
+    public static String exportConnectionExamples;
+    public static String exportConnectionHelp;
+    public static String exportConnectionUsage;
 
     public static String exportVdbExamples;
     public static String exportVdbHelp;
@@ -73,23 +73,23 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String importVdbHelp;
     public static String importVdbUsage;
 
-    public static String uploadDatasourceExamples;
-    public static String uploadDatasourceHelp;
-    public static String uploadDatasourceUsage;
+    public static String uploadConnectionExamples;
+    public static String uploadConnectionHelp;
+    public static String uploadConnectionUsage;
 
     public static String uploadVdbExamples;
     public static String uploadVdbHelp;
     public static String uploadVdbUsage;
 
     public static String cannotImportWouldCreateDuplicate;
-    public static String datasourceCreated;
-    public static String datasourceDeleted;
-    public static String datasourceExported;
-    public static String datasourceNotFound;
-    public static String datasourceOverwriteDisabled;
-    public static String datasourceParserErrors;
-    public static String datasourceUploaded;
-    public static String deleteDatasourceError;
+    public static String connectionCreated;
+    public static String connectionDeleted;
+    public static String connectionExported;
+    public static String connectionNotFound;
+    public static String connectionOverwriteDisabled;
+    public static String connectionParserErrors;
+    public static String connectionUploaded;
+    public static String deleteConnectionError;
     public static String deleteSchemaError;
     public static String deleteTeiidError;
     public static String deleteVdbError;
@@ -100,13 +100,13 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String importFailedMsg;
     public static String inputFileError;
     public static String invalidBooleanPropertyValue;
-    public static String invalidDatasourceIndicator;
+    public static String invalidConnectionIndicator;
     public static String invalidIntegerPropertyValue;
     public static String invalidNullablePropertyValue;
     public static String invalidObjectType;
     public static String invalidPropertyName;
-    public static String missingDatasourceName;
-    public static String missingInputDatasourceFilePath;
+    public static String missingConnectionName;
+    public static String missingInputConnectionFilePath;
     public static String missingInputFileName;
     public static String missingInputVdbFilePath;
     public static String missingOutputFileName;

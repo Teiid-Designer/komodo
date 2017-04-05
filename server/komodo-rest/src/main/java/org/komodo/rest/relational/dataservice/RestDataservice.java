@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.resource.Driver;
@@ -135,7 +135,7 @@ public final class RestDataservice extends RestBasicEntity {
             setServiceViewTables(tableNames.toArray(new String[0]));
         }
 
-        Datasource[] connections = dataService.getConnections(uow);
+        Connection[] connections = dataService.getConnections(uow);
         setConnectionTotal(connections != null ? connections.length : 0);
 
         Driver[] drivers = dataService.getDrivers(uow);

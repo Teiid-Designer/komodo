@@ -45,9 +45,9 @@ import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.internal.DataserviceConveyor;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.Vdb;
@@ -249,7 +249,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for validating a data service or data source name.
+         * The name of the URI path segment for validating a data service or connection name.
          */
         String NAME_VALIDATION_SEGMENT = "nameValidation"; //$NON-NLS-1$
 
@@ -956,20 +956,20 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     }
 
     /**
-     * Create a datasource in the komodo engine
+     * Create a connection in the komodo engine
      *
-     * @param datasourceName the datasource name
+     * @param connectionName the connection name
      * @param user initiating call
      * @throws Exception if error occurs
      */
-    public void createDatasource(String datasourceName, String user) throws Exception {
+    public void createConnection(String connectionName, String user) throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = repository.createTransaction(user, "Create Datasource", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction(user, "Create Connection", false, callback); //$NON-NLS-1$
 
         WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository, uow);
-        wsMgr.createDatasource(uow, null, datasourceName);
+        wsMgr.createConnection(uow, null, connectionName);
 
         uow.commit();
         callback.await(3, TimeUnit.MINUTES);
@@ -978,15 +978,15 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     /**
      * @param user initiating call
      *
-     * @return the datasources directly from the kEngine
+     * @return the connections directly from the kEngine
      * @throws Exception if error occurs
      */
-    public Datasource[] getDatasources(String user) throws Exception {
+    public Connection[] getConnections(String user) throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
 
-        UnitOfWork uow = repository.createTransaction(user, "Find datasources", true, null); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction(user, "Find connections", true, null); //$NON-NLS-1$
         WorkspaceManager mgr = WorkspaceManager.getInstance(repository, uow);
-        Datasource[] sources = mgr.findDatasources(uow);
+        Connection[] sources = mgr.findConnections(uow);
         uow.commit();
 
         return sources;

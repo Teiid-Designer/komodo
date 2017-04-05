@@ -60,8 +60,8 @@ import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.ViewBuilderCriteriaPredicate;
 import org.komodo.relational.ViewDdlBuilder;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Model;
@@ -79,12 +79,12 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.dataservice.RestDataservice;
-import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
-import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestConnectionDriver;
 import org.komodo.rest.relational.response.RestDataserviceViewInfo;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.KException;
@@ -93,7 +93,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.language.SQLConstants;
@@ -1709,10 +1709,10 @@ public final class KomodoDataserviceService extends KomodoService {
             if (dataservice == null)
                 return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
 
-            Datasource[] connections = dataservice.getConnections(uow);
-            List<RestDataSource> restConnections = new ArrayList<>(connections.length);
-            for (Datasource connection : connections) {
-                RestDataSource entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow);
+            Connection[] connections = dataservice.getConnections(uow);
+            List<RestConnection> restConnections = new ArrayList<>(connections.length);
+            for (Connection connection : connections) {
+                RestConnection entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow);
                 restConnections.add(entity);
                 LOGGER.debug("getConnections:Connections from Dataservice '{0}' entity was constructed", dataserviceName); //$NON-NLS-1$
             }
@@ -1748,7 +1748,7 @@ public final class KomodoDataserviceService extends KomodoService {
     @Path( V1Constants.DATA_SERVICE_PLACEHOLDER +
                    StringConstants.FORWARD_SLASH + V1Constants.DRIVERS_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Find a dataservice's drivers ", response = RestDataSourceDriver.class)
+    @ApiOperation(value = "Find a dataservice's drivers ", response = RestConnectionDriver.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
@@ -1777,10 +1777,10 @@ public final class KomodoDataserviceService extends KomodoService {
                 return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
 
             Driver[] drivers = dataservice.getDrivers(uow);
-            List<RestDataSourceDriver> restDrivers = new ArrayList<>(drivers.length);
+            List<RestConnectionDriver> restDrivers = new ArrayList<>(drivers.length);
             for (Driver driver : drivers) {
-                DataSourceDriver aDriver = new DataSourceDriver(driver.getName(uow),null);
-                RestDataSourceDriver entity = new RestDataSourceDriver(aDriver);
+                ConnectionDriver aDriver = new ConnectionDriver(driver.getName(uow),null);
+                RestConnectionDriver entity = new RestConnectionDriver(aDriver);
                 restDrivers.add(entity);
                 LOGGER.debug("getDrivers:Drivers from Dataservice '{0}' entity was constructed", dataserviceName); //$NON-NLS-1$
             }

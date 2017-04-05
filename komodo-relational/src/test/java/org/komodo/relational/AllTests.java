@@ -2,8 +2,8 @@ package org.komodo.relational;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.relational.connection.internal.ConnectionImplTest;
 import org.komodo.relational.dataservice.internal.DataserviceImplTest;
-import org.komodo.relational.datasource.internal.DatasourceImplTest;
 import org.komodo.relational.importer.ddl.TestTeiidDdlImporter;
 import org.komodo.relational.importer.vdb.TestTeiidVdbImporter;
 import org.komodo.relational.model.internal.AbstractProcedureImplTest;
@@ -53,8 +53,8 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     // Dataservice
     DataserviceImplTest.class,
 
-    // DataSource
-    DatasourceImplTest.class,
+    // Connection
+    ConnectionImplTest.class,
 
     // Model
     AbstractProcedureImplTest.class,

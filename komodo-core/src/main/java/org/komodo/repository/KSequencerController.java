@@ -44,7 +44,7 @@ public interface KSequencerController {
         DDL("DDL Sequencer"), //$NON-NLS-1$
 
         /**
-         * Connection/DataSource Sequencer
+         * Connection Sequencer
          */
         CONNECTION("Connection Sequencer"), //$NON-NLS-1$
 

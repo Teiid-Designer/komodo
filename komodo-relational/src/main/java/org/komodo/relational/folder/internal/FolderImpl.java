@@ -26,10 +26,10 @@ import java.util.List;
 
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelFactory;
+import org.komodo.relational.connection.Connection;
+import org.komodo.relational.connection.internal.ConnectionImpl;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
-import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
@@ -61,7 +61,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, 
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Connection.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, 
                                                                        Dataservice.IDENTIFIER, Translator.IDENTIFIER, Driver.IDENTIFIER, 
                                                                        Folder.IDENTIFIER };
     
@@ -103,9 +103,9 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
     }
 
     @Override
-    public Datasource addDatasource( final UnitOfWork uow,
-                                     final String sourceName ) throws KException {
-         return RelationalModelFactory.createDatasource( uow, getRepository(), this.getAbsolutePath(), sourceName );
+    public Connection addConnection( final UnitOfWork uow,
+                                     final String connectionName ) throws KException {
+         return RelationalModelFactory.createConnection( uow, getRepository(), this.getAbsolutePath(), connectionName );
     }
 
     @Override
@@ -148,23 +148,23 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
     }
 
     @Override
-    public Datasource[] getDatasources( final UnitOfWork transaction,
+    public Connection[] getConnections( final UnitOfWork transaction,
                                         final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Datasource > result = new ArrayList< >();
+        final List< Connection > result = new ArrayList< >();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns ) ) {
-            final Datasource ds = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            final Connection ds = new ConnectionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
             result.add( ds );
         }
 
         if ( result.isEmpty() ) {
-            return Datasource.NO_DATASOURCES;
+            return Connection.NO_CONNECTIONS;
         }
 
-        return result.toArray( new Datasource[ result.size() ] );
+        return result.toArray( new Connection[ result.size() ] );
     }
 
     @Override
@@ -287,7 +287,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         } else if ( KomodoLexicon.Schema.NODE_TYPE.equals( type ) ) {
             result = getSchemas( transaction, namePatterns );
         } else if ( DataVirtLexicon.Connection.NODE_TYPE.equals( type ) ) {
-            result = getDatasources( transaction, namePatterns );
+            result = getConnections( transaction, namePatterns );
         } else if ( DataVirtLexicon.DataService.NODE_TYPE.equals( type ) ) {
             result = getDataservices( transaction, namePatterns );
         } else if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( type ) ) {

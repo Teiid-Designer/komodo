@@ -304,7 +304,7 @@ public final class KomodoUtilService extends KomodoService {
                              final @Context UriInfo uriInfo,
                              @ApiParam(
                                        value = "Type of schema element to be returned",
-                                       allowableValues = "Vdb, VdbImport, DataSource," +
+                                       allowableValues = "Vdb, VdbImport, Connection," +
                                                                              "VdbTranslator, Model, " +
                                                                              "VdbModelSource, VdbDataRole, " +
                                                                              "VdbPermission, VdbCondition, VdbMask",

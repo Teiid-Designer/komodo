@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application;
@@ -64,9 +64,9 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         DATA_SERVICE_PARENT_PATH,
 
         /**
-         * The path of the parent of a datasource (stored as an URI)
+         * The path of the parent of a connection (stored as an URI)
          */
-        DATA_SOURCE_PARENT_PATH,
+        CONNECTION_PARENT_PATH,
 
         /**
          * Name of the teiid object
@@ -114,9 +114,9 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         ADD_TRANSLATORS_SEGMENT,
 
         /**
-         * Name of the data source
+         * Name of the connection
          */
-        DATA_SOURCE_NAME,
+        CONNECTION_NAME,
 
         /**
          * Name of the import
@@ -891,13 +891,13 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
-     * @param data source
+     * @param connection the connection whose parent URI is being requested (cannot be <code>null</code>)
      * @param uow
-     * @return the uri of the parent of the given data source
+     * @return the URI of the parent of the given connection
      * @throws KException
      */
-    public URI dataSourceParentUri(Datasource dataSource, UnitOfWork uow) throws KException {
-        KomodoObject parent = dataSource.getParent(uow);
+    public URI connectionParentUri(Connection connection, UnitOfWork uow) throws KException {
+        KomodoObject parent = connection.getParent(uow);
         if (isCachedTeiidFolder(uow, parent)) {
             return cachedTeiidUri(parent.getName(uow));
         }
@@ -908,9 +908,9 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      * @param settings
-     * @return data source URIs for the given link type and settings
+     * @return the connection URI for the given link type and settings
      */
-    public URI dataSourceUri(LinkType linkType, Properties settings) {
+    public URI connectionUri(LinkType linkType, Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
         ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
@@ -919,7 +919,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
 
         switch (linkType) {
             case SELF:
-                String name = setting(settings, SettingNames.DATA_SOURCE_NAME);
+                String name = setting(settings, SettingNames.CONNECTION_NAME);
                 result = UriBuilder.fromUri(parentUri)
                                    .path(name).build();
                 break;

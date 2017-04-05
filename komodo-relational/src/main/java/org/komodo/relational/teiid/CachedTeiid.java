@@ -24,7 +24,7 @@ package org.komodo.relational.teiid;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.internal.CachedTeiidImpl;
 import org.komodo.relational.vdb.Translator;
@@ -170,17 +170,17 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * @throws KException
      *         if an error occurs
      */
-    Datasource[] getDataSources(UnitOfWork transaction, final String... namePatterns ) throws KException;
+    Connection[] getConnections(UnitOfWork transaction, final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name the datasource name
-     * @return the named datasource found on this teiid server or null
+     * @param name the connection name
+     * @return the named connection found on this teiid server or null
      * @throws KException
      *         if an error occurs
      */
-    Datasource getDataSource(final UnitOfWork transaction, String name) throws KException;
+    Connection getConnection(final UnitOfWork transaction, String name) throws KException;
 
     /**
      * @param transaction
@@ -215,15 +215,15 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
     void refreshVdbs(final UnitOfWork transaction, TeiidInstance teiidInstance, final String... vdbNames) throws KException;
 
     /**
-     * Refresh DataSources with the supplied names
+     * Refresh connections with the supplied names
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param teiidInstance the teiid instance
-     * @param dataSourceNames the dataSource names
+     * @param connectionNames the connection names
      * @throws KException
      *         if an error occurs
      */
-    void refreshDataSources(final UnitOfWork transaction, TeiidInstance teiidInstance, String... dataSourceNames) throws KException;
+    void refreshConnections(final UnitOfWork transaction, TeiidInstance teiidInstance, String... connectionNames) throws KException;
 
     /**
      * Refresh Translators with the supplied names

@@ -25,7 +25,6 @@ import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GE
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,8 +59,8 @@ import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
@@ -80,8 +79,8 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
-import org.komodo.rest.relational.datasource.RestDataSource;
-import org.komodo.rest.relational.datasource.RestDataSourceJdbcInfo;
+import org.komodo.rest.relational.connection.RestConnection;
+import org.komodo.rest.relational.connection.RestConnectionJdbcInfo;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataSourceJdbcTableAttributes;
 import org.komodo.rest.relational.request.KomodoFileAttributes;
@@ -90,7 +89,7 @@ import org.komodo.rest.relational.request.KomodoQueryAttribute;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
 import org.komodo.rest.relational.request.KomodoVdbUpdateAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
-import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestConnectionDriver;
 import org.komodo.rest.relational.response.RestQueryResult;
 import org.komodo.rest.relational.response.RestTeiid;
 import org.komodo.rest.relational.response.RestTeiidDataSourceJdbcCatalogSchemaInfo;
@@ -106,7 +105,7 @@ import org.komodo.spi.query.QueryService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.ExecutionAdmin;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.TeiidDataSource;
@@ -227,7 +226,7 @@ public class KomodoTeiidService extends KomodoService {
             uow = systemTx("refresh-teiid-content", false);
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
 
-            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceNames);
+            cachedTeiid.refreshConnections(uow, teiidInstance, dataSourceNames);
 
             // Commit the transaction to allow the sequencers to run
             uow.commit();
@@ -303,12 +302,12 @@ public class KomodoTeiidService extends KomodoService {
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
 
             // DataSources
-            Datasource[] dataSources = dataService.getConnections(uow);
+            Connection[] dataSources = dataService.getConnections(uow);
             String[] dataSourceNames = new String[dataSources.length];
             for (int i = 0; i < dataSources.length; i++) {
                 dataSourceNames[i] = dataSources[i].getJndiName(uow);
             }
-            cachedTeiid.refreshDataSources(uow, teiidInstance, dataSourceNames);
+            cachedTeiid.refreshConnections(uow, teiidInstance, dataSourceNames);
 
             // Drivers
             Driver[] drivers = dataService.getDrivers(uow);
@@ -399,8 +398,8 @@ public class KomodoTeiidService extends KomodoService {
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
             teiidInstance.reconnect();
 
-            Collection<DataSourceDriver> drivers = teiidInstance.getDataSourceDrivers();
-            for (DataSourceDriver driver : drivers) {
+            Collection<ConnectionDriver> drivers = teiidInstance.getDataSourceDrivers();
+            for (ConnectionDriver driver : drivers) {
                 if (driver.getName().startsWith(driverName)) {
                     hasDriver = true;
                     break;
@@ -1317,10 +1316,10 @@ public class KomodoTeiidService extends KomodoService {
                 refreshCachedDataSources(teiidNode, connectionName);
 
                 status.addAttribute(connectionName,
-                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_UNDEPLOYED));
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED));
             } else
                 status.addAttribute(connectionName,
-                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_UNDEPLOYMENT_REQUEST_SENT));
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_UNDEPLOYMENT_REQUEST_SENT));
 
            return commit(uow, mediaTypes, status);
 
@@ -1478,7 +1477,7 @@ public class KomodoTeiidService extends KomodoService {
     @Path(V1Constants.CONNECTIONS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Display the collection of connections",
-                            response = RestDataSource[].class)
+                            response = RestConnection[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
@@ -1500,14 +1499,14 @@ public class KomodoTeiidService extends KomodoService {
             uow = createTransaction(principal, "getConnections", true); //$NON-NLS-1$
 
             // Get teiid datasources
-            Datasource[] dataSources = cachedTeiid.getDataSources(uow);
+            Connection[] dataSources = cachedTeiid.getConnections(uow);
             LOGGER.debug("getConnections:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
 
-            final List<RestDataSource> entities = new ArrayList<>();
+            final List<RestConnection> entities = new ArrayList<>();
 
             KomodoProperties properties = new KomodoProperties();
-            for (final Datasource dataSource : dataSources) {
-                RestDataSource entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
+            for (final Connection dataSource : dataSources) {
+                RestConnection entity = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
                 entities.add(entity);
                 LOGGER.debug("getConnections:Data Source '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
             }
@@ -1543,7 +1542,7 @@ public class KomodoTeiidService extends KomodoService {
     @GET
     @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Find connection by name", response = RestDataSource.class)
+    @ApiOperation(value = "Find connection by name", response = RestConnection.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
@@ -1567,12 +1566,12 @@ public class KomodoTeiidService extends KomodoService {
 
             // find DataSource
             uow = createTransaction(principal, "getConnection-" + connectionName, true); //$NON-NLS-1$
-            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
+            Connection dataSource = cachedTeiid.getConnection(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
+                return commitNoConnectionFound(uow, mediaTypes, connectionName);
 
             KomodoProperties properties = new KomodoProperties();
-            final RestDataSource restDataSource = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
+            final RestConnection restDataSource = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
             LOGGER.debug("getConnection:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
             return commit( uow, mediaTypes, restDataSource );
 
@@ -1631,9 +1630,9 @@ public class KomodoTeiidService extends KomodoService {
 
             // find Connection
             uow = createTransaction(principal, "getConnectionDefaultTranslator-" + connectionName, true); //$NON-NLS-1$
-            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
+            Connection dataSource = cachedTeiid.getConnection(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
+                return commitNoConnectionFound(uow, mediaTypes, connectionName);
 
             // Get the driver name for the source
             String driverName = dataSource.getDriverName(uow);
@@ -1675,7 +1674,7 @@ public class KomodoTeiidService extends KomodoService {
     @Path(V1Constants.DRIVERS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Display the collection of drivers available in teiid",
-                            response = RestDataSourceDriver[].class)
+                            response = RestConnectionDriver[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
@@ -1699,10 +1698,10 @@ public class KomodoTeiidService extends KomodoService {
             Driver[] drivers = cachedTeiid.getDrivers(uow);
             LOGGER.debug("getDrivers:found '{0}' Drivers", drivers.length); //$NON-NLS-1$
 
-            final List<RestDataSourceDriver> entities = new ArrayList<>();
+            final List<RestConnectionDriver> entities = new ArrayList<>();
 
             for (final Driver driver : drivers) {
-                RestDataSourceDriver entity = new RestDataSourceDriver();
+                RestConnectionDriver entity = new RestConnectionDriver();
                 entity.setName(driver.getName(uow));
                 entities.add(entity);
                 LOGGER.debug("getDrivers:Driver '{0}' entity was constructed", driver.getName(uow)); //$NON-NLS-1$
@@ -2100,7 +2099,7 @@ public class KomodoTeiidService extends KomodoService {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
             }
 
-            Datasource dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Datasource.class);
+            Connection dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Connection.class);
             if (dataSource == null) {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
             }
@@ -2542,7 +2541,7 @@ public class KomodoTeiidService extends KomodoService {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
-        Connection connection = null;
+        java.sql.Connection connection = null;
 
         // Get the attributes for fetching the tables
         KomodoDataSourceJdbcTableAttributes attr;
@@ -2563,9 +2562,9 @@ public class KomodoTeiidService extends KomodoService {
             uow = createTransaction(principal, "getConnectionJdbcTables", true); //$NON-NLS-1$
 
             // Get the data source (connection) from teiid
-            Datasource dataSource = cachedTeiid.getDataSource(uow, attr.getDataSourceName());
+            Connection dataSource = cachedTeiid.getConnection(uow, attr.getDataSourceName());
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, attr.getDataSourceName());
+                return commitNoConnectionFound(uow, mediaTypes, attr.getDataSourceName());
 
             // Ensure the datasource is jdbc
             if(!dataSource.isJdbc(uow)) {
@@ -2653,7 +2652,7 @@ public class KomodoTeiidService extends KomodoService {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
-        Connection connection = null;
+        java.sql.Connection connection = null;
 
         try {
             Teiid teiidNode = getDefaultTeiid();
@@ -2662,9 +2661,9 @@ public class KomodoTeiidService extends KomodoService {
             uow = createTransaction(principal, "getConnectionJdbcTables", true); //$NON-NLS-1$
 
             // Get the data source (connection) from teiid
-            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
+            Connection dataSource = cachedTeiid.getConnection(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
+                return commitNoConnectionFound(uow, mediaTypes, connectionName);
 
             // Ensure the datasource is jdbc
             if(!dataSource.isJdbc(uow)) {
@@ -2710,7 +2709,7 @@ public class KomodoTeiidService extends KomodoService {
      * @param connection the JDBC connection
      * @return list of Catalog Schema info
      */
-    private List<RestTeiidDataSourceJdbcCatalogSchemaInfo> generateCatalogSchemaInfos(Connection connection) throws KException {
+    private List<RestTeiidDataSourceJdbcCatalogSchemaInfo> generateCatalogSchemaInfos(java.sql.Connection connection) throws KException {
         List<RestTeiidDataSourceJdbcCatalogSchemaInfo> infos = new ArrayList<RestTeiidDataSourceJdbcCatalogSchemaInfo>();
 
         if(connection!=null) {
@@ -2829,7 +2828,7 @@ public class KomodoTeiidService extends KomodoService {
     @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER 
            + StringConstants.FORWARD_SLASH + V1Constants.JDBC_INFO_SEGMENT)
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @ApiOperation(value = "Get info for a jdbc source", response = RestDataSourceJdbcInfo.class)
+    @ApiOperation(value = "Get info for a jdbc source", response = RestConnectionJdbcInfo.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No Connection could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
@@ -2846,7 +2845,7 @@ public class KomodoTeiidService extends KomodoService {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
-        Connection connection = null;
+        java.sql.Connection connection = null;
 
         try {
             Teiid teiidNode = getDefaultTeiid();
@@ -2855,9 +2854,9 @@ public class KomodoTeiidService extends KomodoService {
             uow = createTransaction(principal, "getConnectionJdbcTables", true); //$NON-NLS-1$
 
             // Get the data source from teiid
-            Datasource dataSource = cachedTeiid.getDataSource(uow, connectionName);
+            Connection dataSource = cachedTeiid.getConnection(uow, connectionName);
             if (dataSource == null)
-                return commitNoDatasourceFound(uow, mediaTypes, connectionName);
+                return commitNoConnectionFound(uow, mediaTypes, connectionName);
 
             // Ensure the datasource is jdbc
             if(!dataSource.isJdbc(uow)) {
@@ -2875,7 +2874,7 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             // Get the table names
-            RestDataSourceJdbcInfo info = new RestDataSourceJdbcInfo();
+            RestConnectionJdbcInfo info = new RestConnectionJdbcInfo();
             try {
                 populateJdbcInfo(connection, info);
             } catch (Exception ex) {
@@ -2907,7 +2906,7 @@ public class KomodoTeiidService extends KomodoService {
      * Populate the JDBC info using the supplied connection
      * @param connection the JDBC connection
      */
-    private void populateJdbcInfo(Connection connection, RestDataSourceJdbcInfo jdbcInfo) throws KException {
+    private void populateJdbcInfo(java.sql.Connection connection, RestConnectionJdbcInfo jdbcInfo) throws KException {
         if(connection!=null) {
             try {
                 DatabaseMetaData metaData = connection.getMetaData();
@@ -2944,7 +2943,7 @@ public class KomodoTeiidService extends KomodoService {
      * @param connection the JDBC connection
      * @return the list of table names
      */
-    private List<String> getTableNames(Connection connection, String catalogName, String schemaName, String tableFilter) throws KException {
+    private List<String> getTableNames(java.sql.Connection connection, String catalogName, String schemaName, String tableFilter) throws KException {
         // Get the list of Tables
         List<String> tableNameList = new ArrayList<String>();
         if(connection!=null) {
@@ -2977,8 +2976,8 @@ public class KomodoTeiidService extends KomodoService {
     /*
      * Get JDBC Connection for the specified jndiName
      */
-    private Connection getJdbcConnection (String jndiName) throws KException {
-        Connection connection = null;
+    private java.sql.Connection getJdbcConnection (String jndiName) throws KException {
+    	java.sql.Connection connection = null;
 
         String jdbcContext = jndiName.substring(0, jndiName.lastIndexOf('/')+1);
 
