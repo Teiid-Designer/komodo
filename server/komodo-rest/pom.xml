@@ -38,7 +38,7 @@
 		<profile>
 			<id>dv63</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 
 			<properties>
@@ -157,8 +157,88 @@
 		<profile>
 			<id>wildfly</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
+
+			<properties>
+				<version.resteasy>3.0.19.Final</version.resteasy>
+				<version.jboss.logging>3.3.0.Final</version.jboss.logging>
+				<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.logging, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
+			</properties>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.jboss.logging</groupId>
+						<artifactId>jboss-logging</artifactId>
+						<version>${version.jboss.logging}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>resteasy-jaxrs</artifactId>
+						<version>${version.resteasy}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>jaxrs-api</artifactId>
+						<version>${version.resteasy}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>resteasy-jackson-provider</artifactId>
+						<version>${version.resteasy}</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.xnio</groupId>
+					<artifactId>xnio-api</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.xnio</groupId>
+					<artifactId>xnio-nio</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.spec</groupId>
+					<artifactId>jboss-javaee-7.0</artifactId>
+					<type>pom</type>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.arquillian.junit</groupId>
+					<artifactId>arquillian-junit-container</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.wildfly.arquillian</groupId>
+					<artifactId>wildfly-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>1.8</source>
+							<target>1.8</target>
+							<excludes>
+								<!-- Exclude the cors classes for rest 2 as this is for rest 3 -->
+								<exclude>**/org/komodo/rest/cors/rest2/*.java</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>openshift</id>
 
 			<properties>
 				<version.resteasy>3.0.19.Final</version.resteasy>

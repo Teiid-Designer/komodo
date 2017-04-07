@@ -131,7 +131,7 @@
 		<profile>
 			<id>dv63</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 
 			<properties>
@@ -246,7 +246,7 @@
 		<profile>
 			<id>wildfly</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 
 			<properties>
@@ -313,6 +313,76 @@
 				</dependencies>
 			</dependencyManagement>
 
+		</profile>
+		<profile>
+			<id>openshift</id>
+			<properties>
+				<!-- skip all tests to speed up compilation -->
+   				<maven.test.skip>true</maven.test.skip>
+   				<integration.skipTests>true</integration.skipTests>
+
+				<server.platform>wildfly</server.platform>
+
+				<!-- The default version of teiid targetted for development -->
+				<teiid.version.default>9.1.1</teiid.version.default>
+				<teiid.classifier.default>wildfly-dist</teiid.classifier.default>
+
+				<!-- The version of server to use with testing -->
+				<test.server.group.id>org.wildfly</test.server.group.id>
+				<test.server.artifact.id>wildfly-dist</test.server.artifact.id>
+				<test.server.version>10.1.0.Final</test.server.version>
+				<!-- The test version of server when its unpacked -->
+				<test.server.name>wildfly-10.1.0.Final</test.server.name>
+
+				<version.wildfly>2.0.10.Final</version.wildfly>
+				<version.aesh>0.33.12.redhat-1</version.aesh>
+				<version.org.jboss.dmr>1.3.0.Final</version.org.jboss.dmr>
+
+				<version.org.jboss.spec.jboss-javaee-7.0>1.0.4.Final</version.org.jboss.spec.jboss-javaee-7.0>
+				<version.org.jboss.xnio>3.4.0.Final</version.org.jboss.xnio>
+				<version.arquillian>1.1.11.Final</version.arquillian>
+				<version.arquillian-container>2.0.0.Final</version.arquillian-container>
+				<arquillian.container.name>wildfly-managed</arquillian.container.name>
+    		</properties>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.wildfly.core</groupId>
+						<artifactId>wildfly-cli</artifactId>
+						<version>${version.wildfly}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.wildfly.core</groupId>
+						<artifactId>wildfly-controller-client</artifactId>
+						<version>${version.wildfly}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.xnio</groupId>
+						<artifactId>xnio-api</artifactId>
+						<version>${version.org.jboss.xnio}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jboss.xnio</groupId>
+						<artifactId>xnio-nio</artifactId>
+						<version>${version.org.jboss.xnio}</version>
+					</dependency>
+
+					<dependency>
+						<groupId>org.jboss.spec</groupId>
+						<artifactId>jboss-javaee-7.0</artifactId>
+						<version>${version.org.jboss.spec.jboss-javaee-7.0}</version>
+						<type>pom</type>
+						<scope>test</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.wildfly.arquillian</groupId>
+						<artifactId>wildfly-arquillian-container-managed</artifactId>
+						<version>${version.arquillian-container}</version>
+						<scope>test</scope>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
 		</profile>
 	</profiles>
 
