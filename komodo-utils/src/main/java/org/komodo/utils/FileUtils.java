@@ -836,7 +836,14 @@ public class FileUtils implements StringConstants {
         File tmpFile = null;
         ZipFile zipFile = null;
         try {
-            tmpFile = File.createTempFile(destDirectory.getName(), ZIP_SUFFIX);
+            String prefix = destDirectory.getName();
+
+            // make sure prefix is at least 3 chars
+            while ( prefix.length() < 3 ) {
+                prefix += '_';
+            }
+
+            tmpFile = File.createTempFile(prefix, ZIP_SUFFIX);
             write(fileStream, tmpFile);
 
             zipFile = new ZipFile(tmpFile);
@@ -854,7 +861,7 @@ public class FileUtils implements StringConstants {
                     final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
                     zipStream = zipFile.getInputStream(entry);
-                    File newFile = new File(destDirectory + File.separator + name);
+                    File newFile = new File( destDirectory, name );
 
                     //
                     // creates all non existent directories
