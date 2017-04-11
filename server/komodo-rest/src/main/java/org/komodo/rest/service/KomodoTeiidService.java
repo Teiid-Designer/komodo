@@ -1911,6 +1911,100 @@ public class KomodoTeiidService extends KomodoService {
     }
 
     /**
+     * Return Dataservice deployability status.
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the id of the Dataservice being requested for deployment (cannot be empty)
+     * @return the deployable status for the Dataservice (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem determining the status 
+     */
+    @GET
+    @Path( V1Constants.DATA_SERVICE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER 
+           + StringConstants.FORWARD_SLASH + V1Constants.DEPLOYABLE_STATUS_SEGMENT)
+    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Get deployable status for a dataservice", response = KomodoStatusObject.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDataserviceDeployableStatus( final @Context HttpHeaders headers,
+                                                    final @Context UriInfo uriInfo,
+                                                    @ApiParam(value = "Id of the data service", required = true)
+                                                    final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+        java.sql.Connection connection = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            uow = createTransaction(principal, "getDeployableStatus", true); //$NON-NLS-1$
+
+            // Get the dataservice from the users repo
+            Dataservice dataservice = findDataservice(uow, dataserviceName);
+            if (dataservice == null)
+                return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
+            
+
+            // Get the serviceVDB name associated with the dataservice
+            Vdb serviceVdb = dataservice.getServiceVdb(uow);
+            String serviceVdbName = serviceVdb.getName(uow);
+
+            // Get the already-deployed VDB on the server if available
+            Vdb serverVdb = cachedTeiid.getVdb(uow, serviceVdbName);
+
+            String deployableStatusMessage = "OK"; //$NON-NLS-1$
+            // If found, determine if there is a conflict with the VDB
+            if( serverVdb != null ) {
+                if(serverVdb.hasProperty(uow, DSB_PROP_OWNER)) {
+                    String serverVdbOwner = serverVdb.getProperty(uow, DSB_PROP_OWNER).getStringValue(uow);
+                    // server vdb owner is different than the current user.
+                    if(!serverVdbOwner.equals(uow.getUserName())) {
+                        deployableStatusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_ALREADY_DEPLOYED_OWNER, serviceVdbName, serverVdbOwner);    
+                    }
+                } else {
+                    deployableStatusMessage = RelationalMessages.getString(RelationalMessages.Info.VDB_ALREADY_DEPLOYED, serviceVdbName);    
+                }
+            }
+
+            // The KomodoStatusObject returns 'OK' if OK to deploy, otherwise a message describing the issue
+            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYABLE_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+            status.addAttribute("deployableStatus", deployableStatusMessage); //$NON-NLS-1$
+
+           return commit(uow, mediaTypes, status);
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SERVICE_DEPLOYABLE_ERROR, dataserviceName);
+        } finally {
+            try {
+                if(connection!=null) {
+                    connection.close();
+                }
+            } catch (SQLException ex) {
+            }
+        }
+   }
+    
+    /**
      * Adds (deploys) a Dataservice to the server
      * @param headers
      *        the request headers (never <code>null</code>)

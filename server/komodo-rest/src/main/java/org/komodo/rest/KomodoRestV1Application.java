@@ -249,6 +249,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for DataService deployable status
+         */
+        String DEPLOYABLE_STATUS_SEGMENT = "deployableStatus"; //$NON-NLS-1$
+        
+        /**
          * The name of the URI path segment for validating a data service or connection name.
          */
         String NAME_VALIDATION_SEGMENT = "nameValidation"; //$NON-NLS-1$

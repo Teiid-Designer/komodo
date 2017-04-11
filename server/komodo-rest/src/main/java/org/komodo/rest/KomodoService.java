@@ -76,6 +76,7 @@ public abstract class KomodoService implements V1Constants {
     /**
      * VDB properties for DSB
      */
+    protected final static String DSB_PROP_OWNER = "dsbOwner"; //$NON-NLS-1$
     protected final static String DSB_PROP_SERVICE_SOURCE = "dsbServiceSource"; //$NON-NLS-1$
     protected final static String DSB_PROP_SOURCE_CONNECTION = "dsbSourceConnection"; //$NON-NLS-1$
     protected final static String DSB_PROP_SOURCE_TRANSLATOR = "dsbSourceTranslator"; //$NON-NLS-1$
