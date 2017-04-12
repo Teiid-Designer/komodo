@@ -2431,8 +2431,12 @@ public final class KomodoDataserviceService extends KomodoService {
             final Dataservice service = findDataservice( uow, dataserviceName );
 
             if ( service == null ) {
+                final Vdb vdb = findVdb( uow, dataserviceName );
+
                 // name is valid
-                return Response.ok().build();
+                if ( vdb == null) {
+                    return Response.ok().build();
+                }
             }
 
             // name is a duplicate
