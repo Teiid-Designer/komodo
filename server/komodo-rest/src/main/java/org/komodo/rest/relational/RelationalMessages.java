@@ -87,6 +87,16 @@ public final class RelationalMessages {
         VDB_STATUS_MSG_UNKNOWN,
 
         /**
+         * Message for VDB already deployed message
+         */
+        VDB_ALREADY_DEPLOYED,
+
+        /**
+         * Message for VDB already deployed by owner message
+         */
+        VDB_ALREADY_DEPLOYED_OWNER,
+
+        /**
          * Title for the driver deployment status
          */
         DRIVER_DEPLOYMENT_STATUS_TITLE,
@@ -131,6 +141,11 @@ public final class RelationalMessages {
          */
         CONNECTION_SUCCESSFULLY_UNDEPLOYED,
         
+        /**
+         * Data service deployable status title
+         */
+        DATA_SERVICE_DEPLOYABLE_STATUS_TITLE,
+
         /**
          * Data service status title
          */
@@ -881,6 +896,11 @@ public final class RelationalMessages {
          * An error indicating a teiid credentials failure
          */
         TEIID_SERVICE_SET_CREDENTIALS_ERROR,
+
+        /**
+         * An error determining data service deployable status
+         */
+        TEIID_SERVICE_GET_DATA_SERVICE_DEPLOYABLE_ERROR,
 
         /**
          * An error when getting vdbs

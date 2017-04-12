@@ -678,6 +678,8 @@ public final class KomodoDataserviceService extends KomodoService {
             	svcVdbObj.remove(uow);
             }
             KomodoObject vdbObj = wkspMgr.createVdb(uow, null, serviceVdbName, serviceVdbName);
+            // Set owner property on the service vdb
+            vdbObj.setProperty(uow, DSB_PROP_OWNER, uow.getUserName());
             Vdb serviceVdb = Vdb.RESOLVER.resolve(uow, vdbObj);
             
             // Add to the ServiceVdb a virtual model for the View
@@ -1020,6 +1022,8 @@ public final class KomodoDataserviceService extends KomodoService {
                 svcVdbObj.remove(uow);
             }
             KomodoObject vdbObj = wkspMgr.createVdb(uow, null, serviceVdbName, serviceVdbName);
+            // Set owner property on the service vdb
+            vdbObj.setProperty(uow, DSB_PROP_OWNER, uow.getUserName());
             Vdb serviceVdb = Vdb.RESOLVER.resolve(uow, vdbObj);
             
             // ----------------------------------------------------------------
