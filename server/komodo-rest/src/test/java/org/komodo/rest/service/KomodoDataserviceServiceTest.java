@@ -606,6 +606,26 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
 
     @Test
+    public void shouldFailNameValidationWhenVdbWithSameNameExists() throws Exception {
+        // create a data source first
+        createVdb( DATASERVICE_NAME );
+
+        // try and validate the same name of an existing data service
+        final URI dsUri = _uriBuilder.workspaceDataservicesUri();
+        final URI uri = UriBuilder.fromUri( dsUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( DATASERVICE_NAME )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
+    }
+
+    @Test
     public void shouldFailNameValidationWhenNameHasInvalidCharacters() throws Exception {
         final URI dsUri = _uriBuilder.workspaceDataservicesUri();
         final URI uri = UriBuilder.fromUri( dsUri )
@@ -618,6 +638,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
@@ -648,6 +669,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
@@ -663,6 +685,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
@@ -678,6 +701,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
