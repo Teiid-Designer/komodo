@@ -1991,6 +1991,7 @@ public final class KomodoDataserviceService extends KomodoService {
             
             // Create the view infos for the left and right tables
             int nTable = 0;
+            boolean hasUnmatchedTable = false;
             for (String viewTable : tableSourceVdbMap.keySet()) {
                 RestDataserviceViewInfo viewInfo = new RestDataserviceViewInfo();
                 
@@ -1999,10 +2000,13 @@ public final class KomodoDataserviceService extends KomodoService {
                     viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
                 } else if(viewTable.equals(rightTableName)){
                     viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
-                } else if(leftTableName.equals(StringConstants.EMPTY_STRING) && nTable==0) {
+                // If sql table names could not be matched to dataservice source, just set LH/RH by index and track unmatchedTable state
+                } else if(nTable==0) {
                     viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
-                } else if(rightTableName.equals(StringConstants.EMPTY_STRING) && nTable==1) {
+                    hasUnmatchedTable = true;
+                } else if(nTable==1) {
                     viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
+                    hasUnmatchedTable = true;
                 }
                 // Source VDB and table
                 viewInfo.setSourceVdbName(tableSourceVdbMap.get(viewTable));
@@ -2046,6 +2050,8 @@ public final class KomodoDataserviceService extends KomodoService {
                 viewInfo.setViewEditable(false);
             // Problem if 2 tables (join) and there were no criteria found
             } else if ( tableColumnMap.size() == 2 && criteriaInfo == null ) {
+                viewInfo.setViewEditable(false);
+            } else if ( hasUnmatchedTable ) {
                 viewInfo.setViewEditable(false);
             } else {
                 viewInfo.setViewEditable(true);
