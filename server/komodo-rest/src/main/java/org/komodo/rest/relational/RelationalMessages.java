@@ -1081,6 +1081,11 @@ public final class RelationalMessages {
          * An error indicating data source isn not a JDBC source.
          */
         TEIID_SERVICE_GET_DATA_SOURCE_NOT_JDBC_ERROR,
+
+        /**
+         * An error indicating data source cannot be instantiated from available data sources
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_INSTANTIATION_FAILURE,
         
         /**
          * An error indicating attempt to get source JDBC connection failed.
@@ -1101,6 +1106,16 @@ public final class RelationalMessages {
          * An error indicating attempt to get source catalog and schema failed.
          */
         TEIID_SERVICE_GET_DATA_SOURCE_CATALOG_SCHEMA_ERROR,
+
+        /**
+         * An error indicating jdbc info failed to be supplied from a data source.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_JDBC_INFO_FAILURE,
+
+        /**
+         * An error indicating the jdbc data source is not recognised.
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_UNRECOGNISED_JDBC_SOURCE,
 
            /**
          * An error indicating update attempt failed

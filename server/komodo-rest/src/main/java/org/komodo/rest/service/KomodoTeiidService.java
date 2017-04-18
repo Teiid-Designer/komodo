@@ -111,6 +111,7 @@ import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -134,11 +135,9 @@ public class KomodoTeiidService extends KomodoService {
     private static final String TABLE_NAME = "TABLE_NAME"; //$NON-NLS-1$
     private static final String CATALOG = "Catalog"; //$NON-NLS-1$
     private static final String SCHEMA = "Schema"; //$NON-NLS-1$
-    
-    private static final String WRAPPER_DS = "org.jboss.resource.adapter.jdbc.WrapperDataSource"; //$NON-NLS-1$
-    private static final String WRAPPER_DS_AS7 = "org.jboss.jca.adapters.jdbc.WrapperDataSource"; //$NON-NLS-1$
+
     private InitialContext initialContext;
-    
+
     /**
      * Default translator mappings for different drivers
      */
@@ -2587,11 +2586,8 @@ public class KomodoTeiidService extends KomodoService {
             // Get a connection to the jdbc source
             try {
                 connection = getJdbcConnection(dataSource.getJndiName(uow));
-                if(connection == null) {
-                    return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
-                }
             } catch (Exception ex) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
+                return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
             }
 
             // Get the table names
@@ -2686,11 +2682,8 @@ public class KomodoTeiidService extends KomodoService {
             // Get a connection to the jdbc source
             try {
                 connection = getJdbcConnection(dataSource.getJndiName(uow));
-                if(connection == null) {
-                    return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
-                }
             } catch (Exception ex) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
+                return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
             }
 
             // Generate the Catalog Schema Info
@@ -2723,103 +2716,108 @@ public class KomodoTeiidService extends KomodoService {
      * @return list of Catalog Schema info
      */
     private List<RestTeiidDataSourceJdbcCatalogSchemaInfo> generateCatalogSchemaInfos(java.sql.Connection connection) throws KException {
+        ArgCheck.isNotNull(connection, "connection");
+
         List<RestTeiidDataSourceJdbcCatalogSchemaInfo> infos = new ArrayList<RestTeiidDataSourceJdbcCatalogSchemaInfo>();
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            boolean supportsCatalogs = metaData.supportsCatalogsInTableDefinitions()
+                                       || metaData.supportsCatalogsInProcedureCalls()
+                                       || metaData.supportsCatalogsInDataManipulation();
+            boolean supportsSchemas = metaData.supportsSchemasInTableDefinitions()
+                                      || metaData.supportsSchemasInDataManipulation();
 
-        if(connection!=null) {
-            try {
-                DatabaseMetaData metaData = connection.getMetaData();
-                boolean supportsCatalogs = metaData.supportsCatalogsInTableDefinitions() || metaData.supportsCatalogsInProcedureCalls() ||
-                metaData.supportsCatalogsInDataManipulation();
-                boolean supportsSchemas = metaData.supportsSchemasInTableDefinitions() || metaData.supportsSchemasInDataManipulation();
+            // DB supports catalogs
+            if (supportsCatalogs && supportsSchemas) {
+                ResultSet rs = connection.getMetaData().getCatalogs();
 
-                // DB supports catalogs
-                if(supportsCatalogs && supportsSchemas) {
-                    ResultSet rs = connection.getMetaData().getCatalogs();
+                // Get all the catalogs
+                List<String> allCats = new ArrayList<String>();
+                while (rs.next()) {
+                    String catalog = rs.getString(1);
+                    allCats.add(catalog);
+                }
+                rs.close();
 
-                    // Get all the catalogs
-                    List<String> allCats = new ArrayList<String>();
-                    while (rs.next()) {
-                        String catalog = rs.getString(1);
-                        allCats.add(catalog);
-                    }
-                    rs.close();
-
-                    // Create mapping of catalog to schema list
-                    Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
-                    Map<String,List<String>> catalogSchemaMap = new HashMap<String, List<String>>();
-                    for(String catlg : allCats) {
-                        ResultSet rs2;
-                        try {
-                            rs2 = connection.getMetaData().getSchemas(catlg,null);
-                        } catch (Exception ex) {
-                            if(allCats.size()==1) {
-                                try {
-                                    rs2 = connection.getMetaData().getSchemas();
-                                } catch (Exception ex1) {
-                                    continue;
-                                }
-                            } else {
+                // Create mapping of catalog to schema list
+                Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
+                Map<String, List<String>> catalogSchemaMap = new HashMap<String, List<String>>();
+                for (String catlg : allCats) {
+                    ResultSet rs2;
+                    try {
+                        rs2 = connection.getMetaData().getSchemas(catlg, null);
+                    } catch (Exception ex) {
+                        if (allCats.size() == 1) {
+                            try {
+                                rs2 = connection.getMetaData().getSchemas();
+                            } catch (Exception ex1) {
                                 continue;
                             }
+                        } else {
+                            continue;
                         }
-                        List<String> schemaList = new ArrayList<String>();
-                        while (rs2.next()) {
-                            String schemaName = rs2.getString(1);
-                            schemaList.add(schemaName);
-                        }
-                        Collections.sort(schemaList, String.CASE_INSENSITIVE_ORDER);
-                        catalogSchemaMap.put(catlg, schemaList);
-                        rs2.close();
                     }
-
-                    // Generate the infos
-                    List<String> catNames = new ArrayList<String>(catalogSchemaMap.keySet());
-                    Collections.sort(catNames, String.CASE_INSENSITIVE_ORDER);
-                    for(String catName : catNames) {
-                        RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
-                        info.setItemName(catName);
-                        info.setItemType(CATALOG);
-                        info.setCatalogSchemaNames(catalogSchemaMap.get(catName));
-                        infos.add(info);
+                    List<String> schemaList = new ArrayList<String>();
+                    while (rs2.next()) {
+                        String schemaName = rs2.getString(1);
+                        schemaList.add(schemaName);
                     }
-                } else if(supportsCatalogs && !supportsSchemas) {
-                    ResultSet resultSet = connection.getMetaData().getCatalogs();
-                    // Get all the catalogs
-                    List<String> allCats = new ArrayList<String>();
-                    while (resultSet.next()) {
-                        String catalog = resultSet.getString(1);
-                        allCats.add(catalog);
-                    }
-                    resultSet.close();
-                    Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
-                    // Create infos
-                    for(String cat : allCats) {
-                        RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
-                        info.setItemName(cat);
-                        info.setItemType(CATALOG);
-                        infos.add(info);
-                    }
-                } else if(supportsSchemas && !supportsCatalogs) {
-                    ResultSet resultSet = connection.getMetaData().getSchemas();
-                    // Get all the schemas
-                    List<String> allSchemas = new ArrayList<String>();
-                    while (resultSet.next()) {
-                        String schema = resultSet.getString(1);
-                        allSchemas.add(schema);
-                    }
-                    resultSet.close();
-
-                    Collections.sort(allSchemas, String.CASE_INSENSITIVE_ORDER);
-                    for(String sch : allSchemas) {
-                        RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
-                        info.setItemName(sch);
-                        info.setItemType(SCHEMA);
-                        infos.add(info);
-                    }
+                    Collections.sort(schemaList, String.CASE_INSENSITIVE_ORDER);
+                    catalogSchemaMap.put(catlg, schemaList);
+                    rs2.close();
                 }
-            } catch (Exception e) {
-                throw new KException(e);
+
+                // Generate the infos
+                List<String> catNames = new ArrayList<String>(catalogSchemaMap.keySet());
+                Collections.sort(catNames, String.CASE_INSENSITIVE_ORDER);
+                for (String catName : catNames) {
+                    RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
+                    info.setItemName(catName);
+                    info.setItemType(CATALOG);
+                    info.setCatalogSchemaNames(catalogSchemaMap.get(catName));
+                    infos.add(info);
+                }
+            } else if (supportsCatalogs && !supportsSchemas) {
+                ResultSet resultSet = connection.getMetaData().getCatalogs();
+                // Get all the catalogs
+                List<String> allCats = new ArrayList<String>();
+                while (resultSet.next()) {
+                    String catalog = resultSet.getString(1);
+                    allCats.add(catalog);
+                }
+                resultSet.close();
+                Collections.sort(allCats, String.CASE_INSENSITIVE_ORDER);
+                // Create infos
+                for (String cat : allCats) {
+                    RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
+                    info.setItemName(cat);
+                    info.setItemType(CATALOG);
+                    infos.add(info);
+                }
+            } else if (supportsSchemas && !supportsCatalogs) {
+                ResultSet resultSet = connection.getMetaData().getSchemas();
+                // Get all the schemas
+                List<String> allSchemas = new ArrayList<String>();
+                while (resultSet.next()) {
+                    String schema = resultSet.getString(1);
+                    allSchemas.add(schema);
+                }
+                resultSet.close();
+
+                Collections.sort(allSchemas, String.CASE_INSENSITIVE_ORDER);
+                for (String sch : allSchemas) {
+                    RestTeiidDataSourceJdbcCatalogSchemaInfo info = new RestTeiidDataSourceJdbcCatalogSchemaInfo();
+                    info.setItemName(sch);
+                    info.setItemType(SCHEMA);
+                    infos.add(info);
+                }
             }
+            else {
+                // Does not support either schemas or catalogues
+                throw new Exception(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_UNRECOGNISED_JDBC_SOURCE));
+            }
+        } catch (Exception e) {
+            throw new KException(e);
         }
 
         return infos;
@@ -2873,17 +2871,14 @@ public class KomodoTeiidService extends KomodoService {
 
             // Ensure the datasource is jdbc
             if(!dataSource.isJdbc(uow)) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_NOT_JDBC_ERROR);
             }
 
             // Get a connection to the jdbc source
             try {
                 connection = getJdbcConnection(dataSource.getJndiName(uow));
-                if(connection == null) {
-                    return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
-                }
             } catch (Exception ex) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
+                return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_CONNECTION_ERROR);
             }
 
             // Get the table names
@@ -2891,7 +2886,7 @@ public class KomodoTeiidService extends KomodoService {
             try {
                 populateJdbcInfo(connection, info);
             } catch (Exception ex) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
+                return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_JDBC_INFO_FAILURE);
             }
 
             return commit(uow, mediaTypes, info);
@@ -2904,7 +2899,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_TRANSLATOR_ERROR);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_JDBC_INFO_FAILURE);
         } finally {
             try {
                 if(connection!=null) {
@@ -2920,34 +2915,37 @@ public class KomodoTeiidService extends KomodoService {
      * @param connection the JDBC connection
      */
     private void populateJdbcInfo(java.sql.Connection connection, RestConnectionJdbcInfo jdbcInfo) throws KException {
-        if(connection!=null) {
-            try {
-                DatabaseMetaData metaData = connection.getMetaData();
-                String productName = metaData.getDatabaseProductName();
-                String productVersion = metaData.getDatabaseProductVersion();
-                String driverName = metaData.getDriverName();
-                int majorVersion = metaData.getDriverMajorVersion();
-                int minorVersion = metaData.getDriverMinorVersion();
-                String url = metaData.getURL();
-                boolean readonly = metaData.isReadOnly();
-                String userName = metaData.getUserName();
-                boolean supportsCatalogs = metaData.supportsCatalogsInTableDefinitions() || metaData.supportsCatalogsInProcedureCalls() ||
-                metaData.supportsCatalogsInDataManipulation();
-                boolean supportsSchemas = metaData.supportsSchemasInTableDefinitions() || metaData.supportsSchemasInDataManipulation();
+        ArgCheck.isNotNull(connection, "connection");
+        ArgCheck.isNotNull(jdbcInfo, "jdbcInfo");
 
-                jdbcInfo.setProductName(productName);
-                jdbcInfo.setProductVersion(productVersion);
-                jdbcInfo.setDriverUrl(url);
-                jdbcInfo.setReadonly(readonly);
-                jdbcInfo.setDriverName(driverName);
-                jdbcInfo.setDriverMajorVersion(majorVersion);
-                jdbcInfo.setDriverMinorVersion(minorVersion);
-                jdbcInfo.setUsername(userName);
-                jdbcInfo.setSupportsCatalogs(supportsCatalogs);
-                jdbcInfo.setSupportsSchemas(supportsSchemas);
-            } catch (Exception e) {
-                throw new KException(e);
-            }
+        try {
+            DatabaseMetaData metaData = connection.getMetaData();
+            String productName = metaData.getDatabaseProductName();
+            String productVersion = metaData.getDatabaseProductVersion();
+            String driverName = metaData.getDriverName();
+            int majorVersion = metaData.getDriverMajorVersion();
+            int minorVersion = metaData.getDriverMinorVersion();
+            String url = metaData.getURL();
+            boolean readonly = metaData.isReadOnly();
+            String userName = metaData.getUserName();
+            boolean supportsCatalogs = metaData.supportsCatalogsInTableDefinitions()
+                                       || metaData.supportsCatalogsInProcedureCalls()
+                                       || metaData.supportsCatalogsInDataManipulation();
+            boolean supportsSchemas = metaData.supportsSchemasInTableDefinitions()
+                                      || metaData.supportsSchemasInDataManipulation();
+
+            jdbcInfo.setProductName(productName);
+            jdbcInfo.setProductVersion(productVersion);
+            jdbcInfo.setDriverUrl(url);
+            jdbcInfo.setReadonly(readonly);
+            jdbcInfo.setDriverName(driverName);
+            jdbcInfo.setDriverMajorVersion(majorVersion);
+            jdbcInfo.setDriverMinorVersion(minorVersion);
+            jdbcInfo.setUsername(userName);
+            jdbcInfo.setSupportsCatalogs(supportsCatalogs);
+            jdbcInfo.setSupportsSchemas(supportsSchemas);
+        } catch (Exception e) {
+            throw new KException(e);
         }
     }
     
@@ -2957,41 +2955,52 @@ public class KomodoTeiidService extends KomodoService {
      * @return the list of table names
      */
     private List<String> getTableNames(java.sql.Connection connection, String catalogName, String schemaName, String tableFilter) throws KException {
+        ArgCheck.isNotNull(connection, "connection");
+
         // Get the list of Tables
         List<String> tableNameList = new ArrayList<String>();
-        if(connection!=null) {
-            try {
-                ResultSet resultSet = connection.getMetaData().getTables(catalogName, schemaName, tableFilter, new String[]{"DOCUMENT", "TABLE", "VIEW"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                int columnCount = resultSet.getMetaData().getColumnCount();
-                while (resultSet.next()) {
-                    String tableName = null;
-                    for (int i=1 ; i<=columnCount ; ++i) {
-                        String colName = resultSet.getMetaData().getColumnName(i);
-                        String value = resultSet.getString(i);
-                        if (colName.equalsIgnoreCase(TABLE_NAME)) {
-                            tableName = value;
-                        }
-                        if(tableName!=null) {
-                            break;
-                        }
+        try {
+            ResultSet resultSet = connection.getMetaData().getTables(catalogName,
+                                                                     schemaName,
+                                                                     tableFilter,
+                                                                     new String[] {"DOCUMENT", "TABLE", "VIEW"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            int columnCount = resultSet.getMetaData().getColumnCount();
+            while (resultSet.next()) {
+                String tableName = null;
+                for (int i = 1; i <= columnCount; ++i) {
+                    String colName = resultSet.getMetaData().getColumnName(i);
+                    String value = resultSet.getString(i);
+                    if (colName.equalsIgnoreCase(TABLE_NAME)) {
+                        tableName = value;
                     }
-                    tableNameList.add(tableName);
+                    if (tableName != null) {
+                        break;
+                    }
                 }
-                resultSet.close();
-            } catch (Exception e) {
-                throw new KException(e);
+                tableNameList.add(tableName);
             }
+            resultSet.close();
+        } catch (Exception e) {
+            throw new KException(e);
         }
 
         return tableNameList;
+    }
+
+    private boolean isDataSource(String className) {
+        if (className == null)
+            return false;
+
+        if (! className.endsWith("DataSource"))
+            return false;
+
+        return true;
     }
 
     /*
      * Get JDBC Connection for the specified jndiName
      */
     private java.sql.Connection getJdbcConnection (String jndiName) throws KException {
-    	java.sql.Connection connection = null;
-
         String jdbcContext = jndiName.substring(0, jndiName.lastIndexOf('/')+1);
 
         // New Context
@@ -3017,31 +3026,34 @@ public class KomodoTeiidService extends KomodoService {
 
         while (ne!=null && ne.hasMoreElements()) {
             javax.naming.NameClassPair o = ne.nextElement();
+            String className = o.getClassName();
+            if (! isDataSource(className))
+                continue;
+
+            String jdbcObjectName = jdbcContext + o.getName();
+            if(! jdbcObjectName.equals(jndiName))
+                continue;
+
             try {
-                if (o.getClassName().equals(WRAPPER_DS) || o.getClassName().equals(WRAPPER_DS_AS7)) {
-                    String jdbcObjectName = jdbcContext + o.getName();
-                    if(jdbcObjectName.equals(jndiName)) {
-                        Object jdbcObject = initialContext.lookup(jdbcContext + o.getName());
-                        if(jdbcObject!=null && jdbcObject instanceof DataSource) {
-                            jdbcDataSource = (DataSource)jdbcObject;
-                            break;
-                        }
-                    }
+                Object jdbcObject = initialContext.lookup(jdbcContext + o.getName());
+                if(jdbcObject != null && jdbcObject instanceof DataSource) {
+                    jdbcDataSource = (DataSource)jdbcObject;
+                    break;
                 }
             } catch (NamingException e1) {
                 throw new KException(e1);
             }
         }
 
-        if(jdbcDataSource!=null) {
-            try {
-                connection = jdbcDataSource.getConnection();
-            } catch (SQLException ex) {
-                throw new KException(ex);
-            }
+        if(jdbcDataSource == null) {
+            throw new KException(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_INSTANTIATION_FAILURE));
         }
 
-        return connection;
+        try {
+            return jdbcDataSource.getConnection();
+        } catch (SQLException ex) {
+            throw new KException(ex);
+        }
     }
     
     /*
