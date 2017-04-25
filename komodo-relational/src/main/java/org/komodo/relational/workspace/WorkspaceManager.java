@@ -942,17 +942,37 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     }
 
     /**
+    *
+    * @param transaction
+    *        the transaction (cannot be <code>null</code> or have a state that is not
+    *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+    * @param parent the parent of the imported vdb
+    * @param storageRef the reference to the destination within the storage
+    * @return the import messages (never <code>null</code>)
+    * @throws KException if error occurs
+    */
+    public ImportMessages importArtifact(final UnitOfWork transaction,
+                                         final KomodoObject parent,
+                                         StorageReference storageRef) throws KException {
+        
+        return importArtifact(transaction,parent,storageRef,new ImportOptions());
+    }
+    
+    /**
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent the parent of the imported vdb
      * @param storageRef the reference to the destination within the storage
+     * @param importOptions options for the import
      * @return the import messages (never <code>null</code>)
      * @throws KException if error occurs
      */
     public ImportMessages importArtifact(final UnitOfWork transaction,
-                                      final KomodoObject parent, StorageReference storageRef) throws KException {
+                                         final KomodoObject parent, 
+                                         StorageReference storageRef,
+                                         ImportOptions importOptions) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
@@ -970,7 +990,6 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             connector = storageService.getConnector(storageRef.getParameters());
             stream = connector.read(storageRef.getParameters());
 
-            ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
 
             if (DocumentType.VDB_XML.equals(storageRef.getDocumentType())) {

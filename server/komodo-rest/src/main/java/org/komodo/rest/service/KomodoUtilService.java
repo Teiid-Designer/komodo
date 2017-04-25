@@ -236,14 +236,12 @@ public final class KomodoUtilService extends KomodoService {
                 importer.importVdb(uow, sampleStream, workspace, importOptions, importMessages);
                 uow.commit();
 
-                String existingVdbMsg = org.komodo.importer.Messages.getString(
-                                                                               org.komodo.importer.Messages.IMPORTER.nodeExistsReturn);
                 List<String> errorMsgs = importMessages.getErrorMessages();
                 if (errorMsgs.isEmpty()) {
                     msg = RelationalMessages.getString(
                                                        RelationalMessages.Error.VDB_SAMPLE_IMPORT_SUCCESS,
                                                                                                               sampleName);
-                } else if (existingVdbMsg.equals(errorMsgs.iterator().next())) {
+                } else if (errorMsgs.iterator().next().contains("node already exists")) {
                     msg = RelationalMessages.getString(
                                                        RelationalMessages.Error.VDB_SAMPLE_IMPORT_VDB_EXISTS,
                                                                                                               sampleName);

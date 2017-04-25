@@ -99,7 +99,7 @@ public class VdbImporter extends AbstractImporter {
         switch (exNodeOption) {
             // RETURN - Return 'false' - do not create a node.  Log an error message
             case RETURN:
-                importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
+                importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn, vdbName));
                 return false;
             // CREATE_NEW - Return 'true' - will create a new VDB with new unique name.  Log a progress message.
             case CREATE_NEW:

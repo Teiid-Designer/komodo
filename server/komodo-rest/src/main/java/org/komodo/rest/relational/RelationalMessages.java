@@ -122,6 +122,11 @@ public final class RelationalMessages {
         DRIVER_SUCCESSFULLY_UNDEPLOYED,
         
         /**
+         * An import export service import success message
+         */
+        IMPORT_EXPORT_SERVICE_IMPORT_SUCCESS_MESSAGE,
+        
+        /**
          * VDB undeployment request sent but not yet undeployed
          */
         VDB_UNDEPLOYMENT_REQUEST_SENT,
@@ -1182,6 +1187,11 @@ public final class RelationalMessages {
          */
         IMPORT_EXPORT_SERVICE_IMPORT_ERROR,
 
+        /**
+         * An import export service import artifact error
+         */
+        IMPORT_EXPORT_SERVICE_IMPORT_ARTIFACT_ERROR,
+        
         /**
          * An import export service storage types retrieval error
          */

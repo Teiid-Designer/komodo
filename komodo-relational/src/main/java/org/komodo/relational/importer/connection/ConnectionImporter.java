@@ -85,7 +85,7 @@ public class ConnectionImporter extends AbstractImporter {
                 switch ( optionValue ) {
                     case RETURN:
                     case CREATE_NEW:
-                        importMessages.addErrorMessage( Messages.getString( Messages.IMPORTER.nodeExistsReturn ) );
+                        importMessages.addErrorMessage( Messages.getString( Messages.IMPORTER.nodeExistsReturn, connection.getName() ) );
                         break;
                     case OVERWRITE:
                         shouldSequence = true;
