@@ -530,10 +530,6 @@
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
-					<excludes>
-						<!-- Exclude the cors classes for rest 3 as this is for rest 2 -->
-						<exclude>**/org/komodo/rest/cors/rest3/*.java</exclude>
-					</excludes>
 				</configuration>
 			</plugin>
 
