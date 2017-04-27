@@ -840,5 +840,51 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         assertEquals("PART_ID", viewInfo.getCriteriaPredicates().get(0).getRhColumn());
         assertEquals("=", viewInfo.getCriteriaPredicates().get(0).getOperator());
     }
+    
+    @Test
+    public void shouldCloneDataservice() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        final URI uri = UriBuilder.fromUri( dataservicesUri )
+                                  .path( V1Constants.CLONE_SEGMENT )
+                                  .path( DATASERVICE_NAME )
+                                  .build();
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, "newDataservice");
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        RestDataservice dataservice = KomodoJsonMarshaller.unmarshall(entity, RestDataservice.class);
+        assertNotNull(dataservice);
+        
+        assertEquals(dataservice.getId(), "newDataservice");
+    }
+    
+    @Test
+    public void shouldNotCloneDataservice() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        URI dataservicesUri = _uriBuilder.workspaceDataservicesUri();
+        final URI uri = UriBuilder.fromUri( dataservicesUri )
+                                  .path( V1Constants.CLONE_SEGMENT )
+                                  .path( DATASERVICE_NAME )
+                                  .build();
+
+        // Attempt to clone using the same service name should fail...
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        addBody(request, DATASERVICE_NAME);
+
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertTrue(entity.contains("cannot be the same"));
+    }
 
 }
