@@ -99,16 +99,6 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-shell-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.komodo</groupId>
-			<artifactId>komodo-shell</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.komodo</groupId>
 			<artifactId>komodo-relational</artifactId>
 		</dependency>
 

@@ -56,11 +56,6 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-shell</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.komodo</groupId>
 			<artifactId>komodo-ui</artifactId>
 		</dependency>
 
