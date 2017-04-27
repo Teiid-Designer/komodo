@@ -68,7 +68,6 @@ import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.api.JcrConstants;
 import org.teiid.modeshape.sequencer.dataservice.DataServiceManifest;
 import org.teiid.modeshape.sequencer.dataservice.DataServiceManifestReader;
-import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 
 /**
  * Handles importing and exporting of {@link Dataservice data services}.
@@ -121,7 +120,7 @@ public class DataserviceConveyor implements StringConstants {
             // RETURN - Return 'false' - do not create a node.  Log an error message
             case RETURN:
                 importMessages.addErrorMessage(org.komodo.importer.Messages.getString(
-                                                                                      org.komodo.importer.Messages.IMPORTER.nodeExistsReturn));
+                                                                                      org.komodo.importer.Messages.IMPORTER.nodeExistsReturn, dsName));
                 return false;
             // CREATE_NEW - Return 'true' - will create a new data service with new unique name.  Log a progress message.
             case CREATE_NEW:
