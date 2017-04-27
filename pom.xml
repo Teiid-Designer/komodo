@@ -58,7 +58,8 @@
 	<properties>
 		<rootDir>${project.basedir}</rootDir>
 		<version.teiid.modeshape>0.0.2</version.teiid.modeshape>
-		<version.infinispan>5.2.10.Final</version.infinispan>
+		<version.infinispan>5.2.21.Final-redhat-1</version.infinispan>
+		<version.infinispan-cachestore-leveldb>5.2.20.Final</version.infinispan-cachestore-leveldb>
 		<version.javax.servlet>3.1.0</version.javax.servlet>
 		<version.javax.jacc>1.0.0.Final</version.javax.jacc>
 		<version.joda.time>2.7</version.joda.time>
@@ -117,7 +118,7 @@
 			<dependency>
 				<groupId>org.infinispan</groupId>
 				<artifactId>infinispan-cachestore-leveldb</artifactId>
-				<version>${version.infinispan}</version>
+				<version>${version.infinispan-cachestore-leveldb}</version>
 			</dependency>
 
 			<dependency>
