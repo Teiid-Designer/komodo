@@ -836,7 +836,7 @@ public class TestMultiUsers extends AbstractLocalRepositoryTest {
         //
         // accept
         //
-        boolean[] accept = new boolean[1];
+        final boolean[] accept = new boolean[1];
         KomodoObjectVisitor visitor = new KomodoObjectVisitor() {
 
             @Override

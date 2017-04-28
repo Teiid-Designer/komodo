@@ -76,7 +76,7 @@ public class TeiidSqlSequencer extends Sequencer {
             throw e;
         } catch (Throwable e) {
             LOGGER.error(Messages.getString(Messages.TeiidSqlSequencer.ErrorSequencingContent), e, e.getLocalizedMessage());
-            throw e;
+            throw new Exception(e);
         } finally {
             stream.close();
         }
