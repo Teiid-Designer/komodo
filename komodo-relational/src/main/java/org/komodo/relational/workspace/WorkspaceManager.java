@@ -33,16 +33,16 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.connection.Connection;
+import org.komodo.relational.connection.internal.ConnectionImpl;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
-import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.folder.Folder;
+import org.komodo.relational.importer.connection.ConnectionImporter;
 import org.komodo.relational.importer.ddl.DdlImporter;
-import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.Model;
@@ -88,7 +88,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER,
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Connection.IDENTIFIER, Vdb.IDENTIFIER,
                                                                        Schema.IDENTIFIER, Teiid.IDENTIFIER,
                                                                        Dataservice.IDENTIFIER, Folder.IDENTIFIER };
 
@@ -319,19 +319,19 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
-     *        the parent of the datasource object being created (can be <code>null</code>)
+     *        the parent of the connection object being created (can be <code>null</code>)
      * @param sourceName
-     *        the name of the datasource to create (cannot be empty)
-     * @return the Datasource object (never <code>null</code>)
+     *        the name of the connection to create (cannot be empty)
+     * @return the connection object (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    public Datasource createDatasource( final UnitOfWork uow,
+    public Connection createConnection( final UnitOfWork uow,
                                         final KomodoObject parent,
                                         final String sourceName ) throws KException {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                  : parent.getAbsolutePath() );
-         return RelationalModelFactory.createDatasource( uow, getRepository(), path, sourceName );
+         return RelationalModelFactory.createConnection( uow, getRepository(), path, sourceName );
     }
 
     /**
@@ -744,26 +744,26 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @return all {@link Datasource}s in the workspace
+     * @return all {@link Connection}s in the workspace
      * @throws KException
      *         if an error occurs
      */
-    public Datasource[] findDatasources( UnitOfWork transaction ) throws KException {
+    public Connection[] findConnections( UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, DataVirtLexicon.Connection.NODE_TYPE);
-        Datasource[] result = null;
+        Connection[] result = null;
 
         if (paths.length == 0) {
-            result = Datasource.NO_DATASOURCES;
+            result = Connection.NO_CONNECTIONS;
         } else {
-            result = new Datasource[paths.length];
+            result = new Connection[paths.length];
             int i = 0;
 
             for (final String path : paths) {
-                result[i++] = new DatasourceImpl(transaction, getRepository(), path);
+                result[i++] = new ConnectionImpl(transaction, getRepository(), path);
             }
         }
 
@@ -978,7 +978,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                 importer.importVdb(transaction, stream, parent, importOptions, importMessages);
             }
             else if (DocumentType.CONNECTION.equals(storageRef.getDocumentType())) {
-                DatasourceImporter importer = new DatasourceImporter(getRepository());
+                ConnectionImporter importer = new ConnectionImporter(getRepository());
                 importer.importDS(transaction, stream, parent, importOptions, importMessages);
             }
             else if (DocumentType.DDL.equals(storageRef.getDocumentType())) {

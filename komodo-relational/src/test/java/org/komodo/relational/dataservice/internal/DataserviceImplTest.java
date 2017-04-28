@@ -48,6 +48,7 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.ConnectionEntry;
 import org.komodo.relational.dataservice.DataServiceEntry;
 import org.komodo.relational.dataservice.Dataservice;
@@ -58,7 +59,6 @@ import org.komodo.relational.dataservice.ResourceEntry;
 import org.komodo.relational.dataservice.ServiceVdbEntry;
 import org.komodo.relational.dataservice.UdfEntry;
 import org.komodo.relational.dataservice.VdbEntry;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.resource.DdlFile;
 import org.komodo.relational.resource.Driver;
@@ -186,14 +186,14 @@ public final class DataserviceImplTest extends RelationalModelTest {
     public void shouldAddConnection() throws Exception {
         final String connectionName = "MyConnection";
         final String jndiName = "jndiNameGoesHere";
-        final Datasource connection = this.mgr.createDatasource( getTransaction(), null, connectionName );
+        final Connection connection = this.mgr.createConnection( getTransaction(), null, connectionName );
         connection.setJndiName( getTransaction(), jndiName );
         commit(); // needed so that searching for reference will work
 
         final ConnectionEntry entry = this.dataservice.addConnection( getTransaction(), connection );
         assertThat( entry.getJndiName( getTransaction() ), is( jndiName ) );
         assertThat( entry.getReference( getTransaction() ), is( notNullValue() ) );
-        assertThat( entry.getReference( getTransaction() ), is( instanceOf( Datasource.class ) ) );
+        assertThat( entry.getReference( getTransaction() ), is( instanceOf( Connection.class ) ) );
 
         assertThat( this.dataservice.getConnectionEntries( getTransaction() ).length, is( 1 ) );
         assertThat( this.dataservice.getConnectionEntries( getTransaction(), connectionName ).length, is( 1 ) );

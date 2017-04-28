@@ -66,19 +66,19 @@ public class Messages implements StringConstants {
         CONSTRAINT_NOT_FOUND_TO_REMOVE,
 
         /**
-         * An error message indicating the datasource className property was undefined.
+         * An error message indicating the connection className property was undefined.
          */
-        DATASOURCE_CLASSNAME_NOT_DEFINED,
+        CONNECTION_CLASSNAME_NOT_DEFINED,
 
         /**
-         * An error message indicating the datasource driverName property was undefined.
+         * An error message indicating the connection driverName property was undefined.
          */
-        DATASOURCE_DRIVERNAME_NOT_DEFINED,
+        CONNECTION_DRIVERNAME_NOT_DEFINED,
 
         /**
-         * An error message indicating the datasource jndiName property was undefined.
+         * An error message indicating the connection jndiName property was undefined.
          */
-        DATASOURCE_JNDINAME_NOT_DEFINED,
+        CONNECTION_JNDINAME_NOT_DEFINED,
 
         /**
          * An error message indicating a VDB data role could not be removed because it was not found.
@@ -300,23 +300,6 @@ public class Messages implements StringConstants {
          * An error indicating there document type of an import is invalid
          */
         STORAGE_DOCUMENT_TYPE_INVALID;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-
-    }
-
-    /**
-     * Messages relating to the datasource parser.
-     */
-    public enum DatasourceParser {
-
-        /**
-         * An error message indicating the Datasource schema file could not be found.
-         */
-        SCHEMA_FILE_NOT_FOUND;
 
         @Override
         public String toString() {

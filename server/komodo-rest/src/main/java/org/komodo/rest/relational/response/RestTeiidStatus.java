@@ -31,7 +31,7 @@ import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidTranslator;
@@ -109,7 +109,7 @@ public final class RestTeiidStatus extends RestTeiid {
      */
     public static final String TEIID_VDB_NAMES_LABEL = "vdbNames";
 
-    private List<RestDataSourceDriver> sourceDrivers = new ArrayList<RestDataSourceDriver>();
+    private List<RestConnectionDriver> sourceDrivers = new ArrayList<RestConnectionDriver>();
 
     /**
      * Constructor for use when deserializing
@@ -154,14 +154,14 @@ public final class RestTeiidStatus extends RestTeiid {
                 setDataSourceSize(dataSources.size());
                 setDataSourcesNames(dataSources);
 
-                Collection<DataSourceDriver> dataSourceDrivers = teiidInstance.getDataSourceDrivers();
+                Collection<ConnectionDriver> dataSourceDrivers = teiidInstance.getDataSourceDrivers();
                 setDataSourceDriverSize(dataSourceDrivers.size());
                 if (dataSourceDrivers == null || dataSourceDrivers.isEmpty())
                     this.sourceDrivers = Collections.emptyList();
                 else {
-                    this.sourceDrivers = new ArrayList<RestDataSourceDriver>();
-                    for (DataSourceDriver driver : dataSourceDrivers) {
-                        this.sourceDrivers.add(new RestDataSourceDriver(driver));
+                    this.sourceDrivers = new ArrayList<RestConnectionDriver>();
+                    for (ConnectionDriver driver : dataSourceDrivers) {
+                        this.sourceDrivers.add(new RestConnectionDriver(driver));
                     }
                 }
 
@@ -254,16 +254,16 @@ public final class RestTeiidStatus extends RestTeiid {
         tuples.put(TEIID_DATA_SOURCE_DRIVER_SIZE_LABEL, size);
     }
 
-    public List<RestDataSourceDriver> getDataSourceDrivers() {
+    public List<RestConnectionDriver> getDataSourceDrivers() {
         return this.sourceDrivers;
     }
 
-    public void setDataSourceDrivers(RestDataSourceDriver[] dataSourceDrivers) {
+    public void setDataSourceDrivers(RestConnectionDriver[] dataSourceDrivers) {
         if (dataSourceDrivers == null || dataSourceDrivers.length == 0)
             this.sourceDrivers = Collections.emptyList();
 
-        this.sourceDrivers = new ArrayList<RestDataSourceDriver>();
-        for (RestDataSourceDriver driver : sourceDrivers) {
+        this.sourceDrivers = new ArrayList<RestConnectionDriver>();
+        for (RestConnectionDriver driver : sourceDrivers) {
             this.sourceDrivers.add(driver);
         }
     }

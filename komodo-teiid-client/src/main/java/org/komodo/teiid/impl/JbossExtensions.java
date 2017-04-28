@@ -32,7 +32,7 @@ import org.jboss.as.cli.Util;
 import org.jboss.as.cli.operation.impl.DefaultOperationRequestBuilder;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.teiid.ExtensionConstants;
@@ -182,20 +182,20 @@ public class JbossExtensions implements ExtensionConstants {
      * @return the drivers available on the underlying jboss server
      * @throws Exception
      */
-    public Collection<DataSourceDriver> getDataSourceDrivers(Admin admin) throws Exception {
+    public Collection<ConnectionDriver> getDataSourceDrivers(Admin admin) throws Exception {
         if (admin == null)
             return Collections.emptyList();
 
-        Set<DataSourceDriver> dataSourceDrivers = new HashSet<DataSourceDriver>();
+        Set<ConnectionDriver> dataSourceDrivers = new HashSet<ConnectionDriver>();
 
         if (! isDomainMode(admin)) {
             //'installed-driver-list' not available in the domain mode.
             final ModelNode request = buildRequest(admin, DATA_SOURCES, INSTALLED_DRIVERS_LIST);
             ModelNode outcome = getConnection(admin).execute(request);
             if (Util.isSuccess(outcome)) {
-                List<DataSourceDriver> drivers = getList(outcome, new MetadataMapper<DataSourceDriver>() {
+                List<ConnectionDriver> drivers = getList(outcome, new MetadataMapper<ConnectionDriver>() {
                     @Override
-                    public DataSourceDriver unwrap(ModelNode node) {
+                    public ConnectionDriver unwrap(ModelNode node) {
                         String driverName = null;
                         String driverClassName = null;
                         if (node.hasDefined(DRIVER_NAME))
@@ -207,7 +207,7 @@ public class JbossExtensions implements ExtensionConstants {
                         if (driverName == null || driverClassName == null)
                             return null;
 
-                        return new DataSourceDriver(driverName, driverClassName);
+                        return new ConnectionDriver(driverName, driverClassName);
                     }
 
                     @Override
@@ -216,7 +216,7 @@ public class JbossExtensions implements ExtensionConstants {
                     }
 
                     @Override
-                    public ModelNode wrap(DataSourceDriver obj, ModelNode node) {
+                    public ModelNode wrap(ConnectionDriver obj, ModelNode node) {
                         throw new UnsupportedOperationException();
                     }
                 });
@@ -232,7 +232,7 @@ public class JbossExtensions implements ExtensionConstants {
             List<String> deployments = getChildNodeNames(admin, null, DEPLOYMENT);
             for (String deployment:deployments) {
                 if (!deployment.contains(TRANSLATOR) && deployment.endsWith(DOT + JAR)) {
-                    dataSourceDrivers.add(new DataSourceDriver(deployment, deployment));
+                    dataSourceDrivers.add(new ConnectionDriver(deployment, deployment));
                 }
             }
         }

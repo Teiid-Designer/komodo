@@ -7,7 +7,7 @@
 */
 package org.komodo.relational.dataservice;
 
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -16,7 +16,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 /**
  * Represents a data service entry for a connection.
  */
-public interface ConnectionEntry extends DataServiceEntry< Datasource > {
+public interface ConnectionEntry extends DataServiceEntry< Connection > {
 
     /**
      * The type identifier.

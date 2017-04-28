@@ -23,8 +23,8 @@ package org.komodo.rest.relational;
 
 import java.net.URI;
 
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
@@ -40,8 +40,8 @@ import org.komodo.relational.vdb.VdbImport;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.dataservice.RestDataservice;
-import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.response.RestTeiid;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.relational.response.RestVdbCondition;
@@ -119,9 +119,9 @@ public class RestEntityFactory implements V1Constants {
             case TEIID:
                 Teiid teiid = wsMgr.resolve(uow, kObject, Teiid.class);
                 return (T) new RestTeiid(baseUri, teiid, uow);
-            case DATASOURCE:
-                Datasource dataSource = wsMgr.resolve(uow, kObject, Datasource.class);
-                return (T) new RestDataSource(baseUri, dataSource, uow);
+            case CONNECTION:
+                Connection connection = wsMgr.resolve(uow, kObject, Connection.class);
+                return (T) new RestConnection(baseUri, connection, uow);
             case DATASERVICE:
                 Dataservice dataService = wsMgr.resolve(uow, kObject, Dataservice.class);
                 return (T) new RestDataservice(baseUri, dataService, false, uow);

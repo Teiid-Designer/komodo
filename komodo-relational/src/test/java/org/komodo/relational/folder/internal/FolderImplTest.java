@@ -31,8 +31,8 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.vdb.Vdb;
@@ -139,14 +139,14 @@ public final class FolderImplTest extends RelationalModelTest {
     }
 
     @Test
-    public void shouldAddDatasource() throws Exception {
-        final String name = "dataSource";
-        final Datasource ds = this.folder.addDatasource(getTransaction(), name);
+    public void shouldAddConnection() throws Exception {
+        final String name = "connection";
+        final Connection ds = this.folder.addConnection(getTransaction(), name);
 
         assertThat( ds, is( notNullValue() ) );
         assertThat( ds.getName( getTransaction() ), is( name ) );
-        assertThat( this.folder.getDatasources( getTransaction() ).length, is( 1 ) );
-        assertThat( this.folder.getChildren( getTransaction() )[0], is( instanceOf( Datasource.class ) ) );
+        assertThat( this.folder.getConnections( getTransaction() ).length, is( 1 ) );
+        assertThat( this.folder.getChildren( getTransaction() )[0], is( instanceOf( Connection.class ) ) );
 
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.folder.hasChild( getTransaction(), name, DataVirtLexicon.Connection.NODE_TYPE ), is( true ) );

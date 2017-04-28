@@ -44,11 +44,11 @@ import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.dataservice.RestDataservice;
-import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
-import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestConnectionDriver;
 import org.komodo.rest.relational.response.RestDataserviceViewInfo;
 import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
@@ -140,19 +140,19 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         System.out.println("Response:\n" + entity);
 
-        RestDataSource[] datasources = KomodoJsonMarshaller.unmarshallArray(entity, RestDataSource[].class);
-        assertNotNull(datasources);
-        assertEquals(1, datasources.length);
+        RestConnection[] connections = KomodoJsonMarshaller.unmarshallArray(entity, RestConnection[].class);
+        assertNotNull(connections);
+        assertEquals(1, connections.length);
 
-        RestDataSource dataSource = datasources[0];
-        assertEquals("MySqlPool", dataSource.getId());
-        assertEquals("java:/MySqlDS", dataSource.getJndiName());
+        RestConnection connection = connections[0];
+        assertEquals("MySqlPool", connection.getId());
+        assertEquals("java:/MySqlDS", connection.getJndiName());
         if (getTeiidVersion().isGreaterThanOrEqualTo(Version.TEIID_9_0))
-            assertEquals("mysql-connector-java-5.1.39-bin.jar_com.mysql.jdbc.Driver_5_1", dataSource.getDriverName());
+            assertEquals("mysql-connector-java-5.1.39-bin.jar_com.mysql.jdbc.Driver_5_1", connection.getDriverName());
         else
-            assertEquals("mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1", dataSource.getDriverName());
+            assertEquals("mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1", connection.getDriverName());
 
-        Collection<RestLink> links = dataSource.getLinks();
+        Collection<RestLink> links = connection.getLinks();
         assertNotNull(links);
         assertEquals(3, links.size());
 
@@ -161,7 +161,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
             assertTrue(LinkType.SELF.equals(rel) || LinkType.PARENT.equals(rel) || LinkType.CHILDREN.equals(rel));
 
             if (LinkType.SELF.equals(rel)) {
-                String href = _uriBuilder.workspaceConnectionsUri() + FORWARD_SLASH + dataSource.getId();
+                String href = _uriBuilder.workspaceConnectionsUri() + FORWARD_SLASH + connection.getId();
                 assertEquals(href, link.getHref().toString());
             }
         }
@@ -185,12 +185,12 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         System.out.println("Response:\n" + entity);
 
-        RestDataSourceDriver[] drivers = KomodoJsonMarshaller.unmarshallArray(entity, RestDataSourceDriver[].class);
+        RestConnectionDriver[] drivers = KomodoJsonMarshaller.unmarshallArray(entity, RestConnectionDriver[].class);
         assertNotNull(drivers);
         assertEquals(1, drivers.length);
 
-        RestDataSourceDriver dataSourceDriver = drivers[0];
-        assertEquals("mysql-connector-java-5.1.39-bin.jar", dataSourceDriver.getName());
+        RestConnectionDriver connectionDriver = drivers[0];
+        assertEquals("mysql-connector-java-5.1.39-bin.jar", connectionDriver.getName());
     }
 
     @Test
@@ -606,6 +606,26 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
 
     @Test
+    public void shouldFailNameValidationWhenVdbWithSameNameExists() throws Exception {
+        // create a data source first
+        createVdb( DATASERVICE_NAME );
+
+        // try and validate the same name of an existing data service
+        final URI dsUri = _uriBuilder.workspaceDataservicesUri();
+        final URI uri = UriBuilder.fromUri( dsUri )
+                                  .path( V1Constants.NAME_VALIDATION_SEGMENT )
+                                  .path( DATASERVICE_NAME )
+                                  .build();
+        final ClientRequest request = request( uri, MediaType.TEXT_PLAIN_TYPE );
+        final ClientResponse< String > response = request.get( String.class );
+        assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+        final String errorMsg = response.getEntity();
+        assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
+    }
+
+    @Test
     public void shouldFailNameValidationWhenNameHasInvalidCharacters() throws Exception {
         final URI dsUri = _uriBuilder.workspaceDataservicesUri();
         final URI uri = UriBuilder.fromUri( dsUri )
@@ -618,6 +638,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
@@ -648,6 +669,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
@@ -663,6 +685,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test
@@ -678,6 +701,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         final String errorMsg = response.getEntity();
         assertThat( errorMsg, is( notNullValue() ) );
+        assertThat( errorMsg.isEmpty(), is( false ) );
     }
 
     @Test

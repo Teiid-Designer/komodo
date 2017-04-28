@@ -29,8 +29,8 @@ import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.relational.dataservice.RestDataservice;
@@ -107,7 +107,7 @@ public final class RestDataserviceTest {
         Mockito.when(theDataservice.getParent(transaction)).thenReturn(workspace);
         Mockito.when(theDataservice.getServiceVdb(transaction)).thenReturn(serviceVdb);
         Mockito.when(theDataservice.getDrivers(transaction)).thenReturn(new Driver[0]);
-        Mockito.when(theDataservice.getConnections(transaction)).thenReturn(new Datasource[0]);
+        Mockito.when(theDataservice.getConnections(transaction)).thenReturn(new Connection[0]);
 
         this.dataservice = new RestDataservice(BASE_URI, theDataservice, false, transaction);
         this.dataservice.setId(DATASERVICE_NAME);

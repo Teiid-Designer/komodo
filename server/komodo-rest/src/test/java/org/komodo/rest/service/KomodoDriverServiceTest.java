@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
-import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestConnectionDriver;
 
 @SuppressWarnings( {"javadoc", "nls", "deprecation"} )
 public final class KomodoDriverServiceTest extends AbstractKomodoServiceTest {
@@ -64,10 +64,10 @@ public final class KomodoDriverServiceTest extends AbstractKomodoServiceTest {
 
         // System.out.println("Response:\n" + entities);
         // make sure the Driver JSON document is returned for each driver
-        RestDataSourceDriver[] driver = KomodoJsonMarshaller.unmarshallArray(entities, RestDataSourceDriver[].class);
+        RestConnectionDriver[] driver = KomodoJsonMarshaller.unmarshallArray(entities, RestConnectionDriver[].class);
 
         assertEquals(1, driver.length);
-        RestDataSourceDriver myDriver = driver[0];
+        RestConnectionDriver myDriver = driver[0];
         assertTrue(DRIVER_NAME.equals(myDriver.getName()));
     }
     
@@ -82,7 +82,7 @@ public final class KomodoDriverServiceTest extends AbstractKomodoServiceTest {
 
         //System.out.println("Response:\n" + entity);
 
-        RestDataSourceDriver[] drivers = KomodoJsonMarshaller.unmarshallArray(entity, RestDataSourceDriver[].class);
+        RestConnectionDriver[] drivers = KomodoJsonMarshaller.unmarshallArray(entity, RestConnectionDriver[].class);
         assertNotNull(drivers);
         assertEquals(0, drivers.length);
     }

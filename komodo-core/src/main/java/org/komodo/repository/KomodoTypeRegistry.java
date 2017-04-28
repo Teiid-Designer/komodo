@@ -124,7 +124,7 @@ public class KomodoTypeRegistry implements StringConstants {
 
         index(KomodoType.DATASERVICE, DataVirtLexicon.DataService.NODE_TYPE);
 
-        index(KomodoType.DATASOURCE, DataVirtLexicon.Connection.NODE_TYPE);
+        index(KomodoType.CONNECTION, DataVirtLexicon.Connection.NODE_TYPE);
 
         index(KomodoType.DRIVER, DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE);
         index(KomodoType.DRIVER_ENTRY, DataVirtLexicon.ResourceEntry.DRIVER_ENTRY_NODE_TYPE);

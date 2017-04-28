@@ -41,7 +41,7 @@ import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 
-@SuppressWarnings( {"javadoc", "nls", "deprecation"} )
+@SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
     private void loadSamples(String user) throws Exception {
@@ -225,7 +225,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
-        assertFalse(entity.contains("\"keng__id\": \"datasource\""));
+        assertFalse(entity.contains("\"keng__id\": \"connection\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertTrue(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));
@@ -253,7 +253,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
-        assertFalse(entity.contains("\"keng__id\": \"datasource\""));
+        assertFalse(entity.contains("\"keng__id\": \"connection\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertFalse(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));
@@ -280,7 +280,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
-        assertFalse(entity.contains("\"keng__id\": \"datasource\""));
+        assertFalse(entity.contains("\"keng__id\": \"connection\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertFalse(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));
@@ -295,7 +295,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         // Get data source
         uri = baseBuilder.clone().
-                                   queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.DATASOURCE)
+                                   queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.CONNECTION)
                                    .build();
 
         request = request(uri, MediaType.APPLICATION_JSON_TYPE);
@@ -308,7 +308,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
-        assertTrue(entity.contains("\"keng__id\": \"datasource\""));
+        assertTrue(entity.contains("\"keng__id\": \"connection\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertFalse(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));

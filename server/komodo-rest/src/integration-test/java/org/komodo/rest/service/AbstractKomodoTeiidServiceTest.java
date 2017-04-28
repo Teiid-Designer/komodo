@@ -85,7 +85,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.DocumentType;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.HostProvider;
@@ -199,8 +199,8 @@ public abstract class AbstractKomodoTeiidServiceTest implements StringConstants 
     protected void assertNoMysqlDriver() throws Exception {
         wait(2);
     
-        Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
-        for (DataSourceDriver driver : drivers) {
+        Collection<ConnectionDriver> drivers = helperInstance.getDataSourceDrivers();
+        for (ConnectionDriver driver : drivers) {
             assertFalse(driver.getName().startsWith(MYSQL_DRIVER));
         }
     }
@@ -209,8 +209,8 @@ public abstract class AbstractKomodoTeiidServiceTest implements StringConstants 
         boolean found = false;
         for (int i = 0; i < 10 && !found; i++) {
             wait(3);
-            Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
-            for (DataSourceDriver driver : drivers) {
+            Collection<ConnectionDriver> drivers = helperInstance.getDataSourceDrivers();
+            for (ConnectionDriver driver : drivers) {
                 // Use startswith rather than equals since the
                 // mysql connector gives up 2 drivers rather than just 1
                 if (driver.getName().startsWith(MYSQL_DRIVER)) {
@@ -287,8 +287,8 @@ public abstract class AbstractKomodoTeiidServiceTest implements StringConstants 
 
     protected void undeployDrivers() throws Exception {
         Set<String> undeployDrivers = new HashSet<String>();
-        Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
-        for (DataSourceDriver driver : drivers) {
+        Collection<ConnectionDriver> drivers = helperInstance.getDataSourceDrivers();
+        for (ConnectionDriver driver : drivers) {
             if (driver.getName().startsWith(MYSQL_DRIVER)) {
                 String driverName = driver.getName();
                 //

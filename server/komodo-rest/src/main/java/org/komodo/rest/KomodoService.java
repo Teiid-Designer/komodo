@@ -44,8 +44,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import org.apache.commons.codec.binary.Base64;
 import org.komodo.core.KEngine;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.RepositoryImpl;
@@ -76,6 +76,7 @@ public abstract class KomodoService implements V1Constants {
     /**
      * VDB properties for DSB
      */
+    protected final static String DSB_PROP_OWNER = "dsbOwner"; //$NON-NLS-1$
     protected final static String DSB_PROP_SERVICE_SOURCE = "dsbServiceSource"; //$NON-NLS-1$
     protected final static String DSB_PROP_SOURCE_CONNECTION = "dsbSourceConnection"; //$NON-NLS-1$
     protected final static String DSB_PROP_SOURCE_TRANSLATOR = "dsbSourceTranslator"; //$NON-NLS-1$
@@ -550,16 +551,16 @@ public abstract class KomodoService implements V1Constants {
         return dataservice;
     }
 
-    protected Datasource findDatasource(UnitOfWork uow, String datasourceName) throws KException {
-        if (! getWorkspaceManager(uow).hasChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE ) ) {
+    protected Connection findConnection(UnitOfWork uow, String connectionName) throws KException {
+        if (! getWorkspaceManager(uow).hasChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE ) ) {
             return null;
         }
 
-        final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, DataVirtLexicon.Connection.NODE_TYPE );
-        final Datasource datasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
+        final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
+        final Connection connection = getWorkspaceManager(uow).resolve( uow, kobject, Connection.class );
 
-        LOGGER.debug( "Datasource '{0}' was found", datasourceName ); //$NON-NLS-1$
-        return datasource;
+        LOGGER.debug( "Connection '{0}' was found", connectionName ); //$NON-NLS-1$
+        return connection;
     }
 
     protected String uri(String... segments) {
@@ -588,9 +589,9 @@ public abstract class KomodoService implements V1Constants {
         return commit( uow, mediaTypes, new ResourceNotFound( dataserviceName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
-    protected Response commitNoDatasourceFound(UnitOfWork uow, List<MediaType> mediaTypes, String datasourceName) throws Exception {
-        LOGGER.debug( "Datasource '{0}' was not found", datasourceName ); //$NON-NLS-1$
-        return commit( uow, mediaTypes, new ResourceNotFound( datasourceName, Messages.getString( GET_OPERATION_NAME ) ) );
+    protected Response commitNoConnectionFound(UnitOfWork uow, List<MediaType> mediaTypes, String connectionName) throws Exception {
+        LOGGER.debug( "Connection '{0}' was not found", connectionName ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( connectionName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
     protected Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {

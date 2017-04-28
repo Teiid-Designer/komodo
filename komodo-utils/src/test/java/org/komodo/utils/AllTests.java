@@ -8,7 +8,8 @@ import org.komodo.utils.i18n.UtilsI18nTest;
  * All Util Tests
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses( { TestKLog.class,
+@Suite.SuiteClasses( { FileUtilsTest.class,
+                       TestKLog.class,
                        UtilsI18nTest.class } )
 
 public class AllTests {

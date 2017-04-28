@@ -10,6 +10,9 @@ import org.komodo.relational.commands.condition.ConditionCommandsI18nTest;
 import org.komodo.relational.commands.condition.ConditionRenameCommandTest;
 import org.komodo.relational.commands.condition.SetConditionPropertyCommandTest;
 import org.komodo.relational.commands.condition.UnsetConditionPropertyCommandTest;
+import org.komodo.relational.commands.connection.ConnectionCommandsI18nTest;
+import org.komodo.relational.commands.connection.SetConnectionPropertyCommandTest;
+import org.komodo.relational.commands.connection.UnsetConnectionPropertyCommandTest;
 import org.komodo.relational.commands.datarole.AddMappedRoleCommandTest;
 import org.komodo.relational.commands.datarole.AddPermissionCommandTest;
 import org.komodo.relational.commands.datarole.DataRoleCommandsI18nTest;
@@ -19,9 +22,6 @@ import org.komodo.relational.commands.datarole.SetDataRolePropertyCommandTest;
 import org.komodo.relational.commands.datarole.ShowMappedRolesCommandTest;
 import org.komodo.relational.commands.datarole.ShowPermissionsCommandTest;
 import org.komodo.relational.commands.datarole.UnsetDataRolePropertyCommandTest;
-import org.komodo.relational.commands.datasource.DatasourceCommandsI18nTest;
-import org.komodo.relational.commands.datasource.SetDatasourcePropertyCommandTest;
-import org.komodo.relational.commands.datasource.UnsetDatasourcePropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommandsI18nTest;
 import org.komodo.relational.commands.datatyperesultset.SetDataTypeResultSetPropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.UnsetDataTypeResultSetPropertyCommandTest;
@@ -167,15 +167,15 @@ import org.komodo.relational.commands.view.ViewCommandsI18nTest;
 import org.komodo.relational.commands.virtualprocedure.SetVirtualProcedurePropertyCommandTest;
 import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedurePropertyCommandTest;
 import org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandsI18nTest;
-import org.komodo.relational.commands.workspace.CreateDatasourceCommandTest;
+import org.komodo.relational.commands.workspace.CreateConnectionCommandTest;
 import org.komodo.relational.commands.workspace.CreateSchemaCommandTest;
 import org.komodo.relational.commands.workspace.CreateVdbCommandTest;
-import org.komodo.relational.commands.workspace.DeleteDatasourceCommandTest;
+import org.komodo.relational.commands.workspace.DeleteConnectionCommandTest;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
 import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
-import org.komodo.relational.commands.workspace.ExportDatasourceCommandTest;
+import org.komodo.relational.commands.workspace.ExportConnectionCommandTest;
 import org.komodo.relational.commands.workspace.ExportVdbCommandTest;
-import org.komodo.relational.commands.workspace.UploadDatasourceCommandTest;
+import org.komodo.relational.commands.workspace.UploadConnectionCommandTest;
 import org.komodo.relational.commands.workspace.UploadVdbCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18nTest;
 import org.komodo.relational.commands.workspace.WorkspaceSetPropertyCommandTest;
@@ -202,17 +202,17 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     RelationalShowDescriptorsCommandTest.class,
 
     // Workspace
-    CreateDatasourceCommandTest.class,
+    CreateConnectionCommandTest.class,
     CreateSchemaCommandTest.class,
     CreateVdbCommandTest.class,
-    DeleteDatasourceCommandTest.class,
+    DeleteConnectionCommandTest.class,
     DeleteSchemaCommandTest.class,
     DeleteVdbCommandTest.class,
 //    ImportVdbCommandTest.class,
     UploadVdbCommandTest.class,
     ExportVdbCommandTest.class,
-    UploadDatasourceCommandTest.class,
-    ExportDatasourceCommandTest.class,
+    UploadConnectionCommandTest.class,
+    ExportConnectionCommandTest.class,
     WorkspaceCommandsI18nTest.class,
     WorkspaceSetPropertyCommandTest.class,
     WorkspaceUnsetPropertyCommandTest.class,
@@ -240,10 +240,10 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     ShowPermissionsCommandTest.class,
     UnsetDataRolePropertyCommandTest.class,
 
-    // Datasource
-    DatasourceCommandsI18nTest.class,
-    SetDatasourcePropertyCommandTest.class,
-    UnsetDatasourcePropertyCommandTest.class,
+    // Connection
+    ConnectionCommandsI18nTest.class,
+    SetConnectionPropertyCommandTest.class,
+    UnsetConnectionPropertyCommandTest.class,
 
     // DataTypeResultSet
     DataTypeResultSetCommandsI18nTest.class,

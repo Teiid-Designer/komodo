@@ -41,11 +41,11 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService.QueryParamKeys;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.RelationalMessages;
-import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestConnectionDriver;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ConnectionDriver;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import io.swagger.annotations.Api;
@@ -87,7 +87,7 @@ public final class KomodoDriverService extends KomodoService {
     @GET
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Return the collection of installed drivers",
-                            response = RestDataSourceDriver[].class)
+                            response = RestConnectionDriver[].class)
     @ApiImplicitParams({
         @ApiImplicitParam(
                           name = QueryParamKeys.PATTERN,
@@ -187,14 +187,14 @@ public final class KomodoDriverService extends KomodoService {
                 }
             }
 
-            final List< RestDataSourceDriver > entities = new ArrayList<RestDataSourceDriver>();
+            final List< RestConnectionDriver > entities = new ArrayList<RestConnectionDriver>();
             int i = 0;
 
             for ( final Driver driver : drivers ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
                     if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {
-                        DataSourceDriver aDriver = new DataSourceDriver(driver.getName(uow),null);
-                        RestDataSourceDriver entity = new RestDataSourceDriver(aDriver);
+                        ConnectionDriver aDriver = new ConnectionDriver(driver.getName(uow),null);
+                        RestConnectionDriver entity = new RestConnectionDriver(aDriver);
                         entities.add(entity);
                         LOGGER.debug("getDrivers:Driver '{0}' entity was constructed", driver.getName(uow)); //$NON-NLS-1$
                     } else {

@@ -67,7 +67,7 @@ import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.connection.Connection;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
@@ -154,7 +154,7 @@ public final class KomodoVdbService extends KomodoService {
      *        the Vdb JSON representation (cannot be <code>null</code>)
      * @return a JSON representation of the new vdb (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error creating the DataSource
+     *         if there is an error creating the VDB
      */
     @POST
     @Path( StringConstants.FORWARD_SLASH + V1Constants.VDB_PLACEHOLDER )
@@ -167,10 +167,26 @@ public final class KomodoVdbService extends KomodoService {
     public Response createVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
                                @ApiParam(
-                                         value = "Id of the vdb to be fetched",
+                                         value = "Name of the Vdb to be created",
                                          required = true
                                )
                                final @PathParam( "vdbName" ) String vdbName,
+                               @ApiParam(
+                                         value = "" + 
+                                                 "JSON of the properties of the Vdb to add:<br>" +
+                                                 OPEN_PRE_TAG +
+                                                 OPEN_BRACE + BR +
+                                                 NBSP + "keng\\_\\_id: \"name of the Vdb\"," + BR +
+                                                 NBSP + "vdb\\_\\_name: \"name of the Vdb\"," + BR +
+                                                 NBSP + "keng\\_\\_dataPath: \"path of Vdb to create\"," + BR +
+                                                 NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\")" + CLOSE_PRE_CMT + BR +
+                                                 NBSP + "vdb\\_\\_originalFile: \"original file location\"," + BR +
+                                                 NBSP + OPEN_PRE_CMT + "(same value as keng\\_\\_dataPath)" + CLOSE_PRE_CMT + BR +
+                                                 NBSP + "keng\\_\\_kType: \"Vdb\"" + BR +
+                                                 CLOSE_BRACE +
+                                                 CLOSE_PRE_TAG,
+                                         required = true
+                               )
                                final String vdbJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -281,10 +297,26 @@ public final class KomodoVdbService extends KomodoService {
     public Response updateVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
                                @ApiParam(
-                                         value = "Id of the vdb to be fetched",
+                                         value = "Name of the Vdb to be updated",
                                          required = true
                                )
                                final @PathParam( "vdbName" ) String vdbName,
+                               @ApiParam(
+                                         value = "" + 
+                                                 "JSON of the properties of the Vdb to update:<br>" +
+                                                 OPEN_PRE_TAG +
+                                                 OPEN_BRACE + BR +
+                                                 NBSP + "keng\\_\\_id: \"name of the Vdb\"," + BR +
+                                                 NBSP + "vdb\\_\\_name: \"name of the Vdb\"," + BR +
+                                                 NBSP + "keng\\_\\_dataPath: \"path of Vdb to update\"," + BR +
+                                                 NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\")" + CLOSE_PRE_CMT + BR +
+                                                 NBSP + "vdb\\_\\_originalFile: \"original file location\"," + BR +
+                                                 NBSP + OPEN_PRE_CMT + "(same value as keng\\_\\_dataPath)" + CLOSE_PRE_CMT + BR +
+                                                 NBSP + "keng\\_\\_kType: \"Vdb\"" + BR +
+                                                 CLOSE_BRACE +
+                                                 CLOSE_PRE_TAG,
+                                         required = true
+                               )
                                final String vdbJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -375,10 +407,14 @@ public final class KomodoVdbService extends KomodoService {
     public Response cloneVdb( final @Context HttpHeaders headers,
                               final @Context UriInfo uriInfo,
                               @ApiParam(
-                                        value = "Id of the vdb to be fetched",
+                                        value = "Name of the Vdb to be cloned",
                                         required = true
                               )
                               final @PathParam( "vdbName" ) String vdbName,
+                              @ApiParam(
+                                        value = "name of the new Vdb", 
+                                        required = true
+                              )
                               final String newVdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -642,7 +678,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the Id of the vdb to be fetched to remove (cannot be <code>null</code>)
+     *        the name of the Vdb to be removed (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
      * @throws KomodoRestException
      *         if there is a problem performing the delete
@@ -658,7 +694,7 @@ public final class KomodoVdbService extends KomodoService {
     public Response deleteVdb( final @Context HttpHeaders headers,
                                final @Context UriInfo uriInfo,
                                @ApiParam(
-                                         value = "Id of the vdb to be fetched",
+                                         value = "Name of the Vdb to be removed",
                                          required = true
                                )
                                final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
@@ -854,7 +890,7 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getVdb( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -914,7 +950,7 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getModels( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -984,9 +1020,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getModel( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1056,7 +1092,7 @@ public final class KomodoVdbService extends KomodoService {
     public Response createModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
                                  @ApiParam(
-                                           value = "Id of the vdb to be fetched",
+                                           value = "Name of the Vdb",
                                            required = true
                                  )
                                  final @PathParam( "vdbName" ) String vdbName,
@@ -1065,6 +1101,19 @@ public final class KomodoVdbService extends KomodoService {
                                            required = true
                                  )
                                  final @PathParam( "modelName" ) String modelName,
+                                 @ApiParam(
+                                           value = "" + 
+                                                   "JSON of the properties of the Model to add:<br>" +
+                                                   OPEN_PRE_TAG +
+                                                   OPEN_BRACE + BR +
+                                                   NBSP + "keng\\_\\_id: \"name of the Model\"," + BR +
+                                                   NBSP + "keng\\_\\_dataPath: \"path of Model to create\"," + BR +
+                                                   NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\")" + CLOSE_PRE_CMT + BR +
+                                                   NBSP + "keng\\_\\_kType: \"Model\"" + BR +
+                                                   CLOSE_BRACE +
+                                                   CLOSE_PRE_TAG,
+                                           required = true
+                                 )
                                  final String modelJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1196,15 +1245,28 @@ public final class KomodoVdbService extends KomodoService {
     public Response updateModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
                                  @ApiParam(
-                                           value = "Id of the vdb to be fetched",
+                                           value = "Name of the Vdb",
                                            required = true
                                  )
                                  final @PathParam( "vdbName" ) String vdbName,
                                  @ApiParam(
-                                           value = "Id of the model to be fetched",
+                                           value = "Name of the Model to be updated",
                                            required = true
                                  )
                                  final @PathParam( "modelName" ) String modelName,
+                                 @ApiParam(
+                                           value = "" + 
+                                                   "JSON of the properties of the Model to update:<br>" +
+                                                   OPEN_PRE_TAG +
+                                                   OPEN_BRACE + BR +
+                                                   NBSP + "keng\\_\\_id: \"name of the Model\"," + BR +
+                                                   NBSP + "keng\\_\\_dataPath: \"path of Model to update\"," + BR +
+                                                   NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\")" + CLOSE_PRE_CMT + BR +
+                                                   NBSP + "keng\\_\\_kType: \"Model\"" + BR +
+                                                   CLOSE_BRACE +
+                                                   CLOSE_PRE_TAG,
+                                           required = true
+                                 )
                                  final String modelJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1278,7 +1340,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the Id of the vdb to be fetched (cannot be <code>null</code>)
+     *        the name of the Vdb (cannot be <code>null</code>)
      * @param modelName
      *        the name of the model to remove (cannot be <code>null</code>)
      * @return a JSON document representing the results of the removal
@@ -1300,12 +1362,12 @@ public final class KomodoVdbService extends KomodoService {
     public Response deleteModel( final @Context HttpHeaders headers,
                                  final @Context UriInfo uriInfo,
                                  @ApiParam(
-                                           value = "Id of the vdb to be fetched",
+                                           value = "Name of the Vdb",
                                            required = true
                                  )
                                  final @PathParam( "vdbName" ) String vdbName,
                                  @ApiParam(
-                                           value = "Name of the model",
+                                           value = "Name of the Model to remove",
                                            required = true
                                  )
                                  final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
@@ -1379,7 +1441,7 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATORS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Find all translators belonging to the vdb", response = RestVdbTranslator[].class)
+    @ApiOperation(value = "Find all translators belonging to the Vdb", response = RestVdbTranslator[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No translators could be found but an empty list is returned"),
@@ -1388,7 +1450,7 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getTranslators( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the VDB", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1458,9 +1520,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getTranslator( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the translator to be fetched", required = true)
+                            @ApiParam(value = "Name of the translator to be fetched", required = true)
                             final @PathParam( "translatorName" ) String translatorName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1541,7 +1603,7 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getImports( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1611,9 +1673,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getImport( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the vdb import to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb import to be fetched", required = true)
                             final @PathParam( "importName" ) String importName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1694,7 +1756,7 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getDataRoles( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1764,9 +1826,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getDataRole( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role to be fetched", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1834,9 +1896,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getModelSources( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model to get its Sources", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -1916,11 +1978,11 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getModelSource( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model", required = true)
                             final @PathParam( "modelName" ) String modelName,
-                            @ApiParam(value = "Id of the model source to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model Source to be fetched", required = true)
                             final @PathParam( "sourceName" ) String sourceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2023,12 +2085,27 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response createModelSource( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model", required = true)
                             final @PathParam( "modelName" ) String modelName,
-                            @ApiParam(value = "Id of the model source to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model Source to be created", required = true)
                             final @PathParam( "sourceName" ) String sourceName,
+                            @ApiParam(
+                                      value = "" + 
+                                              "JSON of the properties of the Model Source to add:<br>" +
+                                              OPEN_PRE_TAG +
+                                              OPEN_BRACE + BR +
+                                              NBSP + "keng\\_\\_id: \"name of the VdbModelSource\"," + BR +
+                                              NBSP + "keng\\_\\_dataPath: \"path of VdbModelSource to create\"," + BR +
+                                              NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\\vdb:sources\\\\{sourceName\\}\")" + CLOSE_PRE_CMT + BR +
+                                              NBSP + "keng\\_\\_kType: \"VdbModelSource\"," + BR +
+                                              NBSP + "vdb\\_\\_sourceJndiName: \"the jndi name\"," + BR +
+                                              NBSP + "vdb\\_\\_sourceTranslator: \"the translator name\"" + BR +
+                                              CLOSE_BRACE +
+                                              CLOSE_PRE_TAG,
+                                      required = true
+                            )
                             final String sourceJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2174,12 +2251,27 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response updateModelSource( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
-                                       @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                                       @ApiParam(value = "Name of the Vdb", required = true)
                                        final @PathParam( "vdbName" ) String vdbName,
-                                       @ApiParam(value = "Id of the model to be fetched", required = true)
+                                       @ApiParam(value = "Name of the Model", required = true)
                                        final @PathParam( "modelName" ) String modelName,
-                                       @ApiParam(value = "Id of the model source to be fetched", required = true)
+                                       @ApiParam(value = "Name of the Model Source to be updated", required = true)
                                        final @PathParam( "sourceName" ) String sourceName,
+                                       @ApiParam(
+                                                 value = "" + 
+                                                         "JSON of the properties of the Model Source to update:<br>" +
+                                                         OPEN_PRE_TAG +
+                                                         OPEN_BRACE + BR +
+                                                         NBSP + "keng\\_\\_id: \"name of the VdbModelSource\"," + BR +
+                                                         NBSP + "keng\\_\\_dataPath: \"path of VdbModelSource to update\"," + BR +
+                                                         NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\\vdb:sources\\\\{sourceName\\}\")" + CLOSE_PRE_CMT + BR +
+                                                         NBSP + "keng\\_\\_kType: \"VdbModelSource\"," + BR +
+                                                         NBSP + "vdb\\_\\_sourceJndiName: \"the jndi name\"," + BR +
+                                                         NBSP + "vdb\\_\\_sourceTranslator: \"the translator name\"" + BR +
+                                                         CLOSE_BRACE +
+                                                         CLOSE_PRE_TAG,
+                                                 required = true
+                                       )
                                        final String sourceJson) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2291,11 +2383,11 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response deleteModelSource( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model", required = true)
                             final @PathParam( "modelName" ) String modelName,
-                            @ApiParam(value = "Id of the model source to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model Source to be deleted", required = true)
                             final @PathParam( "sourceName" ) String sourceName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2386,9 +2478,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getModelTables( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model to get its tables", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2468,11 +2560,11 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getModelTableColumns( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the model to be fetched", required = true)
+                            @ApiParam(value = "Name of the Model", required = true)
                             final @PathParam( "modelName" ) String modelName,
-        	                @ApiParam(value = "Id of the table to be fetched", required = true)
+        	                @ApiParam(value = "Name of the Table to get its columns", required = true)
                             final @PathParam( "tableName" ) String tableName) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2553,9 +2645,9 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getPermissions( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role to get its permissions", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2633,11 +2725,11 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getPermission( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId,
-                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            @ApiParam(value = "Name of the Permission to be fetched", required = true)
                             final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2712,11 +2804,11 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getConditions( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId,
-                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            @ApiParam(value = "Name of the Permission to get its Conditions", required = true)
                             final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2798,13 +2890,13 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getCondition( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId,
-                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            @ApiParam(value = "Name of the Permission", required = true)
                             final @PathParam( "permissionId" ) String permissionId,
-                            @ApiParam(value = "Id of the condition to be fetched", required = true)
+                            @ApiParam(value = "Name of the Condition to be fetched", required = true)
                             final @PathParam( "conditionId" ) String conditionId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2908,11 +3000,11 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getMasks( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId,
-                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            @ApiParam(value = "Name of the Permission to get its Masks", required = true)
                             final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -2994,13 +3086,13 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getMask( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Name of the Vdb", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            @ApiParam(value = "Name of the Data Role", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId,
-                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            @ApiParam(value = "Name of the Permission", required = true)
                             final @PathParam( "permissionId" ) String permissionId,
-                            @ApiParam(value = "Id of the mask to be fetched", required = true)
+                            @ApiParam(value = "Name of the Mask to be fetched", required = true)
                             final @PathParam( "maskId" ) String maskId) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
@@ -3123,14 +3215,14 @@ public final class KomodoVdbService extends KomodoService {
 
             if ( vdb == null ) {
                 // make sure an existing connection does not have the same name
-                final Datasource ds = findDatasource( uow, vdbName );
+                final Connection ds = findConnection( uow, vdbName );
 
                 if ( ds == null ) {
                     // name is valid
                     return Response.ok().build();
                 }
 
-                // name is the same as an existing data source
+                // name is the same as an existing connection
                 return Response.ok()
                                .entity( RelationalMessages.getString( VDB_DATA_SOURCE_NAME_EXISTS ) )
                                .build();

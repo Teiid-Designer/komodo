@@ -10,9 +10,10 @@ package org.komodo.relational.dataservice.internal;
 import java.util.Properties;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.connection.Connection;
+import org.komodo.relational.connection.internal.ConnectionImpl;
 import org.komodo.relational.dataservice.ConnectionEntry;
-import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyValueType;
@@ -24,7 +25,7 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 /**
  * An implementation of a connection entry in a data service.
  */
-public class ConnectionEntryImpl extends AbstractDataServiceEntryImpl<Datasource> implements ConnectionEntry {
+public class ConnectionEntryImpl extends AbstractDataServiceEntryImpl<Connection> implements ConnectionEntry {
 
     private static final String ARCHIVE_FOLDER = "connections/"; //$NON-NLS-1$
 
@@ -52,7 +53,7 @@ public class ConnectionEntryImpl extends AbstractDataServiceEntryImpl<Datasource
     @Override
     public byte[] export( final UnitOfWork transaction,
                           final Properties properties ) throws KException {
-        final Datasource connection = getReference( transaction );
+        final Connection connection = getReference( transaction );
 
         if ( connection == null ) {
             throw new KException( Messages.getString( Relational.EXPORT_FAILED_NO_CONTENT, getAbsolutePath() ) );
@@ -90,7 +91,7 @@ public class ConnectionEntryImpl extends AbstractDataServiceEntryImpl<Datasource
      * @see org.komodo.relational.dataservice.DataServiceEntry#getReference(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public Datasource getReference( final UnitOfWork uow ) throws KException {
+    public Connection getReference( final UnitOfWork uow ) throws KException {
         if ( hasProperty( uow, DataVirtLexicon.ConnectionEntry.CONNECTION_REF ) ) {
             final String refId = getProperty( uow, DataVirtLexicon.ConnectionEntry.CONNECTION_REF ).getStringValue( uow );
             final KomodoObject kobj = getRepository().getUsingId( uow, refId );
@@ -101,7 +102,7 @@ public class ConnectionEntryImpl extends AbstractDataServiceEntryImpl<Datasource
                                                           refId ) );
             }
 
-            return new DatasourceImpl( uow, getRepository(), kobj.getAbsolutePath() );
+            return new ConnectionImpl( uow, getRepository(), kobj.getAbsolutePath() );
         }
 
         return null;
