@@ -42,6 +42,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.osgi.PluginService;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
@@ -392,12 +394,32 @@ public class KomodoImportExportService extends KomodoService {
                                                                                    parameters,
                                                                                    new DocumentType(sta.getDocumentType()));
 
-            ImportMessages messages = getWorkspaceManager(uow).importArtifact(uow, importTarget, storageRef);
-            if (messages.hasError())
-                throw new Exception(messages.errorMessagesToString());
+            // Set desired overwrite setting in options
+            ImportOptions importOptions = new ImportOptions();
+            if(parameters.containsKey(StorageConnector.IMPORT_OVERWRITE_PROPERTY)) {
+                String importOverwrite = parameters.getProperty(StorageConnector.IMPORT_OVERWRITE_PROPERTY);
+                // RETURN supplied
+                if( importOverwrite.equals(ImportOptions.ExistingNodeOptions.RETURN.name()) ) {
+                    importOptions.setOption(OptionKeys.HANDLE_EXISTING, ImportOptions.ExistingNodeOptions.RETURN);
+                // CREATE_NEW supplied
+                } else if( importOverwrite.equals(ImportOptions.ExistingNodeOptions.CREATE_NEW.name()) ) {
+                    importOptions.setOption(OptionKeys.HANDLE_EXISTING, ImportOptions.ExistingNodeOptions.CREATE_NEW);
+                // OVERWRITE supplied or no match
+                } else {
+                    importOptions.setOption(OptionKeys.HANDLE_EXISTING, ImportOptions.ExistingNodeOptions.OVERWRITE);
+                }
+            } else {
+                importOptions.setOption(OptionKeys.HANDLE_EXISTING, ImportOptions.ExistingNodeOptions.OVERWRITE);
+            }
+            
+            ImportMessages messages = getWorkspaceManager(uow).importArtifact(uow, importTarget, storageRef, importOptions);
+            if (messages.hasError()) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.IMPORT_EXPORT_SERVICE_IMPORT_ARTIFACT_ERROR, messages.errorMessagesToString());
+            }
 
             status.setSuccess(true);
             status.setName(storageRef.getRelativeRef());
+            status.setMessage(RelationalMessages.getString( RelationalMessages.Info.IMPORT_EXPORT_SERVICE_IMPORT_SUCCESS_MESSAGE, importOptions.getOption(OptionKeys.NAME) ));
             
             if(sta.getDocumentType().equals(DocumentType.JAR.toString())) {
                 String driverName = storageRef.getParameters().getProperty(StorageReference.DRIVER_NAME_KEY);

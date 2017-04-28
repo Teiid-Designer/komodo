@@ -62,6 +62,9 @@ public final class ImportExportStatusSerializer extends TypeAdapter< ImportExpor
             else if (name.equals(ImportExportStatus.CONTENT_LABEL)) {
                 status.setContent(in.nextString());
             }
+            else if (name.equals(ImportExportStatus.MESSAGE_LABEL)) {
+                status.setMessage(in.nextString());
+            }
             else if (name.equals(ImportExportStatus.DOWNLOADABLE_SIZE_LABEL)) {
                 status.setDownloadableSize(in.nextLong());
             }
@@ -100,6 +103,9 @@ public final class ImportExportStatusSerializer extends TypeAdapter< ImportExpor
 
         out.name(ImportExportStatus.CONTENT_LABEL);
         out.value(value.getContent());
+
+        out.name(ImportExportStatus.MESSAGE_LABEL);
+        out.value(value.getMessage());
 
         out.name(ImportExportStatus.DOWNLOADABLE_SIZE_LABEL);
         out.value(value.getDownloadableSize());

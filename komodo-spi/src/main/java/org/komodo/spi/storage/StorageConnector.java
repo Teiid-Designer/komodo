@@ -93,6 +93,11 @@ public interface StorageConnector extends StringConstants {
     String DOWNLOADABLE_PATH_PROPERTY = "downloadable-path-property";
 
     /**
+     * Parameter to specify overwrite option for imports
+     */
+    String IMPORT_OVERWRITE_PROPERTY = "import-overwrite-property";
+
+    /**
      * @return the id of the connector
      */
     StorageConnectorId getId();

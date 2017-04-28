@@ -44,12 +44,17 @@ public class ImportExportStatus implements KRestEntity {
     /**
      * Label for the size of the downloadable
      */
-    public static final String DOWNLOADABLE_SIZE_LABEL = "downloadableSize";
+    public static final String DOWNLOADABLE_SIZE_LABEL = "downloadableSize"; //$NON-NLS-1$
 
     /**
      * Label for the content
      */
     public static final String CONTENT_LABEL = "content"; //$NON-NLS-1$
+
+    /**
+     * Label for the message
+     */
+    public static final String MESSAGE_LABEL = "message"; //$NON-NLS-1$
 
     /**
      * Label for the success flag
@@ -63,6 +68,8 @@ public class ImportExportStatus implements KRestEntity {
     private boolean downloadable;
 
     private String content;
+
+    private String message;
 
     private boolean success;
 
@@ -104,6 +111,20 @@ public class ImportExportStatus implements KRestEntity {
      */
     public void setContent(String content) {
         this.content = content;
+    }
+
+    /**
+     * @return message if provided or null
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * @param message the message
+     */
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     /**

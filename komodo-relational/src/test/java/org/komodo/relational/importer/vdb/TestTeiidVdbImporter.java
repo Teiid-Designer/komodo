@@ -442,7 +442,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Error messages - expect error that the node already exists
         List<String> errorMessages = importMessages.getErrorMessages();
         assertEquals(1, errorMessages.size());
-        assertEquals(Messages.getString(Messages.IMPORTER.nodeExistsReturn), errorMessages.get(0));
+        assertEquals(Messages.getString(Messages.IMPORTER.nodeExistsReturn, TestUtilities.TWEET_EXAMPLE_VDB_NAME), errorMessages.get(0));
     }
 
     @Test

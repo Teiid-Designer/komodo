@@ -21,6 +21,7 @@
  */
 package org.komodo.rest.service;
 
+import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_FIND_SOURCE_VDB_ERROR;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -74,9 +76,11 @@ import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.connection.RestConnection;
@@ -518,30 +522,112 @@ public final class KomodoDataserviceService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR, newDataserviceName);
         }
 
-        UnitOfWork uow = null;
+        UnitOfWork uow1 = null;
+        UnitOfWork uow2 = null;
 
         try {
-            uow = createTransaction(principal, "cloneDataservice", false ); //$NON-NLS-1$
+            uow1 = createTransaction(principal, "cloneDataservice", false ); //$NON-NLS-1$
             
             // Error if the repo already contains a dataservice with the supplied name.
-            if ( getWorkspaceManager(uow).hasChild( uow, newDataserviceName ) ) {
+            if ( getWorkspaceManager(uow1).hasChild( uow1, newDataserviceName ) ) {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS);
             }
 
-            // create new Dataservice
-            // must be an update
-            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
-            final Dataservice oldDataservice = getWorkspaceManager(uow).resolve( uow, kobject, Dataservice.class );
-            
-            final Dataservice dataservice = getWorkspaceManager(uow).createDataservice( uow, null, newDataserviceName);
-            oldDataservice.clone(uow, dataservice);
+            // get the source dataservice
+            final KomodoObject kobject = getWorkspaceManager(uow1).getChild( uow1, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
+            final Dataservice srcDataservice = getWorkspaceManager(uow1).resolve( uow1, kobject, Dataservice.class );
+            // Get the service Vdb from the source dataservice
+            Vdb srcServiceVdb = srcDataservice.getServiceVdb(uow1);
+                        
+            // Create the new dataservice by cloning the source dataservice
+            final Dataservice newDataservice = getWorkspaceManager(uow1).createDataservice( uow1, null, newDataserviceName);
+            newDataservice.setServiceVdb(uow1, null);
+            String tgtServiceVdbName = newDataserviceName+SERVICE_VDB_SUFFIX;
+            if(getWorkspaceManager(uow1).hasChild(uow1, tgtServiceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+                KomodoObject svcVdbObj = getWorkspaceManager(uow1).getChild(uow1, tgtServiceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                svcVdbObj.remove(uow1);
+            }
 
-            final RestDataservice entity = entityFactory.create(dataservice, uriInfo.getBaseUri(), uow );
-            final Response response = commit( uow, mediaTypes, entity );
+            // Create a new service VDB for the target dataservice
+            KomodoObject tgtServiceVdbObj = getWorkspaceManager(uow1).createVdb(uow1, null, tgtServiceVdbName, tgtServiceVdbName);
+            // Set owner property on the service vdb
+            tgtServiceVdbObj.setProperty(uow1, DSB_PROP_OWNER, uow1.getUserName());
+            Vdb tgtServiceVdb = Vdb.RESOLVER.resolve(uow1, tgtServiceVdbObj);
+            
+            // Copy source dataservice model info to the new target
+            Model[] sourceModels = srcServiceVdb.getModels(uow1);
+            for(Model sourceModel : sourceModels) {
+                if( sourceModel.getModelType(uow1) == Model.Type.VIRTUAL ) {
+                    // Add to the ServiceVdb a virtual model for the View
+                    Model viewModel = tgtServiceVdb.addModel(uow1, SERVICE_VDB_VIEW_MODEL);
+                    viewModel.setModelType(uow1, Type.VIRTUAL);
+                    
+                    // Get source model DDL
+                    byte[] ddlBytes = sourceModel.export(uow1, new Properties());
+                    String viewDdl = new String(ddlBytes);
+                    
+                    String srcViewName = dataserviceName+SERVICE_VDB_VIEW_SUFFIX;
+                    String tgtViewName = newDataserviceName+SERVICE_VDB_VIEW_SUFFIX;
+                    
+                    viewDdl = viewDdl.replaceFirst(srcViewName, tgtViewName);
+
+                    // Set DDL on new View Model
+                    viewModel.setModelDefinition(uow1, viewDdl);
+                } else if ( sourceModel.getModelType(uow1) == Model.Type.PHYSICAL ) {
+                    String modelName = sourceModel.getName(uow1);
+                    // Add model to target
+                    Model targetModel = tgtServiceVdb.addModel(uow1, modelName);
+                    targetModel.setModelType(uow1, Type.PHYSICAL);
+
+                    // set the model DDL
+                    Properties exportProps = new Properties();
+                    byte[] bytes = sourceModel.export(uow1, exportProps);
+                    String sourceDdl = new String(bytes);
+                    targetModel.setModelDefinition(uow1, sourceDdl);
+                    
+                    ModelSource[] srcModelSources = sourceModel.getSources(uow1);
+                    ModelSource srcModelSource = srcModelSources[0];
+                    if(srcModelSource!=null) {
+                        ModelSource tgtModelSource = targetModel.addSource(uow1, srcModelSource.getName(uow1));
+                        tgtModelSource.setJndiName(uow1, srcModelSource.getJndiName(uow1));
+                        tgtModelSource.setTranslatorName(uow1, srcModelSource.getTranslatorName(uow1));
+                    }
+                }
+                
+            }
+            
+            // -------------------------------------------------------------
+            // Must commit the transaction before setting the service VDB
+            // -------------------------------------------------------------
+            final SynchronousCallback callback = ( SynchronousCallback )uow1.getCallback();
+            uow1.commit();
+
+            if ( !callback.await( 30, TimeUnit.SECONDS ) ) {
+                // callback timeout occurred
+                String errorMessage = Messages.getString( COMMIT_TIMEOUT, uow1.getName(), 30, TimeUnit.SECONDS );
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status( Status.INTERNAL_SERVER_ERROR )
+                               .entity(responseEntity)
+                               .build();
+            }
+
+            // -------------------------------------------------------------
+            // Start a new transaction to complete the operation
+            // -------------------------------------------------------------
+            uow2 = createTransaction(principal, "cloneDataservice", false ); //$NON-NLS-1$
+
+            // Set the service VDB for the cloned dataservice to the new targetServiceVdb
+            newDataservice.setServiceVdb(uow2, tgtServiceVdb);
+            
+            final RestDataservice entity = entityFactory.create(newDataservice, uriInfo.getBaseUri(), uow2 );
+            final Response response = commit( uow2, mediaTypes, entity );
             return response;
         } catch (final Exception e) {
-            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
-                uow.rollback();
+            if ((uow1 != null) && (uow1.getState() != State.ROLLED_BACK)) {
+                uow1.rollback();
+            }
+            if ((uow2 != null) && (uow2.getState() != State.ROLLED_BACK)) {
+                uow2.rollback();
             }
 
             if (e instanceof KomodoRestException) {
