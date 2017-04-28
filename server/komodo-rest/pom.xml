@@ -542,6 +542,12 @@
 							<directory>${project.basedir}/lib/test-server</directory>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+							<directory>${project.basedir}/var</directory>
+						</fileset>
+						<fileset>
+							<directory>${project.basedir}/log</directory>
+						</fileset>
 					</filesets>
 				</configuration>
 			</plugin>
