@@ -246,6 +246,8 @@
 							<goal>unpack</goal>
 						</goals>
 						<configuration>
+							<!-- Skip tests -->
+							<skip>${skipTests}</skip>
 							<artifactItems>
 								<artifactItem>
 									<groupId>${test.server.group.id}</groupId>
@@ -265,6 +267,8 @@
 							<goal>unpack</goal>
 						</goals>
 						<configuration>
+							<!-- Skip tests -->
+							<skip>${skipTests}</skip>
 							<artifactItems>
 								<artifactItem>
 									<groupId>org.jboss.teiid</groupId>
