@@ -607,11 +607,11 @@ public class KomodoTeiidService extends KomodoService {
                                                      "JSON of credentials:" + BR +
                                                      OPEN_PRE_TAG +
                                                      OPEN_BRACE + BR +
-                                                     NBSP + "adminUser: \"admin user name\"" + BR +
-                                                     NBSP + "adminPasswd: \"admin password\"" + BR +
-                                                     NBSP + "adminSecure: \"true if admin uses secure connection\"" + BR +
-                                                     NBSP + "jdbcUser: \"jdbc user name\"" + BR +
-                                                     NBSP + "jdbcPasswd: \"jdbc password\"" + BR +
+                                                     NBSP + "adminUser: \"admin user name\"" + COMMA + BR +
+                                                     NBSP + "adminPasswd: \"admin password\"" + COMMA + BR +
+                                                     NBSP + "adminSecure: \"true if admin uses secure connection\"" + COMMA + BR +
+                                                     NBSP + "jdbcUser: \"jdbc user name\"" + COMMA + BR +
+                                                     NBSP + "jdbcPasswd: \"jdbc password\"" + COMMA + BR +
                                                      NBSP + "jdbcSecure: \"true if jdbc uses secure connection\"" + BR +
                                                      CLOSE_BRACE +
                                                      CLOSE_PRE_TAG,
@@ -1072,9 +1072,9 @@ public class KomodoTeiidService extends KomodoService {
                               "JSON of update attributes:" + BR +
                               OPEN_PRE_TAG +
                               OPEN_BRACE + BR +
-                              NBSP + "vdbName: \"The destination workspace vdb name\"" + BR +
-                              NBSP + "modelName: \"The destination model name\"" + BR +
-                              NBSP + "teiidVdb: \"The source teiid vdb name\"" + BR +
+                              NBSP + "vdbName: \"The destination workspace vdb name\"" + COMMA + BR +
+                              NBSP + "modelName: \"The destination model name\"" + COMMA + BR +
+                              NBSP + "teiidVdb: \"The source teiid vdb name\"" + COMMA + BR +
                               NBSP + "teiidModel: \"The source teiid model name containing required ddl\"" + BR +
                               NBSP + CLOSE_BRACE + BR +
                               CLOSE_BRACE +
@@ -1761,8 +1761,8 @@ public class KomodoTeiidService extends KomodoService {
                                                      "JSON of the properties of the driver to add:<br>" +
                                                      OPEN_PRE_TAG +
                                                      OPEN_BRACE + BR +
-                                                     NBSP + "name: \"name of the driver\"" + BR +
-                                                     NBSP + "content: \"Base64-encoded byte data of the" + BR +
+                                                     NBSP + "name: \"name of the driver\"" + COMMA + BR +
+                                                     NBSP + "content: \"Base64-encoded byte data of the" + COMMA + BR +
                                                      NBSP + "driver file\"" + BR +
                                                      CLOSE_BRACE +
                                                      CLOSE_PRE_TAG,
@@ -2427,12 +2427,12 @@ public class KomodoTeiidService extends KomodoService {
                                                      "JSON of the properties of the query:<br>" +
                                                      OPEN_PRE_TAG +
                                                      OPEN_BRACE + BR +
-                                                     NBSP + "query: \"SQL formatted query to interrogate the target\"" + BR +
+                                                     NBSP + "query: \"SQL formatted query to interrogate the target\"" + COMMA + BR +
                                                      NBSP + "target: \"The name of the target to be queried\"" + BR +
                                                      NBSP + OPEN_PRE_CMT + "(The target can be a vdb or data service. If the latter " +
                                                      NBSP + "then the name of the service vdb is extracted and " +
-                                                     NBSP + "replaces the data service)" + CLOSE_PRE_CMT + BR +
-                                                     NBSP + "limit: Add a limit on number of results to be returned" + BR +
+                                                     NBSP + "replaces the data service)" + CLOSE_PRE_CMT + COMMA + BR +
+                                                     NBSP + "limit: Add a limit on number of results to be returned" + COMMA + BR +
                                                      NBSP + "offset: The index of the result to begin the results with" + BR +
                                                      CLOSE_BRACE +
                                                      CLOSE_PRE_TAG,
@@ -2630,10 +2630,10 @@ public class KomodoTeiidService extends KomodoService {
                                                                "JSON of the properties of the data source jdbc tables:<br>" +
                                                                OPEN_PRE_TAG +
                                                                OPEN_BRACE + BR +
-                                                               NBSP + "dataSourceName: \"data source name\"" + BR +
-                                                               NBSP + "catalogFilter: \"catalog filter\"" + BR +
-                                                               NBSP + "schemaFilter: \"schema filter\"" + BR +
-                                                               NBSP + "tableFilter: \"table filter\"" + BR +
+                                                               NBSP + "dataSourceName: \"data source name\"" + COMMA + BR +
+                                                               NBSP + "catalogFilter: \"catalog filter\"" + COMMA + BR +
+                                                               NBSP + "schemaFilter: \"schema filter\"" + COMMA + BR +
+                                                               NBSP + "tableFilter: \"table filter\"" + COMMA + BR +
                                                                CLOSE_BRACE +
                                                                CLOSE_PRE_TAG,
                                                        required = true

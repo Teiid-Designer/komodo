@@ -176,11 +176,11 @@ public final class KomodoVdbService extends KomodoService {
                                                  "JSON of the properties of the Vdb to add:<br>" +
                                                  OPEN_PRE_TAG +
                                                  OPEN_BRACE + BR +
-                                                 NBSP + "keng\\_\\_id: \"name of the Vdb\"," + BR +
-                                                 NBSP + "vdb\\_\\_name: \"name of the Vdb\"," + BR +
-                                                 NBSP + "keng\\_\\_dataPath: \"path of Vdb to create\"," + BR +
+                                                 NBSP + "keng\\_\\_id: \"name of the Vdb\"" + COMMA + BR +
+                                                 NBSP + "vdb\\_\\_name: \"name of the Vdb\"" + COMMA + BR +
+                                                 NBSP + "keng\\_\\_dataPath: \"path of Vdb to create\"" + COMMA + BR +
                                                  NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\")" + CLOSE_PRE_CMT + BR +
-                                                 NBSP + "vdb\\_\\_originalFile: \"original file location\"," + BR +
+                                                 NBSP + "vdb\\_\\_originalFile: \"original file location\"" + COMMA + BR +
                                                  NBSP + OPEN_PRE_CMT + "(same value as keng\\_\\_dataPath)" + CLOSE_PRE_CMT + BR +
                                                  NBSP + "keng\\_\\_kType: \"Vdb\"" + BR +
                                                  CLOSE_BRACE +
@@ -306,11 +306,11 @@ public final class KomodoVdbService extends KomodoService {
                                                  "JSON of the properties of the Vdb to update:<br>" +
                                                  OPEN_PRE_TAG +
                                                  OPEN_BRACE + BR +
-                                                 NBSP + "keng\\_\\_id: \"name of the Vdb\"," + BR +
-                                                 NBSP + "vdb\\_\\_name: \"name of the Vdb\"," + BR +
-                                                 NBSP + "keng\\_\\_dataPath: \"path of Vdb to update\"," + BR +
+                                                 NBSP + "keng\\_\\_id: \"name of the Vdb\"" + COMMA + BR +
+                                                 NBSP + "vdb\\_\\_name: \"name of the Vdb\"" + COMMA + BR +
+                                                 NBSP + "keng\\_\\_dataPath: \"path of Vdb to update\"" + COMMA + BR +
                                                  NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\")" + CLOSE_PRE_CMT + BR +
-                                                 NBSP + "vdb\\_\\_originalFile: \"original file location\"," + BR +
+                                                 NBSP + "vdb\\_\\_originalFile: \"original file location\"" + COMMA + BR +
                                                  NBSP + OPEN_PRE_CMT + "(same value as keng\\_\\_dataPath)" + CLOSE_PRE_CMT + BR +
                                                  NBSP + "keng\\_\\_kType: \"Vdb\"" + BR +
                                                  CLOSE_BRACE +
@@ -1106,8 +1106,8 @@ public final class KomodoVdbService extends KomodoService {
                                                    "JSON of the properties of the Model to add:<br>" +
                                                    OPEN_PRE_TAG +
                                                    OPEN_BRACE + BR +
-                                                   NBSP + "keng\\_\\_id: \"name of the Model\"," + BR +
-                                                   NBSP + "keng\\_\\_dataPath: \"path of Model to create\"," + BR +
+                                                   NBSP + "keng\\_\\_id: \"name of the Model\"" + COMMA + BR +
+                                                   NBSP + "keng\\_\\_dataPath: \"path of Model to create\"" + COMMA + BR +
                                                    NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\")" + CLOSE_PRE_CMT + BR +
                                                    NBSP + "keng\\_\\_kType: \"Model\"" + BR +
                                                    CLOSE_BRACE +
@@ -1259,8 +1259,8 @@ public final class KomodoVdbService extends KomodoService {
                                                    "JSON of the properties of the Model to update:<br>" +
                                                    OPEN_PRE_TAG +
                                                    OPEN_BRACE + BR +
-                                                   NBSP + "keng\\_\\_id: \"name of the Model\"," + BR +
-                                                   NBSP + "keng\\_\\_dataPath: \"path of Model to update\"," + BR +
+                                                   NBSP + "keng\\_\\_id: \"name of the Model\"" + COMMA + BR +
+                                                   NBSP + "keng\\_\\_dataPath: \"path of Model to update\"" + COMMA + BR +
                                                    NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\")" + CLOSE_PRE_CMT + BR +
                                                    NBSP + "keng\\_\\_kType: \"Model\"" + BR +
                                                    CLOSE_BRACE +
@@ -2096,11 +2096,11 @@ public final class KomodoVdbService extends KomodoService {
                                               "JSON of the properties of the Model Source to add:<br>" +
                                               OPEN_PRE_TAG +
                                               OPEN_BRACE + BR +
-                                              NBSP + "keng\\_\\_id: \"name of the VdbModelSource\"," + BR +
-                                              NBSP + "keng\\_\\_dataPath: \"path of VdbModelSource to create\"," + BR +
+                                              NBSP + "keng\\_\\_id: \"name of the VdbModelSource\"" + COMMA + BR +
+                                              NBSP + "keng\\_\\_dataPath: \"path of VdbModelSource to create\"" + COMMA + BR +
                                               NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\\vdb:sources\\\\{sourceName\\}\")" + CLOSE_PRE_CMT + BR +
-                                              NBSP + "keng\\_\\_kType: \"VdbModelSource\"," + BR +
-                                              NBSP + "vdb\\_\\_sourceJndiName: \"the jndi name\"," + BR +
+                                              NBSP + "keng\\_\\_kType: \"VdbModelSource\"" + COMMA + BR +
+                                              NBSP + "vdb\\_\\_sourceJndiName: \"the jndi name\"" + COMMA + BR +
                                               NBSP + "vdb\\_\\_sourceTranslator: \"the translator name\"" + BR +
                                               CLOSE_BRACE +
                                               CLOSE_PRE_TAG,
@@ -2262,11 +2262,11 @@ public final class KomodoVdbService extends KomodoService {
                                                          "JSON of the properties of the Model Source to update:<br>" +
                                                          OPEN_PRE_TAG +
                                                          OPEN_BRACE + BR +
-                                                         NBSP + "keng\\_\\_id: \"name of the VdbModelSource\"," + BR +
-                                                         NBSP + "keng\\_\\_dataPath: \"path of VdbModelSource to update\"," + BR +
+                                                         NBSP + "keng\\_\\_id: \"name of the VdbModelSource\"" + COMMA + BR +
+                                                         NBSP + "keng\\_\\_dataPath: \"path of VdbModelSource to update\"" + COMMA + BR +
                                                          NBSP + OPEN_PRE_CMT + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\\\{modelName\\}\\vdb:sources\\\\{sourceName\\}\")" + CLOSE_PRE_CMT + BR +
-                                                         NBSP + "keng\\_\\_kType: \"VdbModelSource\"," + BR +
-                                                         NBSP + "vdb\\_\\_sourceJndiName: \"the jndi name\"," + BR +
+                                                         NBSP + "keng\\_\\_kType: \"VdbModelSource\"" + COMMA + BR +
+                                                         NBSP + "vdb\\_\\_sourceJndiName: \"the jndi name\"" + COMMA + BR +
                                                          NBSP + "vdb\\_\\_sourceTranslator: \"the translator name\"" + BR +
                                                          CLOSE_BRACE +
                                                          CLOSE_PRE_TAG,

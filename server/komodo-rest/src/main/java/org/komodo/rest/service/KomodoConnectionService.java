@@ -302,9 +302,9 @@ public final class KomodoConnectionService extends KomodoService {
                                                         "JSON of the properties of the new connection:<br>" +
                                                         OPEN_PRE_TAG +
                                                         OPEN_BRACE + BR +
-                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + BR +
-                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
-                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + BR +
+                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + COMMA + BR +
+                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + COMMA + BR +
+                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + COMMA + BR +
                                                         NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
                                                         CLOSE_BRACE +
                                                         CLOSE_PRE_TAG,
@@ -493,9 +493,9 @@ public final class KomodoConnectionService extends KomodoService {
                                                         "JSON of the properties of the connection:<br>" +
                                                         OPEN_PRE_TAG +
                                                         OPEN_BRACE + BR +
-                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + BR +
-                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + BR +
-                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + BR +
+                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + COMMA + BR +
+                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + COMMA + BR +
+                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + COMMA + BR +
                                                         NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
                                                         CLOSE_BRACE +
                                                         CLOSE_PRE_TAG,
