@@ -652,23 +652,29 @@ public class KomodoTeiidService extends KomodoService {
 
             uow = createTransaction(principal, "teiidSetCredentials", false); //$NON-NLS-1$
 
-            if (teiidAttrs.getAdminUser() != null)
-                teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
+            String adminUser = teiidAttrs.getAdminUser();
+            if (adminUser != null && ! adminUser.equals(teiidNode.getAdminUser(uow)))
+                teiidNode.setAdminUser(uow, adminUser);
 
-            if (teiidAttrs.getAdminPasswd() != null)
-                teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());
+            String adminPasswd = teiidAttrs.getAdminPasswd();
+            if (adminPasswd != null && ! adminPasswd.equals(teiidNode.getAdminPassword(uow)))
+                teiidNode.setAdminPassword(uow, adminPasswd);
 
-            if (teiidAttrs.isAdminSecure() != null)
-                teiidNode.setAdminSecure(uow, teiidAttrs.isAdminSecure());
+            Boolean adminSecure = teiidAttrs.isAdminSecure();
+            if (adminSecure != null && ! adminSecure.equals(teiidNode.isAdminSecure(uow)))
+                teiidNode.setAdminSecure(uow, adminSecure);
 
-            if (teiidAttrs.getJdbcUser() != null)
-                teiidNode.setJdbcUsername(uow, teiidAttrs.getJdbcUser());
+            String jdbcUser = teiidAttrs.getJdbcUser();
+            if (jdbcUser != null && ! jdbcUser.equals(teiidNode.getJdbcUsername(uow)))
+                teiidNode.setJdbcUsername(uow, jdbcUser);
 
-            if (teiidAttrs.getJdbcPasswd() != null)
-                teiidNode.setJdbcPassword(uow, teiidAttrs.getJdbcPasswd());
+            String jdbcPasswd = teiidAttrs.getJdbcPasswd();
+            if (jdbcPasswd != null && ! jdbcPasswd.equals(teiidNode.getJdbcPassword(uow)))
+                teiidNode.setJdbcPassword(uow, jdbcPasswd);
 
-            if (teiidAttrs.isJdbcSecure() != null)
-                teiidNode.setJdbcSecure(uow, teiidAttrs.isJdbcSecure());
+            Boolean jdbcSecure = teiidAttrs.isJdbcSecure();
+            if (teiidAttrs.isJdbcSecure() != null && ! jdbcSecure.equals(teiidNode.isJdbcSecure(uow)))
+                teiidNode.setJdbcSecure(uow, jdbcSecure);
 
             RestBasicEntity teiidEntity = entityFactory.create(teiidNode, uriInfo.getBaseUri(), uow);
             return commit(uow, mediaTypes, teiidEntity);
