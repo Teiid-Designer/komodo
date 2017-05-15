@@ -64,7 +64,7 @@
 		<version.javax.jacc>1.0.0.Final</version.javax.jacc>
 		<version.joda.time>2.7</version.joda.time>
 		<version.mapdb>1.0.6</version.mapdb>
-		<version.tika>1.8</version.tika>
+		<version.tika>1.14</version.tika>
 		<version.apache.commons.compress>1.9</version.apache.commons.compress>
 		<version.log4j>1.2.16</version.log4j>
 		<version.slf4j.log4j>1.7.2</version.slf4j.log4j>
