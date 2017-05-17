@@ -266,6 +266,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
         LOGGER.debug("commit session for request {0}", commitRequest.getName()); //$NON-NLS-1$
 
+        KSequencerListener sequencerListener = null;
         try {
             //
             // Only bother to save if we actually have changes to save
@@ -284,7 +285,9 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             // then attach a listener to the sequencers controller class, which will be responsible
             // for responding to the callback and finalising the session.
             //
-            KSequencerListener sequencerListener = new KSequencerListener() {
+            sequencerListener = new KSequencerListener() {
+
+                private boolean aborted = false;
 
                 @Override
                 public String id() {
@@ -300,6 +303,15 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                 public void sequencingCompleted() {
                     LOGGER.debug("Sequencers completed. Calling request callback"); //$NON-NLS-1$
                     try {
+                        if (aborted) {
+                            //
+                            // Sequencing listener told to abort regardless of the sequencing completion
+                            // Should occur only if parent tx has thrown an exception and it will take care
+                            // of informing the callback.
+                            //
+                            return;
+                        }
+
                         respondCallback(request, null);
                     } finally {
                         logoutSession(session);
@@ -315,6 +327,11 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                         logoutSession(session);
                     }
                 }
+
+                @Override
+                public void abort() {
+                    this.aborted = true;
+                }
             };
 
             sequencers.addSequencerListener(sequencerListener);
@@ -326,17 +343,18 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
             LOGGER.debug("commit session request {0} has been saved", commitRequest.getName()); //$NON-NLS-1$
 
-        } catch (final Exception e) {
-            request.requestType = RequestType.ROLLBACK_SESSION;
-            rollbackSession(request);
-
-            if (request.getCallback() == null) {
-                LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_COMMIT, e, commitRequest.getName()));
-            } else {
-                request.getCallback().errorOccurred(e);
+        } catch (final Throwable e) {
+            if (sequencerListener != null) {
+                //
+                // Want to rollback session rather than respond normally
+                // so signal to listener to abort
+                //
+                sequencerListener.abort();
             }
 
-            logoutSession(session);
+            request.requestType = RequestType.ROLLBACK_SESSION;
+            LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_COMMIT, e, commitRequest.getName()));
+            rollbackSession(request, e);
         }
     }
 
@@ -355,7 +373,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
         return this.error;
     }
 
-    private synchronized void rollbackSession( final Request request ) {
+    private synchronized void rollbackSession( final Request request, Throwable error) {
         ArgCheck.isTrue(request.getRequestType() == RequestType.ROLLBACK_SESSION,
                         "rollbackSession called when request is not a rollback session"); //$NON-NLS-1$
         final SessionRequest rollbackRequest = (SessionRequest)request;
@@ -366,7 +384,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             if (session.isLive()) session.refresh(false);
             LOGGER.debug("rollback session request {0} has been rolled back", rollbackRequest.getName()); //$NON-NLS-1$
 
-            respondCallback(request, null);
+            errorCallback(request, error);
 
         } catch (final Exception e) {
             LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, rollbackRequest.getName()));
@@ -657,7 +675,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                         commitSession(request);
                         break;
                     case ROLLBACK_SESSION:
-                        rollbackSession(request);
+                        rollbackSession(request, new Exception(Messages.getString(Messages.LocalRepository.General_Exception)));
                         break;
                     default:
                         break;
