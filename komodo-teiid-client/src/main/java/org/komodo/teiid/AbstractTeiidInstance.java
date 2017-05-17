@@ -449,17 +449,20 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
     public Outcome ping(ConnectivityType connectivityType) {
         try {
             boolean testCausesConnect = false;
+            String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, getTeiidAdminInfo().getUsername());
 
             if (! isCoherent()) {
-                connect();
-                testCausesConnect = true;
+                try {
+                    connect();
+                    testCausesConnect = true;
+                } catch (Exception ex) {
+                    return OutcomeFactory.getInstance().createError(msg, ex);
+                }
             }
 
             Outcome outcome = null;
-
-            String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, getTeiidAdminInfo().getUsername());
             if (! isCoherent())
-                throw new Exception(msg);
+                return OutcomeFactory.getInstance().createError(msg);
 
             switch (connectivityType) {
                 case JDBC:

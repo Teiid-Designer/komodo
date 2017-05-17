@@ -155,6 +155,14 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
     @Override
     protected Outcome pingAdmin() throws Exception {
+        if (admin == null) {
+            try {
+                connect();
+            } catch (Exception ex) {
+                return OutcomeFactory.getInstance().createError(ex.getLocalizedMessage(), ex);
+            }
+        }
+
         admin.getSessions();
         return OutcomeFactory.getInstance().createOK();
     }
