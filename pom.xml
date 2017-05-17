@@ -65,7 +65,7 @@
 		<version.joda.time>2.7</version.joda.time>
 		<version.mapdb>1.0.6</version.mapdb>
 		<version.tika>1.14</version.tika>
-		<version.apache.commons.compress>1.9</version.apache.commons.compress>
+		<version.apache.commons.compress>1.12</version.apache.commons.compress>
 		<version.log4j>1.2.16</version.log4j>
 		<version.slf4j.log4j>1.7.2</version.slf4j.log4j>
 	</properties>
