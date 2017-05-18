@@ -426,10 +426,10 @@
       "keng__repeatable": "true",
       "keng__limit": "-1"
     },
-    "datasource": {
-      "keng__id": "datasource",
-      "keng__kType": "Datasource",
-      "keng__description": "Describes the configuration for a datasource",
+    "connection": {
+      "keng__id": "connection",
+      "keng__kType": "Connection",
+      "keng__description": "Describes the configuration for a connection",
       "keng__properties": {
         "dv__jndiName": {
           "keng__type": "string",
