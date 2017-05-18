@@ -470,7 +470,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertThat(entity, is(notNullValue()));
 
         System.out.println("Response:\n" + entity);
-        assertTrue(entity.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+        assertTrue(entity.contains("<?xml version="));
+        assertTrue(entity.contains("encoding="));
         assertTrue(entity.contains("<vdb name=\"Portfolio\" version=\"1\">"));
         assertTrue(entity.contains("</vdb>"));
     }

@@ -384,7 +384,10 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             if (session.isLive()) session.refresh(false);
             LOGGER.debug("rollback session request {0} has been rolled back", rollbackRequest.getName()); //$NON-NLS-1$
 
-            errorCallback(request, error);
+            if (error != null)
+                errorCallback(request, error);
+            else
+                respondCallback(request, null);
 
         } catch (final Exception e) {
             LOGGER.error(Messages.getString(Messages.Komodo.ERROR_TRYING_TO_ROLLBACK, e, rollbackRequest.getName()));
@@ -675,7 +678,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                         commitSession(request);
                         break;
                     case ROLLBACK_SESSION:
-                        rollbackSession(request, new Exception(Messages.getString(Messages.LocalRepository.General_Exception)));
+                        rollbackSession(request, null);
                         break;
                     default:
                         break;
