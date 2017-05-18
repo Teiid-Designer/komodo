@@ -536,11 +536,13 @@ public final class KomodoDataserviceService extends KomodoService {
             // get the source dataservice
             final KomodoObject kobject = getWorkspaceManager(uow1).getChild( uow1, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE );
             final Dataservice srcDataservice = getWorkspaceManager(uow1).resolve( uow1, kobject, Dataservice.class );
+            String srcDescription = srcDataservice.getDescription(uow1);
             // Get the service Vdb from the source dataservice
             Vdb srcServiceVdb = srcDataservice.getServiceVdb(uow1);
                         
             // Create the new dataservice by cloning the source dataservice
             final Dataservice newDataservice = getWorkspaceManager(uow1).createDataservice( uow1, null, newDataserviceName);
+            newDataservice.setDescription(uow1, srcDescription);
             newDataservice.setServiceVdb(uow1, null);
             String tgtServiceVdbName = newDataserviceName+SERVICE_VDB_SUFFIX;
             if(getWorkspaceManager(uow1).hasChild(uow1, tgtServiceVdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
