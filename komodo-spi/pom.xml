@@ -5,7 +5,7 @@
 		<groupId>org.komodo</groupId>
 		<!-- Depend on parent to avoid dragging in modeshape dependencies -->
 		<artifactId>komodo-parent</artifactId>
-		<version>1.0</version>
+		<version>1.0.0</version>
 		<relativePath>../komodo-parent</relativePath>
 	</parent>
 	<artifactId>komodo-spi</artifactId>
