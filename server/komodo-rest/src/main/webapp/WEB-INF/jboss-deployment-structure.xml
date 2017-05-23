@@ -7,5 +7,10 @@
 		<exclude-subsystems>
 			<subsystem name="logging" />
 		</exclude-subsystems>
+		<exclusions>
+			<module name="org.apache.tika" />
+			<module name="org.modeshape" />
+			<module name="org.modeshape.extractor.tika" />
+		</exclusions>
 	</deployment>
 </jboss-deployment-structure>

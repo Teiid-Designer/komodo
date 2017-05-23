@@ -23,16 +23,13 @@ package org.komodo.relational;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.relational.internal.TypeResolverRegistry;
-import org.komodo.shell.ShellI18n;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.utils.TextFormat;
 import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.KLog;
-import org.komodo.utils.i18n.I18n;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
@@ -153,7 +150,7 @@ public class RelationalLabelProvider extends DefaultLabelProvider {
                 }
             }
         } catch ( KException e ) {
-            KLog.getLogger().error( I18n.bind( ShellI18n.internalError ), e );
+            KLog.getLogger().error(e.getLocalizedMessage(), e);
         }
 
         return null;

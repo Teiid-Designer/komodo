@@ -476,11 +476,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Error messages - expect parser error
         List<String> errorMessages = importMessages.getErrorMessages();
         assertEquals(1, errorMessages.size());
-
-        String expErrorMsg = "ParseError at [row,col]:[8,9]" + NEW_LINE +
-                                          "Message: Element type \"model\" must be followed by either attribute " +
-                                          "specifications, \">\" or \"/>\".";
-        assertEquals(expErrorMsg, errorMessages.get(0));
     }
 
     @Test
