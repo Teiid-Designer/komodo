@@ -15,6 +15,7 @@
 
 	<properties>
 		<version.gson>2.2.4</version.gson>
+		<version.apache.commons.codec>1.10</version.apache.commons.codec>
 		<version.guava>16.0.1</version.guava>
 		<version.swagger>1.5.0</version.swagger>
 		<version.jaxrs>2.13</version.jaxrs>
@@ -243,6 +244,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${version.apache.commons.codec}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.sun.xsom</groupId>
 				<artifactId>xsom</artifactId>
 				<version>${version.xsom}</version>
@@ -338,6 +344,44 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<!-- Have a conflict with tika-parser's dependency javax.ws.rs-api-2.0-m10 so must comes first in the classpath -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson-provider</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parsers</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.modeshape</groupId>
+			<artifactId>modeshape-extractor-tika</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.modeshape</groupId>
+			<artifactId>modeshape-jcr</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging</artifactId>
@@ -371,16 +415,6 @@
 		<dependency>
 			<groupId>org.jboss.teiid</groupId>
 			<artifactId>teiid-client</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson-provider</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

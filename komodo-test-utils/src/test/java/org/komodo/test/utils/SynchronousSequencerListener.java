@@ -107,4 +107,9 @@ public class SynchronousSequencerListener implements KSequencerListener {
     public Exception exception() {
         return sequencerException;
     }
+
+    @Override
+    public void abort() {
+        throw new UnsupportedOperationException();
+    }
 }

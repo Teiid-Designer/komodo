@@ -402,7 +402,7 @@ public final class KomodoDataserviceService extends KomodoService {
                                                          "JSON of the properties of the new data service:<br>" +
                                                          OPEN_PRE_TAG +
                                                          OPEN_BRACE + BR +
-                                                         NBSP + "keng\\_\\_id: \"id of the data service\"" + BR +
+                                                         NBSP + "keng\\_\\_id: \"id of the data service\"" + COMMA + BR +
                                                          NBSP + OPEN_PRE_CMT + "(identical to dataserviceName parameter)" + CLOSE_PRE_CMT + BR + BR +
                                                          NBSP + "tko__description: \"the description\"" + BR +
                                                          CLOSE_BRACE +
@@ -669,10 +669,10 @@ public final class KomodoDataserviceService extends KomodoService {
                               "JSON specifying the service vdb:<br>" +
                               OPEN_PRE_TAG +
                               OPEN_BRACE + BR +
-                              NBSP + "dataserviceName: \"name of the data service\"" + BR +
-                              NBSP + "tablePath: \"/path/to/table\"" + BR +
-                              NBSP + "modelSourcePath: \"/path/to/modelSource\"" + BR +
-                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                              NBSP + "dataserviceName: \"name of the data service\"" + COMMA + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + COMMA + BR +
+                              NBSP + "modelSourcePath: \"/path/to/modelSource\"" + COMMA + BR +
+                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + COMMA + BR +
                               NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + BR +
                               CLOSE_BRACE +
                               CLOSE_PRE_TAG,
@@ -849,10 +849,10 @@ public final class KomodoDataserviceService extends KomodoService {
                                                                        "JSON parameters:<br>" +
                                                                        OPEN_PRE_TAG +
                                                                        OPEN_BRACE + BR +
-                                                                       NBSP + "dataserviceName: \"name of the data service\"" + BR +
-                                                                       NBSP + "tablePath: \"/path/to/table\"" + BR +
-                                                                       NBSP + "modelSourcePath: \"/path/to/modelSource\"" + BR +
-                                                                       NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
+                                                                       NBSP + "dataserviceName: \"name of the data service\"" + COMMA + BR +
+                                                                       NBSP + "tablePath: \"/path/to/table\"" + COMMA + BR +
+                                                                       NBSP + "modelSourcePath: \"/path/to/modelSource\"" + COMMA + BR +
+                                                                       NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + COMMA + BR +
                                                                        NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + BR +
                                                                        CLOSE_BRACE +
                                                                        CLOSE_PRE_TAG,
@@ -961,15 +961,15 @@ public final class KomodoDataserviceService extends KomodoService {
                               "JSON parameters:<br>" +
                               OPEN_PRE_TAG +
                               OPEN_BRACE + BR +
-                              NBSP + "dataserviceName: \"name of the data service\"" + BR +
-                              NBSP + "tablePath: \"/path/to/table\"" + BR +
-                              NBSP + "rhTablePath: \"/path/to/table\"" + BR +
-                              NBSP + "modelSourcePath: \"/path/to/modelSource\"" + BR +
-                              NBSP + "rhModelSourcePath: \"/path/to/modelSource\"" + BR +
-                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
-                              NBSP + "rhColumnNames: {name1, name2, ...} [OPTIONAL]" + BR +
-                              NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + BR +
-                              NBSP + "joinType: \"Type of join\"" + BR +
+                              NBSP + "dataserviceName: \"name of the data service\"" + COMMA + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + COMMA + BR +
+                              NBSP + "rhTablePath: \"/path/to/table\"" + COMMA + BR +
+                              NBSP + "modelSourcePath: \"/path/to/modelSource\"" + COMMA + BR +
+                              NBSP + "rhModelSourcePath: \"/path/to/modelSource\"" + COMMA + BR +
+                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + COMMA + BR +
+                              NBSP + "rhColumnNames: {name1, name2, ...} [OPTIONAL]" + COMMA + BR +
+                              NBSP + "viewDdl: \"DDL for the service view\" [OPTIONAL]" + COMMA + BR +
+                              NBSP + "joinType: \"Type of join\"" + COMMA + BR +
                               NBSP + "criteriaPredicates: []" + BR +
                               CLOSE_BRACE +
                               CLOSE_PRE_TAG,
@@ -1235,12 +1235,12 @@ public final class KomodoDataserviceService extends KomodoService {
                               "JSON parameters:<br>" +
                               OPEN_PRE_TAG +
                               OPEN_BRACE + BR +
-                              NBSP + "dataserviceName: \"name of the data service\"" + BR +
-                              NBSP + "tablePath: \"/path/to/table\"" + BR +
-                              NBSP + "rhTablePath: \"/path/to/table\"" + BR +
-                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + BR +
-                              NBSP + "rhColumnNames: {name1, name2, ...} [OPTIONAL]" + BR +
-                              NBSP + "joinType: \"Type of join\"" + BR +
+                              NBSP + "dataserviceName: \"name of the data service\"" + COMMA + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + COMMA + BR +
+                              NBSP + "rhTablePath: \"/path/to/table\"" + COMMA + BR +
+                              NBSP + "columnNames: {name1, name2, ...} [OPTIONAL]" + COMMA + BR +
+                              NBSP + "rhColumnNames: {name1, name2, ...} [OPTIONAL]" + COMMA + BR +
+                              NBSP + "joinType: \"Type of join\"" + COMMA + BR +
                               NBSP + "criteriaPredicates: []" + BR +
                               CLOSE_BRACE +
                               CLOSE_PRE_TAG,
@@ -1383,8 +1383,8 @@ public final class KomodoDataserviceService extends KomodoService {
                               "JSON parameters:<br>" +
                               OPEN_PRE_TAG +
                               OPEN_BRACE + BR +
-                              NBSP + "tablePath: \"/path/to/table\"" + BR +
-                              NBSP + "rhTablePath: \"/path/to/table\"" + BR +
+                              NBSP + "tablePath: \"/path/to/table\"" + COMMA + BR +
+                              NBSP + "rhTablePath: \"/path/to/table\"" + COMMA + BR +
                               CLOSE_BRACE +
                               CLOSE_PRE_TAG,
                       required = true
@@ -1492,7 +1492,7 @@ public final class KomodoDataserviceService extends KomodoService {
                                                          "JSON of the data service properties to update:<br>" +
                                                          OPEN_PRE_TAG +
                                                          OPEN_BRACE + BR +
-                                                         NBSP + "keng\\_\\_id: \"id of the data service\"" + BR +
+                                                         NBSP + "keng\\_\\_id: \"id of the data service\"" + COMMA + BR +
                                                          NBSP + OPEN_PRE_CMT + "(identical to dataserviceName parameter)" + CLOSE_PRE_CMT + BR + BR +
                                                          NBSP + "tko__description: \"the description\"" + BR +
                                                          CLOSE_BRACE +

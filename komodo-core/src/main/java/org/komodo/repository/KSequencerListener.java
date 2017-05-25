@@ -53,4 +53,9 @@ public interface KSequencerListener {
      */
     void sequencingError(Exception exception);
 
+    /**
+     * Called to abort the listener operation if an error has occurred in
+     * the parent transaction
+     */
+    void abort();
 }

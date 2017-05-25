@@ -323,18 +323,18 @@ public final class KomodoSearchService extends KomodoService {
                                                "JSON of the possible search attributes:<br>" +
                                                OPEN_PRE_TAG +
                                                OPEN_BRACE + BR +
-                                               NBSP + "searchName: \"If specified, use the saved search of this name\"" + BR +
-                                               NBSP + "type: \"The type of object to search for (FROM type)\"" + BR +
-                                               NBSP + "parent: \"Limits search to directly beneath this object path\"" + BR +
-                                               NBSP + "ancestor: \"Limits search to descendents of this object path\"" + BR +
+                                               NBSP + "searchName: \"If specified, use the saved search of this name\"" + COMMA + BR +
+                                               NBSP + "type: \"The type of object to search for (FROM type)\"" + COMMA + BR +
+                                               NBSP + "parent: \"Limits search to directly beneath this object path\"" + COMMA + BR +
+                                               NBSP + "ancestor: \"Limits search to descendents of this object path\"" + COMMA + BR +
                                                NBSP + OPEN_PRE_CMT + "(parent and ancestor are mutually exclusive)" + CLOSE_PRE_CMT + BR +
-                                               NBSP + "path: \"Specifies path of the target object" + BR +
-                                               NBSP + "contain: \"Value that result properties will contain\"" + BR +
-                                               NBSP + "objectName: \"Value that result names will match\"" + BR +
+                                               NBSP + "path: \"Specifies path of the target object" + COMMA + BR +
+                                               NBSP + "contain: \"Value that result properties will contain\"" + COMMA + BR +
+                                               NBSP + "objectName: \"Value that result names will match\"" + COMMA + BR +
                                                NBSP + OPEN_PRE_CMT + "(Can be a wildcard using '%' symbol)" + CLOSE_PRE_CMT + BR +
-                                               NBSP + "Search parameters can be added to above keys" + BR +
-                                               NBSP + "by specifying them in braces {param1}." + BR +
-                                               NBSP + "Values of parameters can be included using" + BR +
+                                               NBSP + "Search parameters can be added to above keys" + COMMA + BR +
+                                               NBSP + "by specifying them in braces {param1}." + COMMA + BR +
+                                               NBSP + "Values of parameters can be included using" + COMMA + BR +
                                                NBSP + "key:value properties." + BR +
                                                NBSP + CLOSE_BRACE + BR +
                                                CLOSE_BRACE +
@@ -515,14 +515,14 @@ public final class KomodoSearchService extends KomodoService {
                                                "JSON of the search attributes:<br>" +
                                                OPEN_PRE_TAG +
                                                OPEN_BRACE + BR +
-                                               NBSP + "searchName: \"The name to save the search to\"" + BR +
-                                               NBSP + "type: \"The type of object to search for (FROM type)\"" + BR +
-                                               NBSP + "parent: \"Limits search to directly beneath this object path\"" + BR +
-                                               NBSP + "ancestor: \"Limits search to descendents of this object path\"" + BR +
+                                               NBSP + "searchName: \"The name to save the search to\"" + COMMA + BR +
+                                               NBSP + "type: \"The type of object to search for (FROM type)\"" + COMMA + BR +
+                                               NBSP + "parent: \"Limits search to directly beneath this object path\"" + COMMA + BR +
+                                               NBSP + "ancestor: \"Limits search to descendents of this object path\"" + COMMA + BR +
                                                NBSP + OPEN_PRE_CMT + "(parent and ancestor are mutually exclusive)" + CLOSE_PRE_CMT + BR +
-                                               NBSP + "path: \"Specifies path of the target object" + BR +
-                                               NBSP + "contain: \"Value that result properties will contain\"" + BR +
-                                               NBSP + "objectName: \"Value that result names will match\"" + BR +
+                                               NBSP + "path: \"Specifies path of the target object" + COMMA + BR +
+                                               NBSP + "contain: \"Value that result properties will contain\"" + COMMA + BR +
+                                               NBSP + "objectName: \"Value that result names will match\"" + COMMA + BR +
                                                NBSP + OPEN_PRE_CMT + "(Can be a wildcard using '%' symbol)" + CLOSE_PRE_CMT + BR +
                                                NBSP + "Search parameters can be added to above keys" + BR +
                                                NBSP + "by specifying them in braces {param1}." + BR +

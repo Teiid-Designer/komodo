@@ -419,8 +419,16 @@ public abstract class KomodoService implements V1Constants {
                            .build();
         }
 
-        final Throwable error = callback.error();
+        Throwable error = transaction.getError();
+        if ( error != null ) {
+            // callback was called because of an error condition
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, error.getLocalizedMessage());
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
+                            .entity(responseEntity)
+                            .build();
+        }
 
+        error = callback.error();
         if ( error != null ) {
          // callback was called because of an error condition
             Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, error.getLocalizedMessage());
@@ -527,13 +535,24 @@ public abstract class KomodoService implements V1Constants {
             return;
 
         UnitOfWorkListener callback = transaction.getCallback();
-        if (! (callback instanceof SynchronousCallback))
+        if (! (callback instanceof SynchronousCallback)) {
             return;
+        }
 
+        SynchronousCallback syncCallback = (SynchronousCallback) callback;
         try {
-            if (! ((SynchronousCallback) callback).await(3, TimeUnit.MINUTES)) {
+            if (! syncCallback.await(3, TimeUnit.MINUTES)) {
                 throw new CallbackTimeoutException();
             }
+
+            if (transaction.getError() != null) {
+                throw new KException(transaction.getError());
+            }
+
+            if (syncCallback.hasError()) {
+                throw new KException(syncCallback.error());
+            }
+
         } catch (Exception ex) {
             throw new KException(ex);
         }
