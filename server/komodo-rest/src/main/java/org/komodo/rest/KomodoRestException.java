@@ -31,6 +31,12 @@ public class KomodoRestException extends Exception implements StringConstants {
 
     private static final long serialVersionUID = 1L;
 
+    /*
+     * Possible for the toString() and getMessage() methods to
+     * end up in an infinite loop. Simple flag to avoid this.
+     */
+    private boolean stopOverflow;
+
     /**
      * @param message
      *        the error message (can be empty)
@@ -60,17 +66,29 @@ public class KomodoRestException extends Exception implements StringConstants {
 
     @Override
     public String toString() {
-        StringBuffer buf = new StringBuffer(super.toString())
-            .append(NEW_LINE)
-            .append(StringUtils.exceptionToString(this));
+        StringBuffer buf = new StringBuffer(super.toString());
+
+        if (! stopOverflow) {
+            stopOverflow = true;
+            buf.append(NEW_LINE)
+                    .append(StringUtils.exceptionToString(this));
+            stopOverflow = false;
+        }
+
         return buf.toString();
     }
 
     @Override
     public String getMessage() {
-        StringBuffer buf = new StringBuffer(super.getMessage())
-            .append(NEW_LINE)
-            .append(StringUtils.exceptionToString(this));
+        StringBuffer buf = new StringBuffer(super.getMessage());
+
+        if (! stopOverflow) {
+            stopOverflow = true;
+            buf.append(NEW_LINE)
+                    .append(StringUtils.exceptionToString(this));
+            stopOverflow = false;
+        }
+
         return buf.toString();
     }
 }

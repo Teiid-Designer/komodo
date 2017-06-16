@@ -40,6 +40,7 @@ import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertyPairPr
 import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertySerializer;
 import org.komodo.rest.relational.json.connection.ConnectionSchemaSerializer;
 import org.komodo.rest.relational.json.connection.ConnectionSerializer;
+import org.komodo.rest.relational.request.KomodoConnectionAttributes;
 import org.komodo.rest.relational.request.KomodoDataSourceJdbcTableAttributes;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
 import org.komodo.rest.relational.request.KomodoFileAttributes;
@@ -137,7 +138,8 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter(KomodoQueryAttribute.class, new QueryAttributeSerializer())
                                                   .registerTypeAdapter(RestQueryResult.class, new QueryResultSerializer())
                                                   .registerTypeAdapter(RestQueryColumn.class, new QueryColumnSerializer())
-                                                  .registerTypeAdapter(RestQueryRow.class, new QueryRowSerializer());
+                                                  .registerTypeAdapter(RestQueryRow.class, new QueryRowSerializer())
+                                                  .registerTypeAdapter(KomodoConnectionAttributes.class, new ConnectionAttributesSerializer());
 
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();

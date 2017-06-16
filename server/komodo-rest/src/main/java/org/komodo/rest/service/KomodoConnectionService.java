@@ -24,6 +24,7 @@ package org.komodo.rest.service;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -44,10 +45,12 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.request.KomodoConnectionAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -302,10 +305,12 @@ public final class KomodoConnectionService extends KomodoService {
                                                         "JSON of the properties of the new connection:<br>" +
                                                         OPEN_PRE_TAG +
                                                         OPEN_BRACE + BR +
-                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + COMMA + BR +
-                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + COMMA + BR +
-                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + COMMA + BR +
-                                                        NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
+                                                        NBSP + "driverName: \"name of the driver, eg. mysql\"" + COMMA + BR +
+                                                        NBSP + "jndiName: \"the jndi name of the connection\"" + COMMA + BR +
+                                                        NBSP + "jdbc: \"true if jdbc, otherwise false\"" + BR +
+                                                        NBSP + "parameters: " + OPEN_BRACE + BR +
+                                                        NBSP + NBSP + "property1...n: \"key/value pairs of properties applicable to connection" + BR +
+                                                        NBSP + CLOSE_BRACE + BR +
                                                         CLOSE_BRACE +
                                                         CLOSE_PRE_TAG,
                                                 required = true
@@ -325,21 +330,26 @@ public final class KomodoConnectionService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_CREATE_MISSING_NAME);
         }
 
-        final RestConnection restConnection = KomodoJsonMarshaller.unmarshall( connectionJson, RestConnection.class );
-        final String jsonConnectionName = restConnection.getId();
-        // Error if the name is missing from the supplied json body
-        if ( StringUtils.isBlank( jsonConnectionName ) ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_JSON_MISSING_NAME);
-        }
+        RestConnection restConnection = new RestConnection();
+        restConnection.setId(connectionName);
 
-        // Error if the name parameter is different than JSON name
-        final boolean namesMatch = connectionName.equals( jsonConnectionName );
-        if ( !namesMatch ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_SOURCE_NAME_ERROR, connectionName, jsonConnectionName);
+        final KomodoConnectionAttributes rcAttr;
+        try {
+            rcAttr = KomodoJsonMarshaller.unmarshall(connectionJson, KomodoConnectionAttributes.class);
+
+            restConnection.setDriverName(rcAttr.getDriver());
+            restConnection.setJndiName(rcAttr.getJndi());
+            restConnection.setJdbc(rcAttr.isJdbc());
+
+            for (Map.Entry<String, String> entry : rcAttr.getParameters().entrySet()) {
+                restConnection.addProperty(entry.getKey(), entry.getValue());
+            }
+
+        } catch (Exception ex) {
+            throw new KomodoRestException(ex);
         }
 
         UnitOfWork uow = null;
-
         try {
             uow = createTransaction(principal, "createConnection", false ); //$NON-NLS-1$
 
@@ -493,10 +503,12 @@ public final class KomodoConnectionService extends KomodoService {
                                                         "JSON of the properties of the connection:<br>" +
                                                         OPEN_PRE_TAG +
                                                         OPEN_BRACE + BR +
-                                                        NBSP + "keng\\_\\_id: \"id of the connection\"" + COMMA + BR +
-                                                        NBSP + "dv\\_\\_driverName: \"name of the driver, eg. mysql\"" + COMMA + BR +
-                                                        NBSP + "dv\\_\\_jndiName: \"the jndi name of the connection\"" + COMMA + BR +
-                                                        NBSP + "dv\\_\\_type: \"true if jdbc, otherwise false\"" + BR +
+                                                        NBSP + "driverName: \"name of the driver, eg. mysql\"" + COMMA + BR +
+                                                        NBSP + "jndiName: \"the jndi name of the connection\"" + COMMA + BR +
+                                                        NBSP + "jdbc: \"true if jdbc, otherwise false\"" + BR +
+                                                        NBSP + "parameters: " + OPEN_BRACE + BR +
+                                                        NBSP + NBSP + "property1...n: \"key/value pairs of properties applicable to connection" + BR +
+                                                        NBSP + CLOSE_BRACE + BR +
                                                         CLOSE_BRACE +
                                                         CLOSE_PRE_TAG,
                                                 required = true
@@ -516,11 +528,23 @@ public final class KomodoConnectionService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_UPDATE_MISSING_NAME);
         }
 
-        final RestConnection restConnection = KomodoJsonMarshaller.unmarshall( connectionJson, RestConnection.class );
-        final String jsonConnectionName = restConnection.getId();
-        // Error if the name is missing from the supplied json body
-        if ( StringUtils.isBlank( jsonConnectionName ) ) {
-            return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.CONNECTION_SERVICE_JSON_MISSING_NAME);
+        RestConnection restConnection = new RestConnection();
+        restConnection.setId(connectionName);
+
+        final KomodoConnectionAttributes rcAttr;
+        try {
+            rcAttr = KomodoJsonMarshaller.unmarshall(connectionJson, KomodoConnectionAttributes.class);
+
+            restConnection.setDriverName(rcAttr.getDriver());
+            restConnection.setJndiName(rcAttr.getJndi());
+            restConnection.setJdbc(rcAttr.isJdbc());
+
+            for (Map.Entry<String, String> entry : rcAttr.getParameters().entrySet()) {
+                restConnection.addProperty(entry.getKey(), entry.getValue());
+            }
+
+        } catch (Exception ex) {
+            throw new KomodoRestException(ex);
         }
 
         UnitOfWork uow = null;
@@ -535,21 +559,12 @@ public final class KomodoConnectionService extends KomodoService {
 
             // must be an update
             final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, connectionName, DataVirtLexicon.Connection.NODE_TYPE );
-            final Connection connection = getWorkspaceManager(uow).resolve( uow, kobject, Connection.class );
+            getWorkspaceManager(uow).delete(uow, kobject);
 
-            // Transfers the properties from the rest object to the created komodo service.
-            setProperties(uow, connection, restConnection);
+            Response response = doAddConnection( uow, uriInfo.getBaseUri(), mediaTypes, restConnection );
 
-            // rename if names did not match
-            final boolean namesMatch = connectionName.equals( jsonConnectionName );
-            if ( !namesMatch ) {
-                connection.rename( uow, jsonConnectionName );
-            }
+            LOGGER.debug("updateConnection: connection '{0}' entity was updated", connectionName); //$NON-NLS-1$
 
-            KomodoProperties properties = new KomodoProperties();
-            final RestConnection entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow, properties);
-            LOGGER.debug("updateConnection: connection '{0}' entity was updated", connection.getName(uow)); //$NON-NLS-1$
-            final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
             return response;
         } catch (final Exception e) {
             if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
@@ -618,6 +633,12 @@ public final class KomodoConnectionService extends KomodoService {
         // jdbc
         if ( newJdbc != oldJdbc ) {
             connection.setJdbc( uow, newJdbc );
+        }
+
+        // Additional properties
+        List<RestProperty> properties = restConnection.getProperties();
+        for (RestProperty property : properties) {
+            connection.setProperty(uow, property.getName(), property.getValue());
         }
     }
 
