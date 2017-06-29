@@ -129,6 +129,12 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
                     out.value(val);
                 }
                 out.endArray();
+            } else if (value instanceof Object[]) {
+                out.beginArray();
+                for (Object val: (Object[]) value) {
+                    out.value(val.toString());
+                }
+                out.endArray();
             } else
                 out.value(value.toString());
         }

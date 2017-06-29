@@ -29,22 +29,6 @@ import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 
 public class ConnectionSchemaSerializerTest extends AbstractSerializerTest {
 
-    private static String q(String value) {
-        return SPEECH_MARK + value + SPEECH_MARK;
-    }
-
-    private static String colon() {
-        return COLON + SPACE;
-    }
-
-    private static String tab(int freq) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < freq; ++i)
-            buf.append(SPACE + SPACE);
-
-        return buf.toString();
-    }
-
     private static final String CONNECTION_SCHEMA = EMPTY_STRING +
         OPEN_BRACE + NEW_LINE +
             tab(1) + q("keng__id") + colon() +  q("connection") + COMMA + NEW_LINE +

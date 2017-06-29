@@ -67,6 +67,8 @@ import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.template.Template;
+import org.komodo.relational.template.TemplateEntry;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -81,6 +83,8 @@ import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.connection.RestConnectionJdbcInfo;
+import org.komodo.rest.relational.connection.RestTemplate;
+import org.komodo.rest.relational.connection.RestTemplateEntry;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataSourceJdbcTableAttributes;
 import org.komodo.rest.relational.request.KomodoFileAttributes;
@@ -3192,6 +3196,201 @@ public class KomodoTeiidService extends KomodoService {
             String driver = translatorNode.getAttributes().getNamedItem( ATTR_DRIVER ).getTextContent();
             String translator = translatorNode.getTextContent();
             driverTranslatorMap.put(driver, translator);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the connection templates available in teiid (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the Templates JSON document
+     */
+    @GET
+    @Path(V1Constants.TEMPLATES_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Display the collection of templates",
+                            response = RestTemplate[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnectionTemplates(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find templates
+            uow = createTransaction(principal, "getTemplates", true); //$NON-NLS-1$
+
+            Template[] templates = cachedTeiid.getTemplates(uow);
+            LOGGER.debug("getTemplates:found '{0}' Templates", templates.length); //$NON-NLS-1$
+
+            final List<RestTemplate> entities = new ArrayList<RestTemplate>();
+
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
+            for (final Template template : templates) {
+                RestTemplate entity = entityFactory.create(template, uriInfo.getBaseUri(), uow, properties);
+                entities.add(entity);
+                LOGGER.debug("getTemplates:Template '{0}' entity was constructed", template.getName(uow)); //$NON-NLS-1$
+            }
+
+            // create response
+            return commit(uow, mediaTypes, entities);
+        } catch (CallbackTimeoutException ex) {
+                return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TEMPLATES_ERROR);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the connection templates available in teiid (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the Templates JSON document
+     */
+    @GET
+    @Path(V1Constants.TEMPLATES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.TEMPLATE_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find connection template by name",
+                            response = RestTemplate.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No template could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnectionTemplate(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo,
+                                                   @ApiParam(value = "Name of the template", required = true)
+                                                    final @PathParam( "templateName" ) String templateName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find template
+            uow = createTransaction(principal, "getTemplates", true); //$NON-NLS-1$
+
+            Template template = cachedTeiid.getTemplate(uow, templateName);
+            if (template == null)
+                return commitNoTemplateFound(uow, mediaTypes, templateName);
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestTemplate restTemplate = entityFactory.create(template, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("getConnectionTemplate:Template '{0}' entity was constructed", template.getName(uow)); //$NON-NLS-1$
+            return commit( uow, mediaTypes, restTemplate );
+
+        } catch (CallbackTimeoutException ex) {
+                return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TEMPLATE_ERROR);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the entry properties available in a teiid template (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the TemplateEntry JSON document
+     */
+    @GET
+    @Path(V1Constants.TEMPLATES_SEGMENT + StringConstants.FORWARD_SLASH +
+                  V1Constants.TEMPLATE_PLACEHOLDER + StringConstants.FORWARD_SLASH + 
+                  V1Constants.TEMPLATE_ENTRIES_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find the template entries of the named template",
+                            response = RestTemplateEntry[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No template could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnectionTemplateEntries(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo,
+                                                   @ApiParam(value = "Name of the template", required = true)
+                                                    final @PathParam( "templateName" ) String templateName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find template
+            uow = createTransaction(principal, "getTemplateEntries", true); //$NON-NLS-1$
+
+            Template template = cachedTeiid.getTemplate(uow, templateName);
+            if (template == null)
+                return commitNoTemplateFound(uow, mediaTypes, templateName);
+
+            final List<RestTemplateEntry> entities = new ArrayList<RestTemplateEntry>();
+            TemplateEntry[] entries = template.getEntries(uow);
+            for (TemplateEntry entry : entries) {
+                KomodoProperties properties = new KomodoProperties();
+                RestTemplateEntry restEntry = entityFactory.create(entry, uriInfo.getBaseUri(), uow, properties);
+                entities.add(restEntry);
+            }
+
+            return commit(uow, mediaTypes, entities);
+
+        } catch (CallbackTimeoutException ex) {
+                return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TEMPLATE_ENTRIES_ERROR);
         }
     }
 }

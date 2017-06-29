@@ -27,6 +27,7 @@ import org.komodo.relational.TypeResolver;
 import org.komodo.relational.connection.Connection;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.internal.CachedTeiidImpl;
+import org.komodo.relational.template.Template;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.ObjectImpl;
@@ -63,6 +64,10 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      * The folder under which all cached drivers will be placed
      */
     String DRIVERS_FOLDER = "drivers";  //$NON-NLS-1$
+    /**
+     * The folder under which all cached templates will be placed
+     */
+    String TEMPLATES_FOLDER = "templates";  //$NON-NLS-1$
 
     /**
      * The type identifier.
@@ -204,6 +209,27 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
     Driver getDriver(final UnitOfWork transaction, String name) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the templates found on this teiid server (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Template[] getTemplates(UnitOfWork transaction, String... namePatterns) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name the template name
+     * @return the named template found on this teiid server or null
+     * @throws KException
+     *         if an error occurs
+     */
+    Template getTemplate(UnitOfWork transaction, String name) throws KException;
+
+    /**
      * Refresh VDBs with the supplied names
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
@@ -246,6 +272,17 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      *         if an error occurs
      */
     void refreshDrivers(final UnitOfWork transaction, TeiidInstance teiidInstance, String... driverNames) throws KException;
+
+    /**
+     * Refresh Templates with the supplied names
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance
+     * @param templateNames the template names
+     * @throws KException
+     *         if an error occurs
+     */
+    void refreshTemplates(final UnitOfWork transaction, TeiidInstance teiidInstance, String... templateNames) throws KException;
 
     /**
      * @param uow

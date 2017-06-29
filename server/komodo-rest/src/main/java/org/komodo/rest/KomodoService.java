@@ -613,6 +613,11 @@ public abstract class KomodoService implements V1Constants {
         return commit( uow, mediaTypes, new ResourceNotFound( connectionName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
+    protected Response commitNoTemplateFound(UnitOfWork uow, List<MediaType> mediaTypes, String templateName) throws Exception {
+        LOGGER.debug( "Template '{0}' was not found", templateName ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( templateName, Messages.getString( GET_OPERATION_NAME ) ) );
+    }
+
     protected Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {
         return commit(uow, mediaTypes,
                       new ResourceNotFound(uri(vdbName, MODELS_SEGMENT, modelName),

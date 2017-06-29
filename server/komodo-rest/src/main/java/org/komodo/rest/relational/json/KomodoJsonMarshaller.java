@@ -33,6 +33,8 @@ import org.komodo.rest.relational.connection.ConnectionSchemaPairProperty;
 import org.komodo.rest.relational.connection.ConnectionSchema;
 import org.komodo.rest.relational.connection.ConnectionSchemaProperty;
 import org.komodo.rest.relational.connection.RestConnection;
+import org.komodo.rest.relational.connection.RestTemplate;
+import org.komodo.rest.relational.connection.RestTemplateEntry;
 import org.komodo.rest.relational.dataservice.DataServiceSchema;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertyListSerializer;
@@ -40,6 +42,8 @@ import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertyPairPr
 import org.komodo.rest.relational.json.connection.ConnectionSchemaPropertySerializer;
 import org.komodo.rest.relational.json.connection.ConnectionSchemaSerializer;
 import org.komodo.rest.relational.json.connection.ConnectionSerializer;
+import org.komodo.rest.relational.json.connection.TemplateEntrySerializer;
+import org.komodo.rest.relational.json.connection.TemplateSerializer;
 import org.komodo.rest.relational.request.KomodoConnectionAttributes;
 import org.komodo.rest.relational.request.KomodoDataSourceJdbcTableAttributes;
 import org.komodo.rest.relational.request.KomodoDataserviceUpdateAttributes;
@@ -121,6 +125,8 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter(RestVdbTranslator.class, new VdbTranslatorSerializer())
                                                   .registerTypeAdapter(RestDataservice.class, new DataserviceSerializer())
                                                   .registerTypeAdapter(RestConnection.class, new ConnectionSerializer())
+                                                  .registerTypeAdapter(RestTemplate.class, new TemplateSerializer())
+                                                  .registerTypeAdapter(RestTemplateEntry.class, new TemplateEntrySerializer())
                                                   .registerTypeAdapter(RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>())
                                                   .registerTypeAdapter(RestTeiid.class, new TeiidSerializer())
                                                   .registerTypeAdapter(RestTeiidStatus.class, new TeiidStatusSerializer())

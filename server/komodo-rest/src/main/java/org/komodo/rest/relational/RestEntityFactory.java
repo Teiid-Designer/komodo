@@ -22,13 +22,14 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
-
 import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.template.Template;
+import org.komodo.relational.template.TemplateEntry;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
@@ -41,6 +42,8 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.relational.connection.RestConnection;
+import org.komodo.rest.relational.connection.RestTemplate;
+import org.komodo.rest.relational.connection.RestTemplateEntry;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.response.RestTeiid;
 import org.komodo.rest.relational.response.RestVdb;
@@ -122,6 +125,12 @@ public class RestEntityFactory implements V1Constants {
             case CONNECTION:
                 Connection connection = wsMgr.resolve(uow, kObject, Connection.class);
                 return (T) new RestConnection(baseUri, connection, uow);
+            case TEMPLATE:
+                Template template = wsMgr.resolve(uow, kObject, Template.class);
+                return (T) new RestTemplate(baseUri, template, uow);
+            case TEMPLATE_ENTRY:
+                TemplateEntry entry = wsMgr.resolve(uow, kObject, TemplateEntry.class);
+                return (T) new RestTemplateEntry(baseUri, entry, uow);
             case DATASERVICE:
                 Dataservice dataService = wsMgr.resolve(uow, kObject, Dataservice.class);
                 return (T) new RestDataservice(baseUri, dataService, false, uow);

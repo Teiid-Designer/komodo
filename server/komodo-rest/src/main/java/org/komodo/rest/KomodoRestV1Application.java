@@ -284,6 +284,31 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String CONNECTION_PLACEHOLDER = "{connectionName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for templates.
+         */
+        String TEMPLATES_SEGMENT = "templates"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a template.
+         */
+        String TEMPLATE_SEGMENT = "template"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific template id
+         */
+        String TEMPLATE_PLACEHOLDER = "{templateName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for template entries.
+         */
+        String TEMPLATE_ENTRIES_SEGMENT = "entries"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific template entry id
+         */
+        String TEMPLATE_ENTRY_PLACEHOLDER = "{templateEntryName}"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for a setting a dataservice's service vdb for single table view
          */
         String SERVICE_VDB_FOR_SINGLE_TABLE = "ServiceVdbForSingleTable"; //$NON-NLS-1$

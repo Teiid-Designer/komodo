@@ -491,7 +491,17 @@ public final class RelationalMessages {
          * An error indicating clone attempt failed because same name already exists
          */
         CONNECTION_SERVICE_CLONE_ALREADY_EXISTS,
-        
+
+        /**
+         * An error indicating a connection already exists
+         */
+        CONNECTION_SERVICE_NAME_EXISTS,
+
+        /**
+         * A message indicating an unexpected error occurred during name validation.
+         */
+        CONNECTION_SERVICE_NAME_VALIDATION_ERROR,
+
         /**
          * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.
          */
@@ -1142,11 +1152,26 @@ public final class RelationalMessages {
          */
         TEIID_SERVICE_GET_DATA_SOURCE_UNRECOGNISED_JDBC_SOURCE,
 
-           /**
+        /**
          * An error indicating update attempt failed
          */
         TEIID_SERVICE_UPDATE_ERROR,
-        
+
+        /**
+         * An error indicating the instance failed to get a data source template.
+         */
+        TEIID_SERVICE_GET_TEMPLATE_ERROR,
+
+        /**
+         * An error indicating the instance failed to get any data source templates.
+         */
+        TEIID_SERVICE_GET_TEMPLATES_ERROR,
+
+        /**
+         * An error indicating the instance failed to get any data source templates.
+         */
+        TEIID_SERVICE_GET_TEMPLATE_ENTRIES_ERROR,
+
         /**
          * The importexport service lacks at least one storage attribute
          */

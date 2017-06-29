@@ -21,6 +21,9 @@
  */
 package org.komodo.rest.service;
 
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_DATA_SOURCE_NAME_EXISTS;
+import static org.komodo.rest.relational.RelationalMessages.Error.CONNECTION_SERVICE_NAME_EXISTS;
+import static org.komodo.rest.relational.RelationalMessages.Error.CONNECTION_SERVICE_NAME_VALIDATION_ERROR;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.connection.Connection;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
@@ -57,6 +61,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import io.swagger.annotations.Api;
@@ -74,6 +79,8 @@ import io.swagger.annotations.ApiResponses;
 public final class KomodoConnectionService extends KomodoService {
 
     private static final int ALL_AVAILABLE = -1;
+
+    private static final StringNameValidator VALIDATOR = new StringNameValidator();
 
     /**
      * @param engine
@@ -707,4 +714,86 @@ public final class KomodoConnectionService extends KomodoService {
         }
     }
 
+    /**
+     * @param headers
+     *            the request headers (never <code>null</code>)
+     * @param uriInfo
+     *            the request URI information (never <code>null</code>)
+     * @param connectionName
+     *            the Connection name being validated (cannot be empty)
+     * @return the response (never <code>null</code>) with an entity that is
+     *         either an empty string, when the name is valid, or an error
+     *         message
+     * @throws KomodoRestException
+     *             if there is a problem validating the VDB name or constructing
+     *             the response
+     */
+    @GET
+    @Path( V1Constants.NAME_VALIDATION_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTION_PLACEHOLDER )
+    @Produces( { MediaType.TEXT_PLAIN } )
+    @ApiOperation( value = "Returns an error message if the Connection name is invalid" )
+    @ApiResponses( value = {
+            @ApiResponse( code = 400, message = "The URI cannot contain encoded slashes or backslashes." ),
+            @ApiResponse( code = 403, message = "An unexpected error has occurred." ),
+            @ApiResponse( code = 500, message = "The Connection name cannot be empty." )
+    } )
+    public Response validateConnectionName( final @Context HttpHeaders headers,
+                                     final @Context UriInfo uriInfo,
+                                     @ApiParam( value = "The Connection name being checked", required = true )
+                                     final @PathParam( "connectionName" ) String connectionName ) throws KomodoRestException {
+
+        final SecurityPrincipal principal = checkSecurityContext( headers );
+
+        if ( principal.hasErrorResponse() ) {
+            return principal.getErrorResponse();
+        }
+
+        final String errorMsg = VALIDATOR.checkValidName( connectionName );
+        
+        // a name validation error occurred
+        if ( errorMsg != null ) {
+            return Response.ok().entity( errorMsg ).build();
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( principal, "validateConnectionName", true ); //$NON-NLS-1$
+
+            // make sure an existing Connection does not have that name
+            final Connection connection = findConnection( uow, connectionName );
+
+            if ( connection == null ) {
+                // make sure an existing vdb does not have the same name
+                final Vdb ds = findVdb( uow, connectionName );
+
+                if ( ds == null ) {
+                    // name is valid
+                    return Response.ok().build();
+                }
+
+                // name is the same as an existing connection
+                return Response.ok()
+                               .entity( RelationalMessages.getString( VDB_DATA_SOURCE_NAME_EXISTS ) )
+                               .build();
+            }
+
+            // name is the same as an existing connection
+            return Response.ok()
+                           .entity( RelationalMessages.getString( CONNECTION_SERVICE_NAME_EXISTS ) )
+                           .build();
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden( headers.getAcceptableMediaTypes(), 
+                                                     e, 
+                                                     CONNECTION_SERVICE_NAME_VALIDATION_ERROR );
+        }
+    }
 }

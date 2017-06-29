@@ -30,6 +30,7 @@ import org.komodo.relational.model.internal.UserDefinedFunctionImplTest;
 import org.komodo.relational.model.internal.ViewImplTest;
 import org.komodo.relational.model.internal.VirtualProcedureImplTest;
 import org.komodo.relational.teiid.internal.TeiidImplTest;
+import org.komodo.relational.template.TeiidTemplatesTest;
 import org.komodo.relational.validation.VdbValidationTest;
 import org.komodo.relational.vdb.internal.ConditionImplTest;
 import org.komodo.relational.vdb.internal.DataRoleImplTest;
@@ -97,6 +98,7 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
 
     // Teiid
     TeiidImplTest.class,
+    TeiidTemplatesTest.class,
 
     // DDL
     SchemaImplTest.class,

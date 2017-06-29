@@ -26,6 +26,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -58,6 +59,22 @@ public abstract class AbstractSerializerTest implements JsonConstants {
 
     protected Repository repository;
 
+    protected static String q(String value) {
+        return SPEECH_MARK + value + SPEECH_MARK;
+    }
+
+    protected static String colon() {
+        return COLON + SPACE;
+    }
+
+    protected static String tab(int freq) {
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < freq; ++i)
+            buf.append(SPACE + SPACE);
+
+        return buf.toString();
+    }
+
     public AbstractSerializerTest() {
         super();
     }
@@ -78,7 +95,7 @@ public abstract class AbstractSerializerTest implements JsonConstants {
                                                   listener)).thenReturn(uow);
     }
 
-    protected <T extends KomodoObject> T mockObject(Class<T> mockClass, String name, String dataPath, KomodoType kType, boolean hasChildren) throws KException {
+    protected <T extends KomodoObject> T mockObject(Class<T> mockClass, String name, String dataPath, KomodoType kType, boolean hasChildren, String descriptorName) throws KException {
         T kObject = Mockito.mock(mockClass);
         Mockito.when(kObject.getName(transaction)).thenReturn(name);
         Mockito.when(kObject.getAbsolutePath()).thenReturn(dataPath);
@@ -86,6 +103,16 @@ public abstract class AbstractSerializerTest implements JsonConstants {
         Mockito.when(kObject.hasChildren(transaction)).thenReturn(hasChildren);
         Mockito.when(kObject.getRepository()).thenReturn(repository);
 
+        if (descriptorName != null) {
+            Descriptor primaryDescriptor = Mockito.mock(Descriptor.class);
+            Mockito.when(primaryDescriptor.getName()).thenReturn(descriptorName.toString());
+            Mockito.when(kObject.getPrimaryType(transaction)).thenReturn(primaryDescriptor);
+        }
+
         return kObject;
+    }
+
+    protected <T extends KomodoObject> T mockObject(Class<T> mockClass, String name, String dataPath, KomodoType kType, boolean hasChildren) throws KException {
+        return mockObject(mockClass, name, dataPath, kType, hasChildren, null);
     }
 }
