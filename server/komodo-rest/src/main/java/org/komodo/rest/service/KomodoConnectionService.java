@@ -61,7 +61,6 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import io.swagger.annotations.Api;
@@ -80,7 +79,6 @@ public final class KomodoConnectionService extends KomodoService {
 
     private static final int ALL_AVAILABLE = -1;
 
-    private static final StringNameValidator VALIDATOR = new StringNameValidator();
 
     /**
      * @param engine
@@ -725,7 +723,7 @@ public final class KomodoConnectionService extends KomodoService {
      *         either an empty string, when the name is valid, or an error
      *         message
      * @throws KomodoRestException
-     *             if there is a problem validating the VDB name or constructing
+     *             if there is a problem validating the name or constructing
      *             the response
      */
     @GET

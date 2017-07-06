@@ -22,6 +22,7 @@
 package org.komodo.rest.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.InputStream;
@@ -90,7 +91,7 @@ public final class IT_KomodoTeiidServiceDriverTests extends AbstractKomodoTeiidS
         assertEquals(title, status.getTitle());
         Map<String, String> attributes = status.getAttributes();
 
-        assertEquals(1, attributes.size());
+        assertFalse(attributes.isEmpty());
 
         String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED);
         assertEquals(deployMsg, attributes.values().iterator().next());

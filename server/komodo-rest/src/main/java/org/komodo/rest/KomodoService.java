@@ -61,6 +61,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -72,6 +73,8 @@ import com.google.gson.Gson;
 public abstract class KomodoService implements V1Constants {
 
     protected static final KLog LOGGER = KLog.getLogger();
+
+    protected static final StringNameValidator VALIDATOR = new StringNameValidator();
 
     /**
      * VDB properties for DSB

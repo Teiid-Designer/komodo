@@ -454,6 +454,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SAMPLE_DATA = "samples"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for validating a value
+         */
+        String VALIDATE_SEGMENT = "validate"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI for validation of the value
+         */
+        String VALIDATE_PLACEHOLDER = "{validateValue}"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for searching the workspace
          */
         String SEARCH_SEGMENT = "search"; //$NON-NLS-1$
