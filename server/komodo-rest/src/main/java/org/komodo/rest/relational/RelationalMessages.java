@@ -993,6 +993,22 @@ public final class RelationalMessages {
         TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR,
 
         /**
+         * An error indicating a workspace driver being deployed to teiid cannot be found due to
+         * a missing path property
+         */
+        TEIID_SERVICE_DRIVER_MISSING_PATH,
+
+        /**
+         * A driver cannot be found at the given path in the workspace
+         */
+        TEIID_SERVICE_NO_DRIVER_FOUND_IN_WKSP,
+
+        /**
+         * Cannot deploy a driver since one of its attributes is missing
+         */
+        TEIID_SERVICE_DRIVER_ATTRIBUTES_MISSING,
+
+        /**
          * An error indicating a teiid DataSource undeploy failure
          */
         TEIID_SERVICE_UNDEPLOY_DATA_SOURCE_ERROR,

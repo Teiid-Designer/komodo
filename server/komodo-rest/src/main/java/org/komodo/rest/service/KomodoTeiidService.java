@@ -256,6 +256,12 @@ public class KomodoTeiidService extends KomodoService {
 
             cachedTeiid.refreshDrivers(uow, teiidInstance, driverNames);
 
+            //
+            // Templates are dependent on which drivers are present
+            // so these should be refreshed as well
+            //
+            cachedTeiid.refreshTemplates(uow, teiidInstance);
+
             // Commit the transaction to allow the sequencers to run
             uow.commit();
 
@@ -1752,7 +1758,7 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param fileAttributes
+     * @param driverAttributes
      *        the file attributes (never <code>null</code>)
      * @return a JSON representation of the status (never <code>null</code>)
      * @throws KomodoRestException
@@ -1779,7 +1785,7 @@ public class KomodoTeiidService extends KomodoService {
                                                      CLOSE_PRE_TAG,
                                              required = true
                                    )
-                                   final String fileAttributes) throws KomodoRestException {
+                                   final String driverAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1789,47 +1795,83 @@ public class KomodoTeiidService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        KomodoFileAttributes kfa;
-        try {
-            kfa = KomodoJsonMarshaller.unmarshall(fileAttributes, KomodoFileAttributes.class);
-            Response response = checkFileAttributes(kfa, mediaTypes);
-            if (response.getStatus() != Status.OK.getStatusCode())
-                return response;
-
-        } catch (Exception ex) {
-            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
-        }
-
         UnitOfWork uow = null;
+        String driverName = null;
+        byte[] driverContent = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
-
             uow = createTransaction(principal, "deployTeiidDriver", false); //$NON-NLS-1$
 
-            byte[] content = decode(kfa.getContent());
+            if (driverAttributes.contains(KomodoPathAttribute.PATH_LABEL)) {
+                // Is a workspace path to a driver
+                try {
+                    KomodoPathAttribute kpa = KomodoJsonMarshaller.unmarshall(driverAttributes, KomodoPathAttribute.class);
+                    if (kpa.getPath() == null) {
+                        return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DRIVER_MISSING_PATH);
+                    }
+
+                    List<KomodoObject> results = this.repo.searchByPath(uow, kpa.getPath());
+                    if (results.size() == 0) {
+                        return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DRIVER_FOUND_IN_WKSP, kpa.getPath());
+                    }
+
+                    Driver driver = getWorkspaceManager(uow).resolve(uow, results.get(0), Driver.class);
+                    if (driver == null) {
+                        return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DRIVER_FOUND_IN_WKSP, kpa.getPath());
+                    }
+
+                    driverName = driver.getName(uow);
+                    driverContent = FileUtils.streamToByteArray(driver.getContent(uow));
+
+                } catch (Exception ex) {
+                    return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+                }
+
+            } else {
+                // Is a set of file attributes for file-based with content encoded
+                try {
+                    KomodoFileAttributes kfa = KomodoJsonMarshaller.unmarshall(driverAttributes, KomodoFileAttributes.class);
+                    Response response = checkFileAttributes(kfa, mediaTypes);
+                    if (response.getStatus() != Status.OK.getStatusCode())
+                        return response;
+
+                    driverName = kfa.getName();
+                    driverContent = decode(kfa.getContent());
+
+                } catch (Exception ex) {
+                    return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+                }
+            }
+
+            if (driverName == null || driverContent == null) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ATTRIBUTES_MISSING);
+            }
+
             String tempDir = FileUtils.tempDirectory();
-            String fileName = content.hashCode() + DOT + kfa.getName();
+            String fileName = driverContent.hashCode() + DOT + driverName;
             File driverFile = new File(tempDir, fileName);
+            FileUtils.write(driverContent, driverFile);
 
-            FileUtils.write(content, driverFile);
-
+            Teiid teiidNode = getDefaultTeiid();
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
-            teiidInstance.deployDriver(kfa.getName(), driverFile);
+            teiidInstance.deployDriver(driverName, driverFile);
 
             // Await the deployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             // Make sure Driver state is current in the cachedTeiid
-            refreshCachedDrivers(teiidNode, kfa.getName());
+            refreshCachedDrivers(teiidNode, driverName);
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (hasDataSourceDriver(kfa.getName(), teiidNode))
-                status.addAttribute(kfa.getName(),
+            status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
+
+            if (hasDataSourceDriver(driverName, teiidNode)) {
+                status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
+                status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED));
-            else
-                status.addAttribute(kfa.getName(),
+            } else
+                status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UPLOADED));
 
            return commit(uow, mediaTypes, status);
@@ -1843,7 +1885,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DRIVER_ERROR, kfa.getName());
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DRIVER_ERROR, driverName);
         }
     }
 

@@ -22,7 +22,6 @@
 package org.komodo.repository;
 
 import static org.komodo.repository.Messages.Komodo.ERROR_REPO_HAS_CHANGES;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,7 +31,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
@@ -43,7 +41,6 @@ import javax.jcr.ValueFactory;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
-
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Environment;
@@ -67,7 +64,6 @@ import org.komodo.spi.repository.ValidationManager;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.JcrSession;
-import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.JcrTools;
 
 /**
@@ -967,7 +963,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
-        searcher.setFromType(JcrConstants.NT_UNSTRUCTURED, typeAlias);
+        searcher.setFromType("nt:base", typeAlias);
         searcher.addWherePathClause(null, typeAlias, path);
 
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
