@@ -38,6 +38,16 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 public interface Template extends RelationalObject {
 
     /**
+     * Connection factory class property key
+     */
+    String CONN_FACTORY_CLASS_KEY = "managedconnectionfactory-class";  //$NON-NLS-1$
+
+    /**
+     * Class name property key
+     */
+    String CLASSNAME_KEY = "class-name";  //$NON-NLS-1$
+
+    /**
      * The type identifier.
      */
     int TYPE_ID = Template.class.hashCode();
@@ -113,6 +123,14 @@ public interface Template extends RelationalObject {
      * @throws KException
      */
     String getId(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return 'true' if a JDBC source, 'false' if not.
+     * @throws KException if error occurs
+     */
+    boolean isJdbc(UnitOfWork transaction) throws KException;
 
     /**
      * @param transaction

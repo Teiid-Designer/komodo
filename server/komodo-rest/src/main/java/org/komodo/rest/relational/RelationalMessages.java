@@ -204,7 +204,17 @@ public final class RelationalMessages {
         /**
          * Vdb transfer to repo success
          */
-        VDB_TO_REPO_SUCCESS;
+        VDB_TO_REPO_SUCCESS,
+
+        /**
+         * Connection transfer to repo status title
+         */
+        CONNECTION_TO_REPO_STATUS_TITLE,
+
+        /**
+         * Connection transfer to repo success
+         */
+        CONNECTION_TO_REPO_SUCCESS;
 
         /**
          * {@inheritDoc}
@@ -501,6 +511,11 @@ public final class RelationalMessages {
          * A message indicating an unexpected error occurred during name validation.
          */
         CONNECTION_SERVICE_NAME_VALIDATION_ERROR,
+
+        /**
+         * Error transferring connections from server to repo
+         */
+        CONNECTION_TO_REPO_IMPORT_ERROR,
 
         /**
          * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.
@@ -1054,6 +1069,11 @@ public final class RelationalMessages {
         TEIID_SERVICE_NO_DATA_SOURCE_FOUND,
 
         /**
+         * No data source could be found while trying to deploy
+         */
+        TEIID_SERVICE_NO_CONNECTION_FOUND,
+
+        /**
          * No VDB could be found while trying to deploy
          */
         TEIID_SERVICE_NO_VDB_FOUND,
@@ -1167,6 +1187,11 @@ public final class RelationalMessages {
          * An error indicating the jdbc data source is not recognised.
          */
         TEIID_SERVICE_GET_DATA_SOURCE_UNRECOGNISED_JDBC_SOURCE,
+
+        /**
+         * An error indicating a connection could not be undeployed
+         */
+        TEIID_SERVICE_UNDEPLOY_CONNECTION_ERROR,
 
         /**
          * An error indicating update attempt failed

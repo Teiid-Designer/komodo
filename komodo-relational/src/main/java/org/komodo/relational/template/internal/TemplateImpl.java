@@ -95,6 +95,12 @@ public class TemplateImpl extends RelationalObjectImpl implements Template, Even
     }
 
     @Override
+    public boolean isJdbc(UnitOfWork uow) throws KException {
+        TemplateEntry[] entries = getEntries(uow, Template.CONN_FACTORY_CLASS_KEY);
+        return entries.length == 0;
+    }
+
+    @Override
     public TemplateEntry addEntry( final UnitOfWork transaction, final String entryName ) throws KException {
         return RelationalModelFactory.createTemplateEntry( transaction, getRepository(), this, entryName );
     }

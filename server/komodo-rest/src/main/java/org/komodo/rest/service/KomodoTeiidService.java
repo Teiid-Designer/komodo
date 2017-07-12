@@ -830,16 +830,16 @@ public class KomodoTeiidService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
         }
     }
-    
+
     /**
      * Copy a VDBs from the server into the workspace that are not present in the workspace 
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON representation of the new datasource (never <code>null</code>)
+     * @return a JSON representation of the status of the copy (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error creating the DataSource
+     *         if there is an error copying the vdbs
      */
     @POST
     @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VDBS_FROM_TEIID )
@@ -1326,28 +1326,36 @@ public class KomodoTeiidService extends KomodoService {
 
         UnitOfWork uow = null;
 
+        String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+        KomodoStatusObject status = new KomodoStatusObject(title);
+
         try {
             Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "removeConnection", false); //$NON-NLS-1$
 
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+
+            if (! teiidInstance.dataSourceExists(connectionName)) {
+                status.addAttribute(connectionName,
+                                    RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_NO_CONNECTION_FOUND, connectionName));
+                return commit(uow, mediaTypes, status);
+            }
+
             teiidInstance.deleteDataSource(connectionName);
 
             // Await the undeployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
-            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
-            KomodoStatusObject status = new KomodoStatusObject(title);
             if (! hasDataSource(connectionName, teiidNode)) {
                 // Make sure DataSource state is current in cachedTeiid
-                refreshCachedDataSources(teiidNode, connectionName);
+                refreshCachedDataSources(teiidNode);
 
                 status.addAttribute(connectionName,
-                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED));
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED, connectionName));
             } else
                 status.addAttribute(connectionName,
-                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_UNDEPLOYMENT_REQUEST_SENT));
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_UNDEPLOYMENT_REQUEST_SENT, connectionName));
 
            return commit(uow, mediaTypes, status);
 
@@ -1360,7 +1368,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, connectionName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_CONNECTION_ERROR, connectionName);
         }
     }
     
@@ -1686,6 +1694,96 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_TRANSLATOR_ERROR, connectionName);
+        }
+    }
+
+    /**
+     * Copy  connections from the server into the workspace that are not present in the workspace 
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON representation of the status of the copying (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error copying the connections
+     */
+    @POST
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTIONS_FROM_TEIID )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Copy Connections from the server into the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response copyConnectionsIntoRepo( final @Context HttpHeaders headers,
+                                      final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find Connections
+            uow = createTransaction(principal, "connectionsFromTeiid", false); //$NON-NLS-1$
+            Connection[] teiidConns = cachedTeiid.getConnections(uow);
+            
+            // Get current list of workspace Connections
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            Connection[] workspaceConns = mgr.findConnections( uow );
+            List<String> workspaceConnNames = new ArrayList<String>(workspaceConns.length);
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.CONNECTION_TO_REPO_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+
+            // Remove any connections that dont belong to user.  Compile list of remaining workspace connections
+            for(Connection workspaceConn : workspaceConns) {
+                // Connections not belonging to user are removed
+                if(workspaceConn.hasProperty(uow, DSB_PROP_SERVICE_SOURCE)) {
+                    String owner = workspaceConn.getProperty(uow, DSB_PROP_SERVICE_SOURCE).getStringValue(uow);
+                    if(! uow.getUserName().equals(owner)) {
+                        mgr.delete(uow, workspaceConn);
+                        continue;
+                    }
+                }
+
+                workspaceConnNames.add(workspaceConn.getName(uow));
+            }
+                
+            // Copy the teiid connection into the workspace, if no workspace connection with the same name
+            for(Connection teiidConn : teiidConns) {
+                String name = teiidConn.getName(uow);
+
+                if(workspaceConnNames.contains(name))
+                    continue;
+
+                final Connection connection = getWorkspaceManager(uow).createConnection( uow, null, name);
+                final RestConnection teiidConnEntity = entityFactory.create(teiidConn, uriInfo.getBaseUri(), uow);
+
+                setProperties(uow, connection, teiidConnEntity);
+            }
+
+            status.addAttribute("copyConnsToRepo", RelationalMessages.getString(RelationalMessages.Info.CONNECTION_TO_REPO_SUCCESS)); //$NON-NLS-1$
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_TO_REPO_IMPORT_ERROR);
         }
     }
 

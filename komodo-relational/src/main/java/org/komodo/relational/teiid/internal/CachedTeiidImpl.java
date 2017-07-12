@@ -1095,6 +1095,22 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
     }
 
     /*
+     * Get the default value for the Managed ConnectionFactory class
+     * @param propDefns the collection of property definitions
+     * @return default value of the ManagedConnectionFactory, null if not found.
+     */
+    private String getManagedConnectionFactoryClassDefault (Collection<TeiidPropertyDefinition> propDefns) {
+        String resultValue = null;
+        for(TeiidPropertyDefinition pDefn : propDefns) {
+            if(pDefn.getName().equalsIgnoreCase(Template.CONN_FACTORY_CLASS_KEY)) {
+                resultValue=(String)pDefn.getDefaultValue();
+                break;
+            }
+        }
+        return resultValue;
+    }
+
+    /*
      * Update cached Template with the supplied Template name.
      */
     private void updateTemplate(UnitOfWork transaction, KomodoObject templatesFolder, String templateName, Collection<TeiidPropertyDefinition> teiidTempProperties) throws KException {
@@ -1111,6 +1127,9 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         Template template = new TemplateImpl(transaction,
                                                        getRepository(),
                                                        kObject.getAbsolutePath());
+
+        // Get the Managed connection factory class for rars
+        String rarConnFactoryValue = getManagedConnectionFactoryClassDefault(teiidTempProperties);
 
         for (TeiidPropertyDefinition definition : teiidTempProperties) {
             KomodoObject kPropObject = template.addChild(transaction,
@@ -1141,6 +1160,13 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             property.setModifiable(transaction, definition.isModifiable());
             property.setRequired(transaction, definition.isRequired());
             property.setCustomProperties(transaction, definition.getProperties());
+
+            // Copy the 'managedconnectionfactory-class' default value into the 'class-name' default value
+            if(definition.getName().equals(Template.CLASSNAME_KEY)) {
+                property.setDefaultValue(transaction, rarConnFactoryValue);
+                property.setRequired(transaction, true);
+                property.setModifiable(transaction, false);
+            }
         }
     }
 }

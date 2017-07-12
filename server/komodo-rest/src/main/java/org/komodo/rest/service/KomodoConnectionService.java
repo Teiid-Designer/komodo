@@ -21,9 +21,9 @@
  */
 package org.komodo.rest.service;
 
-import static org.komodo.rest.relational.RelationalMessages.Error.VDB_DATA_SOURCE_NAME_EXISTS;
 import static org.komodo.rest.relational.RelationalMessages.Error.CONNECTION_SERVICE_NAME_EXISTS;
 import static org.komodo.rest.relational.RelationalMessages.Error.CONNECTION_SERVICE_NAME_VALIDATION_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_DATA_SOURCE_NAME_EXISTS;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,14 +49,12 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
-import org.komodo.rest.RestProperty;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoConnectionAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
-import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -612,38 +610,6 @@ public final class KomodoConnectionService extends KomodoService {
             }
 
             throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.CONNECTION_SERVICE_CREATE_CONNECTION_ERROR, connectionName ), e );
-        }
-    }
-
-    // Sets Connection properties using the supplied RestConnection object
-    private void setProperties(final UnitOfWork uow, Connection connection, RestConnection restConnection) throws KException {
-        // 'New' = requested RestConnection properties
-        String newJndiName = restConnection.getJndiName();
-        String newDriverName = restConnection.getDriverName();
-        boolean newJdbc = restConnection.isJdbc();
-        
-        // 'Old' = current Connection properties
-        String oldJndiName = connection.getJndiName(uow);
-        String oldDriverName = connection.getDriverName(uow);
-        boolean oldJdbc = connection.isJdbc(uow);
-        
-        // JndiName
-        if ( !StringUtils.equals(newJndiName, oldJndiName) ) {
-            connection.setJndiName( uow, newJndiName );
-        } 
-        // DriverName
-        if ( !StringUtils.equals(newDriverName, oldDriverName) ) {
-            connection.setDriverName( uow, newDriverName );
-        } 
-        // jdbc
-        if ( newJdbc != oldJdbc ) {
-            connection.setJdbc( uow, newJdbc );
-        }
-
-        // Additional properties
-        List<RestProperty> properties = restConnection.getProperties();
-        for (RestProperty property : properties) {
-            connection.setProperty(uow, property.getName(), property.getValue());
         }
     }
 

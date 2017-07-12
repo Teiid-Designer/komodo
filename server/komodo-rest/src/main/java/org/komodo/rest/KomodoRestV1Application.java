@@ -229,6 +229,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String VDBS_FROM_TEIID = "VdbsFromTeiid"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for creating workspace connections from teiid
+         */
+        String CONNECTIONS_FROM_TEIID = "connectionsFromTeiid"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for undeploy.
          */
         String UNDEPLOY = "undeploy"; //$NON-NLS-1$

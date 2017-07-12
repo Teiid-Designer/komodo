@@ -42,6 +42,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public final class RestTemplate extends RestBasicEntity {
 
     /**
+     * Is-Jdbc label
+     */
+    public static final String IS_JDBC_LABEL = "isJdbc";
+
+    /**
      * Label used to describe entries
      */
     public static final String ENTRIES_LABEL = "entries";
@@ -74,6 +79,8 @@ public final class RestTemplate extends RestBasicEntity {
         URI parentUri = getUriBuilder().templateParentUri(template, uow);
         getUriBuilder().addSetting(settings, SettingNames.PARENT_PATH, parentUri);
 
+        setJdbc(template.isJdbc(uow));
+
         TemplateEntry[] templateEntries = template.getEntries(uow);
         if (templateEntries != null) {
             entries = new ArrayList<String>();
@@ -86,6 +93,21 @@ public final class RestTemplate extends RestBasicEntity {
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().templateUri(LinkType.PARENT, settings)));
         createChildLink();
         addLink(new RestLink(LinkType.TEMPLATE_ENTRIES, getUriBuilder().templateUri(LinkType.TEMPLATE_ENTRIES, settings)));
+    }
+
+    /**
+     * @return jdbc flag
+     */
+    public boolean isJdbc() {
+        Object value = tuples.get(IS_JDBC_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : false;
+    }
+
+    /**
+     * @param jdbc
+     */
+    public void setJdbc(boolean jdbc) {
+        tuples.put(IS_JDBC_LABEL, jdbc);
     }
 
     public List<String> getEntries() {

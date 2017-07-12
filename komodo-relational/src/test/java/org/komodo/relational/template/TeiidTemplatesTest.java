@@ -191,6 +191,7 @@ public class TeiidTemplatesTest extends RelationalModelTest {
             TemplateEntry[] entries = template.getEntries(getTransaction());
             assertTrue(entries.length > 0);
 
+            boolean hasConnFactoryClassKey = false;
             for (TemplateEntry entry : entries) {
                 if (entry.isConstrainedToAllowedValues(getTransaction())) {
                     Collection<Object> allowedValues = entry.getAllowedValues(getTransaction());
@@ -204,7 +205,13 @@ public class TeiidTemplatesTest extends RelationalModelTest {
                         assertEquals(className, defaultValue.getClass().getCanonicalName());
                     }
                 }
+
+                if (entry.getName(getTransaction()).equals(Template.CONN_FACTORY_CLASS_KEY)) {
+                    hasConnFactoryClassKey = true;
+                }
             }
+
+            assertEquals(! hasConnFactoryClassKey, template.isJdbc(getTransaction()));
         }
     }
 }
