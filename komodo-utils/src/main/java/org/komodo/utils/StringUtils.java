@@ -1388,7 +1388,7 @@ public final class StringUtils implements StringConstants {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < values.length; ++i) {
             Object value = values[i];
-            buffer.append(value.toString());
+            buffer.append(value);
             if (i < (values.length - 1)) {
                 buffer.append(COMMA).append(SPACE);
             }

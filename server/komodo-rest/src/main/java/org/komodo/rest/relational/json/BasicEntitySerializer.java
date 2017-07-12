@@ -84,8 +84,14 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
                         entity.addTuple(name, in.nextBoolean());
                         break;
                     case NUMBER:
-                        entity.addTuple(name, in.nextInt());
+                    {
+                        double value = in.nextDouble();
+                        if (value % 1 == 0)
+                            entity.addTuple(name, (int) value);
+                        else
+                            entity.addTuple(name, value);
                         break;
+                    }
                     case STRING:
                         entity.addTuple(name, in.nextString());
                         break;
@@ -94,7 +100,18 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
                         entity.addTuple(name, null);
                         break;
                     case BEGIN_ARRAY:
-                        final String[] value = BUILDER.fromJson( in, String[].class );
+                        final Object[] value = BUILDER.fromJson( in, Object[].class );
+
+                        //
+                        // BUILDER always converts json numbers to double regardless
+                        // of them being integers so need to do some checking and on-the-fly
+                        // conversion
+                        //
+                        for (int i = 0; i < value.length; ++i) {
+                            if (value[i] instanceof Double && ((double) value[i] % 1) == 0)
+                                value[i] = ((Double) value[i]).intValue();
+                        }
+
                         entity.addTuple(name, value);
                         break;
                     default:
@@ -111,32 +128,40 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
         return entity;
     }
 
+    protected void writeValue(final JsonWriter out, Object value) throws IOException {
+        if (value == null)
+            out.nullValue();
+        else if (value instanceof Boolean)
+            out.value((Boolean) value);
+        else if (value instanceof Integer)
+            out.value((int) value);
+        else if (value instanceof Long)
+            out.value((long) value);
+        else if (value instanceof Double)
+            out.value((double) value);
+        else if (value instanceof Float)
+            out.value((double) value);
+        else if (value instanceof String[]) {
+            out.beginArray();
+            for (String val: (String[]) value) {
+                out.value(val);
+            }
+            out.endArray();
+        } else if (value instanceof Object[]) {
+            out.beginArray();
+            for (Object val: (Object[]) value) {
+                writeValue(out, val);
+            }
+            out.endArray();
+        } else
+            out.value(value.toString());
+    }
+
     protected void writeTuples(final JsonWriter out, final T entity) throws IOException {
         for (Map.Entry<String, Object>entry : entity.getTuples().entrySet()) {
             out.name(entry.getKey());
             Object value = entry.getValue();
-            if (value == null)
-                out.nullValue();
-            else if (value instanceof Boolean)
-                out.value((Boolean) value);
-            else if (value instanceof Integer)
-                out.value((Integer) value);
-            else if (value instanceof Boolean)
-                out.value((Boolean) value);
-            else if (value instanceof String[]) {
-                out.beginArray();
-                for (String val: (String[]) value) {
-                    out.value(val);
-                }
-                out.endArray();
-            } else if (value instanceof Object[]) {
-                out.beginArray();
-                for (Object val: (Object[]) value) {
-                    out.value(val.toString());
-                }
-                out.endArray();
-            } else
-                out.value(value.toString());
+            writeValue(out, value);
         }
     }
 

@@ -68,7 +68,7 @@ public class KomodoConnectionAttributes implements KRestEntity {
     private String driver;
 
     @JsonProperty(PARAMETERS_LABEL)
-    private Map<String, String> parameters;
+    private Map<String, Object> parameters;
 
     /**
      * Default constructor for deserialization
@@ -134,7 +134,7 @@ public class KomodoConnectionAttributes implements KRestEntity {
     /**
      * @return the parameters
      */
-    public Map<String, String> getParameters() {
+    public Map<String, Object> getParameters() {
         if (parameters == null)
             return Collections.emptyMap();
 
@@ -146,7 +146,7 @@ public class KomodoConnectionAttributes implements KRestEntity {
      * @param name the name
      * @param value the value
      */
-    public void setParameter(String name, String value) {
+    public void setParameter(String name, Object value) {
         if (this.parameters == null)
             this.parameters = new HashMap<>();
 

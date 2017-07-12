@@ -38,7 +38,7 @@ import com.google.gson.stream.JsonWriter;
  */
 public final class ConnectionAttributesSerializer extends TypeAdapter<KomodoConnectionAttributes> {
 
-    private static final Type STRING_MAP_TYPE = new TypeToken< Map< String, String > >() {/* nothing to do */}.getType();
+    private static final Type OBJECT_MAP_TYPE = new TypeToken< Map< String, Object > >() {/* nothing to do */}.getType();
 
     protected KomodoConnectionAttributes createEntity() {
         return new KomodoConnectionAttributes();
@@ -105,7 +105,7 @@ public final class ConnectionAttributesSerializer extends TypeAdapter<KomodoConn
 
         if (! value.getParameters().isEmpty()) {
             out.name(KomodoConnectionAttributes.PARAMETERS_LABEL);
-            BUILDER.toJson(value.getParameters(), STRING_MAP_TYPE, out);
+            BUILDER.toJson(value.getParameters(), OBJECT_MAP_TYPE, out);
         }
 
         out.endObject();

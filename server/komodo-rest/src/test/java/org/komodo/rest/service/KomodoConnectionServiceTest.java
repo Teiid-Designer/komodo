@@ -147,7 +147,7 @@ public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest
         assertEquals(rcAttr.isJdbc(), rsObj.isJdbc());
 
         List<RestProperty> rsProps = rsObj.getProperties();
-        for (Entry<String, String> parameter : rcAttr.getParameters().entrySet()) {
+        for (Entry<String, Object> parameter : rcAttr.getParameters().entrySet()) {
             RestProperty rsProp = null;
 
             for (RestProperty rsp : rsProps) {
@@ -193,7 +193,7 @@ public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest
         assertEquals(rcAttr.isJdbc(), rsObj.isJdbc());
 
         List<RestProperty> rsProps = rsObj.getProperties();
-        for (Entry<String, String> parameter : rcAttr.getParameters().entrySet()) {
+        for (Entry<String, Object> parameter : rcAttr.getParameters().entrySet()) {
             RestProperty rsProp = null;
 
             for (RestProperty rsp : rsProps) {

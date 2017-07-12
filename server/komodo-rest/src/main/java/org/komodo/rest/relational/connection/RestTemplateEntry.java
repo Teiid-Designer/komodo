@@ -282,9 +282,9 @@ public final class RestTemplateEntry extends RestBasicEntity {
     /**
      * @return the default value
      */
-    public String getDefaultValue() {
+    public Object getDefaultValue() {
         Object value = tuples.get(DEFAULT_VALUE_LABEL);
-        return value != null ? value.toString() : null;
+        return value != null ? value : null;
     }
 
     /**
@@ -342,7 +342,7 @@ public final class RestTemplateEntry extends RestBasicEntity {
     /**
      * @param allowedValues
      */
-    public void setAllowedValues(Collection<Object> allowedValues) {
+    public <T> void setAllowedValues(Collection<T> allowedValues) {
         if (allowedValues == null || allowedValues.isEmpty())
             return;
 

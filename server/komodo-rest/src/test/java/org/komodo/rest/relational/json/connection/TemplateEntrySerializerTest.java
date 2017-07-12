@@ -24,7 +24,9 @@ package org.komodo.rest.relational.json.connection;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -67,7 +69,7 @@ public final class TemplateEntrySerializerTest extends AbstractSerializerTest {
         V1Constants.TEMPLATE_ENTRIES_SEGMENT + FORWARD_SLASH +
         ENTRY_NAME;
 
-    private static final String[] ALLOWED_VALUES = { "none", "one", "many" };
+    private static final int[] ALLOWED_VALUES = { 0, 1, 2 };
 
     private static final String SOME_CATEGORY = "SomeCategory";
 
@@ -95,7 +97,7 @@ public final class TemplateEntrySerializerTest extends AbstractSerializerTest {
             tab(1) + q("keng__kType") + colon() +  q(KomodoType.TEMPLATE_ENTRY.toString()) + COMMA + NEW_LINE +
             tab(1) + q("keng__hasChildren") + colon() +  Boolean.FALSE.toString() + COMMA + NEW_LINE +
             tab(1) + q(RestTemplateEntry.CATEGORY_LABEL) + colon() + q(SOME_CATEGORY) + COMMA + NEW_LINE +
-            tab(1) + q(RestTemplateEntry.DEFAULT_VALUE_LABEL) + colon() + q(ALLOWED_VALUES[0]) + COMMA + NEW_LINE +
+            tab(1) + q(RestTemplateEntry.DEFAULT_VALUE_LABEL) + colon() + ALLOWED_VALUES[0] + COMMA + NEW_LINE +
             tab(1) + q(RestTemplateEntry.DESCRIPTION_LABEL) + colon() + q(ENTRY_DESCRIPTION) + COMMA + NEW_LINE +
             tab(1) + q(RestTemplateEntry.DISPLAY_NAME_LABEL) + colon() + q(DISPLAY_NAME) + COMMA + NEW_LINE +
             tab(1) + q(RestTemplateEntry.TYPE_CLASS_NAME_LABEL) + colon() + q(TYPE_CLASS_NAME) + COMMA + NEW_LINE +
@@ -105,9 +107,9 @@ public final class TemplateEntrySerializerTest extends AbstractSerializerTest {
             tab(1) + q(RestTemplateEntry.MODIFIABLE_LABEL) + colon() +  true + COMMA + NEW_LINE +
             tab(1) + q(RestTemplateEntry.REQUIRED_LABEL) + colon() +  true + COMMA + NEW_LINE +
             tab(1) + q(RestTemplateEntry.ALLOWED_VALUES_LABEL) + colon() +  OPEN_SQUARE_BRACKET + NEW_LINE +
-                tab(2) + q(ALLOWED_VALUES[0])+ COMMA + NEW_LINE +
-                tab(2) + q(ALLOWED_VALUES[1]) + COMMA + NEW_LINE +
-                tab(2) + q(ALLOWED_VALUES[2]) + NEW_LINE +
+                tab(2) + ALLOWED_VALUES[0]+ COMMA + NEW_LINE +
+                tab(2) + ALLOWED_VALUES[1] + COMMA + NEW_LINE +
+                tab(2) + ALLOWED_VALUES[2] + NEW_LINE +
             tab(1) + CLOSE_SQUARE_BRACKET + COMMA + NEW_LINE +
             tab(1) + q(LINKS) + colon() + OPEN_SQUARE_BRACKET + NEW_LINE +
                 tab(2) + OPEN_BRACE + NEW_LINE +
@@ -139,7 +141,11 @@ public final class TemplateEntrySerializerTest extends AbstractSerializerTest {
         this.templateEntry.setRequired(REQUIRED_FLAG);
         this.templateEntry.setConstrainedToAllowedValues(CTA_FLAG);
         this.templateEntry.setMasked(MASKED_FLAG);
-        this.templateEntry.setAllowedValues(Arrays.asList((Object[]) ALLOWED_VALUES));
+        List<Integer> allowedValuesList = new ArrayList<Integer>();
+        for (int val : ALLOWED_VALUES)
+            allowedValuesList.add(val);
+
+        this.templateEntry.setAllowedValues(allowedValuesList);
         this.templateEntry.setCategory(SOME_CATEGORY);
         this.templateEntry.setDefaultValue(ALLOWED_VALUES[0]);
         this.templateEntry.setDescription(ENTRY_DESCRIPTION);

@@ -346,7 +346,7 @@ public final class KomodoConnectionService extends KomodoService {
             restConnection.setJndiName(rcAttr.getJndi());
             restConnection.setJdbc(rcAttr.isJdbc());
 
-            for (Map.Entry<String, String> entry : rcAttr.getParameters().entrySet()) {
+            for (Map.Entry<String, Object> entry : rcAttr.getParameters().entrySet()) {
                 restConnection.addProperty(entry.getKey(), entry.getValue());
             }
 
@@ -544,7 +544,7 @@ public final class KomodoConnectionService extends KomodoService {
             restConnection.setJndiName(rcAttr.getJndi());
             restConnection.setJdbc(rcAttr.isJdbc());
 
-            for (Map.Entry<String, String> entry : rcAttr.getParameters().entrySet()) {
+            for (Map.Entry<String, Object> entry : rcAttr.getParameters().entrySet()) {
                 restConnection.addProperty(entry.getKey(), entry.getValue());
             }
 
