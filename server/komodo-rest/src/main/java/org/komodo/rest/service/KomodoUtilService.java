@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -56,6 +57,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.response.KomodoStatusObject;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.Id;
@@ -349,5 +351,49 @@ public final class KomodoUtilService extends KomodoService {
 
             return createErrorResponseWithForbidden(mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
         }
+    }
+
+    /**
+     * @param headers
+     *            the request headers (never <code>null</code>)
+     * @param uriInfo
+     *            the request URI information (never <code>null</code>)
+     * @param validateValue
+     *            the value being validated (cannot be empty)
+     * @return the response (never <code>null</code>) with an entity that is
+     *         either an empty string, when the name is valid, or an error
+     *         message
+     * @throws KomodoRestException
+     *             if there is a problem validating the value or constructing
+     *             the response
+     */
+    @GET
+    @Path( V1Constants.VALIDATE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VALIDATE_PLACEHOLDER )
+    @Produces( { MediaType.TEXT_PLAIN } )
+    @ApiOperation( value = "Returns an error message if the value is invalid" )
+    @ApiResponses( value = {
+            @ApiResponse( code = 400, message = "The URI cannot contain encoded slashes or backslashes." ),
+            @ApiResponse( code = 403, message = "An unexpected error has occurred." ),
+            @ApiResponse( code = 500, message = "The value cannot be empty." )
+    } )
+    public Response validateValue( final @Context HttpHeaders headers,
+                                     final @Context UriInfo uriInfo,
+                                     @ApiParam( value = "The value being checked", required = true )
+                                     final @PathParam( "validateValue" ) String validateValue ) throws KomodoRestException {
+
+        final SecurityPrincipal principal = checkSecurityContext( headers );
+
+        if ( principal.hasErrorResponse() ) {
+            return principal.getErrorResponse();
+        }
+
+        final String errorMsg = VALIDATOR.checkValidName( validateValue );
+        
+        // a name validation error occurred
+        if ( errorMsg != null ) {
+            return Response.ok().entity( errorMsg ).build();
+        }
+
+        return Response.ok().build();
     }
 }

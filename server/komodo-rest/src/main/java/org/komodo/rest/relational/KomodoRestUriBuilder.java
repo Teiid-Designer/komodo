@@ -28,6 +28,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.template.Template;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application;
@@ -117,6 +118,16 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
          * Name of the connection
          */
         CONNECTION_NAME,
+
+        /**
+         * Name of the template
+         */
+        TEMPLATE_NAME,
+
+        /**
+         * Name of the template
+         */
+        TEMPLATE_ENTRY_NAME,
 
         /**
          * Name of the import
@@ -906,6 +917,21 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
+     * @param template the template whose parent URI is being requested (cannot be <code>null</code>)
+     * @param uow
+     * @return the URI of the parent of the given template
+     * @throws KException
+     */
+    public URI templateParentUri(Template template, UnitOfWork uow) throws KException {
+        KomodoObject parent = template.getParent(uow);
+        if (isCachedTeiidFolder(uow, parent)) {
+            return cachedTeiidUri(parent.getName(uow));
+        }
+
+        return workspaceConnectionsUri();
+    }
+
+    /**
      * @param linkType
      * @param settings
      * @return the connection URI for the given link type and settings
@@ -925,6 +951,73 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 break;
             case PARENT:
                 result = parentUri;
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     * @param settings
+     * @return the connection URI for the given link type and settings
+     */
+    public URI templateUri(LinkType linkType, Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+        URI parentUri = parentUri(settings);
+        String templateName = setting(settings, SettingNames.TEMPLATE_NAME);
+
+        switch (linkType) {
+            case SELF:
+                result = UriBuilder.fromUri(parentUri)
+                                   .path(templateName).build();
+                break;
+            case PARENT:
+                result = parentUri;
+                break;
+            case TEMPLATE_ENTRIES:
+                result = UriBuilder.fromUri(parentUri)
+                                                .path(templateName)
+                                                .path(TEMPLATE_ENTRIES_SEGMENT)
+                                                .build();
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     * @param settings
+     * @return the connection URI for the given link type and settings
+     */
+    public URI templateEntryUri(LinkType linkType, Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+
+        String templateName = setting(settings, SettingNames.TEMPLATE_NAME);
+        String templateEntryName = setting(settings, SettingNames.TEMPLATE_ENTRY_NAME);
+
+        URI templateUri = UriBuilder.fromUri(teiidCacheUri())
+                                            .path(TEMPLATES_SEGMENT).path(templateName).build();
+
+        switch (linkType) {
+            case SELF:
+                result = UriBuilder.fromUri(templateUri).path(TEMPLATE_ENTRIES_SEGMENT).path(templateEntryName).build();
+                break;
+            case PARENT:
+                result = UriBuilder.fromUri(templateUri).build();
                 break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$

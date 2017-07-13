@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -1023,6 +1024,14 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                 if(StringUtils.isBlank(driverName)) {
                     driverName = StorageReference.DRIVER_NAME_DEFAULT;
                 }
+
+                importOptions.setOption(OptionKeys.NAME, driverName);
+                boolean doImport = DataserviceConveyor.handleExistingNode(transaction, parent, importOptions, importMessages);
+                if (! doImport) {
+                    // Handling existing node advises not to continue
+                    return importMessages;
+                }
+
                 Driver driver = RelationalModelFactory.createDriver(transaction, getRepository(), parent, driverName);
                 driver.setContent(transaction, content);
             }

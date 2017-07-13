@@ -21,12 +21,14 @@
  */
 package org.komodo.rest.json;
 
+import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import org.komodo.rest.RestProperty;
 import org.komodo.rest.Messages;
 import org.komodo.utils.StringUtils;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 /**
@@ -42,7 +44,7 @@ public class RestPropertySerializer extends TypeAdapter<RestProperty> implements
     public RestProperty read(JsonReader in) throws IOException {
 
         String propName = null;
-        String propValue = null;
+        Object propValue = null;
 
         in.beginObject();
 
@@ -50,8 +52,45 @@ public class RestPropertySerializer extends TypeAdapter<RestProperty> implements
             String name = in.nextName();
             if (RestProperty.NAME_LABEL.equals(name))
                 propName = in.nextString();
-            else if (RestProperty.VALUE_LABEL.equals(name))
-                propValue = in.nextString();
+            else if (RestProperty.VALUE_LABEL.equals(name)) {
+                JsonToken token = in.peek();
+                switch (token) {
+                    case BOOLEAN:
+                        propValue = in.nextBoolean();
+                        break;
+                    case NUMBER: {
+                        double value = in.nextDouble();
+                        if (value % 1 == 0)
+                            propValue = (int)value;
+                        else propValue = value;
+                        break;
+                    }
+                    case STRING:
+                        propValue = in.nextString();
+                        break;
+                    case NULL:
+                        in.nextNull();
+                        propValue = null;
+                        break;
+                    case BEGIN_ARRAY:
+                        final Object[] value = BUILDER.fromJson(in, Object[].class);
+
+                        //
+                        // BUILDER always converts json numbers to double regardless
+                        // of them being integers so need to do some checking and on-the-fly
+                        // conversion
+                        //
+                        for (int i = 0; i < value.length; ++i) {
+                            if (value[i] instanceof Double && ((double)value[i] % 1) == 0)
+                                value[i] = ((Double)value[i]).intValue();
+                        }
+
+                        propValue = value;
+                        break;
+                    default:
+                        throw new IOException(Messages.getString(Messages.Error.UNEXPECTED_JSON_TOKEN, name));
+                }
+            }
         }
 
         in.endObject();
@@ -63,6 +102,35 @@ public class RestPropertySerializer extends TypeAdapter<RestProperty> implements
         return property;
     }
 
+    protected void writeValue(final JsonWriter out, Object value) throws IOException {
+        if (value == null)
+            out.nullValue();
+        else if (value instanceof Boolean)
+            out.value((Boolean) value);
+        else if (value instanceof Integer)
+            out.value((int) value);
+        else if (value instanceof Long)
+            out.value((long) value);
+        else if (value instanceof Double)
+            out.value((double) value);
+        else if (value instanceof Float)
+            out.value((double) value);
+        else if (value instanceof String[]) {
+            out.beginArray();
+            for (String val: (String[]) value) {
+                out.value(val);
+            }
+            out.endArray();
+        } else if (value instanceof Object[]) {
+            out.beginArray();
+            for (Object val: (Object[]) value) {
+                writeValue(out, val);
+            }
+            out.endArray();
+        } else
+            out.value(value.toString());
+    }
+
     @Override
     public void write(JsonWriter out, RestProperty value) throws IOException {
         out.beginObject();
@@ -71,7 +139,8 @@ public class RestPropertySerializer extends TypeAdapter<RestProperty> implements
         out.value(value.getName());
 
         out.name(RestProperty.VALUE_LABEL);
-        out.value(value.getValue());
+        
+        writeValue(out, value.getValue());
 
         out.endObject();
     }

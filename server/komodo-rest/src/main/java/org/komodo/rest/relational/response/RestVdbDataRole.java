@@ -188,7 +188,23 @@ public final class RestVdbDataRole extends RestBasicEntity {
      */
     public String[] getMappedRoles() {
         Object roles = tuples.get(MAPPED_ROLES_LABEL);
-        return roles != null ? (String[]) roles : EMPTY_ARRAY;
+        if (roles == null)
+            return EMPTY_ARRAY;
+
+        if (roles instanceof String[])
+            return (String[]) roles;
+
+        /*
+         * If deserialising from json then the array of roles will
+         * have been deserialised as an Object[] rather than a String[]
+         * so cannot simply cast but must convert each value
+         */
+        Object[] roleArr = (Object[]) roles;
+        String[] roleStrings = new String[roleArr.length];
+        for (int i = 0; i < roleArr.length; ++i)
+            roleStrings[i] = roleArr[i].toString();
+
+        return roleStrings;
     }
 
     /**

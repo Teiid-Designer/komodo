@@ -23,7 +23,6 @@ package org.komodo.relational.folder.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.connection.Connection;
@@ -36,6 +35,8 @@ import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.resource.internal.DriverImpl;
+import org.komodo.relational.template.Template;
+import org.komodo.relational.template.internal.TemplateImpl;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
@@ -248,6 +249,26 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
     }
 
     @Override
+    public Template[] getTemplates( final UnitOfWork transaction,
+                                        final String... namePatterns ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< Template > result = new ArrayList< Template >();
+
+        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.Template.NODE_TYPE, namePatterns ) ) {
+            final Template template = new TemplateImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+            result.add( template );
+        }
+
+        if ( result.isEmpty() ) {
+            return Template.NO_TEMPLATES;
+        }
+
+        return result.toArray( new Template[ result.size() ] );
+    }
+
+    @Override
     public Folder[] getFolders( final UnitOfWork transaction,
                                 final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
@@ -296,6 +317,8 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
             result = getTranslators( transaction, namePatterns );
         } else if ( DataVirtLexicon.ResourceFile.DRIVER_FILE_NODE_TYPE.equals( type ) ) {
             result = getDrivers( transaction, namePatterns );
+        } else if ( DataVirtLexicon.Template.NODE_TYPE.equals( type ) ) {
+            result = getTemplates( transaction, namePatterns );
         } else {
             result = KomodoObject.EMPTY_ARRAY;
         }

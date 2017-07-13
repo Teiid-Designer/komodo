@@ -131,7 +131,7 @@
 		<profile>
 			<id>dv63</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 
 			<properties>
@@ -246,7 +246,7 @@
 		<profile>
 			<id>wildfly</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 
 			<properties>

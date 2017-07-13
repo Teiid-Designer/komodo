@@ -92,7 +92,7 @@ public class DataserviceConveyor implements StringConstants {
         return WorkspaceManager.getInstance(repository, transaction);
     }
 
-    protected String determineNewName(UnitOfWork transaction, KomodoObject parent, String nodeName) throws KException {
+    private static String determineNewName(UnitOfWork transaction, KomodoObject parent, String nodeName) throws KException {
         for (int i = 0; i < 1000; ++i) {
             String newName = nodeName + UNDERSCORE + i;
             if (!parent.hasChild(transaction, newName))
@@ -103,7 +103,7 @@ public class DataserviceConveyor implements StringConstants {
                                                                     org.komodo.importer.Messages.IMPORTER.newNameFailure, nodeName));
     }
 
-    protected boolean handleExistingNode(UnitOfWork transaction, KomodoObject parent, ImportOptions importOptions,
+    public static boolean handleExistingNode(UnitOfWork transaction, KomodoObject parent, ImportOptions importOptions,
                                          ImportMessages importMessages) throws KException {
 
         // dataservice name to create
@@ -117,9 +117,9 @@ public class DataserviceConveyor implements StringConstants {
         ExistingNodeOptions exNodeOption = (ExistingNodeOptions)importOptions.getOption(OptionKeys.HANDLE_EXISTING);
 
         switch (exNodeOption) {
-            // RETURN - Return 'false' - do not create a node.  Log an error message
+            // RETURN - Return 'false' - do not create a node.  Log a progress message
             case RETURN:
-                importMessages.addErrorMessage(org.komodo.importer.Messages.getString(
+                importMessages.addProgressMessage(org.komodo.importer.Messages.getString(
                                                                                       org.komodo.importer.Messages.IMPORTER.nodeExistsReturn, dsName));
                 return false;
             // CREATE_NEW - Return 'true' - will create a new data service with new unique name.  Log a progress message.

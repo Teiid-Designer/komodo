@@ -40,14 +40,14 @@ public class RestProperty implements StringConstants {
 
     private final String name;
 
-    private final String value;
+    private final Object value;
 
     /**
      * @param name the name
      * @param value the value
      *
      */
-    public RestProperty(String name, String value) {
+    public RestProperty(String name, Object value) {
         this.name = name;
         this.value = value;
     }
@@ -62,7 +62,7 @@ public class RestProperty implements StringConstants {
     /**
      * @return the value
      */
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
