@@ -2463,7 +2463,155 @@ public class KomodoTeiidService extends KomodoService {
             return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR);
         }
     }
-    
+
+//
+//    TODO
+//
+//    Cannot actually use this at the moment since the removal and addition
+//    of a datasource during the same runtime fails with the error:
+//
+//    TEIID70006 {"WFLYCTL0062: Composite operation failed and was rolled back
+//    Steps that failed:" => {"Operation step-1" => "WFLYCTL0158: Operation handler
+//    failed: org.jboss.msc.service.DuplicateServiceException: Service
+//    org.wildfly.data-source.{DatasourceName} is already registered"}}
+//
+//    Cannot refresh teiid either since its not part of the API
+//    see https://issues.jboss.org/browse/TEIID-4592
+//    
+//    /**
+//     * Updates a Connection on the server (deletes then adds)
+//     * @param headers
+//     *        the request headers (never <code>null</code>)
+//     * @param uriInfo
+//     *        the request URI information (never <code>null</code>)
+//     * @param pathAttribute
+//     *        the path (never <code>null</code>)
+//     * @return a JSON representation of the status (never <code>null</code>)
+//     * @throws KomodoRestException
+//     *         if there is an error adding the Connection
+//     */
+//    @SuppressWarnings( "nls" )
+//    @PUT
+//    @Path(V1Constants.CONNECTION_SEGMENT)
+//    @Produces( MediaType.APPLICATION_JSON )
+//    @Consumes ( { MediaType.APPLICATION_JSON } )
+//    @ApiOperation(value = "Updates the connection on the teiid server")
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+//        @ApiResponse(code = 403, message = "An error has occurred.")
+//    })
+//    public Response updateConnection( final @Context HttpHeaders headers,
+//                                   final @Context UriInfo uriInfo,
+//                                   @ApiParam(
+//                                             value = "" + 
+//                                                     "JSON of the properties of the connection:<br>" +
+//                                                     OPEN_PRE_TAG +
+//                                                     OPEN_BRACE + BR +
+//                                                     NBSP + "path: \"location of the connection in the workspace\"" + BR +
+//                                                     CLOSE_BRACE +
+//                                                     CLOSE_PRE_TAG,
+//                                             required = true
+//                                   )
+//                                   final String pathAttribute)
+//                                   throws KomodoRestException {
+//
+//        SecurityPrincipal principal = checkSecurityContext(headers);
+//        if (principal.hasErrorResponse())
+//            return principal.getErrorResponse();
+//
+//        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+//        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+//            return notAcceptableMediaTypesBuilder().build();
+//
+//        //
+//        // Error if there is no path attribute defined
+//        //
+//        KomodoPathAttribute kpa;
+//        try {
+//            kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
+//            if (kpa.getPath() == null) {
+//                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SOURCE_MISSING_PATH);
+//            }
+//        } catch (Exception ex) {
+//            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+//        }
+//
+//        UnitOfWork uow = null;
+//        try {
+//            Teiid teiidNode = getDefaultTeiid();
+//
+//            uow = createTransaction(principal, "updateTeiidConnection", false); //$NON-NLS-1$
+//
+//            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+//
+//            List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
+//            if (dataSources.size() == 0) {
+//                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+//            }
+//
+//            Connection dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Connection.class);
+//            if (dataSource == null) {
+//                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+//            }
+//
+//            //
+//            // If connection exists then remove it first
+//            //
+//            String connectionName = dataSource.getName(uow);
+//            if (teiidInstance.dataSourceExists(connectionName)) {
+//                teiidInstance.deleteDataSource(connectionName);
+//                Thread.sleep(DEPLOYMENT_WAIT_TIME);
+//            }
+//
+//            //
+//            // Deploy the data source
+//            //
+//            DeployStatus deployStatus = dataSource.deploy(uow, teiidNode);
+//
+//            // Await the deployment to end
+//            Thread.sleep(DEPLOYMENT_WAIT_TIME);
+//
+//            // Make sure Datasource is current in the CachedTeiid
+//            refreshCachedDataSources(teiidNode);
+//
+//            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+//            KomodoStatusObject status = new KomodoStatusObject(title);
+//
+//            List<String> progressMessages = deployStatus.getProgressMessages();
+//            for (int i = 0; i < progressMessages.size(); ++i) {
+//                status.addAttribute("ProgressMessage" + (i + 1), progressMessages.get(i));
+//            }
+//
+//            if (deployStatus.ok()) {
+//                status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
+//                status.addAttribute(dataSource.getName(uow),
+//                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_DEPLOYED));
+//            } else {
+//                status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
+//                List<String> errorMessages = deployStatus.getErrorMessages();
+//                for (int i = 0; i < errorMessages.size(); ++i) {
+//                    status.addAttribute("ErrorMessage" + (i + 1), errorMessages.get(i));
+//                }
+//
+//                status.addAttribute(dataSource.getName(uow),
+//                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYED_WITH_ERRORS));
+//            }
+//
+//           return commit(uow, mediaTypes, status);
+//
+//        } catch (final Exception e) {
+//            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+//                uow.rollback();
+//            }
+//
+//            if (e instanceof KomodoRestException) {
+//                throw (KomodoRestException)e;
+//            }
+//
+//            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR);
+//        }
+//    }
+
     /**
      * Adds (deploys) a VDB to the server
      * @param headers
