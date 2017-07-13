@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.template;
 
+import java.util.List;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.template.internal.TemplateImpl;
@@ -149,5 +150,5 @@ public interface Template extends RelationalObject {
       * @return
       * @throws KException
       */
-    TemplateEntry[] getEntries(UnitOfWork transaction, String... namePatterns) throws KException;
+    List<TemplateEntry> getEntries(UnitOfWork transaction, String... namePatterns) throws KException;
 }

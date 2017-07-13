@@ -22,6 +22,7 @@
 package org.komodo.relational.template.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
@@ -96,8 +97,8 @@ public class TemplateImpl extends RelationalObjectImpl implements Template, Even
 
     @Override
     public boolean isJdbc(UnitOfWork uow) throws KException {
-        TemplateEntry[] entries = getEntries(uow, Template.CONN_FACTORY_CLASS_KEY);
-        return entries.length == 0;
+        List<TemplateEntry> entries = getEntries(uow, Template.CONN_FACTORY_CLASS_KEY);
+        return entries.isEmpty();
     }
 
     @Override
@@ -106,7 +107,7 @@ public class TemplateImpl extends RelationalObjectImpl implements Template, Even
     }
 
     @Override
-    public TemplateEntry[] getEntries(final UnitOfWork transaction, String... namePatterns) throws KException {
+    public List<TemplateEntry> getEntries(final UnitOfWork transaction, String... namePatterns) throws KException {
         ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
         ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
 
@@ -117,10 +118,10 @@ public class TemplateImpl extends RelationalObjectImpl implements Template, Even
         }
 
         if (result.isEmpty()) {
-            return new TemplateEntry[0];
+            return Collections.emptyList();
         }
 
-        return result.toArray(new TemplateEntry[result.size()]);
+        return result;
     }
 
     @Override

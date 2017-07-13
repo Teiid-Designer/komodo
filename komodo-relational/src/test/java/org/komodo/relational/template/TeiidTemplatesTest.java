@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.After;
 import org.junit.Before;
@@ -188,8 +189,8 @@ public class TeiidTemplatesTest extends RelationalModelTest {
         // Sanity check the templates and template entries
         //
         for (Template template : templates) {
-            TemplateEntry[] entries = template.getEntries(getTransaction());
-            assertTrue(entries.length > 0);
+            List<TemplateEntry> entries = template.getEntries(getTransaction());
+            assertTrue(entries.size() > 0);
 
             boolean hasConnFactoryClassKey = false;
             for (TemplateEntry entry : entries) {

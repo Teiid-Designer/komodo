@@ -81,7 +81,7 @@ public final class RestTemplate extends RestBasicEntity {
 
         setJdbc(template.isJdbc(uow));
 
-        TemplateEntry[] templateEntries = template.getEntries(uow);
+        List<TemplateEntry> templateEntries = template.getEntries(uow);
         if (templateEntries != null) {
             entries = new ArrayList<String>();
             for (TemplateEntry entry : templateEntries) {

@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,6 +163,60 @@ public class KomodoTeiidService extends KomodoService {
      * Time to wait after deploying/undeploying an artifact from the teiid instance
      */
     private final static int DEPLOYMENT_WAIT_TIME = 10000;
+
+    private static class TemplateEntryComparator implements Comparator<TemplateEntry> {
+
+        private static String[] priorityNames = {"connection-url", "user-name", "password", "port"};
+
+        private UnitOfWork transaction;
+
+        public TemplateEntryComparator(UnitOfWork transaction) {
+            this.transaction = transaction;
+        }
+
+        @Override
+        public int compare(TemplateEntry entry1, TemplateEntry entry2) {
+            String entry1Name = null;
+            boolean entry1Advanced = false;
+            String entry2Name = null;
+            boolean entry2Advanced = false;
+
+            try {
+                entry1Name = entry1.getName(transaction);
+                entry1Advanced = entry1.isAdvanced(transaction);
+
+                entry2Name = entry2.getName(transaction);
+                entry2Advanced = entry2.isAdvanced(transaction);
+            } catch (KException e) {
+                // Ignore exception. Will be dealt with below
+            }
+
+            if (entry1Name == null && entry2Name == null)
+                return 0; // Not a lot
+            else if (entry1Name == null)
+                return -1;
+            else if (entry2Name == null)
+                return 1;
+
+            if (entry1Name.equals(entry2Name))
+                return 0;
+
+            for (String name : priorityNames) {
+                if (name.equals(entry1Name))
+                    return -1;
+
+                if (name.equals(entry2Name))
+                    return 1;
+            }
+
+            if (entry1Advanced && !entry2Advanced)
+                return 1; // De-prioritise advanced
+            else if (! entry1Advanced && entry2Advanced)
+                return -1; // De-prioritise advanced    
+
+            return entry1Name.compareTo(entry2Name);
+        }
+    }
 
     /**
      * Mapping of driverName to default translator
@@ -3510,7 +3565,9 @@ public class KomodoTeiidService extends KomodoService {
                 return commitNoTemplateFound(uow, mediaTypes, templateName);
 
             final List<RestTemplateEntry> entities = new ArrayList<RestTemplateEntry>();
-            TemplateEntry[] entries = template.getEntries(uow);
+            List<TemplateEntry> entries = template.getEntries(uow);
+            Collections.sort(entries, new TemplateEntryComparator(uow));
+
             for (TemplateEntry entry : entries) {
                 KomodoProperties properties = new KomodoProperties();
                 RestTemplateEntry restEntry = entityFactory.create(entry, uriInfo.getBaseUri(), uow, properties);
