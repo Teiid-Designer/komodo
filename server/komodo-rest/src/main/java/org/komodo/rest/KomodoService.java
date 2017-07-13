@@ -38,11 +38,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Variant.VariantListBuilder;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
-import org.apache.commons.codec.binary.Base64;
 import org.komodo.core.KEngine;
 import org.komodo.relational.connection.Connection;
 import org.komodo.relational.dataservice.Dataservice;
@@ -223,7 +223,7 @@ public abstract class KomodoService implements V1Constants {
         if (content == null)
             return null;
 
-        return Base64.encodeBase64String(content);
+        return DatatypeConverter.printBase64Binary(content);
     }
 
     /**
@@ -234,7 +234,7 @@ public abstract class KomodoService implements V1Constants {
         if (content == null)
             return null;
 
-        return Base64.decodeBase64(content);
+        return DatatypeConverter.parseBase64Binary(content);
     }
 
     protected WorkspaceManager getWorkspaceManager(UnitOfWork transaction) throws KException {
