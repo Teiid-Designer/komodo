@@ -54,6 +54,7 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestBasicEntity.ResourceNotFound;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestEntityFactory;
+import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -61,6 +62,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -72,6 +74,8 @@ import com.google.gson.Gson;
 public abstract class KomodoService implements V1Constants {
 
     protected static final KLog LOGGER = KLog.getLogger();
+
+    protected static final StringNameValidator VALIDATOR = new StringNameValidator();
 
     /**
      * VDB properties for DSB
@@ -613,6 +617,11 @@ public abstract class KomodoService implements V1Constants {
         return commit( uow, mediaTypes, new ResourceNotFound( connectionName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
+    protected Response commitNoTemplateFound(UnitOfWork uow, List<MediaType> mediaTypes, String templateName) throws Exception {
+        LOGGER.debug( "Template '{0}' was not found", templateName ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( templateName, Messages.getString( GET_OPERATION_NAME ) ) );
+    }
+
     protected Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {
         return commit(uow, mediaTypes,
                       new ResourceNotFound(uri(vdbName, MODELS_SEGMENT, modelName),
@@ -640,5 +649,37 @@ public abstract class KomodoService implements V1Constants {
                                                           dataRoleId, PERMISSIONS_SEGMENT,
                                                           permissionId),
                                                      Messages.getString( GET_OPERATION_NAME)));
+    }
+
+    // Sets Connection properties using the supplied RestConnection object
+    protected void setProperties(final UnitOfWork uow, Connection connection, RestConnection restConnection) throws KException {
+        // 'New' = requested RestConnection properties
+        String newJndiName = restConnection.getJndiName();
+        String newDriverName = restConnection.getDriverName();
+        boolean newJdbc = restConnection.isJdbc();
+        
+        // 'Old' = current Connection properties
+        String oldJndiName = connection.getJndiName(uow);
+        String oldDriverName = connection.getDriverName(uow);
+        boolean oldJdbc = connection.isJdbc(uow);
+        
+        // JndiName
+        if ( !StringUtils.equals(newJndiName, oldJndiName) ) {
+            connection.setJndiName( uow, newJndiName );
+        } 
+        // DriverName
+        if ( !StringUtils.equals(newDriverName, oldDriverName) ) {
+            connection.setDriverName( uow, newDriverName );
+        } 
+        // jdbc
+        if ( newJdbc != oldJdbc ) {
+            connection.setJdbc( uow, newJdbc );
+        }
+
+        // Additional properties
+        List<RestProperty> properties = restConnection.getProperties();
+        for (RestProperty property : properties) {
+            connection.setProperty(uow, property.getName(), property.getValue());
+        }
     }
 }

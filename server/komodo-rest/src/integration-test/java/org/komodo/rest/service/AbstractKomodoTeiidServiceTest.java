@@ -45,7 +45,7 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.commons.codec.binary.Base64;
+import javax.xml.bind.DatatypeConverter;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -399,7 +399,7 @@ public abstract class AbstractKomodoTeiidServiceTest implements StringConstants 
     
         InputStream usStatesDSStream = TestUtilities.usStatesDataserviceExample();
         byte[] sampleBytes = TestUtilities.streamToBytes(usStatesDSStream);
-        String content = Base64.encodeBase64String(sampleBytes);
+        String content = DatatypeConverter.printBase64Binary(sampleBytes); 
         storageAttr.setContent(content);
     
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

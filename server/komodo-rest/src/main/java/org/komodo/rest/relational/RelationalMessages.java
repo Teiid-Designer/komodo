@@ -204,7 +204,17 @@ public final class RelationalMessages {
         /**
          * Vdb transfer to repo success
          */
-        VDB_TO_REPO_SUCCESS;
+        VDB_TO_REPO_SUCCESS,
+
+        /**
+         * Connection transfer to repo status title
+         */
+        CONNECTION_TO_REPO_STATUS_TITLE,
+
+        /**
+         * Connection transfer to repo success
+         */
+        CONNECTION_TO_REPO_SUCCESS;
 
         /**
          * {@inheritDoc}
@@ -491,7 +501,22 @@ public final class RelationalMessages {
          * An error indicating clone attempt failed because same name already exists
          */
         CONNECTION_SERVICE_CLONE_ALREADY_EXISTS,
-        
+
+        /**
+         * An error indicating a connection already exists
+         */
+        CONNECTION_SERVICE_NAME_EXISTS,
+
+        /**
+         * A message indicating an unexpected error occurred during name validation.
+         */
+        CONNECTION_SERVICE_NAME_VALIDATION_ERROR,
+
+        /**
+         * Error transferring connections from server to repo
+         */
+        CONNECTION_TO_REPO_IMPORT_ERROR,
+
         /**
          * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.
          */
@@ -983,6 +1008,22 @@ public final class RelationalMessages {
         TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR,
 
         /**
+         * An error indicating a workspace driver being deployed to teiid cannot be found due to
+         * a missing path property
+         */
+        TEIID_SERVICE_DRIVER_MISSING_PATH,
+
+        /**
+         * A driver cannot be found at the given path in the workspace
+         */
+        TEIID_SERVICE_NO_DRIVER_FOUND_IN_WKSP,
+
+        /**
+         * Cannot deploy a driver since one of its attributes is missing
+         */
+        TEIID_SERVICE_DRIVER_ATTRIBUTES_MISSING,
+
+        /**
          * An error indicating a teiid DataSource undeploy failure
          */
         TEIID_SERVICE_UNDEPLOY_DATA_SOURCE_ERROR,
@@ -1026,6 +1067,11 @@ public final class RelationalMessages {
          * No data source could be found while trying to deploy
          */
         TEIID_SERVICE_NO_DATA_SOURCE_FOUND,
+
+        /**
+         * No data source could be found while trying to deploy
+         */
+        TEIID_SERVICE_NO_CONNECTION_FOUND,
 
         /**
          * No VDB could be found while trying to deploy
@@ -1142,11 +1188,31 @@ public final class RelationalMessages {
          */
         TEIID_SERVICE_GET_DATA_SOURCE_UNRECOGNISED_JDBC_SOURCE,
 
-           /**
+        /**
+         * An error indicating a connection could not be undeployed
+         */
+        TEIID_SERVICE_UNDEPLOY_CONNECTION_ERROR,
+
+        /**
          * An error indicating update attempt failed
          */
         TEIID_SERVICE_UPDATE_ERROR,
-        
+
+        /**
+         * An error indicating the instance failed to get a data source template.
+         */
+        TEIID_SERVICE_GET_TEMPLATE_ERROR,
+
+        /**
+         * An error indicating the instance failed to get any data source templates.
+         */
+        TEIID_SERVICE_GET_TEMPLATES_ERROR,
+
+        /**
+         * An error indicating the instance failed to get any data source templates.
+         */
+        TEIID_SERVICE_GET_TEMPLATE_ENTRIES_ERROR,
+
         /**
          * The importexport service lacks at least one storage attribute
          */

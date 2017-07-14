@@ -49,6 +49,16 @@ public enum KomodoType {
     DRIVER("driver"), //$NON-NLS-1$
 
     /**
+     * Template
+     */
+    TEMPLATE("template"), //$NON-NLS-1$
+
+    /**
+     * Template Entry
+     */
+    TEMPLATE_ENTRY("templateEntry"), //$NON-NLS-1$
+
+    /**
      * Folder
      */
     FOLDER,

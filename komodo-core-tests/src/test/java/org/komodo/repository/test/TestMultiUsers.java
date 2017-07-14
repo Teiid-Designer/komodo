@@ -253,7 +253,7 @@ public class TestMultiUsers extends AbstractLocalRepositoryTest {
             fail("Alice should not be allowed to remove stuff from bob's workspace");
         } catch (Exception ex) {
             assertEquals(
-                         "The object at path \"" + bobVdbPath + "\" is inaccessbile for the user \"" + ALICE + "\"",
+                         "The object at path \"" + bobVdbPath + "\" is inaccessible for the user \"" + ALICE + "\"",
                          ex.getMessage());
         }
 
@@ -262,7 +262,7 @@ public class TestMultiUsers extends AbstractLocalRepositoryTest {
             fail("Bob should not be allowed to remove stuff from alice's workspace");
         } catch (Exception ex) {
             assertEquals(
-                         "The object at path \"" + aliceVdbPath + "\" is inaccessbile for the user \"" + BOB + "\"",
+                         "The object at path \"" + aliceVdbPath + "\" is inaccessible for the user \"" + BOB + "\"",
                          ex.getMessage());
         }
 
@@ -287,7 +287,7 @@ public class TestMultiUsers extends AbstractLocalRepositoryTest {
        
         UnitOfWork aliceTx = writeTx(ALICE);
 
-        String expReadErrorMsg = "The object at path \"" + bobVdb.getAbsolutePath() + "\" is inaccessbile for the user \"" + ALICE + "\"";
+        String expReadErrorMsg = "The object at path \"" + bobVdb.getAbsolutePath() + "\" is inaccessible for the user \"" + ALICE + "\"";
         String expChildrenErrorMsg = "Adding or removing children to the object at path \"" + bobVdb.getAbsolutePath() + "\" is not allowed for the user \"" + ALICE + "\"";
         String expRemoveErrorMsg = "Removing object at path \"" + bobVdb.getAbsolutePath() + "\" is not allowed for the user \"" + ALICE + "\"";
         String expPropertySetErrorMsg = "Properties are not allowed to be set on the object at path \"" + bobVdb.getAbsolutePath() + "\" by the user \"" + ALICE + "\"";

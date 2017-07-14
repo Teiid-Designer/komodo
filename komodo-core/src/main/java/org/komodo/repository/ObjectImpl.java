@@ -1589,10 +1589,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
     }
 
-    protected void setObjectProperty( final UnitOfWork transaction,
+    private boolean isArray(Object value) {
+        return value != null && value.getClass().isArray();
+    }
+
+    protected <T> void setObjectProperty( final UnitOfWork transaction,
                                       final String setterName,
                                       final String propertyName,
-                                      final Object value ) throws KException {
+                                      final T value ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
@@ -1603,7 +1607,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         try {
-            setProperty(transaction, propertyName, value);
+            if (isArray(value)) {
+                setProperty(transaction, propertyName, (Object[]) value);
+            } else {
+                setProperty(transaction, propertyName, value);
+            }
         } catch (final Exception e) {
             throw handleError( e );
         }

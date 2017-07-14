@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,8 @@ import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.template.Template;
+import org.komodo.relational.template.TemplateEntry;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -81,6 +84,8 @@ import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.connection.RestConnectionJdbcInfo;
+import org.komodo.rest.relational.connection.RestTemplate;
+import org.komodo.rest.relational.connection.RestTemplateEntry;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoDataSourceJdbcTableAttributes;
 import org.komodo.rest.relational.request.KomodoFileAttributes;
@@ -158,6 +163,60 @@ public class KomodoTeiidService extends KomodoService {
      * Time to wait after deploying/undeploying an artifact from the teiid instance
      */
     private final static int DEPLOYMENT_WAIT_TIME = 10000;
+
+    private static class TemplateEntryComparator implements Comparator<TemplateEntry> {
+
+        private static String[] priorityNames = {"connection-url", "user-name", "password", "port"};
+
+        private UnitOfWork transaction;
+
+        public TemplateEntryComparator(UnitOfWork transaction) {
+            this.transaction = transaction;
+        }
+
+        @Override
+        public int compare(TemplateEntry entry1, TemplateEntry entry2) {
+            String entry1Name = null;
+            boolean entry1Advanced = false;
+            String entry2Name = null;
+            boolean entry2Advanced = false;
+
+            try {
+                entry1Name = entry1.getName(transaction);
+                entry1Advanced = entry1.isAdvanced(transaction);
+
+                entry2Name = entry2.getName(transaction);
+                entry2Advanced = entry2.isAdvanced(transaction);
+            } catch (KException e) {
+                // Ignore exception. Will be dealt with below
+            }
+
+            if (entry1Name == null && entry2Name == null)
+                return 0; // Not a lot
+            else if (entry1Name == null)
+                return -1;
+            else if (entry2Name == null)
+                return 1;
+
+            if (entry1Name.equals(entry2Name))
+                return 0;
+
+            for (String name : priorityNames) {
+                if (name.equals(entry1Name))
+                    return -1;
+
+                if (name.equals(entry2Name))
+                    return 1;
+            }
+
+            if (entry1Advanced && !entry2Advanced)
+                return 1; // De-prioritise advanced
+            else if (! entry1Advanced && entry2Advanced)
+                return -1; // De-prioritise advanced    
+
+            return entry1Name.compareTo(entry2Name);
+        }
+    }
 
     /**
      * Mapping of driverName to default translator
@@ -251,6 +310,12 @@ public class KomodoTeiidService extends KomodoService {
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
 
             cachedTeiid.refreshDrivers(uow, teiidInstance, driverNames);
+
+            //
+            // Templates are dependent on which drivers are present
+            // so these should be refreshed as well
+            //
+            cachedTeiid.refreshTemplates(uow, teiidInstance);
 
             // Commit the transaction to allow the sequencers to run
             uow.commit();
@@ -827,9 +892,9 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON representation of the new datasource (never <code>null</code>)
+     * @return a JSON representation of the status of the copy (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is an error creating the DataSource
+     *         if there is an error copying the vdbs
      */
     @POST
     @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.VDBS_FROM_TEIID )
@@ -1316,28 +1381,36 @@ public class KomodoTeiidService extends KomodoService {
 
         UnitOfWork uow = null;
 
+        String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+        KomodoStatusObject status = new KomodoStatusObject(title);
+
         try {
             Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "removeConnection", false); //$NON-NLS-1$
 
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+
+            if (! teiidInstance.dataSourceExists(connectionName)) {
+                status.addAttribute(connectionName,
+                                    RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_NO_CONNECTION_FOUND, connectionName));
+                return commit(uow, mediaTypes, status);
+            }
+
             teiidInstance.deleteDataSource(connectionName);
 
             // Await the undeployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
-            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
-            KomodoStatusObject status = new KomodoStatusObject(title);
             if (! hasDataSource(connectionName, teiidNode)) {
                 // Make sure DataSource state is current in cachedTeiid
-                refreshCachedDataSources(teiidNode, connectionName);
+                refreshCachedDataSources(teiidNode);
 
                 status.addAttribute(connectionName,
-                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED));
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED, connectionName));
             } else
                 status.addAttribute(connectionName,
-                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_UNDEPLOYMENT_REQUEST_SENT));
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_UNDEPLOYMENT_REQUEST_SENT, connectionName));
 
            return commit(uow, mediaTypes, status);
 
@@ -1350,7 +1423,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_VDB_ERROR, connectionName);
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_UNDEPLOY_CONNECTION_ERROR, connectionName);
         }
     }
     
@@ -1680,6 +1753,96 @@ public class KomodoTeiidService extends KomodoService {
     }
 
     /**
+     * Copy  connections from the server into the workspace that are not present in the workspace 
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON representation of the status of the copying (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error copying the connections
+     */
+    @POST
+    @Path( V1Constants.CONNECTIONS_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.CONNECTIONS_FROM_TEIID )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Copy Connections from the server into the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response copyConnectionsIntoRepo( final @Context HttpHeaders headers,
+                                      final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find Connections
+            uow = createTransaction(principal, "connectionsFromTeiid", false); //$NON-NLS-1$
+            Connection[] teiidConns = cachedTeiid.getConnections(uow);
+            
+            // Get current list of workspace Connections
+            final WorkspaceManager mgr = getWorkspaceManager(uow);
+            Connection[] workspaceConns = mgr.findConnections( uow );
+            List<String> workspaceConnNames = new ArrayList<String>(workspaceConns.length);
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.CONNECTION_TO_REPO_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+
+            // Remove any connections that dont belong to user.  Compile list of remaining workspace connections
+            for(Connection workspaceConn : workspaceConns) {
+                // Connections not belonging to user are removed
+                if(workspaceConn.hasProperty(uow, DSB_PROP_SERVICE_SOURCE)) {
+                    String owner = workspaceConn.getProperty(uow, DSB_PROP_SERVICE_SOURCE).getStringValue(uow);
+                    if(! uow.getUserName().equals(owner)) {
+                        mgr.delete(uow, workspaceConn);
+                        continue;
+                    }
+                }
+
+                workspaceConnNames.add(workspaceConn.getName(uow));
+            }
+                
+            // Copy the teiid connection into the workspace, if no workspace connection with the same name
+            for(Connection teiidConn : teiidConns) {
+                String name = teiidConn.getName(uow);
+
+                if(workspaceConnNames.contains(name))
+                    continue;
+
+                final Connection connection = getWorkspaceManager(uow).createConnection( uow, null, name);
+                final RestConnection teiidConnEntity = entityFactory.create(teiidConn, uriInfo.getBaseUri(), uow);
+
+                setProperties(uow, connection, teiidConnEntity);
+            }
+
+            status.addAttribute("copyConnsToRepo", RelationalMessages.getString(RelationalMessages.Info.CONNECTION_TO_REPO_SUCCESS)); //$NON-NLS-1$
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.CONNECTION_TO_REPO_IMPORT_ERROR);
+        }
+    }
+
+    /**
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
@@ -1747,7 +1910,7 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @param fileAttributes
+     * @param driverAttributes
      *        the file attributes (never <code>null</code>)
      * @return a JSON representation of the status (never <code>null</code>)
      * @throws KomodoRestException
@@ -1774,7 +1937,7 @@ public class KomodoTeiidService extends KomodoService {
                                                      CLOSE_PRE_TAG,
                                              required = true
                                    )
-                                   final String fileAttributes) throws KomodoRestException {
+                                   final String driverAttributes) throws KomodoRestException {
 
         SecurityPrincipal principal = checkSecurityContext(headers);
         if (principal.hasErrorResponse())
@@ -1784,47 +1947,83 @@ public class KomodoTeiidService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        KomodoFileAttributes kfa;
-        try {
-            kfa = KomodoJsonMarshaller.unmarshall(fileAttributes, KomodoFileAttributes.class);
-            Response response = checkFileAttributes(kfa, mediaTypes);
-            if (response.getStatus() != Status.OK.getStatusCode())
-                return response;
-
-        } catch (Exception ex) {
-            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
-        }
-
         UnitOfWork uow = null;
+        String driverName = null;
+        byte[] driverContent = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
-
             uow = createTransaction(principal, "deployTeiidDriver", false); //$NON-NLS-1$
 
-            byte[] content = decode(kfa.getContent());
+            if (driverAttributes.contains(KomodoPathAttribute.PATH_LABEL)) {
+                // Is a workspace path to a driver
+                try {
+                    KomodoPathAttribute kpa = KomodoJsonMarshaller.unmarshall(driverAttributes, KomodoPathAttribute.class);
+                    if (kpa.getPath() == null) {
+                        return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DRIVER_MISSING_PATH);
+                    }
+
+                    List<KomodoObject> results = this.repo.searchByPath(uow, kpa.getPath());
+                    if (results.size() == 0) {
+                        return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DRIVER_FOUND_IN_WKSP, kpa.getPath());
+                    }
+
+                    Driver driver = getWorkspaceManager(uow).resolve(uow, results.get(0), Driver.class);
+                    if (driver == null) {
+                        return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DRIVER_FOUND_IN_WKSP, kpa.getPath());
+                    }
+
+                    driverName = driver.getName(uow);
+                    driverContent = FileUtils.streamToByteArray(driver.getContent(uow));
+
+                } catch (Exception ex) {
+                    return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+                }
+
+            } else {
+                // Is a set of file attributes for file-based with content encoded
+                try {
+                    KomodoFileAttributes kfa = KomodoJsonMarshaller.unmarshall(driverAttributes, KomodoFileAttributes.class);
+                    Response response = checkFileAttributes(kfa, mediaTypes);
+                    if (response.getStatus() != Status.OK.getStatusCode())
+                        return response;
+
+                    driverName = kfa.getName();
+                    driverContent = decode(kfa.getContent());
+
+                } catch (Exception ex) {
+                    return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+                }
+            }
+
+            if (driverName == null || driverContent == null) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ATTRIBUTES_MISSING);
+            }
+
             String tempDir = FileUtils.tempDirectory();
-            String fileName = content.hashCode() + DOT + kfa.getName();
+            String fileName = driverContent.hashCode() + DOT + driverName;
             File driverFile = new File(tempDir, fileName);
+            FileUtils.write(driverContent, driverFile);
 
-            FileUtils.write(content, driverFile);
-
+            Teiid teiidNode = getDefaultTeiid();
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
-            teiidInstance.deployDriver(kfa.getName(), driverFile);
+            teiidInstance.deployDriver(driverName, driverFile);
 
             // Await the deployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
             // Make sure Driver state is current in the cachedTeiid
-            refreshCachedDrivers(teiidNode, kfa.getName());
+            refreshCachedDrivers(teiidNode, driverName);
 
             String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
-            if (hasDataSourceDriver(kfa.getName(), teiidNode))
-                status.addAttribute(kfa.getName(),
+            status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
+
+            if (hasDataSourceDriver(driverName, teiidNode)) {
+                status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
+                status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED));
-            else
-                status.addAttribute(kfa.getName(),
+            } else
+                status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UPLOADED));
 
            return commit(uow, mediaTypes, status);
@@ -1838,7 +2037,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DRIVER_ERROR, kfa.getName());
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DRIVER_ERROR, driverName);
         }
     }
 
@@ -2263,7 +2462,155 @@ public class KomodoTeiidService extends KomodoService {
             return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR);
         }
     }
-    
+
+//
+//    TODO
+//
+//    Cannot actually use this at the moment since the removal and addition
+//    of a datasource during the same runtime fails with the error:
+//
+//    TEIID70006 {"WFLYCTL0062: Composite operation failed and was rolled back
+//    Steps that failed:" => {"Operation step-1" => "WFLYCTL0158: Operation handler
+//    failed: org.jboss.msc.service.DuplicateServiceException: Service
+//    org.wildfly.data-source.{DatasourceName} is already registered"}}
+//
+//    Cannot refresh teiid either since its not part of the API
+//    see https://issues.jboss.org/browse/TEIID-4592
+//    
+//    /**
+//     * Updates a Connection on the server (deletes then adds)
+//     * @param headers
+//     *        the request headers (never <code>null</code>)
+//     * @param uriInfo
+//     *        the request URI information (never <code>null</code>)
+//     * @param pathAttribute
+//     *        the path (never <code>null</code>)
+//     * @return a JSON representation of the status (never <code>null</code>)
+//     * @throws KomodoRestException
+//     *         if there is an error adding the Connection
+//     */
+//    @SuppressWarnings( "nls" )
+//    @PUT
+//    @Path(V1Constants.CONNECTION_SEGMENT)
+//    @Produces( MediaType.APPLICATION_JSON )
+//    @Consumes ( { MediaType.APPLICATION_JSON } )
+//    @ApiOperation(value = "Updates the connection on the teiid server")
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+//        @ApiResponse(code = 403, message = "An error has occurred.")
+//    })
+//    public Response updateConnection( final @Context HttpHeaders headers,
+//                                   final @Context UriInfo uriInfo,
+//                                   @ApiParam(
+//                                             value = "" + 
+//                                                     "JSON of the properties of the connection:<br>" +
+//                                                     OPEN_PRE_TAG +
+//                                                     OPEN_BRACE + BR +
+//                                                     NBSP + "path: \"location of the connection in the workspace\"" + BR +
+//                                                     CLOSE_BRACE +
+//                                                     CLOSE_PRE_TAG,
+//                                             required = true
+//                                   )
+//                                   final String pathAttribute)
+//                                   throws KomodoRestException {
+//
+//        SecurityPrincipal principal = checkSecurityContext(headers);
+//        if (principal.hasErrorResponse())
+//            return principal.getErrorResponse();
+//
+//        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+//        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+//            return notAcceptableMediaTypesBuilder().build();
+//
+//        //
+//        // Error if there is no path attribute defined
+//        //
+//        KomodoPathAttribute kpa;
+//        try {
+//            kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
+//            if (kpa.getPath() == null) {
+//                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SOURCE_MISSING_PATH);
+//            }
+//        } catch (Exception ex) {
+//            return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
+//        }
+//
+//        UnitOfWork uow = null;
+//        try {
+//            Teiid teiidNode = getDefaultTeiid();
+//
+//            uow = createTransaction(principal, "updateTeiidConnection", false); //$NON-NLS-1$
+//
+//            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+//
+//            List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
+//            if (dataSources.size() == 0) {
+//                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+//            }
+//
+//            Connection dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Connection.class);
+//            if (dataSource == null) {
+//                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+//            }
+//
+//            //
+//            // If connection exists then remove it first
+//            //
+//            String connectionName = dataSource.getName(uow);
+//            if (teiidInstance.dataSourceExists(connectionName)) {
+//                teiidInstance.deleteDataSource(connectionName);
+//                Thread.sleep(DEPLOYMENT_WAIT_TIME);
+//            }
+//
+//            //
+//            // Deploy the data source
+//            //
+//            DeployStatus deployStatus = dataSource.deploy(uow, teiidNode);
+//
+//            // Await the deployment to end
+//            Thread.sleep(DEPLOYMENT_WAIT_TIME);
+//
+//            // Make sure Datasource is current in the CachedTeiid
+//            refreshCachedDataSources(teiidNode);
+//
+//            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+//            KomodoStatusObject status = new KomodoStatusObject(title);
+//
+//            List<String> progressMessages = deployStatus.getProgressMessages();
+//            for (int i = 0; i < progressMessages.size(); ++i) {
+//                status.addAttribute("ProgressMessage" + (i + 1), progressMessages.get(i));
+//            }
+//
+//            if (deployStatus.ok()) {
+//                status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
+//                status.addAttribute(dataSource.getName(uow),
+//                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_DEPLOYED));
+//            } else {
+//                status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
+//                List<String> errorMessages = deployStatus.getErrorMessages();
+//                for (int i = 0; i < errorMessages.size(); ++i) {
+//                    status.addAttribute("ErrorMessage" + (i + 1), errorMessages.get(i));
+//                }
+//
+//                status.addAttribute(dataSource.getName(uow),
+//                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYED_WITH_ERRORS));
+//            }
+//
+//           return commit(uow, mediaTypes, status);
+//
+//        } catch (final Exception e) {
+//            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+//                uow.rollback();
+//            }
+//
+//            if (e instanceof KomodoRestException) {
+//                throw (KomodoRestException)e;
+//            }
+//
+//            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR);
+//        }
+//    }
+
     /**
      * Adds (deploys) a VDB to the server
      * @param headers
@@ -3191,6 +3538,203 @@ public class KomodoTeiidService extends KomodoService {
             String driver = translatorNode.getAttributes().getNamedItem( ATTR_DRIVER ).getTextContent();
             String translator = translatorNode.getTextContent();
             driverTranslatorMap.put(driver, translator);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the connection templates available in teiid (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the Templates JSON document
+     */
+    @GET
+    @Path(V1Constants.TEMPLATES_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Display the collection of templates",
+                            response = RestTemplate[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnectionTemplates(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find templates
+            uow = createTransaction(principal, "getTemplates", true); //$NON-NLS-1$
+
+            Template[] templates = cachedTeiid.getTemplates(uow);
+            LOGGER.debug("getTemplates:found '{0}' Templates", templates.length); //$NON-NLS-1$
+
+            final List<RestTemplate> entities = new ArrayList<RestTemplate>();
+
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
+            for (final Template template : templates) {
+                RestTemplate entity = entityFactory.create(template, uriInfo.getBaseUri(), uow, properties);
+                entities.add(entity);
+                LOGGER.debug("getTemplates:Template '{0}' entity was constructed", template.getName(uow)); //$NON-NLS-1$
+            }
+
+            // create response
+            return commit(uow, mediaTypes, entities);
+        } catch (CallbackTimeoutException ex) {
+                return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TEMPLATES_ERROR);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the connection templates available in teiid (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the Templates JSON document
+     */
+    @GET
+    @Path(V1Constants.TEMPLATES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.TEMPLATE_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find connection template by name",
+                            response = RestTemplate.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No template could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnectionTemplate(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo,
+                                                   @ApiParam(value = "Name of the template", required = true)
+                                                    final @PathParam( "templateName" ) String templateName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find template
+            uow = createTransaction(principal, "getTemplates", true); //$NON-NLS-1$
+
+            Template template = cachedTeiid.getTemplate(uow, templateName);
+            if (template == null)
+                return commitNoTemplateFound(uow, mediaTypes, templateName);
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestTemplate restTemplate = entityFactory.create(template, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("getConnectionTemplate:Template '{0}' entity was constructed", template.getName(uow)); //$NON-NLS-1$
+            return commit( uow, mediaTypes, restTemplate );
+
+        } catch (CallbackTimeoutException ex) {
+                return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TEMPLATE_ERROR);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the entry properties available in a teiid template (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the TemplateEntry JSON document
+     */
+    @GET
+    @Path(V1Constants.TEMPLATES_SEGMENT + StringConstants.FORWARD_SLASH +
+                  V1Constants.TEMPLATE_PLACEHOLDER + StringConstants.FORWARD_SLASH + 
+                  V1Constants.TEMPLATE_ENTRIES_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Find the template entries of the named template",
+                            response = RestTemplateEntry[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No template could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getConnectionTemplateEntries(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo,
+                                                   @ApiParam(value = "Name of the template", required = true)
+                                                    final @PathParam( "templateName" ) String templateName) throws KomodoRestException {
+
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+            CachedTeiid cachedTeiid = importContent(teiidNode);
+
+            // find template
+            uow = createTransaction(principal, "getTemplateEntries", true); //$NON-NLS-1$
+
+            Template template = cachedTeiid.getTemplate(uow, templateName);
+            if (template == null)
+                return commitNoTemplateFound(uow, mediaTypes, templateName);
+
+            final List<RestTemplateEntry> entities = new ArrayList<RestTemplateEntry>();
+            List<TemplateEntry> entries = template.getEntries(uow);
+            Collections.sort(entries, new TemplateEntryComparator(uow));
+
+            for (TemplateEntry entry : entries) {
+                KomodoProperties properties = new KomodoProperties();
+                RestTemplateEntry restEntry = entityFactory.create(entry, uriInfo.getBaseUri(), uow, properties);
+                entities.add(restEntry);
+            }
+
+            return commit(uow, mediaTypes, entities);
+
+        } catch (CallbackTimeoutException ex) {
+                return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TEMPLATE_ENTRIES_ERROR);
         }
     }
 }

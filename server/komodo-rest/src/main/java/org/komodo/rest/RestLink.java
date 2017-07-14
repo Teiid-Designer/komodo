@@ -137,7 +137,12 @@ public final class RestLink {
         /**
          * A link to a data service's connections
          */
-        DRIVERS;
+        DRIVERS,
+
+        /**
+         * A link to a connection template's entries resource
+         */
+        TEMPLATE_ENTRIES(KomodoType.TEMPLATE_ENTRY);
 
         private KomodoType kType;
 
