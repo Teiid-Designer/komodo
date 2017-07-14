@@ -47,6 +47,7 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.BasicUserPrincipal;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -391,7 +392,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         // Add this to enable BASIC authorization
         //
         String credentials = USER_NAME + COLON + PASSWORD;
-        byte[] encCredentials = DatatypeConverter.parseBase64Binary(credentials);
+        byte[] encCredentials = Base64.encodeBase64(credentials.getBytes());
 
         String value = "Basic " + new String(encCredentials);
         request.header("Authorization", value);

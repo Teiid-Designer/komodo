@@ -24,6 +24,7 @@ package org.komodo.rest.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -94,7 +95,15 @@ public final class IT_KomodoTeiidServiceDriverTests extends AbstractKomodoTeiidS
         assertFalse(attributes.isEmpty());
 
         String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED);
-        assertEquals(deployMsg, attributes.values().iterator().next());
+        boolean foundValue = false;
+        for (String value : attributes.values()) {
+            if (deployMsg.equals(value)) {
+               foundValue = true;
+               break;
+            }
+        }
+
+        assertTrue(foundValue);
 
         assertMysqlDriver();
     }
