@@ -29,7 +29,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,6 +41,7 @@ import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.komodo.relational.ViewBuilderCriteriaPredicate;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
@@ -194,11 +197,11 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
 
     @Test
-    public void shouldGetViewInfoForDataService() throws Exception {
-        loadStatesDataService();
+    public void shouldGetViewInfoForSingleSourceDataService() throws Exception {
+        loadDsbSingleSourceDataService();
 
         // get
-        String dsName = TestUtilities.US_STATES_DATA_SERVICE_NAME;
+        String dsName = TestUtilities.PARTS_SINGLE_SOURCE_SERVICE_NAME;
         Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
         _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
 
@@ -209,12 +212,121 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
-        assertTrue(entity.contains("sourceVdbName"));
-        assertTrue(entity.contains("ServiceSource"));
-        assertTrue(entity.contains("tableName"));
-        assertTrue(entity.contains("state"));
-        assertTrue(entity.contains("columnNames"));
-        assertTrue(entity.contains("id"));
+        RestDataserviceViewInfo[] viewInfos = KomodoJsonMarshaller.unmarshallArray(entity, RestDataserviceViewInfo[].class);
+        assertEquals(2, viewInfos.length);
+        
+        for(int i = 0; i < viewInfos.length; i++) {
+            String infoType = viewInfos[i].getInfoType();
+            if(infoType.equals(RestDataserviceViewInfo.LH_TABLE_INFO)) {
+                assertEquals("OracleParts", viewInfos[i].getSourceVdbName());
+                assertEquals("SUPPLIER", viewInfos[i].getTableName());
+                List<String> colList = Arrays.asList(viewInfos[i].getColumnNames());
+                assertTrue(colList.contains("SUPPLIER_ID"));
+                assertTrue(colList.contains("SUPPLIER_NAME"));
+                assertTrue(colList.contains("SUPPLIER_STATUS"));
+                assertTrue(colList.contains("SUPPLIER_CITY"));
+                assertTrue(colList.contains("SUPPLIER_STATE"));
+            } else if(infoType.equals(RestDataserviceViewInfo.DDL_INFO)) {
+                assertEquals(true, viewInfos[i].isViewEditable());
+                assertEquals("CREATE VIEW PartsSingleSourceView (\n\tSUPPLIER_ID string,\n\tSUPPLIER_NAME string,\n\tSUPPLIER_STATUS bigdecimal,\n\tSUPPLIER_CITY string,\n\tSUPPLIER_STATE string,\n\tPRIMARY KEY(SUPPLIER_ID)\n)\nAS\nSELECT SUPPLIER_ID, SUPPLIER_NAME, SUPPLIER_STATUS, SUPPLIER_CITY, SUPPLIER_STATE FROM OracleParts.SUPPLIER;\n", viewInfos[i].getViewDdl());
+            }
+        }
+    }
+    
+    @Test
+    public void shouldGetViewInfoForJoinSameTableNamesDataService() throws Exception {
+        loadDsbJoinSameTableNamesDataService();
+
+        // get
+        String dsName = TestUtilities.JOIN_SAME_TABLE_NAMES_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SERVICE_VIEW_INFO, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        RestDataserviceViewInfo[] viewInfos = KomodoJsonMarshaller.unmarshallArray(entity, RestDataserviceViewInfo[].class);
+        assertEquals(4, viewInfos.length);
+       
+        for(int i = 0; i < viewInfos.length; i++) {
+            String infoType = viewInfos[i].getInfoType();
+            if(infoType.equals(RestDataserviceViewInfo.LH_TABLE_INFO)) {
+                assertEquals("BQTOracle", viewInfos[i].getSourceVdbName());
+                assertEquals("SMALLA", viewInfos[i].getTableName());
+                List<String> colList = Arrays.asList(viewInfos[i].getColumnNames());
+                assertTrue(colList.contains("INTKEY"));
+                assertTrue(colList.contains("STRINGKEY"));
+            } else if(infoType.equals(RestDataserviceViewInfo.RH_TABLE_INFO)) {
+                assertEquals("BQTOracle2", viewInfos[i].getSourceVdbName());
+                assertEquals("SMALLA", viewInfos[i].getTableName());
+                List<String> colList = Arrays.asList(viewInfos[i].getColumnNames());
+                assertTrue(colList.contains("STRINGKEY"));
+                assertTrue(colList.contains("INTNUM"));
+            } else if(infoType.equals(RestDataserviceViewInfo.CRITERIA_INFO)) {
+                assertEquals("INNER", viewInfos[i].getJoinType());
+                List<ViewBuilderCriteriaPredicate> colList = viewInfos[i].getCriteriaPredicates();
+                assertEquals(1, colList.size());
+                ViewBuilderCriteriaPredicate predicate = colList.get(0);
+                assertEquals("INTKEY", predicate.getLhColumn());
+                assertEquals("INTKEY", predicate.getRhColumn());
+                assertEquals("=", predicate.getOperator());
+            } else if(infoType.equals(RestDataserviceViewInfo.DDL_INFO)) {
+                assertEquals(true, viewInfos[i].isViewEditable());
+                assertEquals("CREATE VIEW JoinServiceSameTableNamesView (\n\tRowId integer,\n\tINTKEY bigdecimal,\n\tA_STRINGKEY string,\n\tB_STRINGKEY string,\n\tINTNUM bigdecimal,\n\tPRIMARY KEY(RowId)\n)\nAS\nSELECT ROW_NUMBER() OVER (ORDER BY A.INTKEY), A.INTKEY, A.STRINGKEY, B.STRINGKEY, B.INTNUM FROM BQTOracle.SMALLA AS A INNER JOIN BQTOracle2.SMALLA AS B ON A.INTKEY = B.INTKEY;\n", viewInfos[i].getViewDdl());
+            }
+        }
+    }
+    
+    @Test
+    public void shouldGetViewInfoForJoinDifferentTableNamesDataService() throws Exception {
+        loadDsbJoinDifferentTableNamesDataService();
+
+        // get
+        String dsName = TestUtilities.JOIN_DIFFERENT_TABLE_NAMES_SERVICE_NAME;
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, dsName);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SERVICE_VIEW_INFO, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+
+        RestDataserviceViewInfo[] viewInfos = KomodoJsonMarshaller.unmarshallArray(entity, RestDataserviceViewInfo[].class);
+        assertEquals(4, viewInfos.length);
+        
+        for(int i = 0; i < viewInfos.length; i++) {
+            String infoType = viewInfos[i].getInfoType();
+            if(infoType.equals(RestDataserviceViewInfo.LH_TABLE_INFO)) {
+                assertEquals("BQTOracle", viewInfos[i].getSourceVdbName());
+                assertEquals("SMALLA", viewInfos[i].getTableName());
+                List<String> colList = Arrays.asList(viewInfos[i].getColumnNames());
+                assertTrue(colList.contains("INTKEY"));
+                assertTrue(colList.contains("STRINGKEY"));
+            } else if(infoType.equals(RestDataserviceViewInfo.RH_TABLE_INFO)) {
+                assertEquals("BQTOracle2", viewInfos[i].getSourceVdbName());
+                assertEquals("SMALLB", viewInfos[i].getTableName());
+                List<String> colList = Arrays.asList(viewInfos[i].getColumnNames());
+                assertTrue(colList.contains("STRINGKEY"));
+                assertTrue(colList.contains("INTNUM"));
+            } else if(infoType.equals(RestDataserviceViewInfo.CRITERIA_INFO)) {
+                assertEquals("INNER", viewInfos[i].getJoinType());
+                List<ViewBuilderCriteriaPredicate> colList = viewInfos[i].getCriteriaPredicates();
+                assertEquals(1, colList.size());
+                ViewBuilderCriteriaPredicate predicate = colList.get(0);
+                assertEquals("INTKEY", predicate.getLhColumn());
+                assertEquals("INTKEY", predicate.getRhColumn());
+                assertEquals("=", predicate.getOperator());
+            } else if(infoType.equals(RestDataserviceViewInfo.DDL_INFO)) {
+                assertEquals(true, viewInfos[i].isViewEditable());
+                assertEquals("CREATE VIEW JoinServiceDifferentTableNamesView (\n\tRowId integer,\n\tINTKEY bigdecimal,\n\tA_STRINGKEY string,\n\tB_STRINGKEY string,\n\tINTNUM bigdecimal,\n\tPRIMARY KEY(RowId)\n)\nAS\nSELECT ROW_NUMBER() OVER (ORDER BY A.INTKEY), A.INTKEY, A.STRINGKEY, B.STRINGKEY, B.INTNUM FROM BQTOracle.SMALLA AS A INNER JOIN BQTOracle2.SMALLB AS B ON A.INTKEY = B.INTKEY;\n", viewInfos[i].getViewDdl());
+            }
+        }
     }
     
     @Test
@@ -507,8 +619,12 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         ClientResponse<String> response = request.post(String.class);
 
         final String entity = response.getEntity();
-        assertTrue(entity.contains("infoType"));
-        assertTrue(entity.contains("CREATE VIEW MyDataServiceView"));
+        
+        RestDataserviceViewInfo viewInfo = KomodoJsonMarshaller.unmarshall(entity, RestDataserviceViewInfo.class);
+        assertEquals(RestDataserviceViewInfo.DDL_INFO, viewInfo.getInfoType());
+        assertEquals("CREATE VIEW MyDataServiceView ( ROW_ID INTEGER, ACCOUNT_ID INTEGER, PRODUCT_TYPE STRING, PRODUCT_VALUE STRING, " +
+                     "CONSTRAINT PK0 PRIMARY KEY (ROW_ID)) AS \nSELECT  ROW_ID, ACCOUNT_ID, PRODUCT_TYPE, PRODUCT_VALUE \nFROM Portfolio.Sheet1;", viewInfo.getViewDdl());
+        assertEquals(false, viewInfo.isViewEditable());
     }
     
     @Test
@@ -582,10 +698,16 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         ClientResponse<String> response = request.post(String.class);
 
         final String entity = response.getEntity();
-        assertTrue(entity.contains("infoType"));
-        assertTrue(entity.contains("CREATE VIEW MyDataServiceView"));
+        
+        RestDataserviceViewInfo viewInfo = KomodoJsonMarshaller.unmarshall(entity, RestDataserviceViewInfo.class);
+        assertEquals(RestDataserviceViewInfo.DDL_INFO, viewInfo.getInfoType());
+        assertEquals("CREATE VIEW MyDataServiceView (RowId integer PRIMARY KEY,  A_ROW_ID INTEGER, A_ACCOUNT_ID INTEGER, A_PRODUCT_TYPE STRING, A_PRODUCT_VALUE STRING,  " +
+                     "B_ROW_ID INTEGER, B_ACCOUNT_ID INTEGER, B_PRODUCT_TYPE STRING, B_PRODUCT_VALUE STRING) AS \n" + 
+                     "SELECT ROW_NUMBER() OVER (ORDER BY A.ROW_ID), A.ROW_ID, A.ACCOUNT_ID, A.PRODUCT_TYPE, A.PRODUCT_VALUE, B.ROW_ID, B.ACCOUNT_ID, B.PRODUCT_TYPE, B.PRODUCT_VALUE \n" + 
+                     "FROM \nPortfolio.Sheet1 AS A \nINNER JOIN \nPortfolio.Sheet1 AS B ;", viewInfo.getViewDdl());
+        assertEquals(false, viewInfo.isViewEditable());
     }
-
+    
     @Test
     public void shouldFailNameValidationWhenNameAlreadyExists() throws Exception {
         // create a data service first

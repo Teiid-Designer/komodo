@@ -142,7 +142,8 @@ public class ViewDdlBuilder {
         }
         sb.append(" \n"); //$NON-NLS-1$
         sb.append("FROM "); //$NON-NLS-1$
-        sb.append(escapeSQLName(teiidVersion, table.getName(uow)));
+        String vdbName = table.getParent(uow).getParent(uow).getName(uow);
+        sb.append(escapeSQLName(teiidVersion, vdbName) + StringConstants.DOT + escapeSQLName(teiidVersion, table.getName(uow)));
         sb.append(StringConstants.SEMI_COLON);
 
         return sb.toString();
@@ -183,8 +184,10 @@ public class ViewDdlBuilder {
         TeiidVersion teiidVersion = TeiidVersionProvider.getInstance().getTeiidVersion();
 
         // Left and Right table names
-        String lhTableNameAliased = lhTable.getName(uow)+" AS "+lhTableAlias; //$NON-NLS-1$
-        String rhTableNameAliased = rhTable.getName(uow)+" AS "+rhTableAlias; //$NON-NLS-1$
+        String lhVdbName = lhTable.getParent(uow).getParent(uow).getName(uow);
+        String rhVdbName = rhTable.getParent(uow).getParent(uow).getName(uow);
+        String lhTableNameAliased = lhVdbName+StringConstants.DOT+lhTable.getName(uow)+" AS "+lhTableAlias; //$NON-NLS-1$
+        String rhTableNameAliased = rhVdbName+StringConstants.DOT+rhTable.getName(uow)+" AS "+rhTableAlias; //$NON-NLS-1$
         
         List<String> includedLHColumnNames = new ArrayList<String>();
         if( lhColNames!=null && !lhColNames.isEmpty() ) {
@@ -199,23 +202,29 @@ public class ViewDdlBuilder {
         boolean includeAllRHColumns = (includedRHColumnNames.isEmpty()) ? true : false;
 
         // Get LHS table column names and types
+        List<String> allLeftColNames = new ArrayList<String>();
         List<String> leftColNames = new ArrayList<String>();
         List<String> leftColTypes = new ArrayList<String>();
         Column[] lhCols = lhTable.getColumns(uow);
         for (int i = 0; i < lhCols.length; i++) {
-            if(includeAllLHColumns || includedLHColumnNames.contains(lhCols[i].getName(uow))) {
-                leftColNames.add(lhCols[i].getName(uow));
+            String lName = lhCols[i].getName(uow);
+            allLeftColNames.add(lName);
+            if(includeAllLHColumns || includedLHColumnNames.contains(lName)) {
+                leftColNames.add(lName);
                 leftColTypes.add(lhCols[i].getDatatypeName(uow));
             }
         }
         
         // Get RHS table column names and types
+        List<String> allRightColNames = new ArrayList<String>();
         List<String> rightColNames = new ArrayList<String>();
         List<String> rightColTypes = new ArrayList<String>();
         Column[] rhCols = rhTable.getColumns(uow);
         for (int i = 0; i < rhCols.length; i++) {
-            if(includeAllRHColumns || includedRHColumnNames.contains(rhCols[i].getName(uow))) {
-                rightColNames.add(rhCols[i].getName(uow));
+            String rName = rhCols[i].getName(uow);
+            allRightColNames.add(rName);
+            if(includeAllRHColumns || includedRHColumnNames.contains(rName)) {
+                rightColNames.add(rName);
                 rightColTypes.add(rhCols[i].getDatatypeName(uow));
             }
         }
@@ -225,9 +234,11 @@ public class ViewDdlBuilder {
         sb.append(StringConstants.SPACE+StringConstants.OPEN_BRACKET);
 
         sb.append("RowId integer PRIMARY KEY, "); //$NON-NLS-1$
-        sb.append(getColWithTypeString(teiidVersion, leftColNames, leftColTypes));
+        // Get list of columns that are duplicated in LH and RH and will need to be alias prefixed.
+        List<String> duplicateColNames = getDuplicateColumnNames(leftColNames, rightColNames);
+        sb.append(getAliasedColWithTypeString(teiidVersion, leftColNames, leftColTypes, lhTableAlias, duplicateColNames));
         sb.append(StringConstants.COMMA+StringConstants.SPACE);
-        sb.append(getColWithTypeString(teiidVersion, rightColNames, rightColTypes));
+        sb.append(getAliasedColWithTypeString(teiidVersion, rightColNames, rightColTypes, rhTableAlias, duplicateColNames));
         sb.append(") AS \nSELECT "); //$NON-NLS-1$
         sb.append("ROW_NUMBER() OVER (ORDER BY "); //$NON-NLS-1$
         sb.append(getAliasedFirstColName(teiidVersion, leftColNames, lhTableAlias, rightColNames, rhTableAlias));
@@ -271,6 +282,37 @@ public class ViewDdlBuilder {
         sb.append(StringConstants.SEMI_COLON);
 
         return sb.toString();
+    }
+    
+    /**
+     * Get the list of names that are duplicate(case insensitive) between the two supplied lists.
+     * @param lhColNames the list of column names for the left table
+     * @param rhColNames the list of column names for the right table
+     * @return the list of duplicated (case insensitive) names.  The returned names are lower cased
+     */
+    private static List<String> getDuplicateColumnNames(List<String> lhColNames, List<String> rhColNames) {
+        List<String> duplicateNames = new ArrayList<String>();
+        for(String lhColName : lhColNames) {
+            if(containsCaseInsensitive(lhColName, rhColNames)) {
+                duplicateNames.add(lhColName.toLowerCase());
+            }
+        }
+        return duplicateNames;
+    }
+    
+    /**
+     * Determine if the supplied String s is contained by the supplied list (case insensitive)
+     * @param s the string to test
+     * @param l the list of names to test against
+     * @return 'true' if the list contains the string (case insensitive) 
+     */
+    private static boolean containsCaseInsensitive(String s, List<String> l){
+        for (String string : l){
+            if (string.equalsIgnoreCase(s)){
+                return true;
+            }
+        }
+        return false;
     }
     
     private static Set<String> getConstraintColumnNames(UnitOfWork uow, Table table) throws KException {
@@ -371,6 +413,32 @@ public class ViewDdlBuilder {
                 sb.append(StringConstants.COMMA);
             }
             sb.append(StringConstants.SPACE + escapeSQLName(teiidVersion, columnNames.get(i)));
+            sb.append(StringConstants.SPACE);
+            sb.append(typeNames.get(i));
+        }
+        return sb.toString();
+    }
+
+    /*
+     * Generates comma separated string of the supplied column names with their corresponding type.
+     * If columns are in the duplicateNames list, then prefix them with the supplied alias.
+     * Will be of form: "alias_column1 string, alias_column2 string, column3 long"
+     */
+    private static String getAliasedColWithTypeString(TeiidVersion teiidVersion, List<String> columnNames,
+                                                      List<String> typeNames, String alias, List<String> duplicateNames) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < columnNames.size(); i++) {
+            if (i != 0) {
+                sb.append(StringConstants.COMMA);
+            }
+
+            // If the columnName is a duplicate, prefix it with "alias_"
+            String colName = columnNames.get(i);
+            if(duplicateNames.contains(colName.toLowerCase())) {
+                sb.append(StringConstants.SPACE + alias + StringConstants.UNDERSCORE + escapeSQLName(teiidVersion, colName));
+            } else {
+                sb.append(StringConstants.SPACE + escapeSQLName(teiidVersion, colName));
+            }
             sb.append(StringConstants.SPACE);
             sb.append(typeNames.get(i));
         }
