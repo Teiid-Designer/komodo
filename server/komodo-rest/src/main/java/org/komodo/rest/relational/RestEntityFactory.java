@@ -93,7 +93,7 @@ public class RestEntityFactory implements V1Constants {
                 Condition condition = wsMgr.resolve(uow, kObject, Condition.class);
                 return (T) new RestVdbCondition(baseUri, condition, uow);
             case VDB_DATA_ROLE:
-                DataRole dataRole = wsMgr.resolve(uow, kObject, DataRole.class);
+                DataRole dataRole = ( kObject instanceof DataRole ) ? ( DataRole )kObject : wsMgr.resolve(uow, kObject, DataRole.class);
                 return (T) new RestVdbDataRole(baseUri, dataRole, uow);
             case VDB_IMPORT:
                 VdbImport vdbImport = wsMgr.resolve(uow, kObject, VdbImport.class);

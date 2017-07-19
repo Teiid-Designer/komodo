@@ -36,6 +36,17 @@ import org.komodo.spi.repository.KomodoType;
 public final class RelationalMessages {
 
     public enum Info {
+        
+        /**
+         * A successfully deleted message.
+         */
+        DELETE_STATUS_MSG,
+        
+        /**
+         * The title of a delete status.
+         */
+        DELETE_STATUS_TITLE,
+        
         /**
          * Tag for VDB Active Status
          */
@@ -543,6 +554,16 @@ public final class RelationalMessages {
         VDB_DESCRIPTOR_BUILDER_ERROR,
 
         /**
+         * An error indicating a VDB data role could not be created.
+         */
+        VDB_SERVICE_CREATE_DATA_ROLE_ERROR,
+        
+        /**
+         * An error indicating create attempt was missing a VDB data role name.
+         */
+        VDB_SERVICE_CREATE_MISSING_DATA_ROLE_NAME,
+
+        /**
          * An error indicating create attempt was missing a VDB name
          */
         VDB_SERVICE_CREATE_MISSING_VDB_NAME,
@@ -596,6 +617,16 @@ public final class RelationalMessages {
          * An error indicating the desired new clone name is same as VDB being cloned
          */
         VDB_SERVICE_CLONE_SAME_NAME_ERROR,
+        
+        /**
+         * An error indicating a data role with the specified name already exists.
+         */
+        VDB_SERVICE_DATA_ROLE_ALREADY_EXISTS,
+        
+        /**
+         * An error indicating the specified VDB data role could not be deleted.
+         */
+        VDB_SERVICE_DELETE_DATA_ROLE_ERROR,
         
         /**
          * An error indicating a VDB could not be deleted.
@@ -728,6 +759,16 @@ public final class RelationalMessages {
         VDB_SERVICE_GET_MASK_ERROR,
 
         /**
+         * An error indicating the VDB data role name is missing from the input JSON document.
+         */
+        VDB_SERVICE_MISSING_JSON_DATA_ROLE_NAME,
+        
+        /**
+         * An error indicating the parameter and JSON VDB data role name does not match.
+         */
+        VDB_SERVICE_DATA_ROLE_NAME_DONT_MATCH_ERROR,
+
+        /**
          * An error when creating a VDB indicating the input VDB JSON document was missing.
          */
         VDB_SERVICE_MISSING_JSON_VDB,
@@ -801,6 +842,11 @@ public final class RelationalMessages {
          * An error indicating the parameter and JSON ModelSource name does not match.
          */
         VDB_SERVICE_MODEL_SOURCE_NAME_DONT_MATCH_ERROR,
+        
+        /**
+         * An error indicating delete attempt was missing a VDB data role name.
+         */
+        VDB_SERVICE_DELETE_MISSING_DATA_ROLE_NAME,
 
         /**
          * An error indicating delete attempt was missing a VDB name

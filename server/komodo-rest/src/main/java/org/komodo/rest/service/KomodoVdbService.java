@@ -49,6 +49,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -1796,6 +1797,355 @@ public final class KomodoVdbService extends KomodoService {
             }
 
             return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_DATA_ROLES_ERROR, vdbName);
+        }
+    }
+
+    /**
+     * Create a data role in the specified VDB.
+     * 
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the vdb name (cannot be empty)
+     * @param dataRoleName
+     *        the data role name (cannot be empty)
+     * @param dataRoleJson
+     *        the data role JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the new data role (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the data role
+     */
+    @POST
+    @Path( V1Constants.VDB_PLACEHOLDER
+           + StringConstants.FORWARD_SLASH
+           + V1Constants.DATA_ROLES_SEGMENT
+           + StringConstants.FORWARD_SLASH
+           + V1Constants.DATA_ROLE_PLACEHOLDER )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Create a VDB data role")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No VDB could be found with specified name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response createDataRole( final @Context HttpHeaders headers,
+                                    final @Context UriInfo uriInfo,
+                                    @ApiParam( value = "Name of the VDB", required = true ) 
+                                    final @PathParam( "vdbName" ) String vdbName,
+                                    @ApiParam( value = "Name of the data role", required = true )
+                                    final @PathParam( "dataRoleId" ) String dataRoleName,
+                                    @ApiParam( value = ""
+                                                       + "JSON of the properties of the data role to add:<br>"
+                                                       + OPEN_PRE_TAG
+                                                       + OPEN_BRACE
+                                                       + BR
+                                                       + NBSP
+                                                       + "keng\\_\\_id: \"name of the data role\""
+                                                       + COMMA
+                                                       + BR
+                                                       + NBSP
+                                                       + "keng\\_\\_dataPath: \"path of the data role to create\""
+                                                       + COMMA
+                                                       + BR
+                                                       + NBSP
+                                                       + OPEN_PRE_CMT
+                                                       + "(eg keng\\_\\_dataPath: \"tko:komodo\\tko:workspace\\\\{username\\}\\\\{vdbName\\}\\vdb:dataRoles\\\\{dataRoleName\\}\")"
+                                                       + CLOSE_PRE_CMT
+                                                       + BR
+                                                       + NBSP
+                                                       + "keng\\_\\_kType: \"DataRole\""
+                                                       + BR
+                                                       + CLOSE_BRACE
+                                                       + CLOSE_PRE_TAG, required = true )
+                                    final String dataRoleJson ) throws KomodoRestException {
+        final SecurityPrincipal principal = checkSecurityContext( headers );
+        if ( principal.hasErrorResponse() ) {
+            return principal.getErrorResponse();
+        }
+
+        final List< MediaType > mediaTypes = headers.getAcceptableMediaTypes();
+        if ( !isAcceptable( mediaTypes, MediaType.APPLICATION_JSON_TYPE ) ) {
+            return notAcceptableMediaTypesBuilder().build();
+        }
+
+        // Error if the VDB name is missing
+        if ( StringUtils.isBlank( vdbName ) ) {
+            return createErrorResponseWithForbidden( mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_VDB_NAME );
+        }
+
+        // Error if the data role name is missing
+        if ( StringUtils.isBlank( dataRoleName ) ) {
+            return createErrorResponseWithForbidden( mediaTypes, RelationalMessages.Error.VDB_SERVICE_CREATE_MISSING_DATA_ROLE_NAME );
+        }
+
+        final RestVdbDataRole restDataRole = KomodoJsonMarshaller.unmarshall( dataRoleJson, RestVdbDataRole.class );
+        final String jsonDataRoleName = restDataRole.getId();
+
+        // Error if the name is missing from the supplied json body
+        if ( StringUtils.isBlank( jsonDataRoleName ) ) {
+            return createErrorResponseWithForbidden( mediaTypes,
+                                                     RelationalMessages.Error.VDB_SERVICE_MISSING_JSON_DATA_ROLE_NAME );
+        }
+
+        // Error if the name parameter is different than JSON name
+        final boolean namesMatch = dataRoleName.equals( jsonDataRoleName );
+        if ( !namesMatch ) {
+            return createErrorResponseWithForbidden( mediaTypes,
+                                                     RelationalMessages.Error.VDB_SERVICE_DATA_ROLE_NAME_DONT_MATCH_ERROR,
+                                                     dataRoleName,
+                                                     jsonDataRoleName );
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( principal, "createDataRole", false ); //$NON-NLS-1$
+            
+            // Get the specified VDB
+            final WorkspaceManager mgr = getWorkspaceManager( uow );
+            final KomodoObject kobject = mgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            final Vdb vdb = mgr.resolve( uow, kobject, Vdb.class );
+            
+            // Error if VDB is not found
+            if ( vdb == null ) {
+                return Response.noContent().build();
+            }
+            
+            // Error if the VDB already contains a data role with the supplied name.
+            if ( vdb.getDataRoles( uow, dataRoleName ).length != 0 ) {
+                return createErrorResponseWithForbidden( mediaTypes,
+                                                         RelationalMessages.Error.VDB_SERVICE_DATA_ROLE_ALREADY_EXISTS,
+                                                         dataRoleName );
+            }
+            
+            // create a new Model in the VDB
+            return doAddDataRole( uow, uriInfo.getBaseUri(), mediaTypes, vdb, restDataRole );
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden( mediaTypes,
+                                                     e,
+                                                     RelationalMessages.Error.VDB_SERVICE_CREATE_DATA_ROLE_ERROR,
+                                                     vdbName,
+                                                     dataRoleName );
+        }
+    }
+    
+    private Response doAddDataRole( final UnitOfWork uow,
+                                    final URI baseUri,
+                                    final List< MediaType > mediaTypes,
+                                    final Vdb vdb,
+                                    final RestVdbDataRole restDataRole ) throws KomodoRestException {
+        assert ( !uow.isRollbackOnly() );
+        assert ( uow.getState() == State.NOT_STARTED );
+        assert ( vdb != null );
+        assert ( restDataRole != null );
+
+        final String dataRoleName = restDataRole.getId();
+
+        try {
+            final DataRole newDataRole = vdb.addDataRole( uow, dataRoleName );
+            setDataRoleState( uow, newDataRole, restDataRole );
+
+            final RestVdbDataRole entity = this.entityFactory.create( newDataRole, baseUri, uow );
+            final Response response = commit( uow, mediaTypes, entity );
+
+            return response;
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            throw new KomodoRestException( RelationalMessages.getString( RelationalMessages.Error.VDB_SERVICE_CREATE_DATA_ROLE_ERROR,
+                                                                         dataRoleName ),
+                                           e );
+        }
+    }
+
+    private void setDataRoleState( final UnitOfWork uow,
+                                   final DataRole dataRole,
+                                   final RestVdbDataRole restVdbDataRole ) throws KException {
+        { // description
+            final String proposed = restVdbDataRole.getDescription();
+            final String current = dataRole.getDescription( uow );
+
+            if ( !StringUtils.equals( proposed, current ) ) {
+                dataRole.setDescription( uow, proposed );
+            }
+        }
+
+        { // allowCreateTempTables
+            final boolean proposed = restVdbDataRole.isAllowCreateTempTables();
+            final boolean current = dataRole.isAllowCreateTempTables( uow );
+
+            if ( proposed != current ) {
+                dataRole.setAllowCreateTempTables( uow, proposed );
+            }
+        }
+
+        { // anyAuthenticated
+            final boolean proposed = restVdbDataRole.isAnyAuthenticated();
+            final boolean current = dataRole.isAnyAuthenticated( uow );
+
+            if ( proposed != current ) {
+                dataRole.setAnyAuthenticated( uow, proposed );
+            }
+        }
+
+        { // grantAll
+            final boolean proposed = restVdbDataRole.isGrantAll();
+            final boolean current = dataRole.isGrantAll( uow );
+
+            if ( proposed != current ) {
+                dataRole.setGrantAll( uow, proposed );
+            }
+        }
+
+        { // mappedRoles
+            final String[] proposed = restVdbDataRole.getMappedRoles(); // never null
+            Arrays.sort( proposed );
+
+            final String[] current = dataRole.getMappedRoles( uow ); // never null
+            Arrays.sort( current );
+
+            if ( !Arrays.equals( proposed, current ) ) {
+                // remove old
+                if ( current.length != 0 ) {
+                    for ( final String role : current ) {
+                        dataRole.removeMappedRole( uow, role );
+                    }
+                }
+
+                // add new
+                if ( proposed.length != 0 ) {
+                    for ( final String role : proposed ) {
+                        dataRole.addMappedRole( uow, role );
+                    }
+                }
+            }
+        }
+
+        { // permissions
+            final RestVdbPermission[] permissions = restVdbDataRole.getPermissions();
+            
+            if ( permissions.length != 0 ) {
+                for ( final RestVdbPermission restPermission : permissions ) {
+                    final Permission permission = dataRole.addPermission( uow, restPermission.getName() );
+                    permission.setAllowAlter( uow, restPermission.isAllowAlter() );
+                    permission.setAllowCreate( uow, restPermission.isAllowCreate() );
+                    permission.setAllowDelete( uow, restPermission.isAllowDelete() );
+                    permission.setAllowExecute( uow, restPermission.isAllowExecute() );
+                    permission.setAllowLanguage( uow, restPermission.isAllowLanguage() );
+                    permission.setAllowRead( uow, restPermission.isAllowRead() );
+                    permission.setAllowUpdate( uow, restPermission.isAllowUpdate() );
+                    // TODO process conditions
+                    // TODO process masks
+                }
+            }
+        }
+    }
+
+    /**
+     * Delete the specified data role from the specified VDB
+     * 
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the name of the VDB (cannot be <code>null</code>)
+     * @param dataRoleName
+     *        the name of the data role to remove (cannot be <code>null</code>)
+     * @return a JSON document representing the results of the removal
+     * @throws KomodoRestException
+     *         if there is a problem performing the delete
+     */
+    @DELETE
+    @Path( V1Constants.VDB_PLACEHOLDER
+           + StringConstants.FORWARD_SLASH
+           + V1Constants.DATA_ROLES_SEGMENT
+           + StringConstants.FORWARD_SLASH
+           + V1Constants.DATA_ROLE_PLACEHOLDER )
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation( value = "Delete a data role from the VDB" )
+    @ApiResponses( value = { @ApiResponse( code = 404, message = "No VDB could be found with name" ),
+                             @ApiResponse( code = 404, message = "No data role could be found with name" ),
+                             @ApiResponse( code = 406, message = "Only JSON is returned by this operation" ),
+                             @ApiResponse( code = 403, message = "An error has occurred." ) } )
+    public Response deleteDataRole( final @Context HttpHeaders headers,
+                                    final @Context UriInfo uriInfo,
+                                    @ApiParam( value = "Name of the VDB", required = true ) final @PathParam( "vdbName" ) String vdbName,
+                                    @ApiParam( value = "Name of the data role to remove", required = true ) final @PathParam( "dataRoleId" ) String dataRoleName ) throws KomodoRestException {
+        final SecurityPrincipal principal = checkSecurityContext( headers );
+        if ( principal.hasErrorResponse() ) {
+            return principal.getErrorResponse();
+        }
+
+        final List< MediaType > mediaTypes = headers.getAcceptableMediaTypes();
+        if ( !isAcceptable( mediaTypes, MediaType.APPLICATION_JSON_TYPE ) ) {
+            return notAcceptableMediaTypesBuilder().build();
+        }
+
+        // Error if the Vdb name is missing
+        if ( StringUtils.isBlank( vdbName ) ) {
+            return createErrorResponseWithForbidden( mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_VDB_NAME );
+        }
+
+        // Error if the data role name is missing
+        if ( StringUtils.isBlank( dataRoleName ) ) {
+            return createErrorResponseWithForbidden( mediaTypes, RelationalMessages.Error.VDB_SERVICE_DELETE_MISSING_DATA_ROLE_NAME );
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( principal, "deleteDataRole", false ); //$NON-NLS-1$
+
+            // Get the specified VDB
+            final WorkspaceManager mgr = getWorkspaceManager( uow );
+            final KomodoObject kobject = mgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            final Vdb vdb = mgr.resolve( uow, kobject, Vdb.class );
+
+            if ( vdb == null ) {
+                return Response.noContent().build();
+            }
+
+            final DataRole[] dataRoles = vdb.getDataRoles( uow, dataRoleName );
+            if ( dataRoles.length == 0 ) {
+                return Response.noContent().build();
+            }
+
+            vdb.removeDataRole( uow, dataRoleName );
+
+            final KomodoStatusObject kso = new KomodoStatusObject( RelationalMessages.getString( RelationalMessages.Info.DELETE_STATUS_TITLE ) );
+            kso.addAttribute( dataRoleName, RelationalMessages.getString( RelationalMessages.Info.DELETE_STATUS_MSG ) );
+
+            return commit( uow, mediaTypes, kso );
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponseWithForbidden( mediaTypes,
+                                                     e,
+                                                     RelationalMessages.Error.VDB_SERVICE_DELETE_DATA_ROLE_ERROR,
+                                                     dataRoleName );
         }
     }
 
