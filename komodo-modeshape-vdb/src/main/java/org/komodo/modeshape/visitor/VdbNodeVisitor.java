@@ -369,12 +369,15 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         visitChild(node, NodeTypeName.PERMISSIONS.getId());
 
         // Mapped Role Names
-        Property property = node.getProperty(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
-        Value[] mappedRoleValues = property.getValues();
-        for (Value value : mappedRoleValues) {
-            writeTab(ElementTabValue.MAPPED_ROLE_NAME);
-            writeElementWithText(VdbLexicon.ManifestIds.MAPPED_ROLE_NAME, value.getString());
+        if ( node.hasProperty( VdbLexicon.DataRole.MAPPED_ROLE_NAMES ) ) {
+            Property property = node.getProperty(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
+            Value[] mappedRoleValues = property.getValues();
+            for (Value value : mappedRoleValues) {
+                writeTab(ElementTabValue.MAPPED_ROLE_NAME);
+                writeElementWithText(VdbLexicon.ManifestIds.MAPPED_ROLE_NAME, value.getString());
+            }
         }
+        
         writeTab(ElementTabValue.DATA_ROLE);
         writeEndElement();
     }
