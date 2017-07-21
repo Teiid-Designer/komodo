@@ -1,0 +1,31 @@
+<mappings>
+    <!--  -->
+    <!-- Mappings of unique connection URL content for translators -->
+    <translator urlcontent=":odbc:">access</translator>
+    <translator urlcontent="AH7">actian-vector</translator>
+    <translator urlcontent=":as400:">db2</translator>
+    <translator urlcontent=":db2:">db2</translator>
+    <translator urlcontent=":derby:">derby</translator>
+    <translator urlcontent=":h2">h2</translator>
+    <translator urlcontent=":sap">hana</translator>
+    <translator urlcontent=":hive:">hive</translator>
+    <translator urlcontent=":hive2:">hive</translator>
+    <translator urlcontent=":hsqldb:">hsql</translator>
+    <translator urlcontent=":informix">informix</translator>
+    <translator urlcontent=":ingres:">ingres</translator>
+    <translator urlcontent=":Cache:">intersystems-cache</translator>
+    <translator urlcontent="modeshape">modeshape</translator>
+    <translator urlcontent=":mysql:">mysql</translator>
+    <translator urlcontent=":netezza:">netezza</translator>
+    <translator urlcontent=":oracle:">oracle</translator>
+    <translator urlcontent=":pioledbent:">osisoft-pi</translator>
+    <translator urlcontent=":postgresql:">postgresql</translator>
+    <translator urlcontent=":presto:">prestodb</translator>
+    <translator urlcontent=":redshift:">redshift</translator>
+    <translator urlcontent=":sqlserver:">sqlserver</translator>
+    <translator urlcontent=":sybase:">sybase</translator>
+    <translator urlcontent=":teiid">teiid</translator>
+    <translator urlcontent=":teradata:">teradata</translator>
+    <translator urlcontent=":ucanaccess:">ucanaccess</translator>
+    <translator urlcontent=":vertica:">vertica</translator>
+</mappings>

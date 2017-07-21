@@ -108,6 +108,7 @@ import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.QSResult;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.ConnectionDriver;
@@ -146,13 +147,19 @@ public class KomodoTeiidService extends KomodoService {
     /**
      * Default translator mappings for different drivers
      */
-    private final static String DEFAULT_TRANSLATOR_MAPPING_FILE = "defaultTranslatorMappings.xml"; //$NON-NLS-1$
+    private final static String DRIVER_TRANSLATOR_MAPPING_FILE = "driverTranslatorMappings.xml"; //$NON-NLS-1$
+
+    /**
+     * Default translator mappings for connection URL content
+     */
+    private final static String URLCONTENT_TRANSLATOR_MAPPING_FILE = "urlContentTranslatorMappings.xml"; //$NON-NLS-1$
 
     /**
      * Translator mapping file elements and attributes
      */
     private final static String ELEM_TRANSLATOR = "translator"; //$NON-NLS-1$
     private final static String ATTR_DRIVER = "driver"; //$NON-NLS-1$
+    private final static String ATTR_URLCONTENT = "urlcontent"; //$NON-NLS-1$
 
     /**
      * Unknown translator
@@ -224,6 +231,11 @@ public class KomodoTeiidService extends KomodoService {
     private Map<String, String> driverTranslatorMap = new HashMap<String,String>();
 
     /**
+     * Mapping of urlContent to default translator
+     */
+    private Map<String, String> urlContentTranslatorMap = new HashMap<String,String>();
+
+    /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
      * @throws WebApplicationException
@@ -232,7 +244,8 @@ public class KomodoTeiidService extends KomodoService {
     public KomodoTeiidService(final KEngine engine) throws WebApplicationException {
         super(engine);
         // Loads default translator mappings
-        loadDefaultTranslatorMap();
+        loadDriverTranslatorMap();
+        loadUrlContentTranslatorMap();
     }
 
     private synchronized Teiid getDefaultTeiid() throws KException {
@@ -1728,11 +1741,33 @@ public class KomodoTeiidService extends KomodoService {
             // Get the driver name for the source
             String driverName = dataSource.getDriverName(uow);
             
-            // Get the corresponding translator name from the mappings
+            // Get the translator name from the default driver - translator mappings
             String translatorName = driverTranslatorMap.get(driverName);
             
-            // Translator not found in mappings
-            if(translatorName==null) translatorName = UNKNOWN_TRANSLATOR;
+            // If translator not found using driver mappings, use the connection url if available.
+            // The urlContentTranslatorMap keys are unique strings within the connection url which would identify the required translator
+            if(translatorName==null) {
+                String connectionUrl = null;
+                Property urlProp = dataSource.getProperty(uow, "connection-url"); //$NON-NLS-1$
+                if(urlProp!=null) {
+                    connectionUrl = urlProp.getStringValue(uow);
+                }
+                // No connection url property - unknown translator
+                if(connectionUrl==null || connectionUrl.isEmpty()) {
+                    translatorName = UNKNOWN_TRANSLATOR;
+                // Connection url property found - use mappings to get translator, if possible
+                } else {
+                    for(String contentKey : urlContentTranslatorMap.keySet()) {
+                        if(connectionUrl.contains(contentKey)) {
+                            translatorName = urlContentTranslatorMap.get(contentKey);
+                            break;
+                        }
+                    }
+                    if(translatorName==null) {
+                        translatorName = UNKNOWN_TRANSLATOR;
+                    }
+                }
+            }
             
             // Return a status object with the translator
             KomodoStatusObject kso = new KomodoStatusObject();
@@ -3505,10 +3540,10 @@ public class KomodoTeiidService extends KomodoService {
     }
     
     /*
-     * Loads default translator mappings from resource file
+     * Loads driver name - translator mappings from resource file
      */
-    private void loadDefaultTranslatorMap() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( DEFAULT_TRANSLATOR_MAPPING_FILE );
+    private void loadDriverTranslatorMap() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( DRIVER_TRANSLATOR_MAPPING_FILE );
         
         if(inputStream==null) {
             LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_DEFAULT_TRANSLATOR_MAPPINGS_NOT_FOUND_ERROR));
@@ -3540,6 +3575,45 @@ public class KomodoTeiidService extends KomodoService {
             String driver = translatorNode.getAttributes().getNamedItem( ATTR_DRIVER ).getTextContent();
             String translator = translatorNode.getTextContent();
             driverTranslatorMap.put(driver, translator);
+        }
+    }
+
+    /*
+     * Loads URL content - translator mappings from resource file
+     */
+    private void loadUrlContentTranslatorMap() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( URLCONTENT_TRANSLATOR_MAPPING_FILE );
+        
+        if(inputStream==null) {
+            LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_DEFAULT_TRANSLATOR_MAPPINGS_NOT_FOUND_ERROR));
+            return;
+        }
+        
+        urlContentTranslatorMap.clear();
+        
+        // Load the mappings file
+        Document doc;
+        try {
+            String mappingXml = FileUtils.streamToString(inputStream);
+            doc = FileUtils.createDocument(mappingXml);
+        } catch (Exception ex) {
+            LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_LOAD_DEFAULT_TRANSLATOR_MAPPINGS_ERROR, ex.getLocalizedMessage()));
+            return;
+        }
+        
+        // Single child node contains the mappings
+        final Node mappingsNode = doc.getChildNodes().item(0);
+        if ( mappingsNode.getNodeType() != Node.ELEMENT_NODE ) {
+            return;
+        }
+
+        // Iterate the doc nodes and populate the default translator map
+        final NodeList translatorNodes = ((Element)mappingsNode).getElementsByTagName( ELEM_TRANSLATOR );
+        for(int i=0; i<translatorNodes.getLength(); i++) {
+            final Node translatorNode = translatorNodes.item(i);
+            String urlContent = translatorNode.getAttributes().getNamedItem( ATTR_URLCONTENT ).getTextContent();
+            String translator = translatorNode.getTextContent();
+            urlContentTranslatorMap.put(urlContent, translator);
         }
     }
 
