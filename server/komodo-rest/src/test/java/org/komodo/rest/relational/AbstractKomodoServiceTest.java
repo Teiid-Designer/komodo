@@ -122,6 +122,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         /**
          * Rest 2 version of method (no @Override to ensure compilation)
          */
+        @Override
         public boolean isUserInRoll(Principal aUsername, String aRole) {
             // No role based checks so return true
             return true;
@@ -262,6 +263,18 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         _restApp.importVdb(TestUtilities.usStatesSourceExample(), USER_NAME);
 
         Assert.assertEquals(1, _restApp.getVdbs(USER_NAME).length);
+    }
+
+    protected void loadDsbSingleSourceDataService() throws Exception {
+        _restApp.importDataservice(TestUtilities.dsbDataserviceSingleSourceParts(), USER_NAME);
+    }
+
+    protected void loadDsbJoinDifferentTableNamesDataService() throws Exception {
+        _restApp.importDataservice(TestUtilities.dsbDataserviceJoinDifferentTableNames(), USER_NAME);
+    }
+
+    protected void loadDsbJoinSameTableNamesDataService() throws Exception {
+        _restApp.importDataservice(TestUtilities.dsbDataserviceJoinSameTableNames(), USER_NAME);
     }
 
     protected void createDataservice( String serviceName ) throws Exception {
