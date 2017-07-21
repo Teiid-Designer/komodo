@@ -919,6 +919,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
+            refreshCachedVdbs(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find VDB
@@ -1322,10 +1323,9 @@ public class KomodoTeiidService extends KomodoService {
 
             String title = RelationalMessages.getString(RelationalMessages.Info.VDB_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
+            // updates cache for the removed vdb
+            refreshCachedVdbs(teiidNode, vdbName);
             if (! hasDynamicVdb(vdbName, teiidNode)) {
-                // Make sure Vdb state is current in the cachedTeiid
-                refreshCachedVdbs(teiidNode, vdbName);
-
                 status.addAttribute(vdbName,
                                     RelationalMessages.getString(RelationalMessages.Info.VDB_SUCCESSFULLY_UNDEPLOYED));
             } else
@@ -1785,6 +1785,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
+            refreshCachedDataSources(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find Connections
