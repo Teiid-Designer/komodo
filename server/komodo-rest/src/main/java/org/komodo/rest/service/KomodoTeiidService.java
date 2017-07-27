@@ -29,6 +29,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -171,9 +172,9 @@ public class KomodoTeiidService extends KomodoService {
      */
     private final static int DEPLOYMENT_WAIT_TIME = 10000;
 
-    private static class TemplateEntryComparator implements Comparator<TemplateEntry> {
+    private static final String[] PRIORITY_TEMPLATE_NAMES = {"connection-url", "user-name", "password", "port"};
 
-        private static String[] priorityNames = {"connection-url", "user-name", "password", "port"};
+    private static class TemplateEntryComparator implements Comparator<TemplateEntry> {
 
         private UnitOfWork transaction;
 
@@ -208,7 +209,7 @@ public class KomodoTeiidService extends KomodoService {
             if (entry1Name.equals(entry2Name))
                 return 0;
 
-            for (String name : priorityNames) {
+            for (String name : PRIORITY_TEMPLATE_NAMES) {
                 if (name.equals(entry1Name))
                     return -1;
 
@@ -289,7 +290,7 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
-    private synchronized void refreshCachedDataSources(Teiid teiid, String... dataSourceNames) throws KException {
+    private synchronized void refreshCachedConnections(Teiid teiid, String... connectionNames) throws KException {
         CachedTeiid cachedTeiid = importContent(teiid);
 
         UnitOfWork uow = null;
@@ -297,7 +298,7 @@ public class KomodoTeiidService extends KomodoService {
             uow = systemTx("refresh-teiid-content", false);
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
 
-            cachedTeiid.refreshConnections(uow, teiidInstance, dataSourceNames);
+            cachedTeiid.refreshConnections(uow, teiidInstance, connectionNames);
 
             // Commit the transaction to allow the sequencers to run
             uow.commit();
@@ -1394,7 +1395,7 @@ public class KomodoTeiidService extends KomodoService {
 
         UnitOfWork uow = null;
 
-        String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+        String title = RelationalMessages.getString(RelationalMessages.Info.CONNECTION_DEPLOYMENT_STATUS_TITLE);
         KomodoStatusObject status = new KomodoStatusObject(title);
 
         try {
@@ -1417,7 +1418,7 @@ public class KomodoTeiidService extends KomodoService {
 
             if (! hasDataSource(connectionName, teiidNode)) {
                 // Make sure DataSource state is current in cachedTeiid
-                refreshCachedDataSources(teiidNode);
+                refreshCachedConnections(teiidNode);
 
                 status.addAttribute(connectionName,
                                     RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED, connectionName));
@@ -1597,7 +1598,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
-            refreshCachedDataSources(teiidNode);
+            refreshCachedConnections(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             uow = createTransaction(principal, "getConnections", true); //$NON-NLS-1$
@@ -2428,7 +2429,7 @@ public class KomodoTeiidService extends KomodoService {
         try {
             kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
             if (kpa.getPath() == null) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SOURCE_MISSING_PATH);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_CONNECTION_MISSING_PATH);
             }
         } catch (Exception ex) {
             return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
@@ -2441,28 +2442,28 @@ public class KomodoTeiidService extends KomodoService {
 
             uow = createTransaction(principal, "deployTeiidConnection", false); //$NON-NLS-1$
 
-            List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
-            if (dataSources.size() == 0) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+            List<KomodoObject> connections = this.repo.searchByPath(uow, kpa.getPath());
+            if (connections.size() == 0) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_CONNECTION_FOUND);
             }
 
-            Connection dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Connection.class);
-            if (dataSource == null) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+            Connection connection = getWorkspaceManager(uow).resolve(uow, connections.get(0), Connection.class);
+            if (connection == null) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_CONNECTION_FOUND);
             }
 
             //
-            // Deploy the data source
+            // Deploy the connection
             //
-            DeployStatus deployStatus = dataSource.deploy(uow, teiidNode);
+            DeployStatus deployStatus = connection.deploy(uow, teiidNode);
 
             // Await the deployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
-            // Make sure Datasource is current in the CachedTeiid
-            refreshCachedDataSources(teiidNode, dataSource.getJndiName(uow));
-            
-            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+            // Make sure Connection is current in the CachedTeiid
+            refreshCachedConnections(teiidNode, connection.getJndiName(uow));
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.CONNECTION_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
 
             List<String> progressMessages = deployStatus.getProgressMessages();
@@ -2472,8 +2473,8 @@ public class KomodoTeiidService extends KomodoService {
 
             if (deployStatus.ok()) {
                 status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
-                status.addAttribute(dataSource.getName(uow),
-                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_DEPLOYED));
+                status.addAttribute(connection.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_DEPLOYED));
             } else {
                 status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
                 List<String> errorMessages = deployStatus.getErrorMessages();
@@ -2481,8 +2482,8 @@ public class KomodoTeiidService extends KomodoService {
                     status.addAttribute("ErrorMessage" + (i + 1), errorMessages.get(i));
                 }
 
-                status.addAttribute(dataSource.getName(uow),
-                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYED_WITH_ERRORS));
+                status.addAttribute(connection.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_DEPLOYED_WITH_ERRORS));
             }
 
            return commit(uow, mediaTypes, status);
@@ -2496,7 +2497,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_CONNECTION_ERROR, kpa.getPath());
         }
     }
 
@@ -3790,10 +3791,21 @@ public class KomodoTeiidService extends KomodoService {
             final List<RestTemplateEntry> entities = new ArrayList<RestTemplateEntry>();
             List<TemplateEntry> entries = template.getEntries(uow);
             Collections.sort(entries, new TemplateEntryComparator(uow));
+            List<String> priorityNames = Arrays.asList(PRIORITY_TEMPLATE_NAMES);
 
             for (TemplateEntry entry : entries) {
+
                 KomodoProperties properties = new KomodoProperties();
                 RestTemplateEntry restEntry = entityFactory.create(entry, uriInfo.getBaseUri(), uow, properties);
+
+                if (priorityNames.contains(entry.getName(uow))) {
+                    //
+                    // Appears some properties are being flagged as not required when they really should be,
+                    // eg. derbyclient.jar -> connection-url
+                    //
+                    restEntry.setRequired(true);
+                }
+
                 entities.add(restEntry);
             }
 

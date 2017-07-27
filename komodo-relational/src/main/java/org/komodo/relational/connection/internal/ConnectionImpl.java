@@ -392,25 +392,25 @@ public class ConnectionImpl extends RelationalObjectImpl implements Connection, 
         TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
         
         try {
-            String dataSrcName = getName(uow);
-            status.addProgressMessage("Starting deployment of data source " + dataSrcName); //$NON-NLS-1$
+            String connName = getName(uow);
+            status.addProgressMessage("Starting deployment of connection " + connName); //$NON-NLS-1$
 
             String jndiName = getJndiName(uow);
             String sourceType = getDriverName(uow);
             Properties properties = getPropertiesForServerDeployment(uow, teiidInstance);
 
-            status.addProgressMessage("Attempting to deploy data source " + dataSrcName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+            status.addProgressMessage("Attempting to deploy connection " + connName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
 
-            TeiidDataSource teiidDataSrc = teiidInstance.getOrCreateDataSource(dataSrcName,
+            TeiidDataSource teiidDataSrc = teiidInstance.getOrCreateDataSource(connName,
                                                                                jndiName,
                                                                                sourceType,
                                                                                properties);
             if (teiidDataSrc == null) {
-                status.addErrorMessage("Data source " + dataSrcName + " failed to deploy"); //$NON-NLS-1$ //$NON-NLS-2$
+                status.addErrorMessage("Connection " + connName + " failed to deploy"); //$NON-NLS-1$ //$NON-NLS-2$
                 return status;
             }
 
-            status.addProgressMessage("Data source deployed " + dataSrcName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
+            status.addProgressMessage("Data source deployed " + connName + " to teiid"); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (Exception ex) {
             status.addErrorMessage(ex);
         }

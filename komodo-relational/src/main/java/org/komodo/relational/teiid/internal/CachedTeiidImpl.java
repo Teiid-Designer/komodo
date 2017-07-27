@@ -763,12 +763,15 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         for(String connectionName : connectionNames) {
             connectionName = removeJavaContext(connectionName);
 
-            TeiidDataSource teiidDataSource;
+            TeiidDataSource teiidDataSource = null;
             try {
-                teiidDataSource = teiidInstance.getDataSource(connectionName);
+                if (teiidInstance.dataSourceExists(connectionName))
+                    teiidDataSource = teiidInstance.getDataSource(connectionName);
+
             } catch (Exception ex) {
                 throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCE_ERROR,connectionName, ex.getLocalizedMessage()));
             }
+
             // No server datasource found, remove the cached connector
             if(teiidDataSource==null) {
                 if(folderNode.hasChild(transaction, connectionName, DataVirtLexicon.Connection.NODE_TYPE)) {
