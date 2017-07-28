@@ -1821,7 +1821,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
-            refreshCachedDataSources(teiidNode);
+            refreshCachedConnections(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find Connections
