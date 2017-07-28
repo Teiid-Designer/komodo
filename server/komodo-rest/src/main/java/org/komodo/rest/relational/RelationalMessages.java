@@ -167,19 +167,19 @@ public final class RelationalMessages {
         DATA_SERVICE_DEPLOYED_WITH_ERRORS,
 
         /**
-         * Data source status title
+         * Connection status title
          */
-        DATA_SOURCE_DEPLOYMENT_STATUS_TITLE,
+        CONNECTION_DEPLOYMENT_STATUS_TITLE,
 
         /**
-         * Data source successfully deployed
+         * Connection successfully deployed
          */
-        DATA_SOURCE_SUCCESSFULLY_DEPLOYED,
+        CONNECTION_SUCCESSFULLY_DEPLOYED,
 
         /**
-         * Data source deployed with errors
+         * Connection deployed with errors
          */
-        DATA_SOURCE_DEPLOYED_WITH_ERRORS,
+        CONNECTION_DEPLOYED_WITH_ERRORS,
 
         /**
          * Vdb status title
@@ -1003,9 +1003,9 @@ public final class RelationalMessages {
         TEIID_SERVICE_DEPLOY_DATA_SERVICE_ERROR,
 
         /**
-         * An error indicating a teiid dataSource deployment failure
+         * An error indicating a teiid connection deployment failure
          */
-        TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR,
+        TEIID_SERVICE_DEPLOY_CONNECTION_ERROR,
 
         /**
          * An error indicating a workspace driver being deployed to teiid cannot be found due to
@@ -1061,12 +1061,7 @@ public final class RelationalMessages {
         /**
          * An error indicating a name is missing while deploying a data source
          */
-        TEIID_SERVICE_DATA_SOURCE_MISSING_PATH,
-
-        /**
-         * No data source could be found while trying to deploy
-         */
-        TEIID_SERVICE_NO_DATA_SOURCE_FOUND,
+        TEIID_SERVICE_CONNECTION_MISSING_PATH,
 
         /**
          * No data source could be found while trying to deploy

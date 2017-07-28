@@ -70,6 +70,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
@@ -763,12 +764,15 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         for(String connectionName : connectionNames) {
             connectionName = removeJavaContext(connectionName);
 
-            TeiidDataSource teiidDataSource;
+            TeiidDataSource teiidDataSource = null;
             try {
-                teiidDataSource = teiidInstance.getDataSource(connectionName);
+                if (teiidInstance.dataSourceExists(connectionName))
+                    teiidDataSource = teiidInstance.getDataSource(connectionName);
+
             } catch (Exception ex) {
                 throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCE_ERROR,connectionName, ex.getLocalizedMessage()));
             }
+
             // No server datasource found, remove the cached connector
             if(teiidDataSource==null) {
                 if(folderNode.hasChild(transaction, connectionName, DataVirtLexicon.Connection.NODE_TYPE)) {
@@ -958,11 +962,11 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
             if (tempName == null)
                 continue;
 
-            Collection<TeiidPropertyDefinition> teiidTempProperties;
+            Collection<TeiidPropertyDefinition> teiidTempProperties = null;
             try {
                 teiidTempProperties = teiidInstance.getTemplatePropertyDefns(tempName);
             } catch (Exception ex) {
-                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_TEMPLATE_ERROR, tempName, ex.getLocalizedMessage()));
+                KLog.getLogger().error(Messages.getString(Messages.CachedTeiid.GET_SERVER_TEMPLATE_ERROR, tempName, ex.getLocalizedMessage()));
             }
 
             // No server template found, remove the cached template
