@@ -187,6 +187,7 @@ public final class VdbDataRoleSerializerTest extends AbstractSerializerTest {
         Vdb theVdb = mockObject(Vdb.class, VDB_NAME, VDB_DATA_PATH, KomodoType.VDB, true);
         this.modelDataRole = mockObject(DataRole.class, NAME, ROLE_DATA_PATH, KomodoType.VDB_DATA_ROLE, true);
         Mockito.when(this.modelDataRole.getParent(transaction)).thenReturn(theVdb);
+        Mockito.when( this.modelDataRole.getPermissions( transaction ) ).thenReturn( Permission.NO_PERMISSIONS );
 
         this.dataRole = new RestVdbDataRole(MY_BASE_URI, this.modelDataRole, transaction);
         this.dataRole.setName(NAME);
