@@ -33,6 +33,7 @@ import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,7 @@ import org.komodo.rest.relational.response.RestVdbPermission;
 import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
@@ -972,6 +974,192 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals(3, links.size());
     }
 
+    @Test
+    public void shouldCreateDataRole() throws Exception {
+        loadVdbs();
+
+        final String dataRoleName = "MyDataRole";
+
+        final Properties settings = _uriBuilder.createSettings( SettingNames.VDB_NAME, TestUtilities.PORTFOLIO_VDB_NAME );
+        _uriBuilder.addSetting( settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri() );
+        _uriBuilder.addSetting( settings, SettingNames.DATA_ROLE_ID, dataRoleName );
+        final URI uri = _uriBuilder.vdbDataRoleUri( LinkType.SELF, settings );
+
+        final boolean allowCreateTempTables = true;
+        final boolean anyAuthenticated = true;
+        final String dataPath = "/tko:komodo/tko:workspace/user/"
+                                + TestUtilities.PORTFOLIO_VDB_NAME
+                                + '/'
+                                + VdbLexicon.Vdb.DATA_ROLES
+                                + '/'
+                                + dataRoleName;
+        final String description = "My data role description";
+        final boolean grantAll = true;
+        final String[] mappedRoles = new String[] { "a", "b", "c", "d", "e" };
+        final KomodoType type = KomodoType.VDB_DATA_ROLE;
+        final String id = dataRoleName;
+
+        final String permissionName = "MyPermission";
+        final String permissionId = permissionName;
+        final KomodoType permissionType = KomodoType.VDB_PERMISSION;
+        final String permissionDataPath = dataPath + '/' + VdbLexicon.DataRole.PERMISSIONS + '/' + permissionName;
+        final boolean allowAlter = true;
+        final boolean allowCreate = false;
+        final boolean allowDelete = true;
+        final boolean allowExecute = false;
+        final boolean allowLanguage = true;
+        final boolean allowRead = false;
+        final boolean allowUpdate = true;
+        
+        { // create data role
+            final RestVdbDataRole inDataRole = new RestVdbDataRole();
+            inDataRole.setAllowCreateTempTables( allowCreateTempTables );
+            inDataRole.setAnyAuthenticated( anyAuthenticated );
+            inDataRole.setDataPath( dataPath );
+            inDataRole.setDescription( description );
+            inDataRole.setGrantAll( grantAll );
+            inDataRole.setId( id );
+            inDataRole.setkType( type );
+            inDataRole.setMappedRoles( mappedRoles );
+            inDataRole.setName( dataRoleName );
+            
+            // add permission
+            final RestVdbPermission permission = new RestVdbPermission();
+            permission.setName( permissionName );
+            permission.setAllowAlter( allowAlter );
+            permission.setAllowCreate( allowCreate );
+            permission.setAllowDelete( allowDelete );
+            permission.setAllowExecute( allowExecute );
+            permission.setAllowLanguage( allowLanguage );
+            permission.setAllowRead( allowRead );
+            permission.setAllowUpdate( allowUpdate );
+            permission.setId( permissionId );
+            permission.setkType( permissionType );
+            permission.setDataPath( permissionDataPath );
+            inDataRole.setPermissions( new RestVdbPermission[] { permission } );
+
+            final String json = KomodoJsonMarshaller.marshall( inDataRole );
+            final ClientRequest request = request( uri, MediaType.APPLICATION_JSON_TYPE );
+            addBody( request, json );
+
+            final ClientResponse< String > response = request.post( String.class );
+            assertThat( response, is( notNullValue() ) );
+            assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+            final String entity = response.getEntity();
+            assertThat( entity, is( notNullValue() ) );
+
+            final RestVdbDataRole outDataRole = KomodoJsonMarshaller.unmarshall( entity, RestVdbDataRole.class );
+            assertNotNull( outDataRole );
+            assertThat( outDataRole.isAllowCreateTempTables(), is( allowCreateTempTables ) );
+            assertThat( outDataRole.isAnyAuthenticated(), is( anyAuthenticated ) );
+            assertThat( outDataRole.getDataPath(), is( dataPath ) );
+            assertThat( outDataRole.getDescription(), is( description ) );
+            assertThat( outDataRole.isGrantAll(), is( grantAll ) );
+            assertThat( outDataRole.getId(), is( id ) );
+            assertThat( outDataRole.getkType(), is( type ) );
+            assertThat( Arrays.equals( outDataRole.getMappedRoles(), mappedRoles ), is( true ) );
+            assertThat( outDataRole.getName(), is( dataRoleName ) );
+            
+            assertThat( outDataRole.getPermissions().length, is( 1 ) );
+            final RestVdbPermission outPermission = outDataRole.getPermissions()[0];
+            assertThat( outPermission.getName(), is( permissionName ) );
+            assertThat( outPermission.isAllowAlter(), is( allowAlter ) );
+            assertThat( outPermission.isAllowCreate(), is( allowCreate ) );
+            assertThat( outPermission.isAllowDelete(), is( allowDelete ) );
+            assertThat( outPermission.isAllowExecute(), is( allowExecute ) );
+            assertThat( outPermission.isAllowLanguage(), is( allowLanguage ) );
+            assertThat( outPermission.isAllowRead(), is( allowRead ) );
+            assertThat( outPermission.isAllowUpdate(), is( allowUpdate ) );
+        }
+        
+        { // verify new data role exists
+            final ClientRequest request = request( uri, MediaType.APPLICATION_JSON_TYPE );
+            final ClientResponse< String > response = request.get( String.class );
+            final String entity = response.getEntity();
+            assertThat( entity, is( notNullValue() ) );
+
+            final RestVdbDataRole dataRole = KomodoJsonMarshaller.unmarshall( entity, RestVdbDataRole.class );
+            assertNotNull( dataRole );
+
+            assertThat( dataRole.isAllowCreateTempTables(), is( allowCreateTempTables ) );
+            assertThat( dataRole.isAnyAuthenticated(), is( anyAuthenticated ) );
+            assertThat( dataRole.getDataPath(), is( dataPath ) );
+            assertThat( dataRole.getDescription(), is( description ) );
+            assertThat( dataRole.isGrantAll(), is( grantAll ) );
+            assertThat( dataRole.getId(), is( id ) );
+            assertThat( dataRole.getkType(), is( type ) );
+            assertThat( Arrays.equals( dataRole.getMappedRoles(), mappedRoles ), is( true ) );
+            assertThat( dataRole.getName(), is( dataRoleName ) );
+            assertThat( dataRole.getPermissions().length, is( 1 ) );
+
+            final Collection< RestLink > links = dataRole.getLinks();
+            assertEquals( 4, links.size() );
+        }
+    }
+    
+    @Test
+    public void shouldDeleteDataRole() throws Exception {
+        loadVdbs();
+
+        final String dataRoleName = "MyDataRole";
+
+        final Properties settings = _uriBuilder.createSettings( SettingNames.VDB_NAME, TestUtilities.PORTFOLIO_VDB_NAME );
+        _uriBuilder.addSetting( settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri() );
+        _uriBuilder.addSetting( settings, SettingNames.DATA_ROLE_ID, dataRoleName );
+        final URI uri = _uriBuilder.vdbDataRoleUri( LinkType.SELF, settings );
+
+        { // create data role
+            final boolean allowCreateTempTables = true;
+            final boolean anyAuthenticated = true;
+            final String dataPath = "/tko:komodo/tko:workspace/user/"
+                                    + TestUtilities.PORTFOLIO_VDB_NAME
+                                    + '/'
+                                    + VdbLexicon.Vdb.DATA_ROLES
+                                    + '/'
+                                    + dataRoleName;
+            final String description = "My data role description";
+            final boolean grantAll = true;
+            final String[] mappedRoles = new String[] { "a", "b", "c", "d", "e" };
+            final KomodoType type = KomodoType.VDB_DATA_ROLE;
+            final String id = dataRoleName;
+
+            final RestVdbDataRole dataRole = new RestVdbDataRole();
+            dataRole.setAllowCreateTempTables( allowCreateTempTables );
+            dataRole.setAnyAuthenticated( anyAuthenticated );
+            dataRole.setDataPath( dataPath );
+            dataRole.setDescription( description );
+            dataRole.setGrantAll( grantAll );
+            dataRole.setId( id );
+            dataRole.setkType( type );
+            dataRole.setMappedRoles( mappedRoles );
+            dataRole.setName( dataRoleName );
+
+            final String json = KomodoJsonMarshaller.marshall( dataRole );
+            final ClientRequest request = request( uri, MediaType.APPLICATION_JSON_TYPE );
+            addBody( request, json );
+
+            final ClientResponse< String > response = request.post( String.class );
+            assertThat( response, is( notNullValue() ) );
+            assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+
+            final String entity = response.getEntity();
+            assertThat( entity, is( notNullValue() ) );
+        }
+        
+        { // delete data role
+            final ClientRequest request = request( uri, MediaType.APPLICATION_JSON_TYPE );
+            final ClientResponse< String > response = request.delete( String.class );
+            assertThat( response.getStatus(), is( Response.Status.OK.getStatusCode() ) );
+        }
+        
+        { // verify data role no longer exists
+            final ClientRequest request = request( uri, MediaType.APPLICATION_JSON_TYPE );
+            final ClientResponse< String > response = request.get( String.class );
+            assertThat( response.getStatus(), is( Response.Status.NOT_FOUND.getStatusCode() ) );
+        }
+    }
+    
     @Test
     public void shouldGetVdbDataRoles() throws Exception {
         loadVdbs();

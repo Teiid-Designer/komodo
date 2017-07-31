@@ -327,6 +327,15 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
 
         for (int i = 0; i < permTags.length; ++i) {
             Property permProp = property(node, permTags[i][0]);
+
+            // Don't include allow-language if not present or set to false as when this was present queries were not working
+            // in the default read-only data role. Might need a 3-state value (true, false, not set) for this property.
+            // See TEIIDTOOLS-224
+            if ( VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE.equals( permTags[ i ][ 0 ] )
+                 && ( ( permProp == null ) || !permProp.getBoolean() ) ) {
+                continue;
+            }
+
             Boolean value = permProp == null ? false : permProp.getBoolean();
             writeTab(ElementTabValue.PERMISSION_ALLOW);
             writeElementWithText(permTags[i][1], value.toString());
@@ -369,12 +378,15 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         visitChild(node, NodeTypeName.PERMISSIONS.getId());
 
         // Mapped Role Names
-        Property property = node.getProperty(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
-        Value[] mappedRoleValues = property.getValues();
-        for (Value value : mappedRoleValues) {
-            writeTab(ElementTabValue.MAPPED_ROLE_NAME);
-            writeElementWithText(VdbLexicon.ManifestIds.MAPPED_ROLE_NAME, value.getString());
+        if ( node.hasProperty( VdbLexicon.DataRole.MAPPED_ROLE_NAMES ) ) {
+            Property property = node.getProperty(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
+            Value[] mappedRoleValues = property.getValues();
+            for (Value value : mappedRoleValues) {
+                writeTab(ElementTabValue.MAPPED_ROLE_NAME);
+                writeElementWithText(VdbLexicon.ManifestIds.MAPPED_ROLE_NAME, value.getString());
+            }
         }
+        
         writeTab(ElementTabValue.DATA_ROLE);
         writeEndElement();
     }
