@@ -34,215 +34,36 @@
 		<app.rest.version>${project.version}</app.rest.version>
 		<app.rest.description>A tool that allows creating, editing and managing dynamic VDBs and their contents</app.rest.description>
 
+		<version.resteasy>3.0.19.Final</version.resteasy>
+		<version.jboss.logging>3.3.0.Final</version.jboss.logging>
+		<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.logging, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
+
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>dv63</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-
-			<properties>
-				<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
-				<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
-				<version.arquillian>1.1.9.Final</version.arquillian>
-				<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
-				<arquillian.container.name>jbossas-managed</arquillian.container.name>
-			</properties>
-
-			<dependencies>
-				<!-- No more releases after 3.0.9.Final -->
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>jaxrs-api</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.spec</groupId>
-					<artifactId>jboss-javaee-6.0</artifactId>
-					<type>pom</type>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.arquillian.junit</groupId>
-					<artifactId>arquillian-junit-container</artifactId>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-arquillian-container-managed</artifactId>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-cli</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<source>1.8</source>
-							<target>1.8</target>
-							<excludes>
-								<!-- Exclude the cors classes for rest 3 as this is for rest 2 -->
-								<exclude>**/org/komodo/rest/cors/rest3/*.java</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>release</id>
-
-			<properties>
-				<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
-				<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
-				<version.arquillian>1.1.9.Final</version.arquillian>
-				<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
-				<arquillian.container.name>jbossas-managed</arquillian.container.name>
-			</properties>
-
-			<dependencies>
-				<!-- No more releases after 3.0.9.Final -->
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>jaxrs-api</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.spec</groupId>
-					<artifactId>jboss-javaee-6.0</artifactId>
-					<type>pom</type>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.arquillian.junit</groupId>
-					<artifactId>arquillian-junit-container</artifactId>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-arquillian-container-managed</artifactId>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-cli</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<source>1.8</source>
-							<target>1.8</target>
-							<excludes>
-								<!-- Exclude the cors classes for rest 3 as this is for rest 2 -->
-								<exclude>**/org/komodo/rest/cors/rest3/*.java</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>wildfly</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-
-			<properties>
-				<version.resteasy>3.0.19.Final</version.resteasy>
-				<version.jboss.logging>3.3.0.Final</version.jboss.logging>
-				<manifest.dependencies>org.jboss.as.cli, org.jboss.as.controller-client, org.jboss.dmr, org.jboss.logging, org.jboss.teiid.admin, org.jboss.teiid.common-core, org.jboss.teiid.api, org.jboss.teiid.client, org.jboss.teiid</manifest.dependencies>
-			</properties>
-
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.jboss.logging</groupId>
-						<artifactId>jboss-logging</artifactId>
-						<version>${version.jboss.logging}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-jaxrs</artifactId>
-						<version>${version.resteasy}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>jaxrs-api</artifactId>
-						<version>${version.resteasy}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-jackson-provider</artifactId>
-						<version>${version.resteasy}</version>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.xnio</groupId>
-					<artifactId>xnio-api</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.xnio</groupId>
-					<artifactId>xnio-nio</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.spec</groupId>
-					<artifactId>jboss-javaee-7.0</artifactId>
-					<type>pom</type>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.arquillian.junit</groupId>
-					<artifactId>arquillian-junit-container</artifactId>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.wildfly.arquillian</groupId>
-					<artifactId>wildfly-arquillian-container-managed</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<source>1.8</source>
-							<target>1.8</target>
-							<excludes>
-								<!-- Exclude the cors classes for rest 2 as this is for rest 3 -->
-								<exclude>**/org/komodo/rest/cors/rest2/*.java</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging</artifactId>
+				<version>${version.jboss.logging}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>${version.resteasy}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>jaxrs-api</artifactId>
+				<version>${version.resteasy}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jackson-provider</artifactId>
+				<version>${version.resteasy}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
@@ -465,12 +286,39 @@
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-jaxrs</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-nio</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-test-tjws</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.spec</groupId>
+			<artifactId>jboss-javaee-7.0</artifactId>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.junit</groupId>
+			<artifactId>arquillian-junit-container</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.arquillian</groupId>
+			<artifactId>wildfly-arquillian-container-managed</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
@@ -507,6 +355,7 @@
 		<finalName>${rest-context}</finalName>
 
 		<plugins>
+
 			<!-- Adds integration test directories to resources -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

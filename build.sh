@@ -6,11 +6,12 @@
 #
 #################
 function show_help {
-	echo "Usage: $0 -p [-d] [-s] [-q] [-h]"
-  echo "-p - profile to build (dv63, wildfly ...)"
+	echo "Usage: $0 [-d] [-s] [-q] [-h]"
 	echo "-d - enable maven debugging"
 	echo "-s - skip test execution"
 	echo "-q - skip integration test execution"
+  echo ""
+  echo "To passthrough additional arguments straight to maven, enter '--' followed by the extra arguments"
   exit 1
 }
 
@@ -48,17 +49,18 @@ DEBUG=0
 #
 # Determine the command line options
 #
-while getopts "p:bdhsq" opt;
+while getopts ":dhsq" opt;
 do
 	case $opt in
 	d) DEBUG=1 ;;
 	h) show_help ;;
   s) SKIP=1 ;;
-  p) PROFILE=$OPTARG ;;
   q) INT_SKIP=1 ;;
-	*) show_help ;;
 	esac
 done
+shift "$(expr $OPTIND - 1)"
+
+EXTRA_ARGS="$@"
 
 #
 # Source directory containing komodo codebase
@@ -78,14 +80,6 @@ LOCAL_REPO="${HOME}/.m2/repository"
 # Maven command
 #
 MVN="mvn clean install"
-
-#
-# Check we have a profile
-#
-if [ -z "${PROFILE}" ]; then
-  echo "No profile have been specified. Use -p for either DV6.3 build (dv63) or community build (wildfly)"
-  exit 1
-fi
 
 #
 # Turn on dedugging if required
@@ -108,15 +102,14 @@ fi
 
 #
 # Maven options
-# -P <profiles> : The profiles to be used for downloading jbosstools artifacts
 # -D maven.repo.local : Assign the $LOCAL_REPO as the target repository
 #
-MVN_FLAGS="${MVN_FLAGS} -s settings.xml -P ${PROFILE} -Dmaven.repo.local=${LOCAL_REPO} ${SKIP_FLAG} ${INTEGRATION_SKIP_FLAG}"
+MVN_FLAGS="${MVN_FLAGS} -s settings.xml -Dmaven.repo.local=${LOCAL_REPO} ${SKIP_FLAG} ${INTEGRATION_SKIP_FLAG}"
 
 echo "==============="
 
 # Build and test the komodo codebase
 echo "Build and install the komodo plugins"
 cd "${SRC_DIR}"
-echo "Executing ${MVN} ${MVN_FLAGS}"
-${MVN} ${MVN_FLAGS}
+echo "Executing ${MVN} ${MVN_FLAGS} ${EXTRA_ARGS}"
+${MVN} ${MVN_FLAGS} ${EXTRA_ARGS}
