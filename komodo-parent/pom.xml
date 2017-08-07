@@ -112,9 +112,9 @@
 
 		<debug.argline />
 
-                <!-- overriding the BOM 1.6 source/target -->
-                <maven.compiler.target>1.8</maven.compiler.target>
-                <maven.compiler.source>1.8</maven.compiler.source>
+		<!-- overriding the BOM 1.6 source/target -->
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
 
 		<!--Skip long running tests by default -->
 		<skipLongRunningTests>true</skipLongRunningTests>
@@ -125,196 +125,29 @@
 		<!-- The version of jgit -->
 		<version.jgit>[4.3.0,4.4.0)</version.jgit>
 
+		<server.platform>wildfly</server.platform>
+
+		<!-- The default version of teiid targetted for development -->
+		<teiid.version.default>9.1.1</teiid.version.default>
+		<teiid.classifier.default>wildfly-dist</teiid.classifier.default>
+
+		<!-- The version of server to use with testing -->
+		<test.server.group.id>org.wildfly</test.server.group.id>
+		<test.server.artifact.id>wildfly-dist</test.server.artifact.id>
+		<test.server.version>10.1.0.Final</test.server.version>
+		<!-- The test version of server when its unpacked -->
+		<test.server.name>${server.platform}-${test.server.version}</test.server.name>
+
+		<version.wildfly>2.0.10.Final</version.wildfly>
+		<version.aesh>0.33.12.redhat-1</version.aesh>
+		<version.org.jboss.dmr>1.3.0.Final</version.org.jboss.dmr>
+
+		<version.org.jboss.spec.jboss-javaee-7.0>1.0.4.Final</version.org.jboss.spec.jboss-javaee-7.0>
+		<version.org.jboss.xnio>3.4.0.Final</version.org.jboss.xnio>
+		<version.arquillian>1.1.11.Final</version.arquillian>
+		<version.arquillian-container>2.0.0.Final</version.arquillian-container>
+		<arquillian.container.name>wildfly-managed</arquillian.container.name>
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>dv63</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-
-			<properties>
-				<server.platform>dv63</server.platform>
-
-				<!-- The default version of teiid targeted for development -->
-				<teiid.version.default>8.12.7.6_3</teiid.version.default>
-				<teiid.classifier.default>jboss-dist</teiid.classifier.default>
-
-				<!-- The version of server to use with testing -->
-				<test.server.group.id>org.jboss.as</test.server.group.id>
-				<test.server.artifact.id>jboss-as-dist</test.server.artifact.id>
-				<test.server.version>7.5.0.Final-redhat-15</test.server.version>
-				<!-- The test version of server when its unpacked -->
-				<test.server.name>jboss-eap-6.4</test.server.name>
-
-				<version.aesh>0.33.12.redhat-1</version.aesh>
-				<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
-
-				<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
-				<version.arquillian>1.1.9.Final</version.arquillian>
-				<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
-				<arquillian.container.name>jbossas-managed</arquillian.container.name>
-			</properties>
-
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.jboss.as</groupId>
-						<artifactId>jboss-as-cli</artifactId>
-						<version>${test.server.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.as</groupId>
-						<artifactId>jboss-as-controller-client</artifactId>
-						<version>${test.server.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.spec</groupId>
-						<artifactId>jboss-javaee-6.0</artifactId>
-						<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
-						<type>pom</type>
-						<scope>test</scope>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.as</groupId>
-						<artifactId>jboss-as-arquillian-container-managed</artifactId>
-						<version>${version.arquillian-container}</version>
-						<scope>test</scope>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-
-		</profile>
-
-		<profile>
-			<id>release</id>
-
-			<properties>
-				<server.platform>release</server.platform>
-
-				<!-- The default version of teiid targeted for development -->
-				<teiid.version.default>8.12.4</teiid.version.default>
-				<teiid.classifier.default>jboss-dist</teiid.classifier.default>
-
-				<!-- The version of server to use with testing -->
-				<test.server.group.id>org.jboss.as</test.server.group.id>
-				<test.server.artifact.id>jboss-as-dist</test.server.artifact.id>
-				<test.server.version>7.5.0.Final-redhat-15</test.server.version>
-				<!-- The test version of server when its unpacked -->
-				<test.server.name>jboss-eap-6.4</test.server.name>
-
-				<version.aesh>0.33.12.redhat-1</version.aesh>
-				<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
-
-				<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
-				<version.arquillian>1.1.9.Final</version.arquillian>
-				<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
-				<arquillian.container.name>jbossas-managed</arquillian.container.name>
-			</properties>
-
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.jboss.as</groupId>
-						<artifactId>jboss-as-cli</artifactId>
-						<version>${test.server.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.as</groupId>
-						<artifactId>jboss-as-controller-client</artifactId>
-						<version>${test.server.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.spec</groupId>
-						<artifactId>jboss-javaee-6.0</artifactId>
-						<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
-						<type>pom</type>
-						<scope>test</scope>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.as</groupId>
-						<artifactId>jboss-as-arquillian-container-managed</artifactId>
-						<version>${version.arquillian-container}</version>
-						<scope>test</scope>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-
-		</profile>
-
-		<profile>
-			<id>wildfly</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-
-			<properties>
-				<server.platform>wildfly</server.platform>
-
-				<!-- The default version of teiid targetted for development -->
-				<teiid.version.default>9.1.1</teiid.version.default>
-				<teiid.classifier.default>wildfly-dist</teiid.classifier.default>
-
-				<!-- The version of server to use with testing -->
-				<test.server.group.id>org.wildfly</test.server.group.id>
-				<test.server.artifact.id>wildfly-dist</test.server.artifact.id>
-				<test.server.version>10.1.0.Final</test.server.version>
-				<!-- The test version of server when its unpacked -->
-				<test.server.name>wildfly-10.1.0.Final</test.server.name>
-
-				<version.wildfly>2.0.10.Final</version.wildfly>
-				<version.aesh>0.33.12.redhat-1</version.aesh>
-				<version.org.jboss.dmr>1.3.0.Final</version.org.jboss.dmr>
-
-				<version.org.jboss.spec.jboss-javaee-7.0>1.0.4.Final</version.org.jboss.spec.jboss-javaee-7.0>
-				<version.org.jboss.xnio>3.4.0.Final</version.org.jboss.xnio>
-				<version.arquillian>1.1.11.Final</version.arquillian>
-				<version.arquillian-container>2.0.0.Final</version.arquillian-container>
-				<arquillian.container.name>wildfly-managed</arquillian.container.name>
-			</properties>
-
-			<dependencyManagement>
-				<dependencies>
-					<dependency>
-						<groupId>org.wildfly.core</groupId>
-						<artifactId>wildfly-cli</artifactId>
-						<version>${version.wildfly}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.wildfly.core</groupId>
-						<artifactId>wildfly-controller-client</artifactId>
-						<version>${version.wildfly}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.xnio</groupId>
-						<artifactId>xnio-api</artifactId>
-						<version>${version.org.jboss.xnio}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.jboss.xnio</groupId>
-						<artifactId>xnio-nio</artifactId>
-						<version>${version.org.jboss.xnio}</version>
-					</dependency>
-
-					<dependency>
-						<groupId>org.jboss.spec</groupId>
-						<artifactId>jboss-javaee-7.0</artifactId>
-						<version>${version.org.jboss.spec.jboss-javaee-7.0}</version>
-						<type>pom</type>
-						<scope>test</scope>
-					</dependency>
-					<dependency>
-						<groupId>org.wildfly.arquillian</groupId>
-						<artifactId>wildfly-arquillian-container-managed</artifactId>
-						<version>${version.arquillian-container}</version>
-						<scope>test</scope>
-					</dependency>
-				</dependencies>
-			</dependencyManagement>
-
-		</profile>
-	</profiles>
 
 	<!-- This section defines the default dependency settings inherited by child 
 		projects. Note that this section does not add dependencies, but rather provide 
@@ -566,11 +399,48 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.wildfly.core</groupId>
+				<artifactId>wildfly-cli</artifactId>
+				<version>${version.wildfly}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.wildfly.core</groupId>
+				<artifactId>wildfly-controller-client</artifactId>
+				<version>${version.wildfly}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-api</artifactId>
+				<version>${version.org.jboss.xnio}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-nio</artifactId>
+				<version>${version.org.jboss.xnio}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.spec</groupId>
+				<artifactId>jboss-javaee-7.0</artifactId>
+				<version>${version.org.jboss.spec.jboss-javaee-7.0}</version>
+				<type>pom</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
 				<groupId>org.jboss.arquillian</groupId>
 				<artifactId>arquillian-bom</artifactId>
 				<version>${version.arquillian}</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.wildfly.arquillian</groupId>
+				<artifactId>wildfly-arquillian-container-managed</artifactId>
+				<version>${version.arquillian-container}</version>
+				<scope>test</scope>
 			</dependency>
 
 		</dependencies>
@@ -597,7 +467,7 @@
 	</dependencies>
 
 	<build>
-		<!-- This section defines the default plugin settings inherited by child
+		<!-- This section defines the default plugin settings inherited by child 
 			projects. -->
 		<pluginManagement>
 			<plugins>
@@ -630,9 +500,12 @@
 					<configuration>
 						<showDeprecation>false</showDeprecation>
 						<showWarnings>false</showWarnings>
+						<source>${maven.compiler.source}</source>
+						<target>${maven.compiler.target}</target>
+						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
 				</plugin>
-				<!-- Fixes how test resources of a project can be used in projects dependent
+				<!-- Fixes how test resources of a project can be used in projects dependent 
 					on it -->
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -677,7 +550,7 @@
 		</pluginManagement>
 		<plugins>
 
-			<!-- Produce source jars during package and test-source jars during the
+			<!-- Produce source jars during package and test-source jars during the 
 				'verify' phase -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -727,8 +600,8 @@
 				</configuration>
 			</plugin>
 
-			<!-- Build a test-jar for each project, so that src/test/* resources and
-				classes can be used in other projects. Also customize how the jar files are
+			<!-- Build a test-jar for each project, so that src/test/* resources and 
+				classes can be used in other projects. Also customize how the jar files are 
 				assembled. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -747,15 +620,6 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
 					<pushChanges>false</pushChanges>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
