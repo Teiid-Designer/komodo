@@ -122,7 +122,6 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         /**
          * Rest 2 version of method (no @Override to ensure compilation)
          */
-        @Override
         public boolean isUserInRoll(Principal aUsername, String aRole) {
             // No role based checks so return true
             return true;
