@@ -27,7 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.komodo.modeshape.lib.LogConfigurator;
+import org.komodo.logging.LogConfigurator;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.utils.FileUtils;

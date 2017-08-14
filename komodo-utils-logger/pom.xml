@@ -6,9 +6,9 @@
 		<artifactId>komodo</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
 	</parent>
-	<artifactId>komodo-utils-modeshape-logger</artifactId>
+	<artifactId>komodo-utils-logger</artifactId>
 	<name>Komodo Logger</name>
-	<description>Komodo Logger Modeshape Implementation</description>
+	<description>Komodo Logger Implementation</description>
 
 	<build>
 		<plugins>
@@ -24,10 +24,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.komodo</groupId>
-			<artifactId>komodo-modeshape</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-spi</artifactId>

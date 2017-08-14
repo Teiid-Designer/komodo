@@ -103,8 +103,6 @@
 	<properties>
 
 		<version.ip-bom>6.0.1.Final</version.ip-bom>
-		<version.modeshape>4.5.0.Final</version.modeshape>
-		<version.javax.jcr>2.0</version.javax.jcr>
 		<version.commons.io>2.5</version.commons.io>
 
 		<!-- Instruct the build to use only UTF-8 encoding for source code -->
@@ -163,27 +161,10 @@
 				<scope>import</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>javax.jcr</groupId>
-				<artifactId>jcr</artifactId>
-				<version>${version.javax.jcr}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.modeshape</groupId>
-				<artifactId>modeshape-jcr-api</artifactId>
-				<version>${version.modeshape}</version>
-			</dependency>
-
 			<!-- komodo-shell-api komodo-shell komodo-importer komodo-relational komodo-relational-commands 
 				komodo-server-rest -->
 
 			<!-- Komodo subprojects -->
-			<dependency>
-				<groupId>org.komodo</groupId>
-				<artifactId>komodo-modeshape</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.komodo</groupId>
 				<artifactId>komodo-spi</artifactId>
@@ -211,7 +192,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.komodo</groupId>
-				<artifactId>komodo-utils-modeshape-logger</artifactId>
+				<artifactId>komodo-utils-logger</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

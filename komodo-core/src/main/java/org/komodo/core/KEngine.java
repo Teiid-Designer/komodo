@@ -31,7 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.event.KEvent;
 import org.komodo.core.event.KListener;
-import org.komodo.modeshape.lib.LogConfigurator;
+import org.komodo.logging.LogConfigurator;
 import org.komodo.repository.LocalRepository;
 import org.komodo.spi.KErrorHandler;
 import org.komodo.spi.KException;

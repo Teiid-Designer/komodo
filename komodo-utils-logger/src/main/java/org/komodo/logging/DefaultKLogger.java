@@ -23,15 +23,13 @@ package org.komodo.logging;
 
 
 import java.util.logging.Level;
-import org.komodo.modeshape.lib.LogConfigurator;
+import org.komodo.logging.i18n.TextI18n;
 import org.komodo.spi.logging.KLogger;
-import org.modeshape.common.i18n.TextI18n;
-import org.modeshape.common.logging.Logger;
 
 /**
  *
  */
-public class ModeshapeKLogger implements KLogger {
+public class DefaultKLogger implements KLogger {
 
     private Logger logger;
 
