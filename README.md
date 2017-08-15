@@ -43,6 +43,7 @@ The general idea is to keep your 'master' branch in-sync with the 'upstream/mast
 
 - Install JDK 1.7
 - Install maven 3 - http://maven.apache.org/download.html
+- You will need to first build the [teiid-modeshape Project](https://github.com/Teiid-Designer/teiid-modeshape).  (Clone the repo and build using 'mvn clean install')
 - To build the komodo code, cd into your komodo local repo, then use the build script
 
 ~~~
