@@ -142,6 +142,17 @@
 		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
 		<arquillian.container.name>jbossas-managed</arquillian.container.name>
 
+<!-- used for licensing -->
+		<version.org.jdv>6.4</version.org.jdv>
+		<output.directory>${project.build.directory}/generated-resources/licenses/</output.directory>
+		<template.directory>${project.basedir}/../licenses/license-scripts</template.directory>
+		<license.directory>${project.basedir}/../licenses/downloaded-licenses</license.directory>
+	 	<product.name>JBoss Data Virtualization - Komodo</product.name>
+		<product.version>${version.org.jdv}</product.version>
+
+		<license.folder>docs/licenses-datavirt-komodo</license.folder>
+
+
 	</properties>
 
 	<!-- This section defines the default dependency settings inherited by child 
@@ -657,8 +668,188 @@
 			</plugin>
 		</plugins>
 	</build>
+  <profiles>
+	<profile>
+
+     		<id>default</id>
+    		<activation>
+      			<activeByDefault>true</activeByDefault>
+    		</activation>
+     		<modules>
+        		<module>modules</module>
+    		</modules>
+	</profile>
+        <profile>
+		<!-- used to gather all the license dependency.  All the licenses should be copied to the src/main/resources/licenses folder and 
+			the license.xml copied to the src/main/resources/template location
+		-->
+            <id>aggregateLicense</id>
+
+		<build>
+			<plugins>
+			    <plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>1.13</version>
+				<executions>
+				  <execution>
+				    <id>download-licenses</id>
+				    <goals>
+				      <goal>download-licenses</goal>
+				    </goals>
+				  </execution>
+				  <execution>
+				    <id>aggregate-download-licenses</id>
+				    <goals>
+				      <goal>aggregate-download-licenses</goal>
+				    </goals>
+				  </execution>
+				</executions>
+			      </plugin>
+		 	</plugins>
+		</build>
+        </profile>
+    <profile>
+	<id>licenses</id>
+	<activation>
+		<activeByDefault>false</activeByDefault>
+	</activation>
+	<build>
+		<plugins>
+           <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+		<inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>copy-licenses-xml</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${output.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${template.directory}</directory>
+                                    <includes>
+                                        <include>licenses.xml</include>
+                                        <include>licenses.css</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>${license.directory}</directory>
+                                    <includes>
+                                        <include>*</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+           <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>generate-licenses-html</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <transformationSets>
+	                       <transformationSet>
+	                            <dir>${output.directory}</dir>
+	                           <outputDir>${output.directory}</outputDir>
+	                            <stylesheet>${template.directory}/licenses-correction.xsl</stylesheet>
+	                            <includes>
+	                                <include>licenses.xml</include>
+	                            </includes>
+	                        </transformationSet>
+	                        <transformationSet>
+	                            <dir>${output.directory}</dir>
+	                            <outputDir>${output.directory}</outputDir>
+	                            <stylesheet>${template.directory}/licenses-add-location.xsl</stylesheet>
+	                            <includes>
+	                                <include>licenses.xml</include>
+	                            </includes>
+	                        </transformationSet>
+	                        <transformationSet>
+	                            <dir>${output.directory}</dir>
+	                            <outputDir>${output.directory}</outputDir>
+	                            <stylesheet>${template.directory}/pretty-print.xsl</stylesheet>
+	                            <includes>
+	                                <include>licenses.xml</include>
+	                            </includes>
+	                        </transformationSet>							
+
+                                <transformationSet>
+                                    <dir>${output.directory}</dir>
+                                    <includes>
+                                        <include>licenses.xml</include>
+                                    </includes>
+                                    <stylesheet>${template.directory}/licenses.xsl</stylesheet>
+                                    <outputDir>${output.directory}</outputDir>
+                                    <fileMappers>
+                                        <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                                            <targetExtension>.html</targetExtension>
+                                        </fileMapper>
+                                    </fileMappers>
+                                    <parameters>
+                                        <parameter>
+                                            <name>product</name>
+                                            <value>${product.name}</value>
+                                        </parameter>
+                                        <parameter>
+                                            <name>version</name>
+                                            <value>${product.version}</value>
+                                        </parameter>
+                                    </parameters>
+                                </transformationSet>
+                            </transformationSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+ 		<inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>license-assembly</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+			    <finalName>teiid-modeshape-licenses</finalName>
+                            <final>dist</final>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <attach>true</attach>
+                            <descriptors>
+                                <descriptor>${template.directory}/license-assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+         </plugins>
+	</build>
+    </profile>
+   </profiles>
    </profile>
   </profiles>
+
 	<repositories>
 		<repository>
 			<id>redhat-product-repository</id>
