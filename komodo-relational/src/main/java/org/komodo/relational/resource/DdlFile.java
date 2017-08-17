@@ -113,14 +113,4 @@ public interface DdlFile extends DataServiceResource {
             return new DdlFileImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
     };
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Exportable#getDocumentType(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    default DocumentType getDocumentType( final UnitOfWork transaction ) {
-        return DOC_TYPE;
-    }
 }

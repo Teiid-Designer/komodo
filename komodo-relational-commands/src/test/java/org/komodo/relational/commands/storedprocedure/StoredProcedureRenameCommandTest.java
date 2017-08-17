@@ -53,7 +53,7 @@ public final class StoredProcedureRenameCommandTest extends AbstractCommandTest 
                                     "set-result-set DataTypeResultSet" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertTabCompletion( "rename ", Collections.emptyList() );
+        assertTabCompletion( "rename ", Collections.<CharSequence>emptyList() );
     }
 
 }

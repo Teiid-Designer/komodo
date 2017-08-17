@@ -135,7 +135,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         if (property.isMultiple(getTransaction()))
             values = Arrays.asList(property.getStringValues(getTransaction()));
         else {
-            values = new ArrayList<>();
+            values = new ArrayList<String>();
             values.add(property.getStringValue(getTransaction()));
         }
 

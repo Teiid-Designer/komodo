@@ -49,13 +49,10 @@ public final class FileAttributesSerializer extends AbstractContentSerializer<Ko
             if (readContent(in, fileAttr, name) != null)
                 continue;
 
-            switch ( name ) {
-                case KomodoFileAttributes.NAME_LABEL:
-                    fileAttr.setName(in.nextString());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
-            }
+            if(name.equals(KomodoFileAttributes.NAME_LABEL))
+                fileAttr.setName(in.nextString());
+            else
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
         }
 
         in.endObject();

@@ -8,7 +8,6 @@
 package org.komodo.relational.dataservice.internal;
 
 import java.util.Properties;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.connection.Connection;
@@ -26,7 +25,7 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 /**
  * An implementation of a connection entry in a data service.
  */
-public class ConnectionEntryImpl extends RelationalObjectImpl implements ConnectionEntry {
+public class ConnectionEntryImpl extends AbstractDataServiceEntryImpl<Connection> implements ConnectionEntry {
 
     private static final String ARCHIVE_FOLDER = "connections/"; //$NON-NLS-1$
 

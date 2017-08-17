@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.komodo</groupId>
 		<artifactId>komodo-plugins</artifactId>
-		<version>0.0.4-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<groupId>org.komodo.plugins.storage</groupId>
 	<artifactId>storage-git</artifactId>
@@ -12,7 +12,7 @@
 	<description>Storage connector for accessing a git repository</description>
 	<packaging>bundle</packaging>
 
-	<dependencyManagement>
+	<!--dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.eclipse.jgit</groupId>
@@ -20,7 +20,7 @@
 				<version>${version.jgit}</version>
 			</dependency>
 		</dependencies>
-	</dependencyManagement>
+	</dependencyManagement-->
 
 	<dependencies>
 		<!-- These will be imported by the bundle at runtime so only required for 
@@ -43,11 +43,6 @@
 		<dependency>
 			<groupId>javax.jcr</groupId>
 			<artifactId>jcr</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.modeshape</groupId>
-			<artifactId>modeshape-jcr-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.komodo</groupId>
 		<artifactId>komodo-plugins</artifactId>
-		<version>0.0.4-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>komodo-plugin-service</artifactId>
 	<name>Komodo OSGI Plugin Service</name>
@@ -111,7 +111,6 @@
 			</testResource>
 		</testResources>
 
-		<!-- Usual compiling ensuring the java version is 1.8 -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -249,7 +248,7 @@
 											maven-antrun-plugin
 										</artifactId>
 										<versionRange>
-											[1.8,)
+											[1.7,)
 										</versionRange>
 										<goals>
 											<goal>run</goal>

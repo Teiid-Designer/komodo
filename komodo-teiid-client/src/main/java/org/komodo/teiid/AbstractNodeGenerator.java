@@ -249,7 +249,7 @@ public abstract class AbstractNodeGenerator<T> implements StringConstants {
 
     protected void index(T obj, Node node) throws RepositoryException {
         if (objectIndex == null)
-            objectIndex = new HashMap<>();
+            objectIndex = new HashMap<IndexKey, Node>();
 
         IndexKey key = createKey(obj, getParentNode());
         objectIndex.put(key, node);

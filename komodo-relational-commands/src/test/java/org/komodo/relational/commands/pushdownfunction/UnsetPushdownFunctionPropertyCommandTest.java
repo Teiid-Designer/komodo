@@ -66,7 +66,7 @@ public final class UnsetPushdownFunctionPropertyCommandTest extends AbstractComm
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addPushdownFunctions.cmd");
     	final String[] commands = { "cd myPushdownFunction1" };
     	final CommandResult result = execute( commands );

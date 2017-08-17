@@ -128,7 +128,7 @@ public final class DeleteConnectionCommand extends WorkspaceShellCommand {
         final UnitOfWork uow = getTransaction();
         final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] connections = mgr.findConnections(getTransaction());
-        List<String> existingNames = new ArrayList<>(connections.length);
+        List<String> existingNames = new ArrayList<String>(connections.length);
         for(KomodoObject connection : connections) {
             existingNames.add(connection.getName(uow));
         }

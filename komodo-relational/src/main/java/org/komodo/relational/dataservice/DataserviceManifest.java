@@ -509,7 +509,7 @@ public class DataserviceManifest implements Exportable {
     }
 
     private String[] filter( final String[] propertyNames ) {
-        final List< String > result = new ArrayList<>( propertyNames.length );
+        final List< String > result = new ArrayList<String>( propertyNames.length );
 
         FILTER: for ( final String name : propertyNames ) {
             for ( final String prefix : HIDDEN_PROP_PREFIXES ) {

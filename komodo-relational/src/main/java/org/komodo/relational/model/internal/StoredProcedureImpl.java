@@ -71,7 +71,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
          */
         static Map< String, String > defaultValues() {
             final StandardOption[] options = values();
-            final Map< String, String > result = new HashMap< >();
+            final Map< String, String > result = new HashMap< String, String >();
 
             for ( final StandardOption option : options ) {
                 result.put( option.name(), option.defaultValue );
@@ -184,7 +184,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
             final Map< String, String > superOptions = super.getStandardOptions();
             final Map< String, String > options = StandardOption.defaultValues();
 
-            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            final Map< String, String > combined = new HashMap< String, String >( superOptions.size() + options.size() );
             combined.putAll( superOptions );
             combined.putAll( options );
 

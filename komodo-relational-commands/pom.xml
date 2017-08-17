@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.komodo</groupId>
 		<artifactId>komodo</artifactId>
-		<version>0.0.4-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>komodo-relational-commands</artifactId>
 	<name>Komodo Relational Commands</name>
@@ -56,7 +56,7 @@
 											maven-assembly-plugin
 										</artifactId>
 										<versionRange>
-											[2.5.5,)
+											[2.4.1,)
 										</versionRange>
 										<goals>
 											<goal>single</goal>

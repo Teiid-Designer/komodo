@@ -112,10 +112,10 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
     private KomodoObjectLabelProvider currentContextLabelProvider;
     private KomodoObjectLabelProvider defaultLabelProvider;
     private KomodoObjectLabelProvider lastUsedLabelProvider;
-    private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
+    private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<KomodoObjectLabelProvider>();
     private Map<String,String> providedGlobalPropertyTypes = new HashMap<String,String>();
 
-    private final Set< PropertyChangeListener > propListeners = new HashSet<>();
+    private final Set< PropertyChangeListener > propListeners = new HashSet<PropertyChangeListener>();
 
     /**
      * Constructor
@@ -234,13 +234,24 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
         final File startupPropertiesFile = new File( dataDir, this.shell.getShellPropertiesFile() );
 
         if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
-            try ( final FileInputStream fis = new FileInputStream( startupPropertiesFile ) ) {
+            FileInputStream fis = null;
+
+            try {
+                fis = new FileInputStream( startupPropertiesFile );
                 props.load( fis );
             } catch ( final Exception e ) {
                 String msg = I18n.bind( ShellI18n.errorLoadingProperties,
                                         startupPropertiesFile.getAbsolutePath(),
                                         e.getMessage() );
                 PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, msg);
+            } finally {
+                if ( fis != null ) {
+                    try {
+                        fis.close();
+                    } catch ( final IOException e ) {
+                        KLog.getLogger().error( e.getLocalizedMessage() );
+                    }
+                }
             }
         }
         return props;
@@ -455,7 +466,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
      */
     @Override
     public String[] getAvailableCommandNames() throws Exception {
-        final Set< String > commandNames = new TreeSet< >();
+        final Set< String > commandNames = new TreeSet< String >();
 
         for ( final ShellCommand possible : getAvailableCommands() ) {
             commandNames.add( possible.getName() );
@@ -1137,7 +1148,8 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
 
     // Discovers Providers
     private void discoverProviders(UnitOfWork transaction ) throws Exception {
-        final List< ClassLoader > commandClassloaders = new ArrayList< >();
+        final List< ClassLoader > commandClassloaders = new ArrayList< ClassLoader >();
+
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
         // Find providers in the user's commands directory
@@ -1155,7 +1167,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
                 final Collection< File > jarFiles = FileUtils.getFilesForPattern( commandsDir.getCanonicalPath(), "", ".jar" ); //$NON-NLS-1$ //$NON-NLS-2$
 
                 if ( !jarFiles.isEmpty() ) {
-                    final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
+                    final List< URL > jarURLs = new ArrayList< URL >( jarFiles.size() );
 
                     for ( final File jarFile : jarFiles ) {
                         final URL jarUrl = jarFile.toURI().toURL();

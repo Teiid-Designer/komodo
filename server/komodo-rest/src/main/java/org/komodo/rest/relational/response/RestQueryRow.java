@@ -50,7 +50,7 @@ public class RestQueryRow implements KRestEntity {
         if (qsRow == null)
             this.values = Collections.emptyList();
         else {
-            this.values = new ArrayList<>();
+            this.values = new ArrayList<String>();
             for (Object value : qsRow.getValues()) {
                 String valueStr = EMPTY_STRING;
                 if(value!=null) {

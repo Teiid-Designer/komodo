@@ -282,7 +282,7 @@ public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServ
 
     @Test
     public void shouldGetTeiidStatusMultiQueries() throws Exception {
-        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+        final URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                           .path(V1Constants.TEIID_SEGMENT)
                                           .path(V1Constants.STATUS_SEGMENT)
                                           .build();

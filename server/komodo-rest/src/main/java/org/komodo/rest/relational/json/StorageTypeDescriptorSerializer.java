@@ -39,24 +39,23 @@ public class StorageTypeDescriptorSerializer extends TypeAdapter<RestStorageType
         final RestStorageTypeDescriptor storageTypeDescriptor = new RestStorageTypeDescriptor();
         in.beginObject();
 
-        while ( in.hasNext() ) {
+        while (in.hasNext()) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RestStorageTypeDescriptor.NAME_LABEL:
-                    storageTypeDescriptor.setName(in.nextString());
-                    break;
-                case RestStorageTypeDescriptor.DESCRIPTION_LABEL:
-                    storageTypeDescriptor.setDescription(in.nextString());
-                    break;
-                case RestStorageTypeDescriptor.REQUIRED_LABEL:
-                    storageTypeDescriptor.setRequired(in.nextBoolean());
-                    break;
-                case RestStorageTypeDescriptor.ENCODED_LABEL:
-                    storageTypeDescriptor.setEncoded(in.nextBoolean());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(RestStorageTypeDescriptor.NAME_LABEL)) {
+                storageTypeDescriptor.setName(in.nextString());
+            }
+            else if (name.equals(RestStorageTypeDescriptor.DESCRIPTION_LABEL)) {
+                storageTypeDescriptor.setDescription(in.nextString());
+            }
+            else if (name.equals(RestStorageTypeDescriptor.REQUIRED_LABEL)) {
+                storageTypeDescriptor.setRequired(in.nextBoolean());
+            }
+            else if (name.equals(RestStorageTypeDescriptor.ENCODED_LABEL)) {
+                storageTypeDescriptor.setEncoded(in.nextBoolean());
+            }
+            else {
+                throw new IOException(Messages.getString(UNEXPECTED_JSON_TOKEN, name));
             }
         }
 

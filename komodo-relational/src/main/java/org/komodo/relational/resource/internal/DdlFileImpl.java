@@ -25,6 +25,7 @@ import org.komodo.relational.RelationalObject;
 import org.komodo.relational.dataservice.internal.DataServiceResourceImpl;
 import org.komodo.relational.resource.DdlFile;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -76,4 +77,13 @@ public class DdlFileImpl extends DataServiceResourceImpl< DdlFile > implements D
         return DdlFile.IDENTIFIER;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#getDocumentType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public DocumentType getDocumentType( final UnitOfWork transaction ) {
+        return DOC_TYPE;
+    }
 }

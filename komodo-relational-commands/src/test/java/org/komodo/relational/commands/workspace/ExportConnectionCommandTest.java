@@ -148,7 +148,7 @@ public class ExportConnectionCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
         candidates.add("jdbcSource");
         candidates.add("raSource");
         candidates.add("mySource1");

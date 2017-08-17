@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -56,7 +54,7 @@ public final class DeleteDataRoleCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	candidates.add("myDatarole1");
     	candidates.add("myDatarole2");
 

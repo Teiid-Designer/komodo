@@ -590,7 +590,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             }
 
             final List< KomodoObject > kObjs = getRepository().query( transaction, queryText );
-            List< KomodoObject > results = new ArrayList< > ();
+            List< KomodoObject > results = new ArrayList<KomodoObject> ();
             for( final KomodoObject kObj : kObjs ) {
                 if(includeSubTypes) {
                     results.add(kObj);

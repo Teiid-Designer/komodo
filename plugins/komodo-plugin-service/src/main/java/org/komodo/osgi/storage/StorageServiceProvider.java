@@ -44,7 +44,7 @@ public class StorageServiceProvider extends AbstractServiceProvider<StorageServi
         }
     }
 
-    private KeyInValueHashMap<String, StorageService> storageServices = new KeyInValueHashMap<>(new StorageServiceKeyAdapter());
+    private KeyInValueHashMap<String, StorageService> storageServices = new KeyInValueHashMap<String, StorageService>(new StorageServiceKeyAdapter());
 
     public StorageServiceProvider(PluginService pluginService) {
         super(pluginService);

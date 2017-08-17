@@ -9,7 +9,6 @@ package org.komodo.relational.dataservice.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.ResourceEntry;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.resource.ResourceFile;
 import org.komodo.relational.resource.internal.ResourceFileImpl;
 import org.komodo.spi.KException;
@@ -22,7 +21,7 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 /**
  * An implementation of a file resource entry in a data service.
  */
-public class ResourceEntryImpl extends RelationalObjectImpl implements ResourceEntry {
+public class ResourceEntryImpl extends AbstractDataServiceResourceEntryImpl<ResourceFile> implements ResourceEntry {
 
     private static final String ARCHIVE_FOLDER = "resources/"; //$NON-NLS-1$
 

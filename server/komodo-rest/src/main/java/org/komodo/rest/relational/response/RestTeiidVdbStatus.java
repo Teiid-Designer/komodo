@@ -44,7 +44,7 @@ public class RestTeiidVdbStatus extends RestBasicEntity {
      */
     public static final String VDBS_LABEL = "vdbs";
 
-    private List<RestTeiidVdbStatusVdb> vdbProps = new ArrayList<>();
+    private List<RestTeiidVdbStatusVdb> vdbProps = new ArrayList<RestTeiidVdbStatusVdb>();
 
     /**
      * Constructor for use when deserializing
@@ -94,7 +94,7 @@ public class RestTeiidVdbStatus extends RestBasicEntity {
 
     public void setVdbProperties(List<RestTeiidVdbStatusVdb> props) {
         if (props == null)
-            props = new ArrayList<>();
+            props = new ArrayList<RestTeiidVdbStatusVdb>();
 
         this.vdbProps = props;
     }

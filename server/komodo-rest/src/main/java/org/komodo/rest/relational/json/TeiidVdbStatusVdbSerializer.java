@@ -49,31 +49,30 @@ public final class TeiidVdbStatusVdbSerializer extends TypeAdapter< RestTeiidVdb
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_NAME:
-                    vdb.setName(in.nextString());
-                    break;
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_DEPLOYED_NAME:
-                    vdb.setDeployedName(in.nextString());
-                    break;
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_VERSION:
-                    vdb.setVersion(in.nextString());
-                    break;
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_ACTIVE:
-                    vdb.setActive(in.nextBoolean());
-                    break;
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_LOADING:
-                    vdb.setLoading(in.nextBoolean());
-                    break;
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_FAILED:
-                    vdb.setFailed(in.nextBoolean());
-                    break;
-                case RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_ERROR:
-                    final String[] errors = BUILDER.fromJson( in, String[].class );
-                    vdb.setErrors(Arrays.asList(errors));
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_NAME)) {
+                vdb.setName(in.nextString());
+            }
+            else if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_DEPLOYED_NAME)) {
+                vdb.setDeployedName(in.nextString());
+            }
+            else if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_VERSION)) {
+                vdb.setVersion(in.nextString());
+            }
+            else if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_ACTIVE)) {
+                vdb.setActive(in.nextBoolean());
+            }
+            else if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_LOADING)) {
+                vdb.setLoading(in.nextBoolean());
+            }
+            else if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_FAILED)) {
+                vdb.setFailed(in.nextBoolean());
+            }
+            else if (name.equals(RestTeiidVdbStatusVdb.TEIID_VDB_STATUS_ERROR)) {
+                final String[] errors = BUILDER.fromJson( in, String[].class );
+                vdb.setErrors(Arrays.asList(errors));
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

@@ -47,18 +47,17 @@ public class QueryColumnSerializer extends TypeAdapter<RestQueryColumn> {
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RestQueryColumn.NAME_LABEL:
-                    queryColumn.setName(in.nextString());
-                    break;
-                case RestQueryColumn.LABEL_LABEL:
-                    queryColumn.setLabel(in.nextString());
-                    break;
-                case RestQueryColumn.TYPE_LABEL:
-                    queryColumn.setType(in.nextString());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(RestQueryColumn.NAME_LABEL)) {
+                queryColumn.setName(in.nextString());
+            }
+            else if (name.equals(RestQueryColumn.LABEL_LABEL)) {
+                queryColumn.setLabel(in.nextString());
+            }
+            else if (name.equals(RestQueryColumn.TYPE_LABEL)) {
+                queryColumn.setType(in.nextString());
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

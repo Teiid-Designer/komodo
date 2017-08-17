@@ -132,9 +132,17 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         final File cmdFile = File.createTempFile( "TestCommand", ".txt" ); //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
 
-        try ( final FileWriter writer = new FileWriter( cmdFile ) ) {
+        FileWriter writer = null;
+
+        try {
+            writer = new FileWriter( cmdFile );
+
             for ( final String command : commands ) {
                 writer.write( command + NEW_LINE );
+            }
+        } finally {
+            if ( writer != null ) {
+                writer.close();
             }
         }
 
@@ -345,7 +353,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
  * @throws Exception
  */
     protected void assertTabCompletion(String line, final List<? extends CharSequence> expectedCandidates) throws Exception{
-    	List<CharSequence> candidates=new LinkedList<>();
+    	List<CharSequence> candidates=new LinkedList<CharSequence>();
     	Arguments arguments = null;
 		try {
 			arguments = new Arguments(line, true);

@@ -22,10 +22,10 @@
 package org.komodo.rest.relational.json.connection;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +69,7 @@ public final class TemplateEntrySerializerTest extends AbstractSerializerTest {
         V1Constants.TEMPLATE_ENTRIES_SEGMENT + FORWARD_SLASH +
         ENTRY_NAME;
 
-    private static final int[] ALLOWED_VALUES = { 0, 1, 2 };
+    private static final Integer[] ALLOWED_VALUES = { 0, 1, 2 };
 
     private static final String SOME_CATEGORY = "SomeCategory";
 
@@ -165,9 +165,9 @@ public final class TemplateEntrySerializerTest extends AbstractSerializerTest {
         final RestTemplateEntry entry = KomodoJsonMarshaller.unmarshall(JSON, RestTemplateEntry.class);
 
         assertThat(entry.getId(), is(ENTRY_NAME));
-        assertThat(entry.getAllowedValues(), is(ALLOWED_VALUES));
+        assertArrayEquals(entry.getAllowedValues(), ALLOWED_VALUES);
         assertThat(entry.getCategory(), is(SOME_CATEGORY));
-        assertThat(entry.getDefaultValue(), is(ALLOWED_VALUES[0]));
+        assertEquals(entry.getDefaultValue(), ALLOWED_VALUES[0]);;
         assertThat(entry.getDescription(), is(ENTRY_DESCRIPTION));
         assertThat(entry.getDisplayName(), is(DISPLAY_NAME));
         assertThat(entry.getTypeClassName(), is(TYPE_CLASS_NAME));

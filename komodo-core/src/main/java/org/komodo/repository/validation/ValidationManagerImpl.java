@@ -108,7 +108,9 @@ public class ValidationManagerImpl implements ValidationManager {
 
         for ( final ValidationRulesProvider provider : ServiceLoader.load( ValidationRulesProvider.class, classLoader ) ) {
             if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
-                try ( final InputStream rulesStream = provider.provideRules() ) {
+                InputStream rulesStream = null;
+                try {
+                    rulesStream = provider.provideRules();
                     if (rulesStream == null) {
                         LOGGER.error( Messages.getString( Messages.ValidationManagerImpl.ValidationRulesProviderNullStream,
                                                           provider.getClass().getName() ) );
@@ -165,6 +167,9 @@ public class ValidationManagerImpl implements ValidationManager {
                     LOGGER.error( Messages.getString( Messages.ValidationManagerImpl.ValidationRulesProviderError,
                                                       provider.getClass().getName() ),
                                   ex );
+                } finally {
+                    if (rulesStream != null)
+                        rulesStream.close();
                 }
             }
         }
@@ -184,7 +189,7 @@ public class ValidationManagerImpl implements ValidationManager {
             parser.parse(rulesXmlFile);
 
             // return any errors
-            List< String > result = new ArrayList<>();
+            List< String > result = new ArrayList<String>();
             result.addAll( parser.getFatalErrors() );
             result.addAll( parser.getErrors() );
             return result;
@@ -246,7 +251,7 @@ public class ValidationManagerImpl implements ValidationManager {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Rule > result = new ArrayList<>();
+        final List< Rule > result = new ArrayList<Rule>();
         KomodoObject defaultValidationArea = getValidationAreaRoot(transaction);
 
         // Collect all available Rules
@@ -314,7 +319,7 @@ public class ValidationManagerImpl implements ValidationManager {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Rule > result = new ArrayList<>();
+        final List< Rule > result = new ArrayList<Rule>();
         KomodoObject defaultValidationArea = getValidationAreaRoot(transaction);
 
         // Check all available Rules - determine if they are applicable for the supplied object.

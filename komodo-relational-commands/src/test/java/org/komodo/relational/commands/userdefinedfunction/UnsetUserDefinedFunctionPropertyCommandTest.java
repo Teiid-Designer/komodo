@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.userdefinedfunction;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -68,7 +66,7 @@ public final class UnsetUserDefinedFunctionPropertyCommandTest extends AbstractC
     @Test
     public void testTabCompleter()throws Exception{
 
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addUserDefinedFunctions.cmd");
     	final String[] commands = { "cd myUserDefinedFunction1" };
     	final CommandResult result = execute( commands );

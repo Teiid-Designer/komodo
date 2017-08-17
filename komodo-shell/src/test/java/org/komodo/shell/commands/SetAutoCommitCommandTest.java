@@ -47,7 +47,7 @@ public final class SetAutoCommitCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	candidates.add("true");
     	candidates.add("false");
 

@@ -63,7 +63,7 @@ public class HelpCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
 
 
     	assertTabCompletion("help show-S", candidates);

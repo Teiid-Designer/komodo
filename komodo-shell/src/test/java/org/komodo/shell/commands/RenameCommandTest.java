@@ -135,7 +135,7 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
        	setup("commandFiles","addChildren.cmd");
 
     	candidates.add("myChild1");

@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -142,7 +141,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
     @Test
     public void shouldSetLastModified() throws Exception {
         final Calendar date = Calendar.getInstance();
-        date.setTimeZone(TimeZone.getTimeZone(ZoneId.of("Europe/London")));
+        date.setTimeZone(TimeZone.getTimeZone("Europe/London"));
         date.set( 2016, 8, 23, 13, 48, 33 );
         this.dataservice.setLastModified( getTransaction(), date );
         assertThat( this.dataservice.getLastModified( getTransaction() ), is( date ) );
@@ -694,7 +693,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         final String dataServiceName = "MyDataService";
         assertThat( parent.hasChild( getTransaction(), dataServiceName ), is( true ) );
         KomodoObject theDataService = parent.getChild( getTransaction(), dataServiceName );
-        final List< String > paths = new ArrayList<>();
+        final List< String > paths = new ArrayList<String>();
 
         // children (entries)
         assertEntry( theDataService,
@@ -782,7 +781,9 @@ public final class DataserviceImplTest extends RelationalModelTest {
         final int numPaths = ( paths.size() + 1 ); // add one for the manifest as it is not persisted
         int numEntries = 0;
 
-        try ( final ZipInputStream zis = new ZipInputStream( new ByteArrayInputStream( dsBytes ) ) ) {
+        ZipInputStream zis = null;
+        try {
+            zis = new ZipInputStream( new ByteArrayInputStream( dsBytes ) );
             ZipEntry entry = null;
 
             while ( ( entry = zis.getNextEntry() ) != null ) {
@@ -795,6 +796,9 @@ public final class DataserviceImplTest extends RelationalModelTest {
                     ++numEntries;
                 }
             }
+        } finally {
+            if (zis != null)
+                zis.close();
         }
 
         assertThat( paths.isEmpty(), is( true ) );

@@ -45,17 +45,16 @@ public class QueryResultSerializer extends TypeAdapter<RestQueryResult> {
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RestQueryResult.COLUMNS_LABEL:
-                    RestQueryColumn[] columns = BUILDER.fromJson(in, RestQueryColumn[].class);
-                    queryResult.setColumns(columns);
-                    break;
-                case RestQueryResult.ROWS_LABEL:
-                    RestQueryRow[] rows = BUILDER.fromJson(in, RestQueryRow[].class);
-                    queryResult.setRows(rows);
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(RestQueryResult.COLUMNS_LABEL)) {
+                RestQueryColumn[] columns = BUILDER.fromJson(in, RestQueryColumn[].class);
+                queryResult.setColumns(columns);
+            }
+            else if (name.equals(RestQueryResult.ROWS_LABEL)) {
+                RestQueryRow[] rows = BUILDER.fromJson(in, RestQueryRow[].class);
+                queryResult.setRows(rows);
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

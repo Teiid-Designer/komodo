@@ -134,7 +134,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Dataservice > result = new ArrayList< >();
+        final List< Dataservice > result = new ArrayList<Dataservice>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.DataService.NODE_TYPE, namePatterns ) ) {
             final Dataservice service = new DataserviceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -154,7 +154,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Connection > result = new ArrayList< >();
+        final List< Connection > result = new ArrayList<Connection>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, DataVirtLexicon.Connection.NODE_TYPE, namePatterns ) ) {
             final Connection ds = new ConnectionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -174,7 +174,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Vdb > result = new ArrayList< >();
+        final List< Vdb > result = new ArrayList<Vdb>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns ) ) {
             final Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -194,7 +194,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Schema > result = new ArrayList< >();
+        final List< Schema > result = new ArrayList<Schema>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, KomodoLexicon.Schema.NODE_TYPE, namePatterns ) ) {
             final Schema schema = new SchemaImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -274,7 +274,7 @@ public class FolderImpl extends RelationalObjectImpl implements Folder, EventMan
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Folder > result = new ArrayList< >();
+        final List< Folder > result = new ArrayList<Folder>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction, KomodoLexicon.Folder.NODE_TYPE, namePatterns ) ) {
             final Folder folder = new FolderImpl( transaction, getRepository(), kobject.getAbsolutePath() );

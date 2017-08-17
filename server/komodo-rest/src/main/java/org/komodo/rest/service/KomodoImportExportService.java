@@ -488,7 +488,7 @@ public class KomodoImportExportService extends KomodoService {
                 return Response.noContent().build();
             }
 
-            List<RestStorageType> restStorageTypes = new ArrayList<>(storageTypes.size());
+            List<RestStorageType> restStorageTypes = new ArrayList<RestStorageType>(storageTypes.size());
             for (String storageType : storageTypes) {
                 StorageService storageService = pluginService.getStorageService(storageType);
                 String description = storageService.getDescription();

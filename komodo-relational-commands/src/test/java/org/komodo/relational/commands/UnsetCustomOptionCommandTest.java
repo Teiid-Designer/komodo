@@ -58,7 +58,7 @@ public class UnsetCustomOptionCommandTest extends CustomOptionCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-        ArrayList<CharSequence> candidates=new ArrayList<>();
+        ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
         candidates.add("myCustomOption1");
         candidates.add("myCustomOption2");
         candidates.add("my.custom.option");

@@ -534,7 +534,7 @@ public class PluginService implements StringConstants {
         if (bundles == null || bundles.length == 0)
             return Collections.emptyList();
 
-        List<String> names = new ArrayList<>(bundles.length);
+        List<String> names = new ArrayList<String>(bundles.length);
         for (Bundle bundle : bundles) {
             names.add(bundle.getSymbolicName());
         }

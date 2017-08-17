@@ -187,7 +187,7 @@ public final class KomodoDriverService extends KomodoService {
                 }
             }
 
-            final List< RestConnectionDriver > entities = new ArrayList< >();
+            final List< RestConnectionDriver > entities = new ArrayList<RestConnectionDriver>();
             int i = 0;
 
             for ( final Driver driver : drivers ) {

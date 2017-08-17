@@ -110,6 +110,8 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 
         CREATE_TABLE(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT),
 
+        CREATE_GLOBAL_TEMP_TABLE(TeiidDdlLexicon.CreateTable.GLOBAL_TEMP_TABLE_STATEMENT),
+
         CREATE_VIEW(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT),
 
         OPTION_NAMESPACE(TeiidDdlLexicon.OptionNamespace.STATEMENT),
@@ -764,8 +766,9 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         if (! includeTables)
             return;
 
-        if (!hasMixinType(table, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT))
-            return;
+        if (!hasMixinType(table, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) &&
+            !hasMixinType(table, TeiidDdlLexicon.CreateTable.GLOBAL_TEMP_TABLE_STATEMENT))
+                     return;
 
         append(NEW_LINE);
 
@@ -975,6 +978,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         try {
             switch (typeName) {
                 case CREATE_TABLE:
+                case CREATE_GLOBAL_TEMP_TABLE:
                     table(node);
                     append(NEW_LINE);
                     break;

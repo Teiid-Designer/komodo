@@ -39,7 +39,7 @@ import org.komodo.utils.FileUtils;
 
 public class FileStorageConnector implements StorageConnector {
 
-    static final Set<Descriptor> DESCRIPTORS = new HashSet<>();
+    static final Set<Descriptor> DESCRIPTORS = new HashSet<Descriptor>();
 
     static {
         DESCRIPTORS.add(

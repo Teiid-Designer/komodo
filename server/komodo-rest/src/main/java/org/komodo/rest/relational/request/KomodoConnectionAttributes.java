@@ -148,7 +148,7 @@ public class KomodoConnectionAttributes implements KRestEntity {
      */
     public void setParameter(String name, Object value) {
         if (this.parameters == null)
-            this.parameters = new HashMap<>();
+            this.parameters = new HashMap<String, Object>();
 
         this.parameters.put(name, value);
     }

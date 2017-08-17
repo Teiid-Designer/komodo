@@ -209,7 +209,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
     protected List< Entry< TextFormat, String > > getPrompt() throws Exception {
         final KomodoObject kobject = this.wsStatus.getCurrentContext();
-        final List< Entry< TextFormat, String > > result = new ArrayList<>(2);
+        final List< Entry< TextFormat, String > > result = new ArrayList<Entry< TextFormat, String >>(2);
 
         { // add opening bracket
             final TextFormat format = new TextFormat();

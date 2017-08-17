@@ -256,7 +256,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         final KomodoObject grouping = getConditionsGroupingNode( transaction );
 
         if ( grouping != null ) {
-            final List< Condition > temp = new ArrayList<>();
+            final List< Condition > temp = new ArrayList< Condition >();
 
             for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction,
                                                                            VdbLexicon.DataRole.Permission.Condition.CONDITION,
@@ -302,7 +302,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         final KomodoObject grouping = getMasksGroupingNode( transaction );
 
         if ( grouping != null ) {
-            final List< Mask > temp = new ArrayList<>();
+            final List< Mask > temp = new ArrayList< Mask >();
 
             for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction,
                                                                            VdbLexicon.DataRole.Permission.Mask.MASK,

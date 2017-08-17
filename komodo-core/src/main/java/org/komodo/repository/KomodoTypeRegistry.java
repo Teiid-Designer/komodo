@@ -112,7 +112,7 @@ public class KomodoTypeRegistry implements StringConstants {
     }
 
     private KeyInValueHashMap<KomodoType, TypeIdentifier> kTypeIndex =
-                    new KeyInValueHashMap<>(new KTypeAdapter());
+                    new KeyInValueHashMap<KomodoType, TypeIdentifier>(new KTypeAdapter());
 
     private KomodoTypeRegistry() {
 
@@ -226,7 +226,7 @@ public class KomodoTypeRegistry implements StringConstants {
         if (lexiconType == null)
             return Collections.emptySet();
 
-        Set<TypeIdentifier> identifiers = new HashSet<>();
+        Set<TypeIdentifier> identifiers = new HashSet<TypeIdentifier>();
         for (TypeIdentifier identifier : kTypeIndex.values()) {
             if (identifier.getLexiconType().equals(lexiconType))
                 identifiers.add(identifier);

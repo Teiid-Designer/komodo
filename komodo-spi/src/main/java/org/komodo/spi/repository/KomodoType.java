@@ -299,7 +299,7 @@ public enum KomodoType {
     private KomodoType(String... aliases) {
         this();
         if (aliases != null) {
-            this.aliases = new ArrayList<>(aliases.length);
+            this.aliases = new ArrayList<String>(aliases.length);
             for (String alias : aliases) {
                 this.aliases.add(alias);
             }
@@ -364,7 +364,7 @@ public enum KomodoType {
      * @return all the string definitions of the types
      */
     public static List<String> getTypes() {
-        List<String> names = new ArrayList<>();
+        List<String> names = new ArrayList<String>();
         for (KomodoType kType : values()) {
             names.add(kType.getType());
         }

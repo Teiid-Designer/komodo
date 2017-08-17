@@ -49,19 +49,18 @@ public class StorageTypeSerializer extends TypeAdapter< RestStorageType > {
             while ( in.hasNext() ) {
                 final String name = in.nextName();
 
-                switch ( name ) {
-                    case RestStorageType.NAME_LABEL:
-                        storageType.setName(in.nextString());
-                        break;
-                    case RestStorageType.DESCRIPTION_LABEL:
-                        storageType.setDescription(in.nextString());
-                        break;
-                    case RestStorageType.DESCRIPTORS_LABEL:
-                        RestStorageTypeDescriptor[] descriptors = BUILDER.fromJson(in, RestStorageTypeDescriptor[].class);
-                        storageType.setDescriptors(descriptors);
-                        break;
-                    default:
-                        throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+                if (name.equals(RestStorageType.NAME_LABEL)) {
+                    storageType.setName(in.nextString());
+                }
+                else if (name.equals(RestStorageType.DESCRIPTION_LABEL)) {
+                    storageType.setDescription(in.nextString());
+                }
+                else if (name.equals(RestStorageType.DESCRIPTORS_LABEL)) {
+                    RestStorageTypeDescriptor[] descriptors = BUILDER.fromJson(in, RestStorageTypeDescriptor[].class);
+                    storageType.setDescriptors(descriptors);
+                }
+                else {
+                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
                 }
             }
 

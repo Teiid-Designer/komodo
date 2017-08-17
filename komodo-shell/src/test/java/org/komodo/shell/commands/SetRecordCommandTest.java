@@ -59,7 +59,7 @@ public class SetRecordCommandTest extends AbstractCommandTest {
 		final String[] commands = { "workspace" };
 		final CommandResult result = execute(commands);
 		assertCommandResultOk(result);
-		ArrayList<CharSequence> candidates = new ArrayList<>();
+		ArrayList<CharSequence> candidates = new ArrayList<CharSequence>();
 		candidates.add("on");
 		candidates.add("off");
 

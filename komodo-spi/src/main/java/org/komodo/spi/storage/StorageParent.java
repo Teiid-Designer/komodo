@@ -73,7 +73,7 @@ public abstract class StorageParent<T> implements StringConstants {
      */
     public StorageNode<T> addChild(T data) {
         if (children == null)
-            children = new ArrayList<>();
+            children = new ArrayList<StorageNode<T>>();
 
         StorageNode<T> child = new StorageNode<T>(this, data);
         children.add(child);

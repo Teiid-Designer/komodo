@@ -43,9 +43,9 @@ public class RestQueryResult implements KRestEntity {
      */
     public static final String ROWS_LABEL = "rows";
 
-    private List<RestQueryColumn> columns = new ArrayList<>();
+    private List<RestQueryColumn> columns = new ArrayList<RestQueryColumn>();
 
-    private List<RestQueryRow> rows = new ArrayList<>();
+    private List<RestQueryRow> rows = new ArrayList<RestQueryRow>();
 
     public RestQueryResult() {
         super();
@@ -90,7 +90,7 @@ public class RestQueryResult implements KRestEntity {
         if (columns == null || columns.length == 0)
             this.columns = Collections.emptyList();
 
-        this.columns = new ArrayList<>();
+        this.columns = new ArrayList<RestQueryColumn>();
         for (RestQueryColumn column : columns) {
             this.columns.add(column);
         }

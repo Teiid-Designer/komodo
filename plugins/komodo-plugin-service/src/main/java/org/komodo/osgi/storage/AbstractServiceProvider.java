@@ -34,7 +34,7 @@ public abstract class AbstractServiceProvider<S extends BundleService, K> extend
 
     private final PluginService pluginService;
 
-    private final Map<K, String> bundleIndex = new HashMap<>();
+    private final Map<K, String> bundleIndex = new HashMap<K, String>();
 
     public AbstractServiceProvider(PluginService pluginService) {
         super(pluginService.getContext(), Bundle.ACTIVE | Bundle.STOPPING, null);

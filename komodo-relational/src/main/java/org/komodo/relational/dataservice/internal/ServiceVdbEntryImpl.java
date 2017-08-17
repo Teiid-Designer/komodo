@@ -113,7 +113,7 @@ public class ServiceVdbEntryImpl extends VdbEntryImpl implements ServiceVdbEntry
         ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< VdbEntry > result = new ArrayList<>();
+        final List< VdbEntry > result = new ArrayList<VdbEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( uow, DataVirtLexicon.VdbEntry.NODE_TYPE ) ) {
             final VdbEntry entry = new VdbEntryImpl( uow, getRepository(), kobject.getAbsolutePath() );

@@ -125,6 +125,17 @@ public class TestGitStorageConnector implements StringConstants {
         }
     }
 
+    private void close(InputStream is) {
+        if (is == null)
+            return;
+
+        try {
+            is.close();
+        } catch (Exception ex) {
+            // do nothing
+        }
+    }
+
     @Before
     public void setup() throws Exception {
         String tmpDirPath = System.getProperty("java.io.tmpdir");
@@ -165,11 +176,15 @@ public class TestGitStorageConnector implements StringConstants {
 
         File usStatesZipFile = new File(tmpDir, TestUtilities.US_STATES_VDB_NAME + ZIP_SUFFIX);
         FileUtils.write(TestUtilities.usStatesDataserviceExample(), usStatesZipFile);
-        try (FileInputStream fis = new FileInputStream(usStatesZipFile)) {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(usStatesZipFile);
             File usStatesDir = new File(seedDir, TestUtilities.US_STATES_VDB_NAME);
             usStatesDir.mkdir();
             FileUtils.zipExtract(fis, usStatesDir);
             usStatesZipFile.delete();
+        } finally {
+            close(fis);
         }
 
         seedGit.add()
@@ -259,17 +274,25 @@ public class TestGitStorageConnector implements StringConstants {
         File original = createTempFile(TestUtilities.US_STATES_VDB_NAME, ZIP_SUFFIX);
         FileUtils.write(TestUtilities.usStatesDataserviceExample(), original);
         File origDir = new File(tmpDir, "original");
-        try (FileInputStream origFis = new FileInputStream(original)) {
+        FileInputStream origFis = null;
+        try {
+            origFis = new FileInputStream(original);
             origDir.mkdir();
             FileUtils.zipExtract(origFis, origDir);
+        } finally {
+            close(origFis);
         }
 
         File fileToCompare = createTempFile(TestUtilities.US_STATES_VDB_NAME, ZIP_SUFFIX);
         FileUtils.write(is, fileToCompare);
         File file2CmpDir = new File(tmpDir, "file2cmp");
-        try (FileInputStream file2CmpFis = new FileInputStream(fileToCompare)) {
+        FileInputStream file2CmpFis = null;
+        try {
+            file2CmpFis = new FileInputStream(fileToCompare);
             file2CmpDir.mkdir();
             FileUtils.zipExtract(file2CmpFis, file2CmpDir);
+        } finally {
+            close(file2CmpFis);
         }
 
         try {
@@ -332,10 +355,14 @@ public class TestGitStorageConnector implements StringConstants {
         //
         Repository repository = myGit.getRepository();
         ObjectId commitId = repository.resolve(Constants.HEAD);
-        try (RevWalk revWalk = new RevWalk(repository)) {
+        RevWalk revWalk = null;
+        try {
+            revWalk = new RevWalk(repository);
             RevCommit commit = revWalk.parseCommit(commitId);
             RevTree tree = commit.getTree();
-            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+            TreeWalk treeWalk = null;
+            try {
+                treeWalk = new TreeWalk(repository);
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(true);
                 treeWalk.setFilter(PathFilter.create(TEST_VDB_2_XML));
@@ -354,7 +381,13 @@ public class TestGitStorageConnector implements StringConstants {
                 File tmpFile2 = createTempFile("sampleExampleFile", XML_SUFFIX);
                 FileUtils.write(TestUtilities.sampleExample(), tmpFile2);
                 compareFileContents(tmpFile1, tmpFile2);
+            } finally {
+                if (treeWalk != null)
+                    treeWalk.close();
             }
+        } finally {
+            if (revWalk != null)
+                revWalk.close();
         }
     }
 
@@ -394,11 +427,15 @@ public class TestGitStorageConnector implements StringConstants {
 
         Repository repository = myGit.getRepository();
         ObjectId commitId = repository.resolve(Constants.HEAD);
-        try (RevWalk revWalk = new RevWalk(repository)) {
+        RevWalk revWalk = null;
+        try {
+            revWalk = new RevWalk(repository);
             RevCommit commit = revWalk.parseCommit(commitId);
             RevTree tree = commit.getTree();
 
-            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+            TreeWalk treeWalk = null;
+            try {
+                treeWalk = new TreeWalk(repository);
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(false);
                 while (treeWalk.next()) {
@@ -407,6 +444,9 @@ public class TestGitStorageConnector implements StringConstants {
                     if (treeWalk.isSubtree())
                         treeWalk.enterSubtree();
                 }
+            } finally {
+                if (treeWalk != null)
+                    treeWalk.close();
             }
 
             //
@@ -414,6 +454,9 @@ public class TestGitStorageConnector implements StringConstants {
             // and pushed to the git repository
             //
             assertTrue("Remaining entries: " + Arrays.toString(zipEntries.toArray(new String[0])), zipEntries.isEmpty());
+        } finally {
+            if (revWalk != null)
+                revWalk.close();
         }
     }
 

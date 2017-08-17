@@ -270,7 +270,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 }
             }
 
-            final List< RestDataservice > entities = new ArrayList< >();
+            final List< RestDataservice > entities = new ArrayList<RestDataservice>();
             int i = 0;
 
             KomodoProperties properties = new KomodoProperties();
@@ -1787,7 +1787,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
 
             Connection[] connections = dataservice.getConnections(uow);
-            List<RestConnection> restConnections = new ArrayList<>(connections.length);
+            List<RestConnection> restConnections = new ArrayList<RestConnection>(connections.length);
             for (Connection connection : connections) {
                 RestConnection entity = entityFactory.create(connection, uriInfo.getBaseUri(), uow);
                 restConnections.add(entity);
@@ -1854,7 +1854,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
 
             Driver[] drivers = dataservice.getDrivers(uow);
-            List<RestConnectionDriver> restDrivers = new ArrayList<>(drivers.length);
+            List<RestConnectionDriver> restDrivers = new ArrayList<RestConnectionDriver>(drivers.length);
             for (Driver driver : drivers) {
                 ConnectionDriver aDriver = new ConnectionDriver(driver.getName(uow),null);
                 RestConnectionDriver entity = new RestConnectionDriver(aDriver);
@@ -1942,7 +1942,7 @@ public final class KomodoDataserviceService extends KomodoService {
                 }
             }
             
-            final List< RestVdb > entities = new ArrayList< >();
+            final List< RestVdb > entities = new ArrayList<RestVdb>();
             KomodoProperties properties = new KomodoProperties();
             properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
             for ( final Vdb vdb : sourceVdbs ) {
@@ -2201,8 +2201,8 @@ public final class KomodoDataserviceService extends KomodoService {
                 }
                 
                 // Now the table aliases have been determined - separate the original column names with the appropriate alias
-                List<String> lhCols = new ArrayList<>();
-                List<String> rhCols = new ArrayList<>();
+                List<String> lhCols = new ArrayList<String>();
+                List<String> rhCols = new ArrayList<String>();
                 
                 for(String colName : colNames) {
                     if(colName.startsWith(LH_TABLE_ALIAS_DOT)) {
@@ -2361,7 +2361,8 @@ public final class KomodoDataserviceService extends KomodoService {
 
             criteriaInfo.setCriteriaPredicates(predicates);
         } else {
-            criteriaInfo.setCriteriaPredicates(Collections.emptyList());
+            List<ViewBuilderCriteriaPredicate> predicates = Collections.emptyList();
+            criteriaInfo.setCriteriaPredicates(predicates);
         }
         
         return criteriaInfo;

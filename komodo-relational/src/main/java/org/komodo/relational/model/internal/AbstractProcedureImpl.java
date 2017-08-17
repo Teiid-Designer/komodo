@@ -76,7 +76,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         static Map< String, String > defaultValues() {
             if ( _defaultValues == null ) {
                 final StandardOption[] options = values();
-                final Map< String, String > temp = new HashMap< >();
+                final Map< String, String > temp = new HashMap< String, String >();
 
                 for ( final StandardOption option : options ) {
                     temp.put( option.name(), option.defaultValue );
@@ -158,7 +158,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         if ( kids.length == 0 ) {
             result = kids;
         } else {
-            final List< KomodoObject > temp = new ArrayList<>();
+            final List< KomodoObject > temp = new ArrayList< KomodoObject >();
 
             for ( final KomodoObject kid : kids ) {
                 if ( kid.hasDescriptor( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {

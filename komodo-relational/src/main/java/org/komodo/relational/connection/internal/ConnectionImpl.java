@@ -34,6 +34,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
@@ -100,6 +101,16 @@ public class ConnectionImpl extends RelationalObjectImpl implements Connection, 
         final Property prop = getRawProperty( transaction, JcrLexicon.UUID.getString() );
         final String result = prop.getStringValue( transaction );
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#getDocumentType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public DocumentType getDocumentType( final UnitOfWork transaction ) {
+        return DOC_TYPE;
     }
 
     /**

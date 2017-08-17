@@ -279,7 +279,9 @@ public class DataserviceConveyor implements StringConstants {
 
         ZipOutputStream zipStream = null;
 
-        try ( final ByteArrayOutputStream bos = new ByteArrayOutputStream() ) {
+        ByteArrayOutputStream bos = null;
+        try {
+            bos = new ByteArrayOutputStream();
             final DataServiceEntry< ? >[] entries = dataService.getChildren( transaction );
 
             if ( entries.length == 0 ) {
@@ -332,6 +334,14 @@ public class DataserviceConveyor implements StringConstants {
                 try {
                     zipStream.close();
                 } catch ( IOException e ) {
+                    // nothing to do
+                }
+            }
+
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
                     // nothing to do
                 }
             }

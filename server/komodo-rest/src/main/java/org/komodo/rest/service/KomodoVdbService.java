@@ -834,7 +834,7 @@ public final class KomodoVdbService extends KomodoService {
                 }
             }
 
-            final List< RestVdb > entities = new ArrayList< >();
+            final List< RestVdb > entities = new ArrayList<RestVdb>();
             int i = 0;
 
             KomodoProperties properties = new KomodoProperties();
@@ -972,7 +972,7 @@ public final class KomodoVdbService extends KomodoService {
             if (models == null)
                 models = new Model[0];
 
-            List<RestVdbModel> restModels = new ArrayList<>(models.length);
+            List<RestVdbModel> restModels = new ArrayList<RestVdbModel>(models.length);
             for (Model model : models) {
                 RestVdbModel entity = entityFactory.create(model, uriInfo.getBaseUri(), uow);
                 restModels.add(entity);
@@ -1472,7 +1472,7 @@ public final class KomodoVdbService extends KomodoService {
             if (translators == null)
                 translators = new Translator[0];
 
-            List<RestVdbTranslator> restTranslators = new ArrayList<>(translators.length);
+            List<RestVdbTranslator> restTranslators = new ArrayList<RestVdbTranslator>(translators.length);
             for (Translator translator : translators) {
                 RestVdbTranslator entity = entityFactory.create(translator, uriInfo.getBaseUri(), uow);
                 restTranslators.add(entity);
@@ -1625,7 +1625,7 @@ public final class KomodoVdbService extends KomodoService {
             if (imports == null)
                 imports = new VdbImport[0];
 
-            List<RestVdbImport> restImports = new ArrayList<>(imports.length);
+            List<RestVdbImport> restImports = new ArrayList<RestVdbImport>(imports.length);
             for (VdbImport vdbImport : imports) {
                 RestVdbImport entity = entityFactory.create(vdbImport, uriInfo.getBaseUri(), uow);
                 restImports.add(entity);
@@ -1778,7 +1778,7 @@ public final class KomodoVdbService extends KomodoService {
             if (dataRoles == null)
                 dataRoles = new DataRole[0];
 
-            List<RestVdbDataRole> restDataRoles = new ArrayList<>(dataRoles.length);
+            List<RestVdbDataRole> restDataRoles = new ArrayList<RestVdbDataRole>(dataRoles.length);
             for (DataRole dataRole : dataRoles) {
                 RestVdbDataRole entity = entityFactory.create(dataRole, uriInfo.getBaseUri(), uow);
                 restDataRoles.add(entity);
@@ -2274,7 +2274,7 @@ public final class KomodoVdbService extends KomodoService {
             if (sources == null)
                 sources = new ModelSource[0];
 
-            List<RestVdbModelSource> restSources = new ArrayList<>(sources.length);
+            List<RestVdbModelSource> restSources = new ArrayList<RestVdbModelSource>(sources.length);
             for (ModelSource source : sources) {
                 RestVdbModelSource entity = entityFactory.create(source, uriInfo.getBaseUri(), uow);
                 restSources.add(entity);
@@ -2856,7 +2856,7 @@ public final class KomodoVdbService extends KomodoService {
             if (tables == null)
             	tables = new Table[0];
 
-            List<RestVdbModelTable> restTables = new ArrayList<>(tables.length);
+            List<RestVdbModelTable> restTables = new ArrayList<RestVdbModelTable>(tables.length);
             for (Table table : tables) {
                 RestVdbModelTable entity = entityFactory.create(table, uriInfo.getBaseUri(), uow);
                 restTables.add(entity);
@@ -2945,7 +2945,7 @@ public final class KomodoVdbService extends KomodoService {
             if (columns == null)
             	columns = new Column[0];
 
-            List<RestVdbModelTableColumn> restColumns = new ArrayList<>(columns.length);
+            List<RestVdbModelTableColumn> restColumns = new ArrayList<RestVdbModelTableColumn>(columns.length);
             for (Column column : columns) {
                 RestVdbModelTableColumn entity = entityFactory.create(column, uriInfo.getBaseUri(), uow);
                 restColumns.add(entity);
@@ -3023,7 +3023,7 @@ public final class KomodoVdbService extends KomodoService {
             if (permissions == null)
                 permissions = new Permission[0];
 
-            List<RestVdbPermission> restPermissions = new ArrayList<>(permissions.length);
+            List<RestVdbPermission> restPermissions = new ArrayList<RestVdbPermission>(permissions.length);
             for (Permission permission : permissions) {
                 RestVdbPermission entity = entityFactory.create(permission, uriInfo.getBaseUri(), uow);
                 restPermissions.add(entity);
@@ -3184,7 +3184,7 @@ public final class KomodoVdbService extends KomodoService {
                 return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
 
             Condition[] conditions = permission.getConditions(uow);
-            List<RestVdbCondition> restConditions = new ArrayList<>(conditions.length);
+            List<RestVdbCondition> restConditions = new ArrayList<RestVdbCondition>(conditions.length);
             for (Condition condition : conditions) {
                 RestVdbCondition entity = entityFactory.create(condition, uriInfo.getBaseUri(), uow);
                 restConditions.add(entity);
@@ -3380,7 +3380,7 @@ public final class KomodoVdbService extends KomodoService {
                 return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
 
             Mask[] masks = permission.getMasks(uow);
-            List<RestVdbMask> restMasks = new ArrayList<>(masks.length);
+            List<RestVdbMask> restMasks = new ArrayList<RestVdbMask>(masks.length);
             for (Mask mask : masks) {
                 RestVdbMask entity = entityFactory.create(mask, uriInfo.getBaseUri(), uow);
                 restMasks.add(entity);

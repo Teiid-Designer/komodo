@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Collections;
+import java.util.Map;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -230,6 +232,16 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
         }
 
         return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
+     */
+    @Override
+    public Map< String, String > getStandardOptions() {
+        return Collections.emptyMap();
     }
 
     /**

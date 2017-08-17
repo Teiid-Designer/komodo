@@ -57,25 +57,19 @@ public final class ConnectionAttributesSerializer extends TypeAdapter<KomodoConn
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoConnectionAttributes.JNDI_LABEL:
-                    ConnectionAttr.setJndi(in.nextString());
-                    break;
-                case KomodoConnectionAttributes.JDBC_LABEL:
-                    ConnectionAttr.setJdbc(in.nextBoolean());
-                    break;
-                case KomodoConnectionAttributes.DRIVER_LABEL:
-                    ConnectionAttr.setDriver(in.nextString());
-                    break;
-                case KomodoConnectionAttributes.PARAMETERS_LABEL:
-                    Map<String, String> parameters = BUILDER.fromJson(in, Map.class);
-                    for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-                        ConnectionAttr.setParameter(parameter.getKey(), parameter.getValue());
-                    }
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
-            }
+            if (KomodoConnectionAttributes.JNDI_LABEL.equals(name))
+                ConnectionAttr.setJndi(in.nextString());
+            else if (KomodoConnectionAttributes.JDBC_LABEL.equals(name))
+                ConnectionAttr.setJdbc(in.nextBoolean());
+            else if (KomodoConnectionAttributes.DRIVER_LABEL.equals(name))
+                ConnectionAttr.setDriver(in.nextString());
+            else if (KomodoConnectionAttributes.PARAMETERS_LABEL.equals(name)) {
+                Map<String, String> parameters = BUILDER.fromJson(in, Map.class);
+                for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+                    ConnectionAttr.setParameter(parameter.getKey(), parameter.getValue());
+                }
+            } else
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
         }
 
         in.endObject();

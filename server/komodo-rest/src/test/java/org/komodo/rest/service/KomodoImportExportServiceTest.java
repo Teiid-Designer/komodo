@@ -30,11 +30,11 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.xml.bind.DatatypeConverter;
 import org.apache.tika.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
@@ -106,11 +106,16 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         File usStatesZipFile = new File(tmpDir, TestUtilities.US_STATES_DATA_SERVICE_NAME + ZIP_SUFFIX);
         FileUtils.write(TestUtilities.usStatesDataserviceExample(), usStatesZipFile);
-        try (FileInputStream fis = new FileInputStream(usStatesZipFile)) {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(usStatesZipFile);
             File usStatesDir = new File(seedDir, TestUtilities.US_STATES_DATA_SERVICE_NAME);
             usStatesDir.mkdir();
             FileUtils.zipExtract(fis, usStatesDir);
             usStatesZipFile.delete();
+        } finally {
+            if (fis != null)
+                fis.close();
         }
 
         seedGit.add()
@@ -185,7 +190,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setDocumentType(DocumentType.VDB_XML);
 
         String portfolioCnt = FileUtils.streamToString(TestUtilities.portfolioExample());
-        String content = Base64.getEncoder().encodeToString(portfolioCnt.getBytes());
+        String content = DatatypeConverter.printBase64Binary(portfolioCnt.getBytes()); 
         storageAttr.setContent(content);
 
         assertFalse(workspace.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
@@ -274,7 +279,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         String content = status.getContent();
         assertNotNull(content);
 
-        byte[] decBytes = Base64.getDecoder().decode(content);
+        byte[] decBytes = DatatypeConverter.parseBase64Binary(content); 
         String decContent = new String(decBytes) + NEW_LINE;
 
         FileInputStream stream = null;
@@ -308,7 +313,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         InputStream sampleDsStream = TestUtilities.sampleDataserviceExample();
 
         byte[] sampleBytes = TestUtilities.streamToBytes(sampleDsStream);
-        String content = Base64.getEncoder().encodeToString(sampleBytes);
+        String content = DatatypeConverter.printBase64Binary(sampleBytes);
         storageAttr.setContent(content);
 
         assertFalse(workspace.hasChild(uow, dsName));
@@ -366,7 +371,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         InputStream usDsStream = TestUtilities.usStatesDataserviceExample();
 
         byte[] usBytes = TestUtilities.streamToBytes(usDsStream);
-        String content = Base64.getEncoder().encodeToString(usBytes);
+        String content = DatatypeConverter.printBase64Binary(usBytes);
         storageAttr.setContent(content);
 
         assertFalse(workspace.hasChild(uow, dsName));
@@ -497,7 +502,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         String content = status.getContent();
         assertNotNull(content);
 
-        byte[] decBytes = Base64.getDecoder().decode(content);
+        byte[] decBytes = DatatypeConverter.parseBase64Binary(content);
 
         File dsZip = File.createTempFile("DSZip", ZIP_SUFFIX);
         dsZip.deleteOnExit();
@@ -548,11 +553,15 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         //
         org.eclipse.jgit.lib.Repository repository = myGit.getRepository();
         ObjectId commitId = repository.resolve(Constants.HEAD);
-        try (RevWalk revWalk = new RevWalk(repository)) {
+        RevWalk revWalk = null;
+        try {
+            revWalk = new RevWalk(repository);
             RevCommit commit = revWalk.parseCommit(commitId);
             RevTree tree = commit.getTree();
 
-            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+            TreeWalk treeWalk = null;
+            try {
+                treeWalk = new TreeWalk(repository);
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(false);
                 while (treeWalk.next()) {
@@ -561,6 +570,9 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
                     if (treeWalk.isSubtree())
                         treeWalk.enterSubtree();
                 }
+            } finally {
+                if (treeWalk != null)
+                    treeWalk.close();
             }
 
             //
@@ -568,6 +580,9 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
             // and pushed to the git repository
             //
             assertTrue("Remaining entries: " + Arrays.toString(zipEntries.toArray(new String[0])), zipEntries.isEmpty());
+        } finally {
+            if (revWalk != null)
+                revWalk.close();
         }
     }
 
@@ -626,7 +641,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setArtifactPath(modelPath);
 
         String patientsDdlCnt = FileUtils.streamToString(TestUtilities.patientsDdl());
-        String content = Base64.getEncoder().encodeToString(patientsDdlCnt.getBytes());
+        String content = DatatypeConverter.printBase64Binary(patientsDdlCnt.getBytes());
         storageAttr.setContent(content);
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

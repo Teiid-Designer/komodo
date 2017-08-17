@@ -9,7 +9,6 @@ package org.komodo.relational.dataservice.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.DdlEntry;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.resource.DdlFile;
 import org.komodo.relational.resource.internal.DdlFileImpl;
 import org.komodo.spi.KException;
@@ -22,7 +21,7 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 /**
  * An implementation of a DDL entry in a data service.
  */
-public class DdlEntryImpl extends RelationalObjectImpl implements DdlEntry {
+public class DdlEntryImpl extends AbstractDataServiceResourceEntryImpl<DdlFile> implements DdlEntry {
 
     private static final String ARCHIVE_FOLDER = "metadata/"; //$NON-NLS-1$
 

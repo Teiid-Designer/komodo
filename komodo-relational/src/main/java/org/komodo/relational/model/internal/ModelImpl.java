@@ -437,7 +437,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         final KomodoObject grouping = getSourcesGroupingNode( transaction );
 
         if ( grouping != null ) {
-            final List< ModelSource > temp = new ArrayList<>();
+            final List< ModelSource > temp = new ArrayList< ModelSource >();
 
             for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
                 final ModelSource source = new ModelSourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );

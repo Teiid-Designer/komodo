@@ -75,7 +75,7 @@ public class TeiidServiceProvider {
     public Set<TeiidVersion> getSupportedTeiidVersions() {
         TeiidVersion version = DefaultTeiidVersion.Version.DEFAULT_TEIID_VERSION.get();
         DefaultTeiidVersion wildcard = new DefaultTeiidVersion(version.getMajor(), version.getMinor(), TeiidVersion.WILDCARD);
-        Set<TeiidVersion> versions = new HashSet<>();
+        Set<TeiidVersion> versions = new HashSet<TeiidVersion>();
         versions.add(version);
         versions.add(wildcard);
         return versions;

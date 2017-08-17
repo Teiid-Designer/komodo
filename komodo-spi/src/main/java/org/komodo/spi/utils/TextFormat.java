@@ -229,7 +229,7 @@ public class TextFormat {
      * Constructs a default text format.
      */
     public TextFormat() {
-        this.props = new HashMap< >();
+        this.props = new HashMap< String, Object >();
         this.style = new BitSet( 3 );
     }
 

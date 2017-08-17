@@ -1667,7 +1667,7 @@ public class TestUtilities implements StringConstants {
         ArgCheck.isNotNull(zipName, "zip name");
         ArgCheck.isNotNull(fileStream, "file stream");
 
-        List<String> entries = new ArrayList<>();
+        List<String> entries = new ArrayList<String>();
         File tmpFile = null;
         ZipFile zipFile = null;
         try {
