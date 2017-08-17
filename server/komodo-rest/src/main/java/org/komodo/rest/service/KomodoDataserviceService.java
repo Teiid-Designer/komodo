@@ -1637,10 +1637,18 @@ public final class KomodoDataserviceService extends KomodoService {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_DNE);
             }
 
-            KomodoObject dataservice = wkspMgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
-            
-            wkspMgr.delete(uow, dataservice);
+            KomodoObject dsKobject = wkspMgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
+            final Dataservice dataservice = wkspMgr.resolve( uow, dsKobject, Dataservice.class );
 
+            // Delete the Dataservice serviceVDB if found
+            Vdb serviceVdb = dataservice.getServiceVdb(uow);
+            if(serviceVdb!=null) {
+                wkspMgr.delete(uow, serviceVdb);
+            }
+
+            // Delete the Dataservice
+            wkspMgr.delete(uow, dataservice);
+            
             KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
             kso.addAttribute(dataserviceName, "Successfully deleted"); //$NON-NLS-1$
 
