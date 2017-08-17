@@ -12,7 +12,7 @@
 	<description>Storage connector for accessing a git repository</description>
 	<packaging>bundle</packaging>
 
-	<dependencyManagement>
+	<!--dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.eclipse.jgit</groupId>
@@ -20,7 +20,7 @@
 				<version>${version.jgit}</version>
 			</dependency>
 		</dependencies>
-	</dependencyManagement>
+	</dependencyManagement-->
 
 	<dependencies>
 		<!-- These will be imported by the bundle at runtime so only required for 
