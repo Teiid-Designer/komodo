@@ -76,7 +76,7 @@ public class CdCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
        	setup("commandFiles","addChildren.cmd");
        	assertTabCompletion("cd invalid", candidates);
 

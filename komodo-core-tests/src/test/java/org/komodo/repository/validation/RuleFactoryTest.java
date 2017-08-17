@@ -113,6 +113,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createChildCountValidationRule( getTransaction(),
                                                                       _repo,
                                                                       this.name.getMethodName(),
@@ -127,7 +128,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                       false,
                                                                       severity,
                                                                       _description,
-                                                                      Collections.emptyList() );
+                                                                      msgs );
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -159,6 +160,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createChildCountValidationRule( getTransaction(),
                                                                       _repo,
                                                                       this.name.getMethodName(),
@@ -173,7 +175,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                       true,
                                                                       severity,
                                                                       _description,
-                                                                      Collections.emptyList() );
+                                                                      msgs );
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -205,6 +207,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createChildCountValidationRule( getTransaction(),
                                                                       _repo,
                                                                       this.name.getMethodName(),
@@ -219,7 +222,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                       true,
                                                                       severity,
                                                                       _description,
-                                                                      Collections.emptyList() );
+                                                                      msgs );
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -251,6 +254,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 1;
         final Number maxValue = 3;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createChildCountValidationRule( getTransaction(),
                                                                       _repo,
                                                                       this.name.getMethodName(),
@@ -265,7 +269,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                       true,
                                                                       severity,
                                                                       _description,
-                                                                      Collections.emptyList() );
+                                                                      msgs );
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -290,6 +294,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final Outcome.Level severity = Outcome.Level.ERROR;
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createSameNameSiblingValidationRule(getTransaction(),
                                                                           _repo,
                                                                           this.name.getMethodName(),
@@ -301,7 +306,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                           false,
                                                                           severity,
                                                                           _description,
-                                                                          Collections.emptyList());
+                                                                          msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -330,6 +335,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final Outcome.Level severity = Outcome.Level.ERROR;
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createSameNameSiblingValidationRule(getTransaction(),
                                                                           _repo,
                                                                           this.name.getMethodName(),
@@ -341,7 +347,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                           false,
                                                                           severity,
                                                                           _description,
-                                                                          Collections.emptyList());
+                                                                          msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -371,6 +377,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -381,7 +388,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -407,6 +414,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final Map<String,String> nodePropRestrictions = new HashMap<String,String>();
         final Outcome.Level severity = Outcome.Level.ERROR;
         final String pattern = "[A-Z]{3}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createNodeNameRule( getTransaction(),
                                                           _repo,
                                                           this.name.getMethodName(),
@@ -415,7 +423,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                           pattern,
                                                           severity,
                                                           _description,
-                                                          Collections.emptyList() );
+                                                          msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "ABC", null );
@@ -434,6 +442,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final Map<String,String> nodePropRestrictions = new HashMap<String,String>();
         final Outcome.Level severity = Outcome.Level.ERROR;
         final String pattern = "[A-Z]{3}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createNodeNameRule( getTransaction(),
                                                           _repo,
                                                           this.name.getMethodName(),
@@ -442,7 +451,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                           pattern,
                                                           severity,
                                                           _description,
-                                                          Collections.emptyList() );
+                                                          msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "ABc", null );
@@ -467,6 +476,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyValueNumberValidationRule( getTransaction(),
                                                                                _repo,
                                                                                this.name.getMethodName(),
@@ -480,7 +490,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                true,
                                                                                severity,
                                                                                _description,
-                                                                               Collections.emptyList() );
+                                                                               msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -505,6 +515,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyValueNumberValidationRule( getTransaction(),
                                                                                _repo,
                                                                                this.name.getMethodName(),
@@ -518,7 +529,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                true,
                                                                                severity,
                                                                                _description,
-                                                                               Collections.emptyList() );
+                                                                               msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -543,6 +554,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyValueNumberValidationRule( getTransaction(),
                                                                                _repo,
                                                                                this.name.getMethodName(),
@@ -556,7 +568,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                false,
                                                                                severity,
                                                                                _description,
-                                                                               Collections.emptyList() );
+                                                                               msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -582,6 +594,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         // create rule in repo
         final Number minValue = 5;
         final Number maxValue = 10;
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyValueNumberValidationRule( getTransaction(),
                                                                                _repo,
                                                                                this.name.getMethodName(),
@@ -595,7 +608,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                true,
                                                                                severity,
                                                                                _description,
-                                                                               Collections.emptyList() );
+                                                                               msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -623,6 +636,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyRelationshipValidationRule( getTransaction(),
                                                                                 _repo,
                                                                                 this.name.getMethodName(),
@@ -636,7 +650,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                 Arrays.asList( childAbsent ),
                                                                                 severity,
                                                                                 _description,
-                                                                                Collections.emptyList() );
+                                                                                msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -667,6 +681,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyRelationshipValidationRule( getTransaction(),
                                                                                 _repo,
                                                                                 this.name.getMethodName(),
@@ -680,7 +695,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                 Arrays.asList( childAbsent ),
                                                                                 severity,
                                                                                 _description,
-                                                                                Collections.emptyList() );
+                                                                                msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -711,6 +726,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries", "tko:dataSources" };
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyRelationshipValidationRule( getTransaction(),
                                                                                 _repo,
                                                                                 this.name.getMethodName(),
@@ -724,7 +740,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                 Arrays.asList( childAbsent ),
                                                                                 severity,
                                                                                 _description,
-                                                                                Collections.emptyList() );
+                                                                                msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -756,6 +772,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyRelationshipValidationRule( getTransaction(),
                                                                                 _repo,
                                                                                 this.name.getMethodName(),
@@ -769,7 +786,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                 Arrays.asList( childAbsent ),
                                                                                 severity,
                                                                                 _description,
-                                                                                Collections.emptyList() );
+                                                                                msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -800,6 +817,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
 
         // create rule in repo
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyRelationshipValidationRule( getTransaction(),
                                                                                 _repo,
                                                                                 this.name.getMethodName(),
@@ -813,7 +831,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                                 Arrays.asList( childAbsent ),
                                                                                 severity,
                                                                                 _description,
-                                                                                Collections.emptyList() );
+                                                                                msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -842,6 +860,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -852,7 +871,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -876,6 +895,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -886,7 +906,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -910,6 +930,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -920,7 +941,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -945,6 +966,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -955,7 +977,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -980,6 +1002,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -990,7 +1013,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
@@ -1018,6 +1041,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
 
         // create rule in repo
         final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
+        List<LocalizedMessage> msgs = Collections.emptyList();
         final Rule rule = RuleFactory.createPropertyPatternRule( getTransaction(),
                                                                  _repo,
                                                                  this.name.getMethodName(),
@@ -1028,7 +1052,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
                                                                  pattern,
                                                                  severity,
                                                                  _description,
-                                                                 Collections.emptyList() );
+                                                                 msgs);
 
         // setup KomodoObject
         final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );

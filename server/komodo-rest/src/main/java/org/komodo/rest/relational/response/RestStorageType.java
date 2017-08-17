@@ -58,7 +58,7 @@ public class RestStorageType implements KRestEntity {
         if (descriptors == null || descriptors.isEmpty())
             this.descriptors = Collections.emptyList();
         else {
-            this.descriptors = new ArrayList<>();
+            this.descriptors = new ArrayList<RestStorageTypeDescriptor>();
             for (Descriptor descriptor : descriptors) {
                 this.descriptors.add(new RestStorageTypeDescriptor(descriptor));
             }
@@ -100,7 +100,7 @@ public class RestStorageType implements KRestEntity {
         if (descriptors == null || descriptors.length == 0)
             this.descriptors = Collections.emptyList();
 
-        this.descriptors = new ArrayList<>();
+        this.descriptors = new ArrayList<RestStorageTypeDescriptor>();
         for (RestStorageTypeDescriptor descriptor : descriptors) {
             this.descriptors.add(descriptor);
         }

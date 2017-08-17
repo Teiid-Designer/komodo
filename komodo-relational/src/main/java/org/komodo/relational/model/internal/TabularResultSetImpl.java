@@ -97,7 +97,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< ResultSetColumn > result = new ArrayList<>();
+        final List< ResultSetColumn > result = new ArrayList< ResultSetColumn >();
 
         for ( final KomodoObject kobject : getChildrenOfType( transaction, CreateProcedure.RESULT_COLUMN ) ) {
             final ResultSetColumn column = new ResultSetColumnImpl( transaction, getRepository(), kobject.getAbsolutePath() );

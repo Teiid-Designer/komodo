@@ -164,7 +164,7 @@ public final class RestConnectionTest implements V1Constants {
         thatConnection.setJdbc(this.connection.isJdbc());
         thatConnection.setLinks( this.connection.getLinks() );
 
-        List<RestProperty> props = new ArrayList<>();
+        List<RestProperty> props = new ArrayList<RestProperty>();
         props.addAll(this.connection.getProperties() );
         props.add(new RestProperty("blah", "blah" ));
         thatConnection.setProperties( props );

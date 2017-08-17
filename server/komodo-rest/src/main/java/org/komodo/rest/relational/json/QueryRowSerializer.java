@@ -48,13 +48,12 @@ public class QueryRowSerializer extends TypeAdapter<RestQueryRow> {
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RestQueryRow.ROW_LABEL:
-                    String[] values = BUILDER.fromJson(in, String[].class);
-                    queryRow.setValues(values);
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(RestQueryRow.ROW_LABEL)) {
+                String[] values = BUILDER.fromJson(in, String[].class);
+                queryRow.setValues(values);
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

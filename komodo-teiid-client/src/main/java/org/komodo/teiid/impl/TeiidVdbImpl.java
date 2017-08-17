@@ -58,7 +58,7 @@ public class TeiidVdbImpl implements TeiidVdb, Comparable<TeiidVdbImpl> {
 
     private List<String> errors;
 
-    private Collection<String> modelNames = new ArrayList<>();
+    private Collection<String> modelNames = new ArrayList<String>();
 
     private Properties properties = new Properties();
 

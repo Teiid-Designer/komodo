@@ -82,7 +82,7 @@ public final class SetResultSetColumnPropertyCommandTest extends AbstractCommand
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addResSetColumns.cmd");
     	final String[] commands = { "cd myColumn1" };
     	final CommandResult result = execute( commands );

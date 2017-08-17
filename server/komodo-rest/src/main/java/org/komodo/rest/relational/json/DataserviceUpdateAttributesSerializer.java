@@ -55,42 +55,31 @@ public final class DataserviceUpdateAttributesSerializer extends TypeAdapter< Ko
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_NAME_LABEL:
-                	updateAttrs.setDataserviceName(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_TABLE_PATH_LABEL:
-                    updateAttrs.setTablePath(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_MODEL_SOURCE_PATH_LABEL:
-                    updateAttrs.setModelSourcePath(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_COLUMN_NAMES_LABEL:
-                    List<String> colNames = BUILDER.fromJson(in, List.class);
-                    updateAttrs.setColumnNames(colNames);
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_RH_TABLE_PATH_LABEL:
-                    updateAttrs.setRhTablePath(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_RH_MODEL_SOURCE_PATH_LABEL:
-                    updateAttrs.setRhModelSourcePath(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_RH_COLUMN_NAMES_LABEL:
-                    List<String> rhColNames = BUILDER.fromJson(in, List.class);
-                    updateAttrs.setRhColumnNames(rhColNames);
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_TYPE_LABEL:
-                    updateAttrs.setJoinType(in.nextString());
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_CRITERIA_PREDICATES_LABEL:
-                    List<Map<String,String>> predicates = BUILDER.fromJson(in, List.class);
-                    updateAttrs.setCriteriaPredicates(predicates);
-                    break;
-                case KomodoDataserviceUpdateAttributes.DATASERVICE_VIEW_DDL_LABEL:
-                    updateAttrs.setViewDdl(in.nextString());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_NAME_LABEL)) {
+                updateAttrs.setDataserviceName(in.nextString());
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_TABLE_PATH_LABEL)) {
+                updateAttrs.setTablePath(in.nextString());
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_MODEL_SOURCE_PATH_LABEL)) {
+                updateAttrs.setModelSourcePath(in.nextString());
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_COLUMN_NAMES_LABEL)) {
+                List<String> colNames = BUILDER.fromJson(in, List.class);
+                updateAttrs.setColumnNames(colNames);
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_RH_TABLE_PATH_LABEL)) {
+                updateAttrs.setRhTablePath(in.nextString());
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_RH_MODEL_SOURCE_PATH_LABEL)) {
+                updateAttrs.setRhModelSourcePath(in.nextString());
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_RH_COLUMN_NAMES_LABEL)) {
+                List<String> rhColNames = BUILDER.fromJson(in, List.class);
+                updateAttrs.setRhColumnNames(rhColNames);
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_JOIN_TYPE_LABEL)) {
+                updateAttrs.setJoinType(in.nextString());
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_CRITERIA_PREDICATES_LABEL)) {
+                List<Map<String, String>> predicates = BUILDER.fromJson(in, List.class);
+                updateAttrs.setCriteriaPredicates(predicates);
+            } else if (name.equals(KomodoDataserviceUpdateAttributes.DATASERVICE_VIEW_DDL_LABEL)) {
+                updateAttrs.setViewDdl(in.nextString());
+            } else {
+                throw new IOException(Messages.getString(UNEXPECTED_JSON_TOKEN, name));
             }
         }
 

@@ -40,8 +40,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.logging.KLogger;
-import org.komodo.utils.FileUtils;
-import org.komodo.utils.KLog;
 
 /**
  *
@@ -95,7 +93,10 @@ public class TestKLog {
     }
 
     private String retrieveLogContents(File newLogFile) throws Exception {
-        try ( BufferedReader reader = new BufferedReader( new FileReader( newLogFile ) ) ) {
+        BufferedReader reader = null;
+
+        try {
+            reader = new BufferedReader( new FileReader( newLogFile ) );
             StringBuilder builder = new StringBuilder();
             String line;
             while((line = reader.readLine()) != null) {
@@ -104,6 +105,10 @@ public class TestKLog {
             }
 
             return builder.toString();
+        } finally {
+            if ( reader != null ) {
+                reader.close();
+            }
         }
     }
 

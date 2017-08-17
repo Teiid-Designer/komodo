@@ -8,11 +8,9 @@
 package org.komodo.relational.dataservice.internal;
 
 import java.util.Properties;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.dataservice.VdbEntry;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.spi.KException;
@@ -27,7 +25,7 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 /**
  * An implementation of a VDB entry in a data service.
  */
-public class VdbEntryImpl extends RelationalObjectImpl implements VdbEntry {
+public class VdbEntryImpl extends AbstractDataServiceEntryImpl<Vdb> implements VdbEntry {
 
     private static final String ARCHIVE_FOLDER = "vdbs/"; //$NON-NLS-1$
 

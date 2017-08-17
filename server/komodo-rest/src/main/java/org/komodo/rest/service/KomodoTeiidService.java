@@ -808,7 +808,7 @@ public class KomodoTeiidService extends KomodoService {
             Vdb[] vdbs = cachedTeiid.getVdbs(uow);
             LOGGER.debug("getVdbs:found '{0}' VDBs", vdbs.length); //$NON-NLS-1$
 
-            final List<RestVdb> entities = new ArrayList<>();
+            final List<RestVdb> entities = new ArrayList<RestVdb>();
 
             KomodoProperties properties = new KomodoProperties();
             properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
@@ -899,7 +899,7 @@ public class KomodoTeiidService extends KomodoService {
             return createErrorResponseWithForbidden(mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
         }
     }
-
+    
     /**
      * Copy a VDBs from the server into the workspace that are not present in the workspace 
      * @param headers
@@ -1543,7 +1543,7 @@ public class KomodoTeiidService extends KomodoService {
             Translator[] translators = cachedTeiid.getTranslators(uow);
             LOGGER.debug("getTranslators:found '{0}' Translators", translators.length); //$NON-NLS-1$
 
-            final List<RestVdbTranslator> entities = new ArrayList<>();
+            final List<RestVdbTranslator> entities = new ArrayList<RestVdbTranslator>();
 
             KomodoProperties properties = new KomodoProperties();
             for (final Translator translator : translators) {
@@ -1607,7 +1607,7 @@ public class KomodoTeiidService extends KomodoService {
             Connection[] dataSources = cachedTeiid.getConnections(uow);
             LOGGER.debug("getConnections:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
 
-            final List<RestConnection> entities = new ArrayList<>();
+            final List<RestConnection> entities = new ArrayList<RestConnection>();
 
             KomodoProperties properties = new KomodoProperties();
             for (final Connection dataSource : dataSources) {
@@ -1916,8 +1916,7 @@ public class KomodoTeiidService extends KomodoService {
             Driver[] drivers = cachedTeiid.getDrivers(uow);
             LOGGER.debug("getDrivers:found '{0}' Drivers", drivers.length); //$NON-NLS-1$
 
-            final List<RestConnectionDriver> entities = new ArrayList<>();
-
+            final List<RestConnectionDriver> entities = new ArrayList<RestConnectionDriver>();
             for (final Driver driver : drivers) {
                 RestConnectionDriver entity = new RestConnectionDriver();
                 entity.setName(driver.getName(uow));

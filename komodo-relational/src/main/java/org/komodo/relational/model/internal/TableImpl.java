@@ -93,7 +93,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         static Map< String, String > defaultValues() {
             if ( _defaultValues == null ) {
                 final StandardOption[] options = values();
-                final Map< String, String > temp = new HashMap< >();
+                final Map< String, String > temp = new HashMap< String, String >();
 
                 for ( final StandardOption option : options ) {
                     temp.put( option.name(), option.defaultValue );

@@ -7,18 +7,12 @@
 */
 package org.komodo.relational.dataservice;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
 import org.komodo.relational.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
-import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.jcr.api.JcrConstants;
 
 /**
  * Represents a data service file resource (i.e., a driver, UDF, or DDL file).
@@ -32,13 +26,7 @@ public interface DataServiceResource extends Exportable, RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    default InputStream getContent( final UnitOfWork transaction ) throws KException {
-        if ( !hasChild( transaction, JcrLexicon.CONTENT.getString() ) ) return null;
-
-        final KomodoObject fileNode = getChild( transaction, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE );
-        final Property property = fileNode.getProperty( transaction, JcrConstants.JCR_DATA );
-        return property.getBinaryValue( transaction );
-    }
+    InputStream getContent( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -48,18 +36,7 @@ public interface DataServiceResource extends Exportable, RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    default void setContent( final UnitOfWork transaction,
-                             final byte[] content ) throws KException {
-        KomodoObject fileNode = null;
-
-        if ( !hasChild( transaction, JcrConstants.JCR_CONTENT ) ) {
-            fileNode = addChild( transaction, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE );
-        } else {
-            fileNode = getChild( transaction, JcrConstants.JCR_CONTENT );
-        }
-
-        final ByteArrayInputStream stream = new ByteArrayInputStream( content );
-        fileNode.setProperty( transaction, JcrConstants.JCR_DATA, stream );
-    }
+    void setContent( final UnitOfWork transaction,
+                             final byte[] content ) throws KException;
 
 }

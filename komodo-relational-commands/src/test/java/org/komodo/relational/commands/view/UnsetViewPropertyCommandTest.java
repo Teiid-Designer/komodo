@@ -63,7 +63,7 @@ public final class UnsetViewPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addViews.cmd");
     	final String[] commands = { "cd myView1" };
     	final CommandResult result = execute( commands );

@@ -64,7 +64,7 @@ public final class RestVdbTranslatorTest implements V1Constants {
     private static final String NAME = "MyTranslator";
     private static final String TYPE = "oracle";
 
-    private static final List<RestProperty> PROPS = new ArrayList<>();
+    private static final List<RestProperty> PROPS = new ArrayList<RestProperty>();
     static {
         PROPS.add(new RestProperty("larry", "bird"));
         PROPS.add(new RestProperty("magic", "johnson"));
@@ -171,7 +171,7 @@ public final class RestVdbTranslatorTest implements V1Constants {
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setLinks( this.translator.getLinks() );
 
-        List<RestProperty> props = new ArrayList<>();
+        List<RestProperty> props = new ArrayList<RestProperty>();
         props.addAll(this.translator.getProperties() );
         props.add(new RestProperty("blah", "blah" ));
         thatTranslator.setProperties( props );
@@ -208,7 +208,7 @@ public final class RestVdbTranslatorTest implements V1Constants {
 
     @Test
     public void shouldSetProperties() {
-        List<RestProperty> newProperties = new ArrayList<>();
+        List<RestProperty> newProperties = new ArrayList<RestProperty>();
         newProperties.add(new RestProperty("blah", "blah" ));
         this.translator.setProperties( newProperties );
         assertThat( this.translator.getProperties().size(), is( newProperties.size() ) );

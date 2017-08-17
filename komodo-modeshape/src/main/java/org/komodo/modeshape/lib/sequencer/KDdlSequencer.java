@@ -58,7 +58,7 @@ public class KDdlSequencer extends TeiidDdlSequencer {
         if (! super.execute(inputProperty, outputNode, context)) {
 
             //
-            // We know the sequencer failed to execute but unforunately the parsing exception
+            // We know the sequencer failed to execute but unfortunately the parsing exception
             // are handled and simply pushed to the logger. We want to throw them back up to
             // the calling transaction so they get some visibility
             //
@@ -66,13 +66,19 @@ public class KDdlSequencer extends TeiidDdlSequencer {
             AstNodeFactory nodeFactory = new AstNodeFactory();
             final AstNode tempNode = nodeFactory.node(StandardDdlLexicon.STATEMENTS_CONTAINER);
             Binary ddlContent = inputProperty.getBinary();
+            InputStream stream = null;
 
-            try (InputStream stream = ddlContent.getStream()) {
+            try {
+                stream = ddlContent.getStream();
                 teiidParser.parse(IoUtil.read(stream), tempNode, null);
             } catch (ParsingException e) {
                 throw new Exception(e);
             } catch (IOException e) {
                 throw new Exception(e);
+            } finally {
+                if ( stream != null ) {
+                    stream.close();
+                }
             }
 
             //

@@ -7,19 +7,23 @@
 */
 package org.komodo.relational.dataservice.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.dataservice.DataServiceResource;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.FileUtils;
+import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.jcr.api.JcrConstants;
 
 /**
  * A base implementation of a data service resource.
@@ -27,7 +31,8 @@ import org.komodo.utils.FileUtils;
  * @param <T>
  *        the type of resource
  */
-public abstract class DataServiceResourceImpl< T extends DataServiceResource > extends RelationalObjectImpl
+public abstract class DataServiceResourceImpl< T extends DataServiceResource >
+    extends RelationalObjectImpl
     implements DataServiceResource {
 
     /**
@@ -71,4 +76,27 @@ public abstract class DataServiceResourceImpl< T extends DataServiceResource > e
         return contents;
     }
 
+    @Override
+    public InputStream getContent( final UnitOfWork transaction ) throws KException {
+        if ( !hasChild( transaction, JcrLexicon.CONTENT.getString() ) ) return null;
+
+        final KomodoObject fileNode = getChild( transaction, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE );
+        final Property property = fileNode.getProperty( transaction, JcrConstants.JCR_DATA );
+        return property.getBinaryValue( transaction );
+    }
+
+    @Override
+    public void setContent( final UnitOfWork transaction,
+                             final byte[] content ) throws KException {
+        KomodoObject fileNode = null;
+
+        if ( !hasChild( transaction, JcrConstants.JCR_CONTENT ) ) {
+            fileNode = addChild( transaction, JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE );
+        } else {
+            fileNode = getChild( transaction, JcrConstants.JCR_CONTENT );
+        }
+
+        final ByteArrayInputStream stream = new ByteArrayInputStream( content );
+        fileNode.setProperty( transaction, JcrConstants.JCR_DATA, stream );
+    }
 }

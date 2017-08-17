@@ -66,7 +66,7 @@ public final class SetConditionPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addConditions.cmd");
     	final String[] commands = { "cd myCondition1" };
     	final CommandResult result = execute( commands );

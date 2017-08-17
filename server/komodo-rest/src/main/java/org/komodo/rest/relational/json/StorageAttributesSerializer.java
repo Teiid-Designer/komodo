@@ -56,26 +56,25 @@ public final class StorageAttributesSerializer extends AbstractContentSerializer
             if (readContent(in, storageAttr, name) != null)
                 continue;
 
-            switch ( name ) {
-                case KomodoStorageAttributes.STORAGE_TYPE_LABEL:
-                    storageAttr.setStorageType(in.nextString());
-                    break;
-                case KomodoStorageAttributes.ARTIFACT_PATH_LABEL:
-                    storageAttr.setArtifactPath(in.nextString());
-                    break;
-                case KomodoStorageAttributes.PARAMETERS_LABEL:
-                    Map<String, String> parameters = BUILDER.fromJson(in, Map.class);
-                    for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-                        storageAttr.setParameter(parameter.getKey(), parameter.getValue());
-                    }
-                    break;
-                case KomodoStorageAttributes.DOCUMENT_TYPE_LABEL:
-                    String docTypeValue = in.nextString();
-                    DocumentType docType = DocumentType.documentType(docTypeValue);
-                    storageAttr.setDocumentType(docType);
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(KomodoStorageAttributes.STORAGE_TYPE_LABEL)) {
+                storageAttr.setStorageType(in.nextString());
+            }
+            else if (name.equals(KomodoStorageAttributes.ARTIFACT_PATH_LABEL)) {
+                storageAttr.setArtifactPath(in.nextString());
+            }
+            else if (name.equals(KomodoStorageAttributes.PARAMETERS_LABEL)) {
+                Map<String, String> parameters = BUILDER.fromJson(in, Map.class);
+                for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+                    storageAttr.setParameter(parameter.getKey(), parameter.getValue());
+                }
+            }
+            else if (name.equals(KomodoStorageAttributes.DOCUMENT_TYPE_LABEL)) {
+                String docTypeValue = in.nextString();
+                DocumentType docType = DocumentType.documentType(docTypeValue);
+                storageAttr.setDocumentType(docType);
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

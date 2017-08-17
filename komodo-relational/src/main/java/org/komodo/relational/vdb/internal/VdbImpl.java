@@ -567,7 +567,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
         final KomodoObject grouping = getDataRolesGroupingNode( transaction );
 
         if ( grouping != null ) {
-            final List< DataRole > temp = new ArrayList<>();
+            final List< DataRole > temp = new ArrayList< DataRole >();
 
             for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
                 final DataRole dataRole = new DataRoleImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -618,7 +618,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
         final KomodoObject grouping = getEntriesGroupingNode( transaction);
 
         if ( grouping != null ) {
-            final List< Entry > temp = new ArrayList<>();
+            final List< Entry > temp = new ArrayList< Entry >();
 
             for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
                 final Entry entry = new EntryImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -672,7 +672,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
         final KomodoObject grouping = getImportsGroupingNode( transaction);
 
         if ( grouping != null ) {
-            final List< VdbImport > temp = new ArrayList<>();
+            final List< VdbImport > temp = new ArrayList< VdbImport >();
 
             for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
                 final VdbImport vdbImport = new VdbImportImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -710,7 +710,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Model > result = new ArrayList<>();
+        final List< Model > result = new ArrayList< Model >();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction,
                                                                     VdbLexicon.Vdb.DECLARATIVE_MODEL,
@@ -818,7 +818,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
         final KomodoObject grouping = getTranslatorsGroupingNode( transaction );
 
         if ( grouping != null ) {
-            final List< Translator > temp = new ArrayList<>();
+            final List< Translator > temp = new ArrayList< Translator >();
 
             for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
                 final Translator translator = new TranslatorImpl( transaction, getRepository(), kobject.getAbsolutePath() );

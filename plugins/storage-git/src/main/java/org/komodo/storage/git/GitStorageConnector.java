@@ -119,7 +119,7 @@ public class GitStorageConnector implements StorageConnector {
     public static final String AUTHOR_EMAIL_PROPERTY = "author-email-property";
 
 
-    static final Set<Descriptor> DESCRIPTORS = new HashSet<>();
+    static final Set<Descriptor> DESCRIPTORS = new HashSet<Descriptor>();
 
     static {
         DESCRIPTORS.add(
@@ -534,11 +534,15 @@ public class GitStorageConnector implements StorageConnector {
         Repository repository = git.getRepository();
         Ref head = repository.findRef(Constants.HEAD);
 
-        try (RevWalk walk = new RevWalk(repository)) {
+        RevWalk walk = null;
+        try {
+            walk = new RevWalk(repository);
             RevCommit commit = walk.parseCommit(head.getObjectId());
             RevTree tree = commit.getTree();
 
-            try (TreeWalk treeWalk = new TreeWalk(repository)) {
+            TreeWalk treeWalk = null;
+            try {
+                treeWalk = new TreeWalk(repository);
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(false);
 
@@ -568,6 +572,16 @@ public class GitStorageConnector implements StorageConnector {
                         currentDepth = treeWalk.getDepth();
                     }
                 }
+            } finally {
+                if (treeWalk != null) {
+                    treeWalk.close();
+                    treeWalk = null;
+                }
+            }
+        } finally {
+            if (walk != null) {
+                walk.close();
+                walk = null;
             }
         }
 

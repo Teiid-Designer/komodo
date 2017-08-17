@@ -80,7 +80,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	public TabCompletionModifier tabCompletion( final String lastArgument, final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             // Global property completion options and reset all argument
-            List< String > potentials = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+            List< String > potentials = new LinkedList< String >(WorkspaceStatus.GLOBAL_PROPS.keySet());
             potentials.add(0,ARG_ALL);
 
             if ( lastArgument == null ) {

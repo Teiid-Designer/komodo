@@ -209,7 +209,7 @@ public class KomodoSearcherAttributes extends KomodoPathAttribute {
      */
     public void setParameter(String name, String value) {
         if (this.parameters == null)
-            this.parameters = new HashMap<>();
+            this.parameters = new HashMap<String, String>();
 
         this.parameters.put(name, value);
     }

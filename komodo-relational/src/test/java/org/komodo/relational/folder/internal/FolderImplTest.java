@@ -36,6 +36,7 @@ import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -99,8 +100,8 @@ public final class FolderImplTest extends RelationalModelTest {
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.folder.hasChild( getTransaction(), name, KomodoLexicon.Folder.NODE_TYPE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.folder.getChild( getTransaction(), name ), is( anotherFolder ) );
-        assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.Folder.NODE_TYPE ), is( anotherFolder ) );
+        assertThat( this.folder.getChild( getTransaction(), name ), is( (KomodoObject) anotherFolder ) );
+        assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.Folder.NODE_TYPE ), is( (KomodoObject) anotherFolder ) );
     }
 
     @Test
@@ -116,8 +117,8 @@ public final class FolderImplTest extends RelationalModelTest {
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.folder.hasChild( getTransaction(), name, VdbLexicon.Vdb.VIRTUAL_DATABASE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.folder.getChild( getTransaction(), name ), is( vdb ) );
-        assertThat( this.folder.getChild( getTransaction(), name, VdbLexicon.Vdb.VIRTUAL_DATABASE ), is( vdb ) );
+        assertThat( this.folder.getChild( getTransaction(), name ), is( (KomodoObject) vdb ) );
+        assertThat( this.folder.getChild( getTransaction(), name, VdbLexicon.Vdb.VIRTUAL_DATABASE ), is( (KomodoObject) vdb ) );
     }
 
     @Test
@@ -133,8 +134,8 @@ public final class FolderImplTest extends RelationalModelTest {
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.folder.hasChild( getTransaction(), name, KomodoLexicon.Schema.NODE_TYPE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.folder.getChild( getTransaction(), name ), is( schema ) );
-        assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.Schema.NODE_TYPE ), is( schema ) );
+        assertThat( this.folder.getChild( getTransaction(), name ), is( (KomodoObject) schema ) );
+        assertThat( this.folder.getChild( getTransaction(), name, KomodoLexicon.Schema.NODE_TYPE ), is( (KomodoObject) schema ) );
     }
 
     @Test
@@ -150,8 +151,8 @@ public final class FolderImplTest extends RelationalModelTest {
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.folder.hasChild( getTransaction(), name, DataVirtLexicon.Connection.NODE_TYPE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.folder.getChild( getTransaction(), name ), is( ds ) );
-        assertThat( this.folder.getChild( getTransaction(), name, DataVirtLexicon.Connection.NODE_TYPE ), is( ds ) );
+        assertThat( this.folder.getChild( getTransaction(), name ), is( (KomodoObject) ds ) );
+        assertThat( this.folder.getChild( getTransaction(), name, DataVirtLexicon.Connection.NODE_TYPE ), is( (KomodoObject) ds ) );
     }
 
     @Test
@@ -167,8 +168,8 @@ public final class FolderImplTest extends RelationalModelTest {
         assertThat( this.folder.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.folder.hasChild( getTransaction(), name, DataVirtLexicon.DataService.NODE_TYPE ), is( true ) );
         assertThat( this.folder.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.folder.getChild( getTransaction(), name ), is( service ) );
-        assertThat( this.folder.getChild( getTransaction(), name, DataVirtLexicon.DataService.NODE_TYPE ), is( service ) );
+        assertThat( this.folder.getChild( getTransaction(), name ), is( (KomodoObject) service ) );
+        assertThat( this.folder.getChild( getTransaction(), name, DataVirtLexicon.DataService.NODE_TYPE ), is( (KomodoObject) service ) );
     }
 
 }

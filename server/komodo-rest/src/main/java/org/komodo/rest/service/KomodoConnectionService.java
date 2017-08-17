@@ -180,7 +180,7 @@ public final class KomodoConnectionService extends KomodoService {
                 }
             }
 
-            final List< RestConnection > entities = new ArrayList< >();
+            final List< RestConnection > entities = new ArrayList<RestConnection>();
             int i = 0;
 
             KomodoProperties properties = new KomodoProperties();

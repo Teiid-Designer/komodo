@@ -62,7 +62,7 @@ public class TeiidArtifactFactory {
         TeiidPropertyDefinition teiidPropDef = new TeiidPropertyDefinition();
 
         Collection<Object> allowedValues = propDef.getAllowedValues();
-        List<String> av = new ArrayList<>();
+        List<String> av = new ArrayList<String>();
         for(Object value : allowedValues)
             av.add(value.toString());
         teiidPropDef.setAllowedValues(av);

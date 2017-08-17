@@ -44,19 +44,17 @@ public class QueryAttributeSerializer extends TypeAdapter<KomodoQueryAttribute> 
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
-            switch (name) {
-                case KomodoQueryAttribute.QUERY_LABEL:
-                    queryAttr.setQuery(in.nextString());
-                    break;
-                case KomodoQueryAttribute.TARGET_LABEL:
-                    queryAttr.setTarget(in.nextString());
-                    break;
-                case KomodoQueryAttribute.LIMIT_LABEL:
-                    queryAttr.setLimit(in.nextInt());
-                    break;
-                case KomodoQueryAttribute.OFFSET_LABEL:
-                    queryAttr.setOffset(in.nextInt());
-                    break;
+            if (name.equals(KomodoQueryAttribute.QUERY_LABEL)) {
+                queryAttr.setQuery(in.nextString());
+            }
+            else if (name.equals(KomodoQueryAttribute.TARGET_LABEL)) {
+                queryAttr.setTarget(in.nextString());
+            }
+            else if (name.equals(KomodoQueryAttribute.LIMIT_LABEL)) {
+                queryAttr.setLimit(in.nextInt());
+            }
+            else if (name.equals(KomodoQueryAttribute.OFFSET_LABEL)) {
+                queryAttr.setOffset(in.nextInt());
             }
         }
 

@@ -6,8 +6,7 @@
 #
 #################
 function show_help {
-	echo "Usage: $0 -p [-d] [-s] [-q] [-h]"
-  echo "-p - profile to build (dv63, wildfly ...)"
+	echo "Usage: $0 [-d] [-h]"
 	echo "-d - enable maven debugging"
 	echo "-s - skip test execution"
 	echo "-q - skip integration test execution"
@@ -48,13 +47,12 @@ DEBUG=0
 #
 # Determine the command line options
 #
-while getopts "p:bdhsq" opt;
+while getopts "bdhsq" opt;
 do
 	case $opt in
 	d) DEBUG=1 ;;
 	h) show_help ;;
   s) SKIP=1 ;;
-  p) PROFILE=$OPTARG ;;
   q) INT_SKIP=1 ;;
 	*) show_help ;;
 	esac
@@ -80,14 +78,6 @@ LOCAL_REPO="${HOME}/.m2/repository"
 MVN="mvn clean install"
 
 #
-# Check we have a profile
-#
-if [ -z "${PROFILE}" ]; then
-  echo "No profile have been specified. Use -p for either DV6.3 build (dv63) or community build (wildfly)"
-  exit 1
-fi
-
-#
 # Turn on dedugging if required
 #
 if [ "${DEBUG}" == "1" ]; then
@@ -111,7 +101,7 @@ fi
 # -P <profiles> : The profiles to be used for downloading jbosstools artifacts
 # -D maven.repo.local : Assign the $LOCAL_REPO as the target repository
 #
-MVN_FLAGS="${MVN_FLAGS} -s settings.xml -P ${PROFILE} -Dmaven.repo.local=${LOCAL_REPO} ${SKIP_FLAG} ${INTEGRATION_SKIP_FLAG}"
+MVN_FLAGS="${MVN_FLAGS} -Dmaven.repo.local=${LOCAL_REPO} ${SKIP_FLAG} ${INTEGRATION_SKIP_FLAG}"
 
 echo "==============="
 

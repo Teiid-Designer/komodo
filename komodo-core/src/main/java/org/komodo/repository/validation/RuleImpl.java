@@ -422,7 +422,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
                     kids = kobject.getChildren( transaction );
                 }
                 
-                final Set< String > names = new HashSet<>();
+                final Set< String > names = new HashSet< String >();
 
                 for ( final KomodoObject kid : kids ) {
                     final String name = kid.getName( transaction );

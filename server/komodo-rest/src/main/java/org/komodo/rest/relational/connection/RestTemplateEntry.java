@@ -306,7 +306,7 @@ public final class RestTemplateEntry extends RestBasicEntity {
 
     public void setCustomProperties(Properties customProperties) {
         if (this.customProperties == null)
-            this.customProperties = new HashMap<>();
+            this.customProperties = new HashMap<String, String>();
 
         if (customProperties != null) {
             for (Object keyObj : customProperties.keySet()) {

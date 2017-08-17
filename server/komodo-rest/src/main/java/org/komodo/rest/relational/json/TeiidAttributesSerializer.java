@@ -47,27 +47,26 @@ public final class TeiidAttributesSerializer extends TypeAdapter< KomodoTeiidAtt
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoTeiidAttributes.ADMIN_USER_LABEL:
-                    teiidAttrs.setAdminUser(in.nextString());
-                    break;
-                case KomodoTeiidAttributes.ADMIN_PASSWD_LABEL:
-                    teiidAttrs.setAdminPasswd(in.nextString());
-                    break;
-                case KomodoTeiidAttributes.ADMIN_SECURE_LABEL:
-                    teiidAttrs.setAdminSecure(in.nextBoolean());
-                    break;
-                case KomodoTeiidAttributes.JDBC_USER_LABEL:
-                    teiidAttrs.setJdbcUser(in.nextString());
-                    break;
-                case KomodoTeiidAttributes.JDBC_PASSWD_LABEL:
-                    teiidAttrs.setJdbcPasswd(in.nextString());
-                    break;
-                case KomodoTeiidAttributes.JDBC_SECURE_LABEL:
-                    teiidAttrs.setJdbcSecure(in.nextBoolean());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(KomodoTeiidAttributes.ADMIN_USER_LABEL)) {
+                teiidAttrs.setAdminUser(in.nextString());
+            }
+            else if (name.equals(KomodoTeiidAttributes.ADMIN_PASSWD_LABEL)) {
+                teiidAttrs.setAdminPasswd(in.nextString());
+            }
+            else if (name.equals(KomodoTeiidAttributes.ADMIN_SECURE_LABEL)) {
+                teiidAttrs.setAdminSecure(in.nextBoolean());
+            }
+            else if (name.equals(KomodoTeiidAttributes.JDBC_USER_LABEL)) {
+                teiidAttrs.setJdbcUser(in.nextString());
+            }
+            else if (name.equals(KomodoTeiidAttributes.JDBC_PASSWD_LABEL)) {
+                teiidAttrs.setJdbcPasswd(in.nextString());
+            }
+            else if (name.equals(KomodoTeiidAttributes.JDBC_SECURE_LABEL)) {
+                teiidAttrs.setJdbcSecure(in.nextBoolean());
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

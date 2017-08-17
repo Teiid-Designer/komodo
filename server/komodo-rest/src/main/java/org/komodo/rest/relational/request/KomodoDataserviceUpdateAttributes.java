@@ -196,7 +196,7 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
      */
     public void setColumnNames(List<String> colNames) {
         if (this.columnNames == null)
-            this.columnNames = new ArrayList<>();
+            this.columnNames = new ArrayList<String>();
 
         this.columnNames.addAll(colNames);
     }
@@ -245,7 +245,7 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
      */
     public void setRhColumnNames(List<String> rhColNames) {
         if (this.rhColumnNames == null)
-            this.rhColumnNames = new ArrayList<>();
+            this.rhColumnNames = new ArrayList<String>();
 
         this.rhColumnNames.addAll(rhColNames);
     }
@@ -280,7 +280,7 @@ public class KomodoDataserviceUpdateAttributes implements KRestEntity {
      */
     public void setCriteriaPredicates(List<Map<String,String>> predicates) {
         if (this.criteriaPredicates == null)
-            this.criteriaPredicates = new ArrayList<>();
+            this.criteriaPredicates = new ArrayList<Map<String, String>>();
 
         this.criteriaPredicates.addAll(predicates);
     }

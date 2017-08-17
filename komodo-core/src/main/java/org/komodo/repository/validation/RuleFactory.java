@@ -294,6 +294,7 @@ public final class RuleFactory {
         }
 
         try {
+            final Map<String,String> emptyMap = Collections.emptyMap();
             final RuleImpl rule = createRule( transaction,
                                               repository,
                                               name,
@@ -302,7 +303,7 @@ public final class RuleFactory {
                                               Rule.RuleType.PATTERN,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.emptyMap(),
+                                              emptyMap,
                                               severity,
                                               descriptions,
                                               messages );
@@ -365,6 +366,7 @@ public final class RuleFactory {
         }
 
         try {
+            final Map<String,String> emptyMap = Collections.emptyMap();
             final RuleImpl rule = createRule( transaction,
                                               repository,
                                               name,
@@ -373,7 +375,7 @@ public final class RuleFactory {
                                               Rule.RuleType.PATTERN,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.emptyMap(),
+                                              emptyMap,
                                               severity,
                                               descriptions,
                                               messages );
@@ -451,6 +453,7 @@ public final class RuleFactory {
         }
 
         try {
+            final Map<String,String> emptyMap = Collections.emptyMap();
             final RuleImpl rule = createRule( transaction,
                                               repository,
                                               name,
@@ -459,7 +462,7 @@ public final class RuleFactory {
                                               Rule.RuleType.RELATIONSHIP,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.emptyMap(),
+                                              emptyMap,
                                               severity,
                                               descriptions,
                                               messages );
@@ -536,6 +539,7 @@ public final class RuleFactory {
         }
 
         try {
+            final Map<String,String> emptyMap = Collections.emptyMap();
             final RuleImpl rule = createRule( transaction,
                                               repository,
                                               name,
@@ -544,7 +548,7 @@ public final class RuleFactory {
                                               Rule.RuleType.NUMBER,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.emptyMap(),
+                                              emptyMap,
                                               severity,
                                               descriptions,
                                               messages );

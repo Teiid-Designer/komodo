@@ -68,7 +68,7 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-        List<String> defaultValues = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+        List<String> defaultValues = new LinkedList<String>(WorkspaceStatus.GLOBAL_PROPS.keySet());
         assertTabCompletion("set-global ", defaultValues);
 
         defaultValues.clear();

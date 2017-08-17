@@ -109,7 +109,7 @@ public final class RestTeiidStatus extends RestTeiid {
      */
     public static final String TEIID_VDB_NAMES_LABEL = "vdbNames";
 
-    private List<RestConnectionDriver> sourceDrivers = new ArrayList<>();
+    private List<RestConnectionDriver> sourceDrivers = new ArrayList<RestConnectionDriver>();
 
     /**
      * Constructor for use when deserializing
@@ -159,7 +159,7 @@ public final class RestTeiidStatus extends RestTeiid {
                 if (dataSourceDrivers == null || dataSourceDrivers.isEmpty())
                     this.sourceDrivers = Collections.emptyList();
                 else {
-                    this.sourceDrivers = new ArrayList<>();
+                    this.sourceDrivers = new ArrayList<RestConnectionDriver>();
                     for (ConnectionDriver driver : dataSourceDrivers) {
                         this.sourceDrivers.add(new RestConnectionDriver(driver));
                     }
@@ -262,7 +262,7 @@ public final class RestTeiidStatus extends RestTeiid {
         if (dataSourceDrivers == null || dataSourceDrivers.length == 0)
             this.sourceDrivers = Collections.emptyList();
 
-        this.sourceDrivers = new ArrayList<>();
+        this.sourceDrivers = new ArrayList<RestConnectionDriver>();
         for (RestConnectionDriver driver : sourceDrivers) {
             this.sourceDrivers.add(driver);
         }

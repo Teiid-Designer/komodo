@@ -66,7 +66,7 @@ public class KomodoObjectUtils implements StringConstants {
     public static List< String > getProperties(final WorkspaceStatus wsStatus, final KomodoObject kObj) throws Exception {
         KomodoObject resolvedObj = wsStatus.resolve(kObj);
         if(resolvedObj==null) resolvedObj = kObj;
-        final List< String > props = new ArrayList<>( Arrays.asList( resolvedObj.getPropertyNames( wsStatus.getTransaction() ) ) ); // props with values
+        final List< String > props = new ArrayList< String >( Arrays.asList( resolvedObj.getPropertyNames( wsStatus.getTransaction() ) ) ); // props with values
         final PropertyDescriptor[] descriptors = resolvedObj.getPropertyDescriptors( wsStatus.getTransaction() );
 
         if ( descriptors.length != 0 ) {
@@ -91,7 +91,7 @@ public class KomodoObjectUtils implements StringConstants {
      */
     public static List< String > getUnfilteredProperties(final WorkspaceStatus wsStatus, final KomodoObject kObj) throws Exception {
         KomodoObject resolvedObj = wsStatus.resolve(kObj);
-        final List< String > props = new ArrayList<>( Arrays.asList( resolvedObj.getRawPropertyNames( wsStatus.getTransaction() ) ) ); // props with values
+        final List< String > props = new ArrayList< String >( Arrays.asList( resolvedObj.getRawPropertyNames( wsStatus.getTransaction() ) ) ); // props with values
         final PropertyDescriptor[] descriptors = resolvedObj.getRawPropertyDescriptors( wsStatus.getTransaction() );
 
         if ( descriptors.length != 0 ) {

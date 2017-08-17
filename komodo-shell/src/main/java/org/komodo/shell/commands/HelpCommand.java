@@ -163,7 +163,7 @@ public class HelpCommand extends BuiltInShellCommand {
 
         if ( getWorkspaceStatus().isShowingCommandCategory() ) {
             final WorkspaceStatus status = getWorkspaceStatus();
-            final Map< String, List< String > > categoryCommands = new TreeMap< >();
+            final Map< String, List< String > > categoryCommands = new TreeMap< String, List< String > >();
 
             // group commands by category
             for ( final String cmdName : validCmdNames ) {

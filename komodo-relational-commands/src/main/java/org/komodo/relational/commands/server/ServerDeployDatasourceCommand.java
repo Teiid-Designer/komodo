@@ -210,7 +210,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findConnections(getTransaction());
-        List<String> existingDatasourceNames = new ArrayList<>(datasources.length);
+        List<String> existingDatasourceNames = new ArrayList<String>(datasources.length);
         for(KomodoObject datasource : datasources) {
             existingDatasourceNames.add(datasource.getName(getTransaction()));
         }

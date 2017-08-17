@@ -108,7 +108,7 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
                         // conversion
                         //
                         for (int i = 0; i < value.length; ++i) {
-                            if (value[i] instanceof Double && ((double) value[i] % 1) == 0)
+                            if (value[i] instanceof Double && ((Double) value[i] % 1) == 0)
                                 value[i] = ((Double) value[i]).intValue();
                         }
 
@@ -134,13 +134,13 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
         else if (value instanceof Boolean)
             out.value((Boolean) value);
         else if (value instanceof Integer)
-            out.value((int) value);
+            out.value((Integer) value);
         else if (value instanceof Long)
-            out.value((long) value);
+            out.value((Long) value);
         else if (value instanceof Double)
-            out.value((double) value);
+            out.value((Double) value);
         else if (value instanceof Float)
-            out.value((double) value);
+            out.value((Double) value);
         else if (value instanceof String[]) {
             out.beginArray();
             for (String val: (String[]) value) {

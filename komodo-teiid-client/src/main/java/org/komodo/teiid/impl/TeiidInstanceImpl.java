@@ -241,7 +241,7 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         if (dsNames.isEmpty())
             return Collections.emptyList();
 
-        List<TeiidDataSource> dsSources = new ArrayList<>();
+        List<TeiidDataSource> dsSources = new ArrayList<TeiidDataSource>();
         for (String dsName : dsNames) {
             TeiidDataSource dataSource = getDataSource(dsName);
             dsSources.add(dataSource);
@@ -274,7 +274,7 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         if (translators.isEmpty())
             return Collections.emptyList();
 
-        List<TeiidTranslator> teiidTranslators = new ArrayList<>();
+        List<TeiidTranslator> teiidTranslators = new ArrayList<TeiidTranslator>();
         for (Translator translator : translators) {
             teiidTranslators.add(factory.createTranslator(translator));
         }
@@ -314,7 +314,7 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         if (vdbs.isEmpty())
             return Collections.emptyList();
 
-        List<TeiidVdb> teiidVdbs = new ArrayList<>();
+        List<TeiidVdb> teiidVdbs = new ArrayList<TeiidVdb>();
         for (VDB vdb : vdbs) {
             if (! isDynamic(vdb))
                 continue;
@@ -415,7 +415,7 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         if (propDefs.isEmpty())
             return Collections.emptyList();
 
-        List<TeiidPropertyDefinition> teiidPropDefs = new ArrayList<>();
+        List<TeiidPropertyDefinition> teiidPropDefs = new ArrayList<TeiidPropertyDefinition>();
         for (PropertyDefinition propDef : propDefs) {
             teiidPropDefs.add(factory.createPropertyDefinition(propDef));
         }

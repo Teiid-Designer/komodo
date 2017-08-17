@@ -47,21 +47,20 @@ public final class DataSourceJdbcTableAttributesSerializer extends TypeAdapter< 
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoDataSourceJdbcTableAttributes.DATA_SOURCE_NAME_LABEL:
-                    updateAttrs.setDataSourceName(in.nextString());
-                    break;
-                case KomodoDataSourceJdbcTableAttributes.CATALOG_FILTER_LABEL:
-                    updateAttrs.setCatalogFilter(in.nextString());
-                    break;
-                case KomodoDataSourceJdbcTableAttributes.SCHEMA_FILTER_LABEL:
-                    updateAttrs.setSchemaFilter(in.nextString());
-                    break;
-                case KomodoDataSourceJdbcTableAttributes.TABLE_FILTER_LABEL:
-                    updateAttrs.setTableFilter(in.nextString());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(KomodoDataSourceJdbcTableAttributes.DATA_SOURCE_NAME_LABEL)) {
+                updateAttrs.setDataSourceName(in.nextString());
+            }
+            else if (name.equals(KomodoDataSourceJdbcTableAttributes.CATALOG_FILTER_LABEL)) {
+                updateAttrs.setCatalogFilter(in.nextString());
+            }
+            else if (name.equals(KomodoDataSourceJdbcTableAttributes.SCHEMA_FILTER_LABEL)) {
+                updateAttrs.setSchemaFilter(in.nextString());
+            }
+            else if (name.equals(KomodoDataSourceJdbcTableAttributes.TABLE_FILTER_LABEL)) {
+                updateAttrs.setTableFilter(in.nextString());
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

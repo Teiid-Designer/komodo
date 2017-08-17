@@ -602,7 +602,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             }
 
             if ( kids.length != 0 ) {
-                final List< KomodoObject > matches = new ArrayList< >( kids.length );
+                final List< KomodoObject > matches = new ArrayList<KomodoObject>( kids.length );
 
                 for ( final KomodoObject kid : kids ) {
                     if ( type.equals( kid.getPrimaryType( transaction ).getName() ) || kid.hasDescriptor( transaction, type ) ) {
@@ -1015,7 +1015,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             return PropertyDescriptor.NO_DESCRIPTORS;
         }
 
-        final List< PropertyDescriptor > result = new ArrayList<>();
+        final List< PropertyDescriptor > result = new ArrayList< PropertyDescriptor >();
 
         for ( final Descriptor descriptor : getAllDescriptors( transaction, this ) ) {
             result.addAll( Arrays.asList( descriptor.getPropertyDescriptors( transaction ) ) );
@@ -1041,7 +1041,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         try {
-            final List< String > names = new ArrayList< >();
+            final List< String > names = new ArrayList<String>();
 
             for ( final PropertyIterator iter = node( transaction ).getProperties(); iter.hasNext(); ) {
                 final String name = iter.nextProperty().getName();
@@ -1097,7 +1097,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
 
         KomodoTypeRegistry registry  = KomodoTypeRegistry.getInstance();
-        Set<TypeIdentifier> identifiers = new HashSet<>();
+        Set<TypeIdentifier> identifiers = new HashSet<TypeIdentifier>();
         for (Descriptor descriptor : descriptors) {
             String name = descriptor.getName();
             identifiers.addAll(registry.getIdentifiers(name));

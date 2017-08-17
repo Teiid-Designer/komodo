@@ -67,7 +67,7 @@ public final class SetMaskPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addMasks.cmd");
     	final String[] commands = { "cd myMask1" };
     	final CommandResult result = execute( commands );

@@ -61,7 +61,7 @@ public class ResultSetColumnImpl extends RelationalChildRestrictedObject impleme
         static Map< String, String > defaultValues() {
             if ( _defaultValues == null ) {
                 final StandardOption[] options = values();
-                final Map< String, String > temp = new HashMap< >();
+                final Map< String, String > temp = new HashMap< String, String >();
 
                 for ( final StandardOption option : options ) {
                     temp.put( option.name(), null ); // no default values

@@ -86,7 +86,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return StringConstants.EMPTY_ARRAY;
         }
 
-        final List< String > paths = new ArrayList<>( entries.length );
+        final List< String > paths = new ArrayList<String>( entries.length );
 
         for ( final DataServiceEntry< T > entry : entries ) {
             T ref = null;
@@ -724,7 +724,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< ConnectionEntry > result = new ArrayList<>();
+        final List< ConnectionEntry > result = new ArrayList<ConnectionEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction,
                                                                     DataVirtLexicon.ConnectionEntry.NODE_TYPE,
@@ -755,7 +755,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return Connection.NO_CONNECTIONS;
         }
 
-        final List< Connection > connections = new ArrayList<>( entries.length );
+        final List< Connection > connections = new ArrayList<Connection>( entries.length );
 
         for ( final ConnectionEntry entry : entries ) {
             Connection ref = null;
@@ -796,7 +796,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< DdlEntry > result = new ArrayList<>();
+        final List< DdlEntry > result = new ArrayList<DdlEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( transaction,
                                                                     DataVirtLexicon.ResourceEntry.DDL_ENTRY_NODE_TYPE,
@@ -827,7 +827,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return DdlFile.NO_DDLS;
         }
 
-        final List< DdlFile > ddls = new ArrayList<>( entries.length );
+        final List< DdlFile > ddls = new ArrayList<DdlFile>( entries.length );
 
         for ( final DdlEntry entry : entries ) {
             DdlFile ref = null;
@@ -881,7 +881,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< DriverEntry > result = new ArrayList<>();
+        final List< DriverEntry > result = new ArrayList<DriverEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( uow, DataVirtLexicon.ResourceEntry.DRIVER_ENTRY_NODE_TYPE, namePatterns ) ) {
             final DriverEntry entry = new DriverEntryImpl( uow, getRepository(), kobject.getAbsolutePath() );
@@ -926,7 +926,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return Driver.NO_DRIVERS;
         }
 
-        final List< Driver > drivers = new ArrayList<>( entries.length );
+        final List< Driver > drivers = new ArrayList<Driver>( entries.length );
 
         for ( final DriverEntry entry : entries ) {
             Driver ref = null;
@@ -977,7 +977,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< ResourceEntry > result = new ArrayList<>();
+        final List< ResourceEntry > result = new ArrayList<ResourceEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( uow, DataVirtLexicon.ResourceEntry.NODE_TYPE, namePatterns ) ) {
             final ResourceEntry entry = new ResourceEntryImpl( uow, getRepository(), kobject.getAbsolutePath() );
@@ -1006,7 +1006,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return ResourceFile.NO_RESOURCES;
         }
 
-        final List< ResourceFile > resources = new ArrayList<>( entries.length );
+        final List< ResourceFile > resources = new ArrayList<ResourceFile>( entries.length );
 
         for ( final ResourceEntry entry : entries ) {
             ResourceFile ref = null;
@@ -1066,7 +1066,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< UdfEntry > result = new ArrayList<>();
+        final List< UdfEntry > result = new ArrayList<UdfEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( uow, DataVirtLexicon.ResourceEntry.UDF_ENTRY_NODE_TYPE, namePatterns ) ) {
             final UdfEntry entry = new UdfEntryImpl( uow, getRepository(), kobject.getAbsolutePath() );
@@ -1095,7 +1095,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return UdfFile.NO_UDFS;
         }
 
-        final List< UdfFile > udfs = new ArrayList<>( entries.length );
+        final List< UdfFile > udfs = new ArrayList<UdfFile>( entries.length );
 
         for ( final UdfEntry entry : entries ) {
             UdfFile ref = null;
@@ -1136,7 +1136,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< VdbEntry > result = new ArrayList<>();
+        final List< VdbEntry > result = new ArrayList<VdbEntry>();
 
         for ( final KomodoObject kobject : super.getChildrenOfType( uow, DataVirtLexicon.VdbEntry.NODE_TYPE, namePatterns ) ) {
             final VdbEntry entry = new VdbEntryImpl( uow, getRepository(), kobject.getAbsolutePath() );
@@ -1165,7 +1165,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
             return Vdb.NO_VDBS;
         }
 
-        final List< Vdb > vdbs = new ArrayList<>( entries.length );
+        final List< Vdb > vdbs = new ArrayList<Vdb>( entries.length );
 
         for ( final VdbEntry entry : entries ) {
             Vdb ref = null;

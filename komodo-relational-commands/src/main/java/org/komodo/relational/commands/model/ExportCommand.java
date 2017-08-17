@@ -81,7 +81,10 @@ public final class ExportCommand extends ModelShellCommand {
                 }
 
                 // write file
-                try ( final FileWriter recordingFileWriter = new FileWriter( fileName, false ) ) {
+                FileWriter recordingFileWriter = null;
+
+                try {
+                    recordingFileWriter = new FileWriter( fileName, false );
                     recordingFileWriter.write( ddl );
                     recordingFileWriter.flush();
                     return new CommandResultImpl( I18n.bind( ModelCommandsI18n.ddlExported,
@@ -90,6 +93,10 @@ public final class ExportCommand extends ModelShellCommand {
                                                              override ) );
                 } catch ( final Exception e ) {
                     return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.errorWritingFile, fileName ), e );
+                } finally {
+                    if ( recordingFileWriter != null ) {
+                        recordingFileWriter.close();
+                    }
                 }
             }
 

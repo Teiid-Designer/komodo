@@ -68,9 +68,9 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
     private boolean sequencingActive = false;
 
     // List appended to by running sequencers detailing their unique identifiers
-    private List<String> runningSequencers = new ArrayList<>();
+    private List<String> runningSequencers = new ArrayList<String>();
 
-    private Set<KSequencerListener> listeners = new HashSet<>();
+    private Set<KSequencerListener> listeners = new HashSet<KSequencerListener>();
 
     /**
      * Create new instance
@@ -409,7 +409,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         if (node == null)
             return;
 
-        List<NodeType> types = new ArrayList<>();
+        List<NodeType> types = new ArrayList<NodeType>();
         types.add(node.getPrimaryNodeType());
         types.addAll(Arrays.asList(node.getMixinNodeTypes()));
 

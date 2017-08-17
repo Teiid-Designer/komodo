@@ -112,14 +112,4 @@ public interface Driver extends DataServiceResource {
             return new DriverImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
     };
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.Exportable#getDocumentType(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    default DocumentType getDocumentType( final UnitOfWork transaction ) {
-        return DocumentType.JAR;
-    }
 }

@@ -9,7 +9,6 @@ package org.komodo.relational.dataservice.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.UdfEntry;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.resource.UdfFile;
 import org.komodo.relational.resource.internal.UdfFileImpl;
 import org.komodo.spi.KException;
@@ -22,7 +21,7 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 /**
  * An implementation of a UDF entry in a data service.
  */
-public class UdfEntryImpl extends RelationalObjectImpl implements UdfEntry {
+public class UdfEntryImpl extends AbstractDataServiceResourceEntryImpl<UdfFile> implements UdfEntry {
 
     private static final String ARCHIVE_FOLDER = "udfs/"; //$NON-NLS-1$
 

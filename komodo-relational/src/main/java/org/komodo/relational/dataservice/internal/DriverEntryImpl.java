@@ -9,7 +9,6 @@ package org.komodo.relational.dataservice.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.DriverEntry;
-import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.resource.Driver;
 import org.komodo.relational.resource.internal.DriverImpl;
 import org.komodo.spi.KException;
@@ -22,7 +21,7 @@ import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
 /**
  * An implementation of a driver entry in a data service.
  */
-public class DriverEntryImpl extends RelationalObjectImpl implements DriverEntry {
+public class DriverEntryImpl extends AbstractDataServiceResourceEntryImpl<Driver> implements DriverEntry {
 
     private static final String ARCHIVE_FOLDER = "drivers/"; //$NON-NLS-1$
 

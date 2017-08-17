@@ -56,7 +56,7 @@ public final class SetDataRolePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addDataRoles.cmd");
     	final String[] commands = { "cd myDatarole1" };
     	final CommandResult result = execute( commands );

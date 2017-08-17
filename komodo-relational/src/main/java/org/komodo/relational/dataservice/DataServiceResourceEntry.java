@@ -37,15 +37,7 @@ public interface DataServiceResourceEntry< T extends DataServiceResource > exten
      * @throws KException
      *         if an error occurs
      */
-    default InputStream getContent( final UnitOfWork transaction ) throws KException {
-        final T resource = getResource( transaction );
-
-        if ( resource == null ) {
-            return null;
-        }
-
-        return resource.getContent( transaction );
-    }
+    InputStream getContent( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param uow
@@ -55,9 +47,7 @@ public interface DataServiceResourceEntry< T extends DataServiceResource > exten
      * @throws KException
      *         if an error occurs
      */
-    default void setResource( final UnitOfWork uow,
-                              final T resource ) throws KException {
-        setReference( uow, resource );
-    }
+    void setResource( final UnitOfWork uow,
+                              final T resource ) throws KException;
 
 }

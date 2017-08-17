@@ -155,7 +155,7 @@ public final class KomodoJsonMarshaller {
      * Cached teiid element schema. Unlikely to ever change
      * and this reduces the work required.
      */
-    private static Map<Object, String> teiidElementSchemaCache = new HashMap<>();
+    private static Map<Object, String> teiidElementSchemaCache = new HashMap<Object, String>();
 
     public static String teiidElementSchema(KomodoType kType) throws Exception {
         String schema;

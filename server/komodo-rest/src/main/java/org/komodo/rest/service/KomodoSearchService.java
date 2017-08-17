@@ -48,6 +48,7 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
+import org.komodo.repository.search.CompareClause;
 import org.komodo.repository.search.ComparisonOperator;
 import org.komodo.repository.search.ContainsClause;
 import org.komodo.repository.search.ObjectSearcher;
@@ -137,9 +138,6 @@ public final class KomodoSearchService extends KomodoService {
         }
 
         if (contains != null) {
-            /*
-             * No longer necessary due to modeshape 4.4.0+
-             *
             //
             // The jcr:name is not included in full-text searches in modeshape versions prior to 4.0
             // so we need to create a combination clause that checks the properties and the name
@@ -151,12 +149,7 @@ public final class KomodoSearchService extends KomodoService {
             CompareClause clause2 = new CompareClause(LogicalOperator.OR, null,
                                                                                   "NAME" + OPEN_BRACKET + ALIAS + CLOSE_BRACKET, //$NON-NLS-1$
                                                                                   ComparisonOperator.LIKE, PERCENT + contains + PERCENT);
-
             os.addWhereParanthesisClause(operator, clause1, clause2);
-            */
-            ContainsClause clause1 = new ContainsClause(operator, ALIAS, STAR, KeywordCriteria.ANY, STAR + contains + STAR);
-            os.addWhereClause(clause1);
-
             operator = LogicalOperator.AND;
         }
 
@@ -269,7 +262,7 @@ public final class KomodoSearchService extends KomodoService {
             List<KomodoObject> searchObjects = os.searchObjects(uow);
 
             // Convert the results into rest objects for the response
-            List<RestBasicEntity> entities = new ArrayList<>();
+            List<RestBasicEntity> entities = new ArrayList<RestBasicEntity>();
             for (KomodoObject kObject : searchObjects) {
                 RestBasicEntity entity = entityFactory.create(kObject, uriInfo.getBaseUri(), uow);
                 if (entity != null) // if kType in UNKNOWN then the entity is not created
@@ -391,7 +384,7 @@ public final class KomodoSearchService extends KomodoService {
             List<KomodoObject> searchObjects = os.searchObjects(uow);
 
             // Convert the results into rest objects for the response
-            List<RestBasicEntity> entities = new ArrayList<>();
+            List<RestBasicEntity> entities = new ArrayList<RestBasicEntity>();
             for (KomodoObject kObject : searchObjects) {
                 RestBasicEntity entity = entityFactory.create(kObject, uriInfo.getBaseUri(), uow);
                 if (entity != null) // if kType in UNKNOWN then the entity is not created

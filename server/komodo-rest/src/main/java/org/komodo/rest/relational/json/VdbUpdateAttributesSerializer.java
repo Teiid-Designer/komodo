@@ -47,21 +47,20 @@ public final class VdbUpdateAttributesSerializer extends TypeAdapter< KomodoVdbU
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoVdbUpdateAttributes.VDB_NAME_LABEL:
-                    updateAttrs.setVdbName(in.nextString());
-                    break;
-                case KomodoVdbUpdateAttributes.MODEL_NAME_LABEL:
-                    updateAttrs.setModelName(in.nextString());
-                    break;
-                case KomodoVdbUpdateAttributes.TEIID_VDB_NAME_LABEL:
-                    updateAttrs.setTeiidVdbName(in.nextString());
-                    break;
-                case KomodoVdbUpdateAttributes.TEIID_MODEL_NAME_LABEL:
-                    updateAttrs.setTeiidModelName(in.nextString());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(KomodoVdbUpdateAttributes.VDB_NAME_LABEL)) {
+                updateAttrs.setVdbName(in.nextString());
+            }
+            else if (name.equals(KomodoVdbUpdateAttributes.MODEL_NAME_LABEL)) {
+                updateAttrs.setModelName(in.nextString());
+            }
+            else if (name.equals(KomodoVdbUpdateAttributes.TEIID_VDB_NAME_LABEL)) {
+                updateAttrs.setTeiidVdbName(in.nextString());
+            }
+            else if (name.equals(KomodoVdbUpdateAttributes.TEIID_MODEL_NAME_LABEL)) {
+                updateAttrs.setTeiidModelName(in.nextString());
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

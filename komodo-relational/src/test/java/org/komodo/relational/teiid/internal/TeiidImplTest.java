@@ -252,7 +252,7 @@ public final class TeiidImplTest extends RelationalModelTest {
         when(ds.getType()).thenReturn(properties.getProperty(TeiidInstance.DATASOURCE_DRIVERNAME));
         when(ds.getProperties()).thenReturn(new Properties());
 
-        Collection<TeiidDataSource> dataSources = new ArrayList<>();
+        Collection<TeiidDataSource> dataSources = new ArrayList<TeiidDataSource>();
         dataSources.add(ds);
         when(teiidInstance.getDataSources()).thenReturn(dataSources);
 
@@ -268,7 +268,7 @@ public final class TeiidImplTest extends RelationalModelTest {
         when(partsVdb.getName()).thenReturn(TestUtilities.PARTS_VDB_FILE);
         when(partsVdb.export()).thenReturn(partsXml);
 
-        Collection<TeiidVdb> vdbs = new ArrayList<>();
+        Collection<TeiidVdb> vdbs = new ArrayList<TeiidVdb>();
         vdbs.add(portfolioVdb);
         vdbs.add(partsVdb);
         when(teiidInstance.getVdbs()).thenReturn(vdbs);
@@ -279,7 +279,7 @@ public final class TeiidImplTest extends RelationalModelTest {
         when(translator.getDescription()).thenReturn("A translator for open source H2 Database");
         when(translator.getProperties()).thenReturn(new Properties());
 
-        Collection<TeiidTranslator> translators = new ArrayList<>();
+        Collection<TeiidTranslator> translators = new ArrayList<TeiidTranslator>();
         translators.add(translator);
         when(teiidInstance.getTranslators()).thenReturn(translators);
 

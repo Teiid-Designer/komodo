@@ -257,7 +257,7 @@ public final class OptionContainerUtils {
             return options;
         }
 
-        final List< StatementOption > custom = new ArrayList<>( options.length );
+        final List< StatementOption > custom = new ArrayList< StatementOption >( options.length );
 
         for ( final StatementOption option : options ) {
             if ( !container.isStandardOption( option.getName( transaction ) ) ) {

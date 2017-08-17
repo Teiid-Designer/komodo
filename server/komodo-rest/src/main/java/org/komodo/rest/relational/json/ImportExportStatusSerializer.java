@@ -47,30 +47,29 @@ public final class ImportExportStatusSerializer extends TypeAdapter< ImportExpor
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case ImportExportStatus.NAME_LABEL:
-                    status.setName(in.nextString());
-                    break;
-                case ImportExportStatus.TYPE_LABEL:
-                    status.setType(in.nextString());
-                    break;
-                case ImportExportStatus.SUCCESS_LABEL:
-                    status.setSuccess(in.nextBoolean());
-                    break;
-                case ImportExportStatus.DOWNLOADABLE_LABEL:
-                    status.setDownloadable(in.nextBoolean());
-                    break;
-                case ImportExportStatus.CONTENT_LABEL:
-                    status.setContent(in.nextString());
-                    break;
-                case ImportExportStatus.MESSAGE_LABEL:
-                    status.setMessage(in.nextString());
-                    break;
-                case ImportExportStatus.DOWNLOADABLE_SIZE_LABEL:
-                    status.setDownloadableSize(in.nextLong());
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (name.equals(ImportExportStatus.NAME_LABEL)) {
+                status.setName(in.nextString());
+            }
+            else if (name.equals(ImportExportStatus.TYPE_LABEL)) {
+                status.setType(in.nextString());
+            }
+            else if (name.equals(ImportExportStatus.SUCCESS_LABEL)) {
+                status.setSuccess(in.nextBoolean());
+            }
+            else if (name.equals(ImportExportStatus.DOWNLOADABLE_LABEL)) {
+                status.setDownloadable(in.nextBoolean());
+            }
+            else if (name.equals(ImportExportStatus.CONTENT_LABEL)) {
+                status.setContent(in.nextString());
+            }
+            else if (name.equals(ImportExportStatus.MESSAGE_LABEL)) {
+                status.setMessage(in.nextString());
+            }
+            else if (name.equals(ImportExportStatus.DOWNLOADABLE_SIZE_LABEL)) {
+                status.setDownloadableSize(in.nextLong());
+            }
+            else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

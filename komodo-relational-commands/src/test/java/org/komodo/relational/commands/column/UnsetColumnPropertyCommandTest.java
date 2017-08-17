@@ -17,9 +17,7 @@ package org.komodo.relational.commands.column;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -77,7 +75,7 @@ public final class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addColumns.cmd");
     	final String[] commands = { "cd myColumn1" };
     	final CommandResult result = execute( commands );
