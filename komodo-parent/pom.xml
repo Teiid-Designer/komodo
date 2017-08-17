@@ -124,7 +124,7 @@
 		<server.platform>release</server.platform>
 
 		<!-- The default version of teiid targeted for development -->
-		<teiid.version.default>8.12.4</teiid.version.default>
+		<teiid.version.default>8.12.11.6_4</teiid.version.default>
 		<teiid.classifier.default>jboss-dist</teiid.classifier.default>
 
 		<!-- The version of server to use with testing -->
@@ -352,6 +352,12 @@
 				<version>${teiid.version.default}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.eclipse.jgit</groupId>
+				<artifactId>org.eclipse.jgit</artifactId>
+				<version>${version.jgit}</version>
+			</dependency>
+
 			<!--Inherited from BOM, but changes the default scope to "test" -->
 			<dependency>
 				<groupId>junit</groupId>
@@ -474,44 +480,6 @@
 		</dependency>
 	</dependencies>
 <profiles>
-
-   <profile>
-	<id>licenses</id>
-	<activation>
-		<activeByDefault>false</activeByDefault>
-	</activation>
-	<build>
-		<plugins>
-		    <plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>license-maven-plugin</artifactId>
-			<version>1.13</version>
-			<executions>
-			  <execution>
-			    <id>download-licenses</id>
-			    <goals>
-			      <goal>download-licenses</goal>
-			    </goals>
-			  </execution>
-			</executions>
-		      </plugin>
-
-		     <plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>license-maven-plugin</artifactId>
-			<version>1.13</version>
-			<executions>
-			  <execution>
-			    <id>aggregate-download-licenses</id>
-			    <goals>
-			      <goal>aggregate-download-licenses</goal>
-			    </goals>
-			  </execution>
-			</executions>
-		      </plugin>
-         	</plugins>
-	</build>
-    </profile>
 
     <profile>
 	<id>build</id>
@@ -668,17 +636,7 @@
 			</plugin>
 		</plugins>
 	</build>
-  <profiles>
-	<profile>
-
-     		<id>default</id>
-    		<activation>
-      			<activeByDefault>true</activeByDefault>
-    		</activation>
-     		<modules>
-        		<module>modules</module>
-    		</modules>
-	</profile>
+        </profile>
         <profile>
 		<!-- used to gather all the license dependency.  All the licenses should be copied to the src/main/resources/licenses folder and 
 			the license.xml copied to the src/main/resources/template location
@@ -708,8 +666,8 @@
 			      </plugin>
 		 	</plugins>
 		</build>
-        </profile>
-    <profile>
+     </profile>
+     <profile>
 	<id>licenses</id>
 	<activation>
 		<activeByDefault>false</activeByDefault>
@@ -847,8 +805,7 @@
 	</build>
     </profile>
    </profiles>
-   </profile>
-  </profiles>
+
 
 	<repositories>
 		<repository>
