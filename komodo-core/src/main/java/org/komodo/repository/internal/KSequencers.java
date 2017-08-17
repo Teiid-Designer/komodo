@@ -162,7 +162,7 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         try {
             return isVdbSequenceable(property.getParent(), property.getName());
         } catch (RepositoryException ex) {
-                return false;
+            return false;
         }
     }
 
@@ -191,9 +191,9 @@ public class KSequencers implements StringConstants, EventListener, KSequencerCo
         try {
             return isConnectionSequenceable(property.getParent(), property.getName());
         } catch (RepositoryException ex) {
-                return false;
+            return false;
         }
-            }
+    }
 
     private boolean isDataServiceSequenceable( Node node, String propertyName ) {
         try {

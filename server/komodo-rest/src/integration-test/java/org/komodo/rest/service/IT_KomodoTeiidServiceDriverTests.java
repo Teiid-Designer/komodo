@@ -22,7 +22,9 @@
 package org.komodo.rest.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -30,7 +32,7 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.commons.codec.binary.Base64;
+import javax.xml.bind.DatatypeConverter;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -73,7 +75,7 @@ public final class IT_KomodoTeiidServiceDriverTests extends AbstractKomodoTeiidS
         assertNotNull(driverStream);
 
         byte[] driverBytes = TestUtilities.streamToBytes(driverStream);
-        String content = Base64.encodeBase64String(driverBytes);
+        String content = DatatypeConverter.printBase64Binary(driverBytes); 
         fileAttr.setContent(content);
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
@@ -90,10 +92,18 @@ public final class IT_KomodoTeiidServiceDriverTests extends AbstractKomodoTeiidS
         assertEquals(title, status.getTitle());
         Map<String, String> attributes = status.getAttributes();
 
-        assertEquals(1, attributes.size());
+        assertFalse(attributes.isEmpty());
 
         String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED);
-        assertEquals(deployMsg, attributes.values().iterator().next());
+        boolean foundValue = false;
+        for (String value : attributes.values()) {
+            if (deployMsg.equals(value)) {
+               foundValue = true;
+               break;
+            }
+        }
+
+        assertTrue(foundValue);
 
         assertMysqlDriver();
     }

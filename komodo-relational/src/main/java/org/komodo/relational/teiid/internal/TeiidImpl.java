@@ -873,6 +873,8 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
             cachedTeiid.refreshTranslators(transaction, teiidInstance);
             // Drivers
             cachedTeiid.refreshDrivers(transaction, teiidInstance);
+            // Templates
+            cachedTeiid.refreshTemplates(transaction, teiidInstance);
         } catch (Exception ex) {
             throw new KException(ex);
         }

@@ -43,7 +43,6 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
 
 /**
  * Indicates the objects has a JSON representation.
@@ -392,7 +391,7 @@ public class RestBasicEntity implements KRestEntity {
      * @param name the property name
      * @param value the property value
      */
-    public final void addProperty(String name, String value) {
+    public final void addProperty(String name, Object value) {
         this.properties.add(new RestProperty(name, value));
     }
 
@@ -452,10 +451,10 @@ public class RestBasicEntity implements KRestEntity {
 
             if (attribute.isMultiple(uow)) {
                 Object[] values = attribute.getValues(uow);
-                addProperty(propName, StringUtils.toCommaSeparatedList(values));
+                addProperty(propName, values);
             } else {
                 Object value = attribute.getValue(uow);
-                addProperty(propName, value == null ? EMPTY_STRING : value.toString());
+                addProperty(propName, value);
             }
         }
     }

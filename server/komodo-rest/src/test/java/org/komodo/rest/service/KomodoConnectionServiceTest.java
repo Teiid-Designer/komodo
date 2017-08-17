@@ -28,19 +28,22 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.connection.RestConnection;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.request.KomodoConnectionAttributes;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest {
@@ -51,7 +54,6 @@ public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest
     public TestName testName = new TestName();
 
     @Test
-    @Ignore
     public void shouldGetConnections() throws Exception {
         createConnection(CONNECTION_NAME);
 
@@ -94,13 +96,12 @@ public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest
     }
     
     @Test
-    @Ignore
     public void shouldGetConnection() throws Exception {
         createConnection(CONNECTION_NAME);
 
         // get
         Properties settings = _uriBuilder.createSettings(SettingNames.CONNECTION_NAME, CONNECTION_NAME);
-        _uriBuilder.addSetting(settings, SettingNames.CONNECTION_PARENT_PATH, _uriBuilder.workspaceConnectionsUri());
+        _uriBuilder.addSetting(settings, SettingNames.PARENT_PATH, _uriBuilder.workspaceConnectionsUri());
 
         URI uri = _uriBuilder.connectionUri(LinkType.SELF, settings);
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
@@ -117,4 +118,93 @@ public final class KomodoConnectionServiceTest extends AbstractKomodoServiceTest
         assertEquals(connection.getId(), CONNECTION_NAME);
     }
 
+    @Test
+    public void shouldCreateConnection() throws Exception {
+        // post
+        Properties settings = _uriBuilder.createSettings(SettingNames.CONNECTION_NAME, CONNECTION_NAME);
+        _uriBuilder.addSetting(settings, SettingNames.PARENT_PATH, _uriBuilder.workspaceConnectionsUri());
+
+        URI uri = _uriBuilder.connectionUri(LinkType.SELF, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+
+        KomodoConnectionAttributes rcAttr = new KomodoConnectionAttributes();
+        rcAttr.setJndi("jndi:/MySqlDS1");
+        rcAttr.setDriver("mysql");
+        rcAttr.setJdbc(true);
+        rcAttr.setParameter("username", "test");
+        rcAttr.setParameter("password", "myPassword");
+
+        addBody(request, rcAttr);
+        ClientResponse<String> response = request.post(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+        System.out.println("Response:\n" + entity);
+
+        RestConnection rsObj = KomodoJsonMarshaller.unmarshall(entity, RestConnection.class);
+        assertEquals(rcAttr.getDriver(), rsObj.getDriverName());
+        assertEquals(rcAttr.getJndi(), rsObj.getJndiName());
+        assertEquals(rcAttr.isJdbc(), rsObj.isJdbc());
+
+        List<RestProperty> rsProps = rsObj.getProperties();
+        for (Entry<String, Object> parameter : rcAttr.getParameters().entrySet()) {
+            RestProperty rsProp = null;
+
+            for (RestProperty rsp : rsProps) {
+                if (! rsp.getName().equals(parameter.getKey()))
+                    continue;
+
+                rsProp = rsp;
+            }
+
+            assertNotNull(parameter.getKey() + " property not handled", rsProp);
+            assertEquals(parameter.getValue(), rsProp.getValue());
+        }
+    }
+
+    @Test
+    public void shouldUpdateConnection() throws Exception {
+        createConnection(CONNECTION_NAME);
+
+        // put
+        Properties settings = _uriBuilder.createSettings(SettingNames.CONNECTION_NAME, CONNECTION_NAME);
+        _uriBuilder.addSetting(settings, SettingNames.PARENT_PATH, _uriBuilder.workspaceConnectionsUri());
+
+        URI uri = _uriBuilder.connectionUri(LinkType.SELF, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+
+        KomodoConnectionAttributes rcAttr = new KomodoConnectionAttributes();
+        rcAttr.setJndi("jndi:/MySqlDS1");
+        rcAttr.setDriver("mysql");
+        rcAttr.setJdbc(true);
+        rcAttr.setParameter("username", "test");
+        rcAttr.setParameter("password", "myPassword");
+
+        addBody(request, rcAttr);
+        ClientResponse<String> response = request.put(String.class);
+
+        final String entity = response.getEntity();
+        assertThat(entity, is(notNullValue()));
+        System.out.println("Response:\n" + entity);
+
+        RestConnection rsObj = KomodoJsonMarshaller.unmarshall(entity, RestConnection.class);
+        assertEquals(rcAttr.getDriver(), rsObj.getDriverName());
+        assertEquals(rcAttr.getJndi(), rsObj.getJndiName());
+        assertEquals(rcAttr.isJdbc(), rsObj.isJdbc());
+
+        List<RestProperty> rsProps = rsObj.getProperties();
+        for (Entry<String, Object> parameter : rcAttr.getParameters().entrySet()) {
+            RestProperty rsProp = null;
+
+            for (RestProperty rsp : rsProps) {
+                if (! rsp.getName().equals(parameter.getKey()))
+                    continue;
+
+                rsProp = rsp;
+            }
+
+            assertNotNull(parameter.getKey() + " property not handled", rsProp);
+            assertEquals(parameter.getValue(), rsProp.getValue());
+        }
+    }
 }

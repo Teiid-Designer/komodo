@@ -653,7 +653,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         assertThat( response.getStatus(), is( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode() ) );
 
         final String errorMsg = response.getEntity();
-        assertThat( errorMsg, startsWith( "RESTEASY001530" ) );
+        assertThat( errorMsg, startsWith( "RESTEASY" ) );
     }
 
     @Test
@@ -715,7 +715,7 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         assertThat( response.getStatus(), is( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode() ) );
 
         final String errorMsg = response.getEntity();
-        assertThat( errorMsg, startsWith( "RESTEASY001530" ) );
+        assertThat( errorMsg, startsWith( "RESTEASY" ) );
     }
 
     @Test

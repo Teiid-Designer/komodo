@@ -44,6 +44,8 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.cors.CorsHeaders;
 import org.komodo.rest.relational.connection.RestConnection;
+import org.komodo.rest.relational.connection.RestTemplate;
+import org.komodo.rest.relational.connection.RestTemplateEntry;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
@@ -145,7 +147,7 @@ public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServ
         assertTrue(status.isTeiidInstanceAvailable());
         assertTrue(status.isConnected());
         assertEquals(1, status.getDataSourceSize());
-        assertTrue(status.getDataSourceDriverSize() > 0);
+        assertEquals(3, status.getDataSourceDriverSize());
 
         testTranslators(status);
 
@@ -321,7 +323,7 @@ public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServ
                         assertTrue(status.isTeiidInstanceAvailable());
                         assertTrue(status.isConnected());
                         assertEquals(1, status.getDataSourceSize());
-                        assertTrue(status.getDataSourceDriverSize() > 0);
+                        assertEquals(3, status.getDataSourceDriverSize());
                         testTranslators(status);
                         assertEquals(1, status.getVdbSize());
                     } catch (Throwable ex) {
@@ -387,6 +389,75 @@ public final class IT_KomodoTeiidServiceGetTests extends AbstractKomodoTeiidServ
         for (RestConnection connection : connections) {
             assertNotNull(connection.getId());
             assertEquals(3, connection.getLinks().size());
+        }
+    }
+
+    @Test
+    public void shouldGetConnectionTemplates() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.TEMPLATES_SEGMENT)
+                                          .build();
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
+
+        assertEquals(200, response.getStatus());
+
+        RestTemplate[] templates = KomodoJsonMarshaller.unmarshallArray(entity, RestTemplate[].class);
+        assertTrue(templates.length > 0);
+
+        for (RestTemplate template : templates) {
+            assertNotNull(template.getId());
+            assertFalse(template.getEntries().isEmpty());
+            assertEquals(4, template.getLinks().size());
+        }
+    }
+
+    @Test
+    public void shouldGetConnectionTemplate() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.TEMPLATES_SEGMENT)
+                                          .path("webservice")
+                                          .build();
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
+
+        assertEquals(200, response.getStatus());
+
+        RestTemplate template = KomodoJsonMarshaller.unmarshall(entity, RestTemplate.class);
+        assertNotNull(template);
+
+        assertNotNull(template.getId());
+        assertFalse(template.getEntries().isEmpty());
+        assertEquals(4, template.getLinks().size());
+    }
+
+    @Test
+    public void shouldGetConnectionTemplateEntries() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.TEMPLATES_SEGMENT)
+                                          .path("webservice")
+                                          .path(V1Constants.TEMPLATE_ENTRIES_SEGMENT)
+                                          .build();
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
+
+        assertEquals(200, response.getStatus());
+
+        RestTemplateEntry[] templateEntries = KomodoJsonMarshaller.unmarshallArray(entity, RestTemplateEntry[].class);
+        assertTrue(templateEntries.length > 0);
+
+        for (RestTemplateEntry entry : templateEntries) {
+            assertNotNull(entry.getId());
+            assertEquals(2, entry.getLinks().size());
         }
     }
 

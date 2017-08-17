@@ -424,7 +424,12 @@ public class Messages implements StringConstants {
         /**
          * An error message indicating get a Translator from server failed.
          */
-        GET_SERVER_TRANSLATOR_ERROR;
+        GET_SERVER_TRANSLATOR_ERROR,
+
+        /**
+         * An error message indicating get a Template from server failed.
+         */
+        GET_SERVER_TEMPLATE_ERROR;
 
 
 

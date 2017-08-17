@@ -41,6 +41,10 @@ import org.komodo.relational.resource.Driver;
 import org.komodo.relational.resource.internal.DriverImpl;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.template.Template;
+import org.komodo.relational.template.TemplateEntry;
+import org.komodo.relational.template.internal.TemplateEntryImpl;
+import org.komodo.relational.template.internal.TemplateImpl;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
@@ -59,12 +63,14 @@ import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
 import org.teiid.modeshape.sequencer.dataservice.lexicon.DataVirtLexicon;
@@ -124,6 +130,7 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         this.addChild(transaction, CachedTeiid.CONNECTIONS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
         this.addChild(transaction, CachedTeiid.TRANSLATORS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
         this.addChild(transaction, CachedTeiid.DRIVERS_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+        this.addChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
     }
 
     @Override
@@ -585,6 +592,47 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         return null;
     }
 
+    @Override
+    public Template[] getTemplates(final UnitOfWork transaction, final String... namePatterns) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        if(!super.hasChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
+            return new Template[0];
+        }
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+
+        final List<Template> result = new ArrayList<Template>();
+        for (final KomodoObject kobject : folderNode.getChildrenOfType(transaction, DataVirtLexicon.Template.NODE_TYPE)) {
+            Template template = new TemplateImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(template);
+        }
+
+        if (result.isEmpty()) {
+            return new Template[0];
+        }
+
+        return result.toArray(new Template[result.size()]);
+    }
+
+    @Override
+    public Template getTemplate(UnitOfWork transaction, String name) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        if(!super.hasChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
+            return null;
+        }
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+
+        if (folderNode.hasChild(transaction, name, DataVirtLexicon.Template.NODE_TYPE)) {
+            KomodoObject kobject = folderNode.getChild(transaction, name, DataVirtLexicon.Template.NODE_TYPE);
+            return new TemplateImpl(transaction, getRepository(), kobject.getAbsolutePath());
+        }
+
+        return null;
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.relational.teiid.CachedTeiid#refreshVdbs(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.runtime.TeiidInstance, java.lang.String[])
      */
@@ -862,6 +910,75 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.komodo.relational.teiid.CachedTeiid#refreshTemplates(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.runtime.TeiidInstance, java.lang.String[])
+     */
+    @Override
+    public void refreshTemplates(UnitOfWork transaction,
+                               TeiidInstance teiidInstance,
+                               String... templateNames) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
+
+        try {
+            teiidInstance.reconnect();
+            if (! teiidInstance.isConnected()) {
+                throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
+            }
+        } catch (Exception ex) {
+            throw new KException(ex);
+        }
+
+        if(!super.hasChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE)) {
+            return;
+        }
+        KomodoObject folderNode = super.getChild(transaction, CachedTeiid.TEMPLATES_FOLDER, KomodoLexicon.Folder.NODE_TYPE);
+
+        Collection<String> tempNames = new ArrayList<String>();
+        // No names supplied, remove all from the cache then refresh all
+        if( templateNames==null || templateNames.length==0 ) {
+            KomodoObject[] kobjs = folderNode.getChildren(transaction);
+            for(KomodoObject kobj : kobjs) {
+                kobj.remove(transaction);
+            }
+
+            try {
+                tempNames = teiidInstance.getDataSourceTemplateNames();
+            } catch (Exception ex) {
+                throw new KException(Messages.getString(Messages.CachedTeiid.GET_SERVER_DATA_SOURCES_ERROR));
+            }
+        } else {
+            for (String templateName : templateNames) {
+                tempNames.add(templateName);
+            }
+        }
+
+        // Names supplied, update only the specified Templates.
+        for(String tempName : tempNames) {
+            if (tempName == null)
+                continue;
+
+            Collection<TeiidPropertyDefinition> teiidTempProperties = null;
+            try {
+                teiidTempProperties = teiidInstance.getTemplatePropertyDefns(tempName);
+            } catch (Exception ex) {
+                KLog.getLogger().error(Messages.getString(Messages.CachedTeiid.GET_SERVER_TEMPLATE_ERROR, tempName, ex.getLocalizedMessage()));
+            }
+
+            // No server template found, remove the cached template
+            if(teiidTempProperties == null) {
+                if(folderNode.hasChild(transaction, tempName, DataVirtLexicon.Template.NODE_TYPE)) {
+                    KomodoObject existingObj = folderNode.getChild(transaction, tempName, DataVirtLexicon.Template.NODE_TYPE);
+                    existingObj.remove(transaction);
+                }
+            // Update the cached template
+            } else {
+                updateTemplate(transaction, folderNode, tempName, teiidTempProperties);
+            }
+        }
+    }
+
     /*
      * Update cached VDB with the supplied TeiidVdb.
      */
@@ -978,4 +1095,79 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), stream);
     }
 
+    /*
+     * Get the default value for the Managed ConnectionFactory class
+     * @param propDefns the collection of property definitions
+     * @return default value of the ManagedConnectionFactory, null if not found.
+     */
+    private String getManagedConnectionFactoryClassDefault (Collection<TeiidPropertyDefinition> propDefns) {
+        String resultValue = null;
+        for(TeiidPropertyDefinition pDefn : propDefns) {
+            if(pDefn.getName().equalsIgnoreCase(Template.CONN_FACTORY_CLASS_KEY)) {
+                resultValue=(String)pDefn.getDefaultValue();
+                break;
+            }
+        }
+        return resultValue;
+    }
+
+    /*
+     * Update cached Template with the supplied Template name.
+     */
+    private void updateTemplate(UnitOfWork transaction, KomodoObject templatesFolder, String templateName, Collection<TeiidPropertyDefinition> teiidTempProperties) throws KException {
+        // Removes currently cached object, if it exists
+        if(templatesFolder.hasChild(transaction, templateName, DataVirtLexicon.Template.NODE_TYPE)) {
+            KomodoObject existingObj = templatesFolder.getChild(transaction, templateName, DataVirtLexicon.Template.NODE_TYPE);
+            existingObj.remove(transaction);
+        }
+
+        // create the new object
+        KomodoObject kObject = templatesFolder.addChild(transaction,
+                                                          templateName,
+                                                          DataVirtLexicon.Template.NODE_TYPE);
+        Template template = new TemplateImpl(transaction,
+                                                       getRepository(),
+                                                       kObject.getAbsolutePath());
+
+        // Get the Managed connection factory class for rars
+        String rarConnFactoryValue = getManagedConnectionFactoryClassDefault(teiidTempProperties);
+
+        for (TeiidPropertyDefinition definition : teiidTempProperties) {
+            KomodoObject kPropObject = template.addChild(transaction,
+                                                            definition.getName(),
+                                                            DataVirtLexicon.TemplateEntry.NODE_TYPE);
+            TemplateEntry property = new TemplateEntryImpl(transaction,
+                                                         getRepository(),
+                                                         kPropObject.getAbsolutePath());
+
+            property.setDescription(transaction, definition.getDescription());
+            property.setDisplayName(transaction, definition.getDisplayName());
+
+            Collection<String> allowedValues = definition.getAllowedValues();
+            if (allowedValues != null && ! allowedValues.isEmpty()) {
+                List<Object> valuesList = new ArrayList<Object>();
+                for (String value : allowedValues)
+                    valuesList.add(value);
+
+                property.setAllowedValues(transaction, valuesList);
+            }
+
+            property.setCategory(transaction, definition.getCategory());
+            property.setDefaultValue(transaction, definition.getDefaultValue());
+            property.setTypeClassName(transaction, definition.getPropertyTypeClassName());
+            property.setConstrainedToAllowedValues(transaction, definition.isConstrainedToAllowedValues());
+            property.setAdvanced(transaction, definition.isAdvanced());
+            property.setMasked(transaction, definition.isMasked());
+            property.setModifiable(transaction, definition.isModifiable());
+            property.setRequired(transaction, definition.isRequired());
+            property.setCustomProperties(transaction, definition.getProperties());
+
+            // Copy the 'managedconnectionfactory-class' default value into the 'class-name' default value
+            if(definition.getName().equals(Template.CLASSNAME_KEY)) {
+                property.setDefaultValue(transaction, rarConnFactoryValue);
+                property.setRequired(transaction, true);
+                property.setModifiable(transaction, false);
+            }
+        }
+    }
 }

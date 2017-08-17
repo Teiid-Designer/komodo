@@ -34,7 +34,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import org.apache.commons.codec.binary.Base64;
+import javax.xml.bind.DatatypeConverter;
 import org.apache.tika.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
@@ -190,7 +190,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setDocumentType(DocumentType.VDB_XML);
 
         String portfolioCnt = FileUtils.streamToString(TestUtilities.portfolioExample());
-        String content = Base64.encodeBase64String(portfolioCnt.getBytes());
+        String content = DatatypeConverter.printBase64Binary(portfolioCnt.getBytes()); 
         storageAttr.setContent(content);
 
         assertFalse(workspace.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
@@ -279,7 +279,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         String content = status.getContent();
         assertNotNull(content);
 
-        byte[] decBytes = Base64.decodeBase64(content);
+        byte[] decBytes = DatatypeConverter.parseBase64Binary(content); 
         String decContent = new String(decBytes) + NEW_LINE;
 
         FileInputStream stream = null;
@@ -313,7 +313,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         InputStream sampleDsStream = TestUtilities.sampleDataserviceExample();
 
         byte[] sampleBytes = TestUtilities.streamToBytes(sampleDsStream);
-        String content = Base64.encodeBase64String(sampleBytes);
+        String content = DatatypeConverter.printBase64Binary(sampleBytes);
         storageAttr.setContent(content);
 
         assertFalse(workspace.hasChild(uow, dsName));
@@ -371,7 +371,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         InputStream usDsStream = TestUtilities.usStatesDataserviceExample();
 
         byte[] usBytes = TestUtilities.streamToBytes(usDsStream);
-        String content = Base64.encodeBase64String(usBytes);
+        String content = DatatypeConverter.printBase64Binary(usBytes);
         storageAttr.setContent(content);
 
         assertFalse(workspace.hasChild(uow, dsName));
@@ -502,7 +502,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         String content = status.getContent();
         assertNotNull(content);
 
-        byte[] decBytes = Base64.decodeBase64(content);
+        byte[] decBytes = DatatypeConverter.parseBase64Binary(content);
 
         File dsZip = File.createTempFile("DSZip", ZIP_SUFFIX);
         dsZip.deleteOnExit();
@@ -641,7 +641,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setArtifactPath(modelPath);
 
         String patientsDdlCnt = FileUtils.streamToString(TestUtilities.patientsDdl());
-        String content = Base64.encodeBase64String(patientsDdlCnt.getBytes());
+        String content = DatatypeConverter.printBase64Binary(patientsDdlCnt.getBytes());
         storageAttr.setContent(content);
 
         ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);

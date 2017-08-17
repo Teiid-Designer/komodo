@@ -473,7 +473,51 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+<profiles>
 
+   <profile>
+	<id>licenses</id>
+	<activation>
+		<activeByDefault>false</activeByDefault>
+	</activation>
+	<build>
+		<plugins>
+		    <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>license-maven-plugin</artifactId>
+			<version>1.13</version>
+			<executions>
+			  <execution>
+			    <id>download-licenses</id>
+			    <goals>
+			      <goal>download-licenses</goal>
+			    </goals>
+			  </execution>
+			</executions>
+		      </plugin>
+
+		     <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>license-maven-plugin</artifactId>
+			<version>1.13</version>
+			<executions>
+			  <execution>
+			    <id>aggregate-download-licenses</id>
+			    <goals>
+			      <goal>aggregate-download-licenses</goal>
+			    </goals>
+			  </execution>
+			</executions>
+		      </plugin>
+         	</plugins>
+	</build>
+    </profile>
+
+    <profile>
+	<id>build</id>
+	<activation>
+		<activeByDefault>true</activeByDefault>
+	</activation>
 	<build>
 		<!-- This section defines the default plugin settings inherited by child 
 			projects. -->
@@ -624,7 +668,7 @@
 			</plugin>
 		</plugins>
 	</build>
-       <profiles>
+  <profiles>
 	<profile>
 
      		<id>default</id>
@@ -803,6 +847,9 @@
 	</build>
     </profile>
    </profiles>
+   </profile>
+  </profiles>
+
 	<repositories>
 		<repository>
 			<id>redhat-product-repository</id>

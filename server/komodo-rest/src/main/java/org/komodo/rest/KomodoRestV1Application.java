@@ -229,6 +229,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String VDBS_FROM_TEIID = "VdbsFromTeiid"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for creating workspace connections from teiid
+         */
+        String CONNECTIONS_FROM_TEIID = "connectionsFromTeiid"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for undeploy.
          */
         String UNDEPLOY = "undeploy"; //$NON-NLS-1$
@@ -282,6 +287,31 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific connection id
          */
         String CONNECTION_PLACEHOLDER = "{connectionName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for templates.
+         */
+        String TEMPLATES_SEGMENT = "templates"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a template.
+         */
+        String TEMPLATE_SEGMENT = "template"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific template id
+         */
+        String TEMPLATE_PLACEHOLDER = "{templateName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for template entries.
+         */
+        String TEMPLATE_ENTRIES_SEGMENT = "entries"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific template entry id
+         */
+        String TEMPLATE_ENTRY_PLACEHOLDER = "{templateEntryName}"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for a setting a dataservice's service vdb for single table view
@@ -427,6 +457,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI path segment for loading of the sample vdb data
          */
         String SAMPLE_DATA = "samples"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for validating a value
+         */
+        String VALIDATE_SEGMENT = "validate"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI for validation of the value
+         */
+        String VALIDATE_PLACEHOLDER = "{validateValue}"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for searching the workspace
