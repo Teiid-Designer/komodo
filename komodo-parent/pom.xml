@@ -788,7 +788,6 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-			    <finalName>teiid-modeshape-licenses</finalName>
                             <final>dist</final>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <appendAssemblyId>true</appendAssemblyId>
