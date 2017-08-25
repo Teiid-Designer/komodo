@@ -30,7 +30,6 @@
             <allow-execute>false</allow-execute>
             <allow-read>true</allow-read>
             <allow-update>false</allow-update>
-            <allow-language>false</allow-language>
         </permission>
         <permission>
             <resource-name>myTable.T2</resource-name>
@@ -40,7 +39,6 @@
 			<allow-execute>true</allow-execute>
 			<allow-read>false</allow-read>
 			<allow-update>true</allow-update>
-			<allow-language>false</allow-language>
             <condition constraint="false">col1 = user()</condition>
         </permission>
         <permission>
@@ -51,7 +49,6 @@
 			<allow-execute>false</allow-execute>
 			<allow-read>false</allow-read>
 			<allow-update>false</allow-update>
-			<allow-language>false</allow-language>
             <mask order="1">col2</mask>
         </permission>
         <permission>

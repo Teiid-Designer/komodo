@@ -148,6 +148,21 @@ public class TestUtilities implements StringConstants {
     public static final String US_STATES_DATASERVICE_TEIID_8_FILE = "usstates-dataservice-teiid8.zip";
 
     /**
+     * DSB Single Source Parts Dataservice Zip
+     */
+    public static final String PARTS_SINGLE_SOURCE_FILE = "PartsSingleSource.zip";
+
+    /**
+     * DSB Join With different table names Dataservice Zip
+     */
+    public static final String JOIN_DIFFERENT_TABLE_NAMES_FILE = "JoinServiceDifferentTableNames.zip";
+
+    /**
+     * DSB Join With same table names Dataservice Zip
+     */
+    public static final String JOIN_SAME_TABLE_NAMES_FILE = "JoinServiceSameTableNames.zip";
+
+    /**
      * US States Dataservice Example Zip
      */
     public static final String US_STATES_DATASERVICE_TEIID_9_FILE = "usstates-dataservice-teiid9.zip";
@@ -171,6 +186,21 @@ public class TestUtilities implements StringConstants {
      * US States Dataservice Example data source name
      */
     public static final String US_STATES_DRIVER_NAME = "mysql-connector-java-5.1.39-bin.jar";
+
+    /**
+     * Parts Single source Dataservice name
+     */
+    public static final String PARTS_SINGLE_SOURCE_SERVICE_NAME = "PartsSingleSource";
+
+    /**
+     * Join different table names Dataservice name
+     */
+    public static final String JOIN_DIFFERENT_TABLE_NAMES_SERVICE_NAME = "JoinServiceDifferentTableNames";
+
+    /**
+     * Join same table names Dataservice name
+     */
+    public static final String JOIN_SAME_TABLE_NAMES_SERVICE_NAME = "JoinServiceSameTableNames";
 
     /**
      * Patients DDL
@@ -1151,6 +1181,36 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    US_STATES_DATASERVICE_TEIID_8_FILE);
+    }
+
+    /**
+     * @return input stream of DSB single source parts dataservice
+     * @throws Exception if error occurs
+     */
+    public static InputStream dsbDataserviceSingleSourceParts() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   PARTS_SINGLE_SOURCE_FILE);
+    }
+
+    /**
+     * @return input stream of DSB join dataservice with different table names
+     * @throws Exception if error occurs
+     */
+    public static InputStream dsbDataserviceJoinDifferentTableNames() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   JOIN_DIFFERENT_TABLE_NAMES_FILE);
+    }
+
+    /**
+     * @return input stream of DSB join dataservice with same table names
+     * @throws Exception if error occurs
+     */
+    public static InputStream dsbDataserviceJoinSameTableNames() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   JOIN_SAME_TABLE_NAMES_FILE);
     }
 
     /**

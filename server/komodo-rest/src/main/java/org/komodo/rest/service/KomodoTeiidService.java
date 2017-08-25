@@ -29,6 +29,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -108,6 +109,7 @@ import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.QSResult;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.ConnectionDriver;
@@ -146,13 +148,19 @@ public class KomodoTeiidService extends KomodoService {
     /**
      * Default translator mappings for different drivers
      */
-    private final static String DEFAULT_TRANSLATOR_MAPPING_FILE = "defaultTranslatorMappings.xml"; //$NON-NLS-1$
+    private final static String DRIVER_TRANSLATOR_MAPPING_FILE = "driverTranslatorMappings.xml"; //$NON-NLS-1$
+
+    /**
+     * Default translator mappings for connection URL content
+     */
+    private final static String URLCONTENT_TRANSLATOR_MAPPING_FILE = "urlContentTranslatorMappings.xml"; //$NON-NLS-1$
 
     /**
      * Translator mapping file elements and attributes
      */
     private final static String ELEM_TRANSLATOR = "translator"; //$NON-NLS-1$
     private final static String ATTR_DRIVER = "driver"; //$NON-NLS-1$
+    private final static String ATTR_URLCONTENT = "urlcontent"; //$NON-NLS-1$
 
     /**
      * Unknown translator
@@ -164,9 +172,9 @@ public class KomodoTeiidService extends KomodoService {
      */
     private final static int DEPLOYMENT_WAIT_TIME = 10000;
 
-    private static class TemplateEntryComparator implements Comparator<TemplateEntry> {
+    private static final String[] PRIORITY_TEMPLATE_NAMES = {"connection-url", "user-name", "password", "port"};
 
-        private static String[] priorityNames = {"connection-url", "user-name", "password", "port"};
+    private static class TemplateEntryComparator implements Comparator<TemplateEntry> {
 
         private UnitOfWork transaction;
 
@@ -201,7 +209,7 @@ public class KomodoTeiidService extends KomodoService {
             if (entry1Name.equals(entry2Name))
                 return 0;
 
-            for (String name : priorityNames) {
+            for (String name : PRIORITY_TEMPLATE_NAMES) {
                 if (name.equals(entry1Name))
                     return -1;
 
@@ -224,6 +232,11 @@ public class KomodoTeiidService extends KomodoService {
     private Map<String, String> driverTranslatorMap = new HashMap<String,String>();
 
     /**
+     * Mapping of urlContent to default translator
+     */
+    private Map<String, String> urlContentTranslatorMap = new HashMap<String,String>();
+
+    /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
      * @throws WebApplicationException
@@ -232,7 +245,8 @@ public class KomodoTeiidService extends KomodoService {
     public KomodoTeiidService(final KEngine engine) throws WebApplicationException {
         super(engine);
         // Loads default translator mappings
-        loadDefaultTranslatorMap();
+        loadDriverTranslatorMap();
+        loadUrlContentTranslatorMap();
     }
 
     private synchronized Teiid getDefaultTeiid() throws KException {
@@ -276,7 +290,7 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
-    private synchronized void refreshCachedDataSources(Teiid teiid, String... dataSourceNames) throws KException {
+    private synchronized void refreshCachedConnections(Teiid teiid, String... connectionNames) throws KException {
         CachedTeiid cachedTeiid = importContent(teiid);
 
         UnitOfWork uow = null;
@@ -284,7 +298,7 @@ public class KomodoTeiidService extends KomodoService {
             uow = systemTx("refresh-teiid-content", false);
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
 
-            cachedTeiid.refreshConnections(uow, teiidInstance, dataSourceNames);
+            cachedTeiid.refreshConnections(uow, teiidInstance, connectionNames);
 
             // Commit the transaction to allow the sequencers to run
             uow.commit();
@@ -919,6 +933,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
+            refreshCachedVdbs(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find VDB
@@ -1322,10 +1337,9 @@ public class KomodoTeiidService extends KomodoService {
 
             String title = RelationalMessages.getString(RelationalMessages.Info.VDB_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
+            // updates cache for the removed vdb
+            refreshCachedVdbs(teiidNode, vdbName);
             if (! hasDynamicVdb(vdbName, teiidNode)) {
-                // Make sure Vdb state is current in the cachedTeiid
-                refreshCachedVdbs(teiidNode, vdbName);
-
                 status.addAttribute(vdbName,
                                     RelationalMessages.getString(RelationalMessages.Info.VDB_SUCCESSFULLY_UNDEPLOYED));
             } else
@@ -1381,7 +1395,7 @@ public class KomodoTeiidService extends KomodoService {
 
         UnitOfWork uow = null;
 
-        String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+        String title = RelationalMessages.getString(RelationalMessages.Info.CONNECTION_DEPLOYMENT_STATUS_TITLE);
         KomodoStatusObject status = new KomodoStatusObject(title);
 
         try {
@@ -1404,7 +1418,7 @@ public class KomodoTeiidService extends KomodoService {
 
             if (! hasDataSource(connectionName, teiidNode)) {
                 // Make sure DataSource state is current in cachedTeiid
-                refreshCachedDataSources(teiidNode);
+                refreshCachedConnections(teiidNode);
 
                 status.addAttribute(connectionName,
                                     RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_UNDEPLOYED, connectionName));
@@ -1584,7 +1598,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
-            refreshCachedDataSources(teiidNode);
+            refreshCachedConnections(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             uow = createTransaction(principal, "getConnections", true); //$NON-NLS-1$
@@ -1728,11 +1742,33 @@ public class KomodoTeiidService extends KomodoService {
             // Get the driver name for the source
             String driverName = dataSource.getDriverName(uow);
             
-            // Get the corresponding translator name from the mappings
+            // Get the translator name from the default driver - translator mappings
             String translatorName = driverTranslatorMap.get(driverName);
             
-            // Translator not found in mappings
-            if(translatorName==null) translatorName = UNKNOWN_TRANSLATOR;
+            // If translator not found using driver mappings, use the connection url if available.
+            // The urlContentTranslatorMap keys are unique strings within the connection url which would identify the required translator
+            if(translatorName==null) {
+                String connectionUrl = null;
+                Property urlProp = dataSource.getProperty(uow, "connection-url"); //$NON-NLS-1$
+                if(urlProp!=null) {
+                    connectionUrl = urlProp.getStringValue(uow);
+                }
+                // No connection url property - unknown translator
+                if(connectionUrl==null || connectionUrl.isEmpty()) {
+                    translatorName = UNKNOWN_TRANSLATOR;
+                // Connection url property found - use mappings to get translator, if possible
+                } else {
+                    for(String contentKey : urlContentTranslatorMap.keySet()) {
+                        if(connectionUrl.contains(contentKey)) {
+                            translatorName = urlContentTranslatorMap.get(contentKey);
+                            break;
+                        }
+                    }
+                    if(translatorName==null) {
+                        translatorName = UNKNOWN_TRANSLATOR;
+                    }
+                }
+            }
             
             // Return a status object with the translator
             KomodoStatusObject kso = new KomodoStatusObject();
@@ -1785,6 +1821,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             Teiid teiidNode = getDefaultTeiid();
+            refreshCachedConnections(teiidNode);
             CachedTeiid cachedTeiid = importContent(teiidNode);
 
             // find Connections
@@ -2391,7 +2428,7 @@ public class KomodoTeiidService extends KomodoService {
         try {
             kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
             if (kpa.getPath() == null) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_DATA_SOURCE_MISSING_PATH);
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_CONNECTION_MISSING_PATH);
             }
         } catch (Exception ex) {
             return createErrorResponseWithForbidden(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
@@ -2404,28 +2441,28 @@ public class KomodoTeiidService extends KomodoService {
 
             uow = createTransaction(principal, "deployTeiidConnection", false); //$NON-NLS-1$
 
-            List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
-            if (dataSources.size() == 0) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+            List<KomodoObject> connections = this.repo.searchByPath(uow, kpa.getPath());
+            if (connections.size() == 0) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_CONNECTION_FOUND);
             }
 
-            Connection dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Connection.class);
-            if (dataSource == null) {
-                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
+            Connection connection = getWorkspaceManager(uow).resolve(uow, connections.get(0), Connection.class);
+            if (connection == null) {
+                return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.TEIID_SERVICE_NO_CONNECTION_FOUND);
             }
 
             //
-            // Deploy the data source
+            // Deploy the connection
             //
-            DeployStatus deployStatus = dataSource.deploy(uow, teiidNode);
+            DeployStatus deployStatus = connection.deploy(uow, teiidNode);
 
             // Await the deployment to end
             Thread.sleep(DEPLOYMENT_WAIT_TIME);
 
-            // Make sure Datasource is current in the CachedTeiid
-            refreshCachedDataSources(teiidNode, dataSource.getJndiName(uow));
-            
-            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYMENT_STATUS_TITLE);
+            // Make sure Connection is current in the CachedTeiid
+            refreshCachedConnections(teiidNode, connection.getJndiName(uow));
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.CONNECTION_DEPLOYMENT_STATUS_TITLE);
             KomodoStatusObject status = new KomodoStatusObject(title);
 
             List<String> progressMessages = deployStatus.getProgressMessages();
@@ -2435,8 +2472,8 @@ public class KomodoTeiidService extends KomodoService {
 
             if (deployStatus.ok()) {
                 status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
-                status.addAttribute(dataSource.getName(uow),
-                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_SUCCESSFULLY_DEPLOYED));
+                status.addAttribute(connection.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_SUCCESSFULLY_DEPLOYED));
             } else {
                 status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
                 List<String> errorMessages = deployStatus.getErrorMessages();
@@ -2444,8 +2481,8 @@ public class KomodoTeiidService extends KomodoService {
                     status.addAttribute("ErrorMessage" + (i + 1), errorMessages.get(i));
                 }
 
-                status.addAttribute(dataSource.getName(uow),
-                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SOURCE_DEPLOYED_WITH_ERRORS));
+                status.addAttribute(connection.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.CONNECTION_DEPLOYED_WITH_ERRORS));
             }
 
            return commit(uow, mediaTypes, status);
@@ -2459,7 +2496,7 @@ public class KomodoTeiidService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_DATA_SOURCE_ERROR);
+            return createErrorResponse(Status.FORBIDDEN, mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DEPLOY_CONNECTION_ERROR, kpa.getPath());
         }
     }
 
@@ -3503,10 +3540,10 @@ public class KomodoTeiidService extends KomodoService {
     }
     
     /*
-     * Loads default translator mappings from resource file
+     * Loads driver name - translator mappings from resource file
      */
-    private void loadDefaultTranslatorMap() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( DEFAULT_TRANSLATOR_MAPPING_FILE );
+    private void loadDriverTranslatorMap() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( DRIVER_TRANSLATOR_MAPPING_FILE );
         
         if(inputStream==null) {
             LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_DEFAULT_TRANSLATOR_MAPPINGS_NOT_FOUND_ERROR));
@@ -3538,6 +3575,45 @@ public class KomodoTeiidService extends KomodoService {
             String driver = translatorNode.getAttributes().getNamedItem( ATTR_DRIVER ).getTextContent();
             String translator = translatorNode.getTextContent();
             driverTranslatorMap.put(driver, translator);
+        }
+    }
+
+    /*
+     * Loads URL content - translator mappings from resource file
+     */
+    private void loadUrlContentTranslatorMap() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( URLCONTENT_TRANSLATOR_MAPPING_FILE );
+        
+        if(inputStream==null) {
+            LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_DEFAULT_TRANSLATOR_MAPPINGS_NOT_FOUND_ERROR));
+            return;
+        }
+        
+        urlContentTranslatorMap.clear();
+        
+        // Load the mappings file
+        Document doc;
+        try {
+            String mappingXml = FileUtils.streamToString(inputStream);
+            doc = FileUtils.createDocument(mappingXml);
+        } catch (Exception ex) {
+            LOGGER.error(RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_LOAD_DEFAULT_TRANSLATOR_MAPPINGS_ERROR, ex.getLocalizedMessage()));
+            return;
+        }
+        
+        // Single child node contains the mappings
+        final Node mappingsNode = doc.getChildNodes().item(0);
+        if ( mappingsNode.getNodeType() != Node.ELEMENT_NODE ) {
+            return;
+        }
+
+        // Iterate the doc nodes and populate the default translator map
+        final NodeList translatorNodes = ((Element)mappingsNode).getElementsByTagName( ELEM_TRANSLATOR );
+        for(int i=0; i<translatorNodes.getLength(); i++) {
+            final Node translatorNode = translatorNodes.item(i);
+            String urlContent = translatorNode.getAttributes().getNamedItem( ATTR_URLCONTENT ).getTextContent();
+            String translator = translatorNode.getTextContent();
+            urlContentTranslatorMap.put(urlContent, translator);
         }
     }
 
@@ -3714,10 +3790,21 @@ public class KomodoTeiidService extends KomodoService {
             final List<RestTemplateEntry> entities = new ArrayList<RestTemplateEntry>();
             List<TemplateEntry> entries = template.getEntries(uow);
             Collections.sort(entries, new TemplateEntryComparator(uow));
+            List<String> priorityNames = Arrays.asList(PRIORITY_TEMPLATE_NAMES);
 
             for (TemplateEntry entry : entries) {
+
                 KomodoProperties properties = new KomodoProperties();
                 RestTemplateEntry restEntry = entityFactory.create(entry, uriInfo.getBaseUri(), uow, properties);
+
+                if (priorityNames.contains(entry.getName(uow))) {
+                    //
+                    // Appears some properties are being flagged as not required when they really should be,
+                    // eg. derbyclient.jar -> connection-url
+                    //
+                    restEntry.setRequired(true);
+                }
+
                 entities.add(restEntry);
             }
 

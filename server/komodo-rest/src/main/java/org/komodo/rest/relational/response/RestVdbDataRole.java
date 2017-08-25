@@ -24,6 +24,7 @@ package org.komodo.rest.relational.response;
 import java.net.URI;
 import java.util.Properties;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
@@ -127,10 +128,17 @@ public final class RestVdbDataRole extends RestBasicEntity {
     public static final String MAPPED_ROLES_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
 
     /**
+     * Label used to describe the permissions collection.
+     */
+    public static final String PERMISSIONS_LABEL = KomodoService.protectPrefix( VdbLexicon.DataRole.PERMISSIONS );
+
+    /**
      * An empty array of data roles.
      */
     public static final RestVdbDataRole[] NO_DATA_ROLES = new RestVdbDataRole[ 0 ];
 
+    private RestVdbPermission[] permissions = RestVdbPermission.NO_PERMISSIONS;
+    
     /**
      * Constructor for use <strong>only</strong> when deserializing.
      */
@@ -159,6 +167,20 @@ public final class RestVdbDataRole extends RestBasicEntity {
         String[] mappedRoles = dataRole.getMappedRoles(uow);
         if (mappedRoles != null) {
             setMappedRoles(mappedRoles);
+        }
+        
+        // permissions
+        final Permission[] permissions = dataRole.getPermissions( uow );
+        
+        if ( permissions.length != 0 ) {
+            final RestVdbPermission[] restPermissions = new RestVdbPermission[ permissions.length ];
+            int i = 0;
+            
+            for ( final Permission permission : permissions ) {
+                restPermissions[ i++ ] = new RestVdbPermission( baseUri, permission, uow );
+            }
+
+            setPermissions( restPermissions );
         }
 
         Vdb vdb = ancestor(dataRole, Vdb.class, uow);
@@ -213,6 +235,13 @@ public final class RestVdbDataRole extends RestBasicEntity {
     public String getName() {
         Object name = tuples.get(NAME_LABEL);
         return name != null ? name.toString() : null;
+    }
+
+    /**
+     * @return the collection of permissions (never empty)
+     */
+    public RestVdbPermission[] getPermissions() {
+        return this.permissions;
     }
 
     /**
@@ -285,5 +314,12 @@ public final class RestVdbDataRole extends RestBasicEntity {
      */
     public void setName( final String newName ) {
         tuples.put(NAME_LABEL, newName);
+    }
+
+    /**
+     * @param newPermissions the new collection of permissions (can be empty)
+     */
+    public void setPermissions( final RestVdbPermission[] newPermissions ) {
+        this.permissions = ( newPermissions == null ) ? RestVdbPermission.NO_PERMISSIONS : newPermissions;
     }
 }

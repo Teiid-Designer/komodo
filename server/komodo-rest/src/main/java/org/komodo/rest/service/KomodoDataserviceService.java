@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1043,15 +1044,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
         // Desired column names for the service (may be empty)
         List<String> lhColumnNames = attr.getColumnNames();
-        List<String> rhColumnOriginalNames = attr.getRhColumnNames();
-        
-        // Disallow duplicate column names.  Remove duplicates from the RH table
-        List<String> rhColumnNames = new ArrayList<String>();
-        for(String rhCol : rhColumnOriginalNames) {
-            if(!lhColumnNames.contains(rhCol)) {
-                rhColumnNames.add(rhCol);
-            }
-        }
+        List<String> rhColumnNames = attr.getRhColumnNames();
         
         UnitOfWork uow = null;
         try {
@@ -1297,15 +1290,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
         // Desired column names for the service (may be empty)
         List<String> lhColumnNames = attr.getColumnNames();
-        List<String> rhColumnOriginalNames = attr.getRhColumnNames();
-        
-        // Disallow duplicate column names.  Remove duplicates from the RH table
-        List<String> rhColumnNames = new ArrayList<String>();
-        for(String rhCol : rhColumnOriginalNames) {
-            if(!lhColumnNames.contains(rhCol)) {
-                rhColumnNames.add(rhCol);
-            }
-        }
+        List<String> rhColumnNames = attr.getRhColumnNames();
         
         UnitOfWork uow = null;
         try {
@@ -1652,10 +1637,18 @@ public final class KomodoDataserviceService extends KomodoService {
                 return createErrorResponseWithForbidden(mediaTypes, RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_DNE);
             }
 
-            KomodoObject dataservice = wkspMgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
-            
-            wkspMgr.delete(uow, dataservice);
+            KomodoObject dsKobject = wkspMgr.getChild(uow, dataserviceName, DataVirtLexicon.DataService.NODE_TYPE);
+            final Dataservice dataservice = wkspMgr.resolve( uow, dsKobject, Dataservice.class );
 
+            // Delete the Dataservice serviceVDB if found
+            Vdb serviceVdb = dataservice.getServiceVdb(uow);
+            if(serviceVdb!=null) {
+                wkspMgr.delete(uow, serviceVdb);
+            }
+
+            // Delete the Dataservice
+            wkspMgr.delete(uow, dataservice);
+            
             KomodoStatusObject kso = new KomodoStatusObject("Delete Status"); //$NON-NLS-1$
             kso.addAttribute(dataserviceName, "Successfully deleted"); //$NON-NLS-1$
 
@@ -2026,10 +2019,10 @@ public final class KomodoDataserviceService extends KomodoService {
             // Get the View Query Expression and extract the table names from the query
             String viewSql = null;
             String viewDdl = null;
-            Map<String,String> tableSourceVdbMap = new HashMap<String, String>();
             
             Vdb serviceVdb = dataservice.getServiceVdb(uow);
             Model[] models = serviceVdb.getModels(uow);
+            List<Table> srcTables = new ArrayList<Table>();
             for(Model model : models) {
                 // Get the view DDL from the virtual model
                 if(model.getModelType(uow) == Model.Type.VIRTUAL) {
@@ -2045,7 +2038,7 @@ public final class KomodoDataserviceService extends KomodoService {
                     // saves mapping of table to source vdb name (physical models were named using ServiceSourceVdb name)
                     Table[] tables = model.getTables(uow);
                     for(Table table : tables) {
-                        tableSourceVdbMap.put(table.getName(uow), model.getName(uow));
+                        srcTables.add(table);
                     }
                 }
             }
@@ -2056,55 +2049,64 @@ public final class KomodoDataserviceService extends KomodoService {
             
             // Determine LHS vs RHS for SQL tables (the map keys are aliased for joins)
             Set<String> sqlTables = tableColumnMap.keySet();
-            String leftTableName = StringConstants.EMPTY_STRING;
-            String rightTableName = StringConstants.EMPTY_STRING;
-            boolean leftTableAliased = false;
-            boolean rightTableAliased = false;
+            String leftSqlTableName = StringConstants.EMPTY_STRING;
+            String rightSqlTableName = StringConstants.EMPTY_STRING;
+            boolean leftSqlTableAliased = false;
+            boolean rightSqlTableAliased = false;
             for(String sqlTable : sqlTables) {
                 // Left aliased
                 if(sqlTable.endsWith(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS)) {
                     int aliasIndx = sqlTable.indexOf(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS);
-                    leftTableName = sqlTable.substring(0,aliasIndx);
-                    leftTableAliased = true;
+                    leftSqlTableName = sqlTable.substring(0,aliasIndx);
+                    leftSqlTableAliased = true;
                 // Right aliased
                 } else if(sqlTable.endsWith(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS)) {
                     int aliasIndx = sqlTable.indexOf(StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS);
-                    rightTableName = sqlTable.substring(0,aliasIndx);
-                    rightTableAliased = true;
+                    rightSqlTableName = sqlTable.substring(0,aliasIndx);
+                    rightSqlTableAliased = true;
                 // No alias - left
                 } else {
-                    leftTableName = sqlTable;
+                    leftSqlTableName = sqlTable;
                 }
             }
             
             // Create the view infos for the left and right tables
             int nTable = 0;
             boolean hasUnmatchedTable = false;
-            for (String viewTable : tableSourceVdbMap.keySet()) {
+            Table lhTable = null;
+            Table rhTable = null;
+            for (Table srcTable : srcTables) {
                 RestDataserviceViewInfo viewInfo = new RestDataserviceViewInfo();
                 
+                String tblName = srcTable.getName(uow);
+                String tblSrc = srcTable.getParent(uow).getName(uow);
+                String qualifiedTblName = tblSrc + StringConstants.DOT + srcTable.getName(uow);
                 // Set LH vs RH on info
-                if(viewTable.equals(leftTableName)) {
+                if(qualifiedTblName.equals(leftSqlTableName)) {
                     viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
-                } else if(viewTable.equals(rightTableName)){
+                    lhTable = srcTable;
+                } else if(qualifiedTblName.equals(rightSqlTableName)){
                     viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
+                    rhTable = srcTable;
                 // If sql table names could not be matched to dataservice source, just set LH/RH by index and track unmatchedTable state
                 } else if(nTable==0) {
                     viewInfo.setInfoType(RestDataserviceViewInfo.LH_TABLE_INFO);
+                    lhTable = srcTable;
                     hasUnmatchedTable = true;
                 } else if(nTable==1) {
                     viewInfo.setInfoType(RestDataserviceViewInfo.RH_TABLE_INFO);
+                    rhTable = srcTable;
                     hasUnmatchedTable = true;
                 }
                 // Source VDB and table
-                viewInfo.setSourceVdbName(tableSourceVdbMap.get(viewTable));
-                viewInfo.setTableName(viewTable);
+                viewInfo.setSourceVdbName(tblSrc);
+                viewInfo.setTableName(tblName);
                 
-                String mapKey = viewTable;
+                String mapKey = qualifiedTblName;
                 if(viewInfo.getInfoType()!=null) {
-                    if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.LH_TABLE_INFO) && leftTableAliased) {
+                    if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.LH_TABLE_INFO) && leftSqlTableAliased) {
                         mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS;
-                    } else if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.RH_TABLE_INFO) && rightTableAliased) {
+                    } else if(viewInfo.getInfoType().equals(RestDataserviceViewInfo.RH_TABLE_INFO) && rightSqlTableAliased) {
                         mapKey = mapKey+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS;
                     } 
                 }
@@ -2130,14 +2132,17 @@ public final class KomodoDataserviceService extends KomodoService {
             viewInfo.setViewDdl(viewDdl);
             
             // Determine whether the DDL is 'editable' - whether it has enough info for editor wizard.
-            // Problem if either of the maps is empty
-            if( tableSourceVdbMap.isEmpty() || tableColumnMap.isEmpty() ) {
+            // Problem if either the srcTable list or tableColumnMap is empty
+            if( srcTables.isEmpty() || tableColumnMap.isEmpty() ) {
                 viewInfo.setViewEditable(false);
-            // Problem if the map sizes dont match
-            } else if ( tableSourceVdbMap.size() != tableColumnMap.size() ) {
+            // Problem if the srcTables and tableColumnMap sizes dont match
+            } else if ( srcTables.size() != tableColumnMap.size() ) {
                 viewInfo.setViewEditable(false);
             // Problem if 2 tables (join) and there were no criteria found
             } else if ( tableColumnMap.size() == 2 && criteriaInfo == null ) {
+                viewInfo.setViewEditable(false);
+            // If column ordering in the DDL is different than the standard ordering - set editable false
+            } else if (columnOrderingChanged(uow, lhTable, rhTable, viewDdl)) {
                 viewInfo.setViewEditable(false);
             } else if ( hasUnmatchedTable ) {
                 viewInfo.setViewEditable(false);
@@ -2173,31 +2178,21 @@ public final class KomodoDataserviceService extends KomodoService {
 
         if(!StringUtils.isEmpty(viewSql)) {
             // Collect the ColumnNames - after the SELECT and before the FROM
-            int startIndex = viewSql.indexOf(SQLConstants.Reserved.SELECT)+(SQLConstants.Reserved.SELECT).length();
-            int endIndex = viewSql.indexOf(SQLConstants.Reserved.FROM+StringConstants.SPACE);
-            // If SELECT or FROM not found, assume empty columns
-            String viewColumnsStr = StringConstants.EMPTY_STRING;
-            String[] viewCols = new String[0];
-            if(startIndex > -1 && endIndex > startIndex) {
-                viewColumnsStr = viewSql.substring(startIndex,endIndex);
-            }
-            if(!viewColumnsStr.trim().isEmpty()) {
-                viewCols = viewColumnsStr.split(COMMA);
-            }
-            for(String cName : viewCols ) {
-                String trimmedName = cName.trim();
-                if(!trimmedName.startsWith("ROW_NUMBER()")) { //$NON-NLS-1$
-                    colNames.add(cName.trim());
+            List<String> cols = getColumnNamesFromSQL(viewSql);
+            for(String cName : cols ) {
+                if(!cName.startsWith("ROW_NUMBER()")) { //$NON-NLS-1$
+                    colNames.add(cName);
                 }
             }
             
-            // Get the FROM clause - if this is a join - determine how the tables are aliased.
+            // Get SQL after the FROM keyword to the end.
             String fromStr = StringConstants.EMPTY_STRING;
             int fromStartIndex = viewSql.indexOf(SQLConstants.Reserved.FROM+StringConstants.SPACE);
             if(fromStartIndex > -1) {
                 fromStr = viewSql.substring(fromStartIndex + (SQLConstants.Reserved.FROM+StringConstants.SPACE).length());
             }
-            // If this is a join, extract the table names / aliases
+            
+            // Handle JOIN SQL
             if(fromStr.contains(INNER_JOIN) || fromStr.contains(LEFT_OUTER_JOIN) || fromStr.contains(RIGHT_OUTER_JOIN) || fromStr.contains(FULL_OUTER_JOIN)) {
                 int indxStart = 0;
                 int indxEnd = fromStr.indexOf(SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS); 
@@ -2230,6 +2225,7 @@ public final class KomodoDataserviceService extends KomodoService {
                     tableColumnMap.put(lhTable+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+LH_TABLE_ALIAS, lhCols);
                     tableColumnMap.put(rhTable+StringConstants.SPACE+SQLConstants.Reserved.AS+StringConstants.SPACE+RH_TABLE_ALIAS, rhCols);
                 }
+            // Handle single source SQL
             } else {
                 String tableName = fromStr.trim();
                 if(!StringUtils.isBlank(tableName)) {
@@ -2240,6 +2236,94 @@ public final class KomodoDataserviceService extends KomodoService {
         }
 
         return tableColumnMap;
+    }
+    
+    /**
+     * Determines if the viewSql column ordering has changed from what the editor would generate.
+     * @param lhTable the left table
+     * @param rhTable the right table
+     * @param viewSql the supplied view SQL
+     * @return 'true' if the view SQL columns are ordered differently than lhTable then rhTable column ordering
+     */
+    private boolean columnOrderingChanged(UnitOfWork uow, Table lhTable, Table rhTable, String viewSql) throws KException {
+        boolean isDifferent = false;
+        
+        // Compile list of all columns for LH and RH tables in order.  Add aliases to distinguish
+        List<String> tableColNameOrdered = new ArrayList();
+        Column[] columns = lhTable.getColumns(uow);
+        for(Column column : columns) {
+            tableColNameOrdered.add( LH_TABLE_ALIAS_DOT + column.getName(uow) );
+        }
+        if(rhTable!=null) {
+            columns = rhTable.getColumns(uow);
+            for(Column column : columns) {
+                tableColNameOrdered.add( RH_TABLE_ALIAS_DOT + column.getName(uow) );
+            }
+        }
+        
+        // Collect the ColumnNames - after the SELECT and before the FROM
+        List<String> sqlColNames = new ArrayList<String>();
+        List<String> cols = getColumnNamesFromSQL(viewSql);
+        for(String cName : cols ) {
+            if(!cName.startsWith("ROW_NUMBER()")) { //$NON-NLS-1$
+                // If name is not aliased at all, then it is a LH column.  Alias for comparison with whole list
+                if( !cName.startsWith(LH_TABLE_ALIAS_DOT) && !cName.startsWith(RH_TABLE_ALIAS_DOT) ) {
+                    sqlColNames.add( LH_TABLE_ALIAS_DOT + cName );
+                } else {
+                    sqlColNames.add( cName );
+                }
+            }
+        }
+        
+        // Now compare the ordering of the sqlColNames to the entire tableA / tableB list
+        Iterator<String> tcIter = tableColNameOrdered.iterator();
+        while(tcIter.hasNext()) {
+            String tcName = tcIter.next();
+            if(!sqlColNames.contains(tcName)) {
+                tcIter.remove();
+            }
+        }
+        
+        // The remaining lists should match exactly, otherwise the column ordering is different.
+        if( sqlColNames.size() != tableColNameOrdered.size() ) {
+            isDifferent = true;
+        } else {
+            for( int i = 0; i < sqlColNames.size(); i++ ) {
+                if( !sqlColNames.get(i).equalsIgnoreCase(tableColNameOrdered.get(i)) ) {
+                    isDifferent = true;
+                    break;
+                }
+            }
+        }
+        
+        return isDifferent;
+    }
+    
+    /*
+     * Get the list of column names from the provided sql.  This simply gets the string between the SELECT and FROM,
+     * and splits the names between commas.
+     * @param sql the SQL 
+     * @return the parsed list of column names
+     */
+    private List<String> getColumnNamesFromSQL(String sql) {
+        ArrayList<String> columnNames = new ArrayList();
+        
+        int startIndex = sql.indexOf(SQLConstants.Reserved.SELECT)+(SQLConstants.Reserved.SELECT).length();
+        int endIndex = sql.indexOf(SQLConstants.Reserved.FROM+StringConstants.SPACE);
+        // If SELECT or FROM not found, assume empty columns
+        String columnsStr = StringConstants.EMPTY_STRING;
+        String[] cols = new String[0];
+        if(startIndex > -1 && endIndex > startIndex) {
+            columnsStr = sql.substring(startIndex,endIndex);
+        }
+        if(!columnsStr.trim().isEmpty()) {
+            cols = columnsStr.split(COMMA);
+        }
+        // remove any leading or trailing spaces
+        for(String col : cols) {
+            columnNames.add(col.trim());
+        }
+        return columnNames;
     }
     
     /*
