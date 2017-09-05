@@ -90,8 +90,6 @@ public abstract class KomodoService implements V1Constants {
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
-    private static final String HTML_NEW_LINE = "<br/>"; //$NON-NLS-1$
-
     /**
      * Query parameter keys used by the service methods.
      */
@@ -280,11 +278,13 @@ public abstract class KomodoService implements V1Constants {
                                            RelationalMessages.Error errorType, Object... errorMsgInputs) {
         String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
 
-        StringBuffer buf = new StringBuffer(errorMsg).append(HTML_NEW_LINE);
+        //
+        // Allow for splitting the message into actual message & stack trace by
+        // dividing them with -----
+        //
+        StringBuffer buf = new StringBuffer(errorMsg).append(NEW_LINE).append("-----").append(NEW_LINE);
         String stackTrace = StringUtils.exceptionToString(ex);
-        // Allow sensible formatting in a browser by replacing newline characters
-        stackTrace = stackTrace.replaceAll(NEW_LINE, HTML_NEW_LINE);
-        buf.append(stackTrace).append(HTML_NEW_LINE);
+        buf.append(stackTrace).append(NEW_LINE);
 
         String resultMsg = null;
         if (errorMsgInputs == null || errorMsgInputs.length == 0)

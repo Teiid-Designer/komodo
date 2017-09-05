@@ -46,6 +46,11 @@ public class KomodoTeiidAttributes implements KRestEntity {
     public static final String ADMIN_PASSWD_LABEL = "adminPasswd"; //$NON-NLS-1$
 
     /**
+     * Label for the admin port
+     */
+    public static final String ADMIN_PORT_LABEL = "adminPort"; //$NON-NLS-1$
+
+    /**
      * Label for the admin secure flag
      */
     public static final String ADMIN_SECURE_LABEL = "adminSecure"; //$NON-NLS-1$
@@ -61,6 +66,11 @@ public class KomodoTeiidAttributes implements KRestEntity {
     public static final String JDBC_PASSWD_LABEL = "jdbcPasswd"; //$NON-NLS-1$
 
     /**
+     * Label for the jdbc port
+     */
+    public static final String JDBC_PORT_LABEL = "jdbcPort"; //$NON-NLS-1$
+
+    /**
      * Label for the jdbc secure flag
      */
     public static final String JDBC_SECURE_LABEL = "jdbcSecure"; //$NON-NLS-1$
@@ -71,6 +81,9 @@ public class KomodoTeiidAttributes implements KRestEntity {
     @JsonProperty(ADMIN_PASSWD_LABEL)
     private String adminPasswd;
 
+    @JsonProperty(ADMIN_PORT_LABEL)
+    private int adminPort = -1;
+
     @JsonProperty(ADMIN_SECURE_LABEL)
     private Boolean adminSecure;
 
@@ -79,6 +92,9 @@ public class KomodoTeiidAttributes implements KRestEntity {
 
     @JsonProperty(JDBC_PASSWD_LABEL)
     private String jdbcPasswd;
+
+    @JsonProperty(JDBC_PORT_LABEL)
+    private int jdbcPort = -1;
 
     @JsonProperty(JDBC_SECURE_LABEL)
     private Boolean jdbcSecure;
@@ -131,6 +147,20 @@ public class KomodoTeiidAttributes implements KRestEntity {
     }
 
     /**
+     * @return admin port
+     */
+    public int getAdminPort() {
+        return adminPort;
+    }
+
+    /**
+     * @param adminPort
+     */
+    public void setAdminPort(int adminPort) {
+        this.adminPort = adminPort;
+    }
+
+    /**
      * @return admin secure
      */
     public Boolean isAdminSecure() {
@@ -173,6 +203,20 @@ public class KomodoTeiidAttributes implements KRestEntity {
     }
 
     /**
+     * @return jdbc port
+     */
+    public int getJdbcPort() {
+        return jdbcPort;
+    }
+
+    /**
+     * @param jdbcPort
+     */
+    public void setJdbcPort(int jdbcPort) {
+        this.jdbcPort = jdbcPort;
+    }
+
+    /**
      * @return jdbc secure
      */
     public Boolean isJdbcSecure() {
@@ -191,10 +235,12 @@ public class KomodoTeiidAttributes implements KRestEntity {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((adminPasswd == null) ? 0 : adminPasswd.hashCode());
-        result = prime * result + (adminSecure ? 1231 : 1237);
+        result = prime * result + adminPort;
+        result = prime * result + ((adminSecure == null) ? 0 : adminSecure.hashCode());
         result = prime * result + ((adminUser == null) ? 0 : adminUser.hashCode());
         result = prime * result + ((jdbcPasswd == null) ? 0 : jdbcPasswd.hashCode());
-        result = prime * result + (jdbcSecure ? 1231 : 1237);
+        result = prime * result + jdbcPort;
+        result = prime * result + ((jdbcSecure == null) ? 0 : jdbcSecure.hashCode());
         result = prime * result + ((jdbcUser == null) ? 0 : jdbcUser.hashCode());
         return result;
     }
@@ -213,7 +259,12 @@ public class KomodoTeiidAttributes implements KRestEntity {
                 return false;
         } else if (!adminPasswd.equals(other.adminPasswd))
             return false;
-        if (adminSecure != other.adminSecure)
+        if (adminPort != other.adminPort)
+            return false;
+        if (adminSecure == null) {
+            if (other.adminSecure != null)
+                return false;
+        } else if (!adminSecure.equals(other.adminSecure))
             return false;
         if (adminUser == null) {
             if (other.adminUser != null)
@@ -225,7 +276,12 @@ public class KomodoTeiidAttributes implements KRestEntity {
                 return false;
         } else if (!jdbcPasswd.equals(other.jdbcPasswd))
             return false;
-        if (jdbcSecure != other.jdbcSecure)
+        if (jdbcPort != other.jdbcPort)
+            return false;
+        if (jdbcSecure == null) {
+            if (other.jdbcSecure != null)
+                return false;
+        } else if (!jdbcSecure.equals(other.jdbcSecure))
             return false;
         if (jdbcUser == null) {
             if (other.jdbcUser != null)

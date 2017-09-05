@@ -54,6 +54,9 @@ public final class TeiidAttributesSerializer extends TypeAdapter< KomodoTeiidAtt
                 case KomodoTeiidAttributes.ADMIN_PASSWD_LABEL:
                     teiidAttrs.setAdminPasswd(in.nextString());
                     break;
+                case KomodoTeiidAttributes.ADMIN_PORT_LABEL:
+                    teiidAttrs.setAdminPort(in.nextInt());
+                    break;
                 case KomodoTeiidAttributes.ADMIN_SECURE_LABEL:
                     teiidAttrs.setAdminSecure(in.nextBoolean());
                     break;
@@ -62,6 +65,9 @@ public final class TeiidAttributesSerializer extends TypeAdapter< KomodoTeiidAtt
                     break;
                 case KomodoTeiidAttributes.JDBC_PASSWD_LABEL:
                     teiidAttrs.setJdbcPasswd(in.nextString());
+                    break;
+                case KomodoTeiidAttributes.JDBC_PORT_LABEL:
+                    teiidAttrs.setJdbcPort(in.nextInt());
                     break;
                 case KomodoTeiidAttributes.JDBC_SECURE_LABEL:
                     teiidAttrs.setJdbcSecure(in.nextBoolean());
@@ -93,6 +99,9 @@ public final class TeiidAttributesSerializer extends TypeAdapter< KomodoTeiidAtt
         out.name(KomodoTeiidAttributes.ADMIN_PASSWD_LABEL);
         out.value(value.getAdminPasswd());
 
+        out.name(KomodoTeiidAttributes.ADMIN_PORT_LABEL);
+        out.value(value.getAdminPort());
+
         Boolean adminSecure = value.isAdminSecure();
         if (adminSecure != null) {
             out.name(KomodoTeiidAttributes.ADMIN_SECURE_LABEL);
@@ -104,6 +113,9 @@ public final class TeiidAttributesSerializer extends TypeAdapter< KomodoTeiidAtt
 
         out.name(KomodoTeiidAttributes.JDBC_PASSWD_LABEL);
         out.value(value.getJdbcPasswd());
+
+        out.name(KomodoTeiidAttributes.JDBC_PORT_LABEL);
+        out.value(value.getJdbcPort());
 
         Boolean jdbcSecure = value.isJdbcSecure();
         if (jdbcSecure != null) {

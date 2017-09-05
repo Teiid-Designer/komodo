@@ -896,7 +896,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                 throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
             }
         } catch (Exception ex) {
-            throw new KException(ex);
+            throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR), ex);
         }
         return teiidInstance;
     }
