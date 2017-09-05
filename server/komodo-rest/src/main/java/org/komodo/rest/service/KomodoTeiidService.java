@@ -441,8 +441,8 @@ public class KomodoTeiidService extends KomodoService {
         return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
     }
 
-    private Response checkTeiidAttributes(String adminUser, String adminPasswd,
-                                                                           String jdbcUser, String jdbcPasswd,
+    private Response checkTeiidAttributes(String adminUser, String adminPasswd, int adminPort,
+                                                                           String jdbcUser, String jdbcPasswd, int jdbcPort,
                                                                            Boolean adminSecure, Boolean jdbcSecure,
                                                                            List<MediaType> mediaTypes) {
         if (adminUser == null && adminPasswd == null && adminSecure == null &&
@@ -688,9 +688,11 @@ public class KomodoTeiidService extends KomodoService {
                                                      OPEN_BRACE + BR +
                                                      NBSP + "adminUser: \"admin user name\"" + COMMA + BR +
                                                      NBSP + "adminPasswd: \"admin password\"" + COMMA + BR +
+                                                     NBSP + "adminPort: \"admin port\"" + COMMA + BR +
                                                      NBSP + "adminSecure: \"true if admin uses secure connection\"" + COMMA + BR +
                                                      NBSP + "jdbcUser: \"jdbc user name\"" + COMMA + BR +
                                                      NBSP + "jdbcPasswd: \"jdbc password\"" + COMMA + BR +
+                                                     NBSP + "jdbcPort: \"jdbc port\"" + COMMA + BR +
                                                      NBSP + "jdbcSecure: \"true if jdbc uses secure connection\"" + BR +
                                                      CLOSE_BRACE +
                                                      CLOSE_PRE_TAG,
@@ -711,8 +713,10 @@ public class KomodoTeiidService extends KomodoService {
             teiidAttrs = KomodoJsonMarshaller.unmarshall(credentialAttributes, KomodoTeiidAttributes.class);
             Response response = checkTeiidAttributes(teiidAttrs.getAdminUser(),
                                                                                         teiidAttrs.getAdminPasswd(),
+                                                                                        teiidAttrs.getAdminPort(),
                                                                                         teiidAttrs.getJdbcUser(),
                                                                                         teiidAttrs.getJdbcPasswd(),
+                                                                                        teiidAttrs.getJdbcPort(),
                                                                                         teiidAttrs.isAdminSecure(),
                                                                                         teiidAttrs.isJdbcSecure(),
                                                                                         mediaTypes);
@@ -739,6 +743,10 @@ public class KomodoTeiidService extends KomodoService {
             if (adminPasswd != null && ! adminPasswd.equals(teiidNode.getAdminPassword(uow)))
                 teiidNode.setAdminPassword(uow, adminPasswd);
 
+            int adminPort = teiidAttrs.getAdminPort();
+            if (adminPort > -1 && adminPort != (teiidNode.getAdminPort(uow)))
+                teiidNode.setAdminPort(uow, adminPort);
+
             Boolean adminSecure = teiidAttrs.isAdminSecure();
             if (adminSecure != null && ! adminSecure.equals(teiidNode.isAdminSecure(uow)))
                 teiidNode.setAdminSecure(uow, adminSecure);
@@ -750,6 +758,10 @@ public class KomodoTeiidService extends KomodoService {
             String jdbcPasswd = teiidAttrs.getJdbcPasswd();
             if (jdbcPasswd != null && ! jdbcPasswd.equals(teiidNode.getJdbcPassword(uow)))
                 teiidNode.setJdbcPassword(uow, jdbcPasswd);
+
+            int jdbcPort = teiidAttrs.getJdbcPort();
+            if (jdbcPort > -1 && jdbcPort != (teiidNode.getJdbcPort(uow)))
+                teiidNode.setJdbcPort(uow, jdbcPort);
 
             Boolean jdbcSecure = teiidAttrs.isJdbcSecure();
             if (teiidAttrs.isJdbcSecure() != null && ! jdbcSecure.equals(teiidNode.isJdbcSecure(uow)))
